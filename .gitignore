@@ -1,0 +1,51 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Build output
+dist/
+build/
+/.angular/
+.angular/cache/
+
+# Coverage
+coverage/
+reports/
+
+# TypeScript
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.*
+
+# macOS
+.DS_Store
+
+# IDEs and editors
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Misc
+.sass-cache/
+.cache/
+*.tgz
+*.zip
+node-repl-history
+
+# Ignore local Angular config if present
+/.angular-cli.json
+
+# Temporary files
+*.tmp
+tmp/
