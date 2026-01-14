@@ -1,0 +1,18 @@
+:host {
+  display: block;
+}
+
+// Стили компонента логина в стиле Sakai-NG
+::ng-deep {
+  .p-password {
+    width: 100%;
+  }
+  
+  .p-password-input {
+    width: 100%;
+  }
+
+  .p-inputtext {
+    padding: 1rem;
+  }
+}

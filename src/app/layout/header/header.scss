@@ -1,0 +1,42 @@
+
+    :host {
+      display: block;
+    }
+    
+    .header-container {
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    }
+    
+    ::ng-deep .header-menubar {
+      padding: 0.5rem 1rem;
+      background: transparent !important;
+      border: none !important;
+    }
+    
+    ::ng-deep .header-menubar .p-menubar-root-list > .p-menubar-item > .p-menubar-item-content {
+      color: white !important;
+    }
+    
+    ::ng-deep .header-menubar .p-menubar-root-list > .p-menubar-item > .p-menubar-item-content .p-menubar-item-label {
+      color: white !important;
+    }
+    
+    ::ng-deep .header-menubar .p-menubar-root-list > .p-menubar-item > .p-menubar-item-content .p-menubar-item-icon {
+      color: white !important;
+    }
+    
+    ::ng-deep .header-menubar .p-menubar-root-list > .p-menubar-item:hover > .p-menubar-item-content {
+      background: rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    ::ng-deep .header-icon-button {
+      color: white !important;
+    }
+    
+    ::ng-deep .header-icon-button:hover {
+      background: rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    ::ng-deep .p-menubar-root-list {
+      gap: 0.25rem;
+    }
