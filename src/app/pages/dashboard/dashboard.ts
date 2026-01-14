@@ -14,16 +14,7 @@ import { MyMailWidget } from './widgets/my-mail-widget';
   selector: 'app-dashboard',
   standalone: true,
     imports: [
-    CommonModule,
-    StatsWidget,
-    BestSellingWidget,
-    NotificationsWidget,
-    RevenueChartWidget,
-    RecentSalesWidget,
-    MyTasksWidget,
-    MyDocumentsWidget,
-    MyCalendarWidget,
-    MyMailWidget
+    CommonModule
   ],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.scss']
