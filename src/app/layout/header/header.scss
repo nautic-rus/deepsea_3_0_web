@@ -4,7 +4,8 @@
     }
     
     .header-container {
-      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      /* Solid color header instead of gradient */
+      background: #1e40af;
     }
     
     ::ng-deep .header-menubar {
@@ -24,11 +25,57 @@
     ::ng-deep .header-menubar .p-menubar-root-list > .p-menubar-item > .p-menubar-item-content .p-menubar-item-icon {
       color: white !important;
     }
+
+  /* Make header icon buttons visually match the weight/size of menubar icons */
+  ::ng-deep .header-menubar .p-menubar-root-list > .p-menubar-item > .p-menubar-item-content .p-menubar-item-icon {
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+
+  ::ng-deep .header-icon-button .p-button-icon,
+  ::ng-deep .header-icon-button .pi {
+    color: white !important;
+    font-weight: 600;
+    font-size: 1.05rem;
+    line-height: 1;
+  }
+
+  /* Slightly increase clickable area for icon buttons */
+  ::ng-deep .header-icon-button {
+    padding: 0.4rem 0.5rem;
+  }
+
+  /* Language toggle specific tweaks */
+  ::ng-deep .lang-toggle {
+    min-width: 2.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white !important;
+    font-weight: 600;
+  }
+
+  ::ng-deep .header-lang-button {
+    color: white !important;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 0.25rem 0.5rem;
+    min-width: 2rem;
+    border-radius: 0.25rem;
+  }
+
+  ::ng-deep .header-lang-button:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
     
-    ::ng-deep .header-menubar .p-menubar-root-list > .p-menubar-item:hover > .p-menubar-item-content {
+    ::ng-deep .header-menubar .p-menubar-root-list > .p-menubar-item:hover > .p-menubar-item-content{
       background: rgba(255, 255, 255, 0.1) !important;
     }
-    
+
+    ::ng-deep .p-menubar-item.p-focus > .p-menubar-item-content {
+      background: rgba(255, 255, 255, 0.1) !important;
+    }
+
     ::ng-deep .header-icon-button {
       color: white !important;
     }
@@ -39,4 +86,18 @@
     
     ::ng-deep .p-menubar-root-list {
       gap: 0.25rem;
+    }
+
+    /* Avatar initials style */
+    ::ng-deep .avatar-initials {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.25rem;
+      height: 2.25rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #ffffff;
+      background: rgba(62, 255, 44, 0.365);
+      border-radius: 50%;
     }

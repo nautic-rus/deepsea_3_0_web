@@ -10,7 +10,7 @@
                 fill="white"
               />
             </svg>
-            <span class="text-white font-semibold text-xl">DeepSea</span>
+            <span class="text-white font-semibold text-xl">{{ title }}</span>
           </div>
         </ng-template>
         <ng-template #end>
@@ -23,6 +23,8 @@
                     class="header-icon-button"
                     (click)="toggleDarkMode()">
             </button>
+            <!-- Language toggle -->
+            <button pButton pRipple [label]="currentLang.toUpperCase()" class="p-button-text header-lang-button" (click)="toggleLang()"></button>
             
             <button pButton pRipple 
                     icon="pi pi-bell" 
@@ -32,11 +34,16 @@
             </button>
             
             <!-- User Avatar with Menu -->
-            <p-avatar 
-              image="https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png" 
+            <p-avatar
+              [image]="avatarUrl"
+              [label]="avatarLabel"
               shape="circle"
               class="cursor-pointer ml-2"
               (click)="userMenu.toggle($event)">
+              <!-- Custom icon template: show initials as a styled span when image is not set -->
+              <ng-template pTemplate="icon">
+                <span class="avatar-initials">{{ avatarLabel }}</span>
+              </ng-template>
             </p-avatar>
             <p-menu #userMenu [model]="userMenuItems" [popup]="true"></p-menu>
           </div>

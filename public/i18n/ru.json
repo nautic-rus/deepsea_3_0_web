@@ -1,0 +1,13 @@
+{
+  "HEADER": {
+    "PROFILE": "Профиль",
+    "LOGOUT": "Выйти"
+  },
+  "APP": {
+    "TITLE": "DeepSea"
+  },
+  "LANG": {
+    "EN": "EN",
+    "RU": "RU"
+  }
+}
