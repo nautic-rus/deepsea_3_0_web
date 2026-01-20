@@ -10,4 +10,10 @@
     "EN": "EN",
     "RU": "RU"
   }
+  ,"MENU": {
+    "DASHBOARD": "Панель",
+    "SETTINGS": "Настройки",
+    "PROFILE": "Профиль",
+    "LOGOUT": "Выйти"
+  }
 }

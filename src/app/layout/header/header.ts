@@ -40,6 +40,7 @@ export class HeaderComponent implements OnInit {
     this.langSub = this.translate.onLangChange.subscribe((event) => {
       this.currentLang = event.lang || 'en';
       this.buildUserMenu();
+      this.remapPages();
     });
     if (this.darkMode) {
       this.document.documentElement.classList.add('app-dark');
@@ -104,6 +105,26 @@ export class HeaderComponent implements OnInit {
     try { this.cdr.detectChanges(); } catch {}
   }
 
+  private reloadMenu() {
+    const token = sessionStorage.getItem('accessToken') ?? localStorage.getItem('accessToken');
+    if (!token) {
+      this.menuItems = [];
+      return;
+    }
+    this.http.get<any>('/api/user/pages').subscribe({
+      next: (resp) => {
+        const pages = this.normalizePages(resp);
+        this.rawPages = pages || [];
+        this.menuItems = this.mapPagesToMenu(this.rawPages);
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.menuItems = [];
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
   private buildUserMenu() {
     this.userMenuItems = [
       { label: this.translate.instant('HEADER.PROFILE'), icon: 'pi pi-user', routerLink: '/settings/profile' },
@@ -115,11 +136,25 @@ export class HeaderComponent implements OnInit {
 
   setLang(lang: string) {
     try { localStorage.setItem('lang', lang); } catch {}
-    this.translate.use(lang);
-    this.currentLang = lang;
-    // rebuild menus that may use translated labels
-    this.buildUserMenu();
-    this.remapPages();
+    // Use translate.use(lang) and wait for translations to load before rebuilding the menus.
+    // This prevents a race where pages are remapped before translation files are ready.
+    this.translate.use(lang).subscribe({
+      next: () => {
+        this.currentLang = lang;
+        // rebuild menus that may use translated labels
+        this.buildUserMenu();
+        // remap existing pages (if any) using the newly loaded translations
+        this.remapPages();
+      },
+      error: () => {
+        // Fallback: still set lang and attempt to remap
+        this.currentLang = lang;
+        this.buildUserMenu();
+        this.remapPages();
+      }
+    });
+    // Also refresh pages from backend to get any language-specific titles if backend provides them
+    this.reloadMenu();
   }
 
   toggleLang() {
@@ -182,10 +217,26 @@ export class HeaderComponent implements OnInit {
     const getLabel = (p: any) => {
       const v = p.title ?? p.name ?? p.label ?? p.text ?? p.caption ?? p.displayName ?? '';
       let label = '';
-      if (!v) { label = ''; }
-      else if (typeof v === 'string') { label = v; }
-      else if (typeof v === 'object') { label = v.ru ?? v.en ?? Object.values(v)[0] ?? ''; }
-      else { label = String(v); }
+      if (!v) {
+        label = '';
+      } else if (typeof v === 'string') {
+        // Try using ngx-translate: if backend provided a translation key, use it; otherwise
+        // attempt to map plain text to a MENU.<KEY> translation.
+        const raw = v.toString().trim();
+        const fromKey = this.translate.instant(raw);
+        if (fromKey && fromKey !== raw) {
+          label = fromKey;
+        } else {
+          const norm = raw.toUpperCase().replace(/[^A-Z0-9]+/g, '_');
+          const key = `MENU.${norm}`;
+          const t = this.translate.instant(key);
+          if (t && t !== key) { label = t; }
+          else { label = raw; }
+        }
+      } else if (typeof v === 'object') {
+    const lang = this.currentLang || this.translate.currentLang || this.translate.getDefaultLang() || 'en';
+        label = (v as any)[lang] ?? (v as any).en ?? (v as any).ru ?? Object.values(v)[0] ?? '';
+      } else { label = String(v); }
       return label;
     };
 
@@ -217,7 +268,12 @@ export class HeaderComponent implements OnInit {
       if (Array.isArray(children) && children.length) { item.items = children.map(mapItem); }
       if (!item.label && item.routerLink) {
         const parts = (item.routerLink as string).split('/').filter(Boolean);
-        item.label = parts.length ? parts[parts.length - 1].replace(/-/g, ' ') : item.routerLink as string;
+        const rawLabel = parts.length ? parts[parts.length - 1].replace(/-/g, ' ') : item.routerLink as string;
+        // try translate using MENU.<RAW>
+        const norm = rawLabel.toUpperCase().replace(/[^A-Z0-9]+/g, '_');
+        const key = `MENU.${norm}`;
+        const t = this.translate.instant(key);
+        item.label = (t && t !== key) ? t : rawLabel;
       }
       return item;
     };

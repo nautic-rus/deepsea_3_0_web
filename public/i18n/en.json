@@ -10,4 +10,10 @@
     "EN": "EN",
     "RU": "RU"
   }
+  ,"MENU": {
+    "DASHBOARD": "Dashboard",
+    "SETTINGS": "Settings",
+    "PROFILE": "Profile",
+    "LOGOUT": "Logout"
+  }
 }
