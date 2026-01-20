@@ -12,6 +12,11 @@
   }
   ,"MENU": {
     "DASHBOARD": "Dashboard",
+    "DASHBORD": "Dashbord",
+    "PROJECTS": "Projects",
+    "MATERIALS": "Materials",
+    "EQUIPMENT": "Equipment",
+    "ADMIN": "Admin",
     "SETTINGS": "Settings",
     "PROFILE": "Profile",
     "LOGOUT": "Logout"

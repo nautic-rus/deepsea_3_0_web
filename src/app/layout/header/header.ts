@@ -36,11 +36,19 @@ export class HeaderComponent implements OnInit {
   constructor(@Inject(DOCUMENT) private document: Document, private router: Router, private http: HttpClient, private cdr: ChangeDetectorRef, private translate: TranslateService) {
     // Check if dark mode was previously enabled
     this.darkMode = localStorage.getItem('darkMode') === 'true';
-    // Ensure translation handler rebuilds menu labels on language change
+    // Ensure translation handler rebuilds menu labels and header texts on language change
     this.langSub = this.translate.onLangChange.subscribe((event) => {
       this.currentLang = event.lang || 'en';
+      
+      // update header title and language labels so template bindings refresh
+      try {
+        this.title = this.translate.instant('APP.TITLE');
+        this.langEnLabel = this.translate.instant('LANG.EN');
+        this.langRuLabel = this.translate.instant('LANG.RU');
+      } catch {}
       this.buildUserMenu();
       this.remapPages();
+      this.safeDetect();
     });
     if (this.darkMode) {
       this.document.documentElement.classList.add('app-dark');
@@ -48,7 +56,7 @@ export class HeaderComponent implements OnInit {
   }
 
   ngOnDestroy(): void {
-    try { this.langSub?.unsubscribe(); } catch {}
+    this.langSub?.unsubscribe();
   }
 
   toggleDarkMode() {
@@ -77,8 +85,8 @@ export class HeaderComponent implements OnInit {
       // not authenticated yet - leave menu empty
       this.menuItems = [];
       // also clear avatar
-  this.avatarUrl = undefined;
-  this.avatarLabel = undefined;
+      this.avatarUrl = undefined;
+      this.avatarLabel = undefined;
       return;
     }
 
@@ -89,19 +97,24 @@ export class HeaderComponent implements OnInit {
       next: (resp) => {
         const pages = this.normalizePages(resp);
         this.rawPages = pages || [];
-        this.menuItems = this.mapPagesToMenu(this.rawPages);
-        this.cdr.detectChanges();
-      },
-      error: () => {
+        const mapped = this.mapPagesToMenu(this.rawPages);
+        const mappedCopy = Array.isArray(mapped) ? [...mapped] : mapped;
         this.menuItems = [];
-        this.cdr.detectChanges();
-      }
+        Promise.resolve().then(() => { this.menuItems = mappedCopy; this.safeDetect(); });
+      },
+      error: () => { this.menuItems = []; this.safeDetect(); }
     });
   }
 
   private remapPages() {
     if (!this.rawPages || !this.rawPages.length) { return; }
-    this.menuItems = this.mapPagesToMenu(this.rawPages);
+    const mapped = this.mapPagesToMenu(this.rawPages);
+    const mappedCopy = Array.isArray(mapped) ? [...mapped] : mapped;
+    this.menuItems = [];
+    Promise.resolve().then(() => { this.menuItems = mappedCopy; this.safeDetect(); });
+  }
+
+  private safeDetect() {
     try { this.cdr.detectChanges(); } catch {}
   }
 
@@ -116,12 +129,10 @@ export class HeaderComponent implements OnInit {
         const pages = this.normalizePages(resp);
         this.rawPages = pages || [];
         this.menuItems = this.mapPagesToMenu(this.rawPages);
-        this.cdr.detectChanges();
+        this.menuItems = Array.isArray(this.menuItems) ? [...this.menuItems] : this.menuItems;
+        this.safeDetect();
       },
-      error: () => {
-        this.menuItems = [];
-        this.cdr.detectChanges();
-      }
+      error: () => { this.menuItems = []; this.safeDetect(); }
     });
   }
 
@@ -131,11 +142,12 @@ export class HeaderComponent implements OnInit {
       { separator: true },
       { label: this.translate.instant('HEADER.LOGOUT'), icon: 'pi pi-sign-out', command: () => this.logout() }
     ];
-    try { this.cdr.detectChanges(); } catch {}
+    this.safeDetect();
   }
 
   setLang(lang: string) {
     try { localStorage.setItem('lang', lang); } catch {}
+    
     // Use translate.use(lang) and wait for translations to load before rebuilding the menus.
     // This prevents a race where pages are remapped before translation files are ready.
     this.translate.use(lang).subscribe({
@@ -145,6 +157,9 @@ export class HeaderComponent implements OnInit {
         this.buildUserMenu();
         // remap existing pages (if any) using the newly loaded translations
         this.remapPages();
+  // After translations are loaded and pages remapped, refresh pages from backend
+  // to pick up any language-specific titles provided by the server.
+  this.reloadMenu();
       },
       error: () => {
         // Fallback: still set lang and attempt to remap
@@ -153,8 +168,7 @@ export class HeaderComponent implements OnInit {
         this.remapPages();
       }
     });
-    // Also refresh pages from backend to get any language-specific titles if backend provides them
-    this.reloadMenu();
+    // Note: reloadMenu is intentionally called after translate.use completes to avoid races
   }
 
   toggleLang() {
@@ -184,7 +198,7 @@ export class HeaderComponent implements OnInit {
     if (!u) {
         this.avatarUrl = undefined;
         this.avatarLabel = undefined;
-      try { this.cdr.detectChanges(); } catch {}
+      this.safeDetect();
       return;
     }
 
@@ -196,7 +210,7 @@ export class HeaderComponent implements OnInit {
     }
     this.avatarUrl = url;
     this.avatarLabel = this.avatarUrl ? undefined : (this.computeInitials(u) || undefined);
-    try { this.cdr.detectChanges(); } catch {}
+    this.safeDetect();
   }
 
   private computeInitials(u: any): string | null {
@@ -214,30 +228,42 @@ export class HeaderComponent implements OnInit {
     if (!Array.isArray(pages)) {
       return [];
     }
+    // Translate menu labels via MENU.* keys when available. If key missing, fall back to
+    // backend-provided localized object or raw string — and collect missing keys to help
+    // auto-generate i18n entries.
+    const missing = new Set<string>();
     const getLabel = (p: any) => {
-      const v = p.title ?? p.name ?? p.label ?? p.text ?? p.caption ?? p.displayName ?? '';
-      let label = '';
-      if (!v) {
-        label = '';
-      } else if (typeof v === 'string') {
-        // Try using ngx-translate: if backend provided a translation key, use it; otherwise
-        // attempt to map plain text to a MENU.<KEY> translation.
-        const raw = v.toString().trim();
-        const fromKey = this.translate.instant(raw);
-        if (fromKey && fromKey !== raw) {
-          label = fromKey;
-        } else {
-          const norm = raw.toUpperCase().replace(/[^A-Z0-9]+/g, '_');
-          const key = `MENU.${norm}`;
-          const t = this.translate.instant(key);
-          if (t && t !== key) { label = t; }
-          else { label = raw; }
+      const raw = (p.title ?? p.name ?? p.label ?? p.text ?? p.caption ?? p.displayName ?? '') as string | object;
+      const lang = this.currentLang || this.translate.currentLang || this.translate.getDefaultLang() || 'en';
+
+      // prefer explicit key from API if present
+      let keyBase = '';
+      if (p && p.key && typeof p.key === 'string' && p.key.trim()) {
+        keyBase = p.key.trim();
+      } else {
+        // derive key from slug/path or from raw string
+        try {
+          const route = (p.path ?? p.url ?? p.route ?? (p.slug ? `/${p.slug}` : undefined) ?? p.href ?? '').toString();
+          const parts = route.split('/').filter(Boolean);
+          if (parts.length) keyBase = parts[parts.length - 1];
+        } catch {}
+        if (!keyBase && typeof raw === 'string') {
+          keyBase = raw.toString().trim().toLowerCase().replace(/[^a-z0-9]+/gi, '_');
         }
-      } else if (typeof v === 'object') {
-    const lang = this.currentLang || this.translate.currentLang || this.translate.getDefaultLang() || 'en';
-        label = (v as any)[lang] ?? (v as any).en ?? (v as any).ru ?? Object.values(v)[0] ?? '';
-      } else { label = String(v); }
-      return label;
+      }
+      const key = `MENU.${(keyBase || 'UNKNOWN').toString().toUpperCase().replace(/[^A-Z0-9]+/g, '_')}`;
+
+      const translated = this.translate.instant(key);
+      if (translated && translated !== key) {
+        return translated;
+      }
+
+      // translation missing: collect key and fallback to backend-localized object or raw
+      missing.add(key);
+      if (raw && typeof raw === 'object') {
+        return (raw as any)[lang] ?? (raw as any).en ?? (raw as any).ru ?? Object.values(raw)[0] ?? '';
+      }
+      return (raw && typeof raw === 'string') ? raw.toString() : String(raw ?? '');
     };
 
     const getIcon = (p: any) => {
@@ -269,16 +295,17 @@ export class HeaderComponent implements OnInit {
       if (!item.label && item.routerLink) {
         const parts = (item.routerLink as string).split('/').filter(Boolean);
         const rawLabel = parts.length ? parts[parts.length - 1].replace(/-/g, ' ') : item.routerLink as string;
-        // try translate using MENU.<RAW>
-        const norm = rawLabel.toUpperCase().replace(/[^A-Z0-9]+/g, '_');
-        const key = `MENU.${norm}`;
-        const t = this.translate.instant(key);
-        item.label = (t && t !== key) ? t : rawLabel;
+        // do not translate here — use the derived raw label
+        item.label = rawLabel;
       }
       return item;
     };
 
-    return pages.map(mapItem).filter(Boolean);
+    const items = pages.map(mapItem).filter(Boolean);
+    if (missing.size) {
+      try { console.info('[I18N-MISSING]', JSON.stringify(Array.from(missing))); } catch {}
+    }
+    return items;
   }
 
   // Normalize various API shapes into an array of page-like objects

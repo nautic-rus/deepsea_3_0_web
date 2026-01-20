@@ -12,8 +12,24 @@
   }
   ,"MENU": {
     "DASHBOARD": "Панель",
+    "DASHBORD": "Панель",
+    "PROJECTS": "Проекты",
+    "MATERIALS": "Материалы",
+    "EQUIPMENT": "Оборудование",
+    "ADMIN": "Админ",
     "SETTINGS": "Настройки",
     "PROFILE": "Профиль",
-    "LOGOUT": "Выйти"
+    "LOGOUT": "Выйти",
+    "ISSUES": "Задачи",
+    "DOCUMENTS": "Документы",
+    "SPECIFICATIONS": "Спецификации",
+    "STATEMENTS": "Ведомости",
+    "USERS": "Пользователи",
+    "ROLES": "Роли",
+    "NOTIFICATIONS": "Уведомления",
+    "SUPPLIERS": "Поставщики",
+    "REPORTS": "Отчеты"
+
+
   }
 }
