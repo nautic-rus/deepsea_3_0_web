@@ -3,49 +3,62 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
-
-# Logs
-logs/
-*.log
-npm-debug.log*
-
-# Build output
-dist/
-build/
-/.angular/
-.angular/cache/
-
-# Coverage
-coverage/
-reports/
-
-# TypeScript
-*.tsbuildinfo
+package-lock.json
+pnpm-lock.yaml
 
 # Environment files
 .env
-.env.*
+.env.*.local
+.env.local
 
-# macOS
-.DS_Store
+# Angular / build outputs
+dist/
+out-tsc/
+coverage/
+.angular/
+.angular-cache/
+.tmp/
 
-# IDEs and editors
+# TypeScript build cache
+*.tsbuildinfo
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Editor / IDE
 .vscode/
 .idea/
-*.sublime-workspace
 *.sublime-project
+*.sublime-workspace
 
-# Misc
-.sass-cache/
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc caches
 .cache/
-*.tgz
-*.zip
-node-repl-history
+.sass-cache/
+.parcel-cache/
 
-# Ignore local Angular config if present
-/.angular-cli.json
+# Generated archives
+*.tgz
+
+# Test / coverage
+/coverage/
+/nyc_output/
+
+# Optional lockfiles not used
+yarn.lock
+
+# Dist / build
+build/
 
 # Temporary files
 *.tmp
-tmp/
+*.temp
+
+# Ignore IDE history
+.history/
+

@@ -1,0 +1,78 @@
+.page-administration {
+  padding: 0;
+
+  .admin-grid {
+    display: flex;
+    gap: 1rem;
+    align-items: stretch; /* allow children to stretch to same height */
+    min-height: calc(100vh - 0px); /* full viewport height (page padding is 0) */
+  }
+
+  .card {
+    background: var(--surface, #fff);
+    border: 0px solid rgba(0,0,0,0.08);
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 0px 0px rgba(0,0,0,0.04);
+  }
+
+  .admin-menu {
+    width: 15%;
+    min-width: 200px;
+  }
+  .admin-menu h2 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.05rem;
+  }
+
+  .admin-menu-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .admin-menu-list li {
+    margin: 0.35rem 0;
+  }
+
+  .admin-menu-list a {
+    color: var(--text-color, #333);
+    text-decoration: none;
+  }
+
+  .admin-content-wrapper {
+    flex: 1 1 70%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* allow children to shrink correctly inside flex */
+  }
+
+  .admin-content {
+    width: 100%;
+    min-height: 0;
+  }
+
+  /* make the second content card expand to fill remaining vertical space */
+  .admin-content-wrapper .admin-content {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    overflow: auto; /* internal scrolling when content overflows */
+  }
+
+  .page-administration h1,
+  .admin-content h3 {
+    margin: 0 0 1rem 0;
+  }
+
+  /* Make block headers bold */
+  .admin-menu h2,
+  .admin-content h3 {
+    font-weight: 700;
+  }
+
+  .admin-tools {
+    width: 100%;
+    height: 70px;
+  }
+}

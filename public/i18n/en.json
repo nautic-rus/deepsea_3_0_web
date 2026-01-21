@@ -13,12 +13,22 @@
   ,"MENU": {
     "DASHBOARD": "Dashboard",
     "DASHBORD": "Dashbord",
-    "PROJECTS": "Projects",
+    "PROJECTSMENU": "Projects",
     "MATERIALS": "Materials",
     "EQUIPMENT": "Equipment",
-    "ADMIN": "Admin",
+    "ADMINISTRATION": "Administration",
     "SETTINGS": "Settings",
     "PROFILE": "Profile",
-    "LOGOUT": "Logout"
+    "LOGOUT": "Logout",
+    "USERS": "Users",
+    "ROLES": "Roles",
+    "PERMISSIONS": "Permissions",
+    "PROJECTS": "Projects",
+    "DOCUMENTS": "Documents",
+    "REPORTS": "Reports",
+    "ISSUES": "Issues",
+    "SPECIFICATIONS": "Specifications",
+    "STATEMENTS": "Statements",
+    "SUPPLIERS": "Suppliers"
   }
 }

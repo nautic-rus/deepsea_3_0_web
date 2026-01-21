@@ -236,10 +236,14 @@ export class HeaderComponent implements OnInit {
       const raw = (p.title ?? p.name ?? p.label ?? p.text ?? p.caption ?? p.displayName ?? '') as string | object;
       const lang = this.currentLang || this.translate.currentLang || this.translate.getDefaultLang() || 'en';
 
-      // prefer explicit key from API if present
+      // prefer explicit key from API if present (check key, then id),
+      // otherwise derive key from slug/path or from raw string
       let keyBase = '';
       if (p && p.key && typeof p.key === 'string' && p.key.trim()) {
         keyBase = p.key.trim();
+      } else if (p && (p.id || p.ID) && typeof (p.id || p.ID) === 'string' && (p.id || p.ID).trim()) {
+        // backend now may return `id` which is intended as localization key
+        keyBase = (p.id || p.ID).trim();
       } else {
         // derive key from slug/path or from raw string
         try {
