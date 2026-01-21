@@ -35,12 +35,19 @@
 
 	.documents-menu-list a { color: var(--text-color, #333); text-decoration: none; }
 
+	/* remove border/shadow from PrimeNG TieredMenu inside the documents menu card */
+	.documents-menu p-tieredMenu,
+	.documents-menu ::ng-deep .p-tieredmenu {
+		border: 0 !important;
+		box-shadow: none !important;
+		background: transparent !important;
+	}
+
 	.documents-content-wrapper {
 		flex: 1 1 70%;
 		display: flex;
 		flex-direction: column;
 		min-height: 0;
-		gap: 1rem;
 	}
 
 	.documents-content { width: 100%; min-height: 0; }

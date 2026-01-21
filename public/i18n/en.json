@@ -29,6 +29,10 @@
     "ISSUES": "Issues",
     "SPECIFICATIONS": "Specifications",
     "STATEMENTS": "Statements",
-    "SUPPLIERS": "Suppliers"
+    "SUPPLIERS": "Suppliers",
+    "NOTIFICATIONS": "Notifications",
+    "SPECIALIZATIONS": "Specialization",
+    "DEPARTMENTS": "Departments"
+
   }
 }

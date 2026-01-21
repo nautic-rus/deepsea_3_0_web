@@ -2,11 +2,7 @@
   <div class="materials-grid">
     <aside class="materials-menu card">
       <h2>{{ 'MENU.MATERIALS' | translate }}</h2>
-      <ul class="materials-menu-list">
-        <li><a routerLink="/administration/users">{{ 'MENU.USERS' | translate }}</a></li>
-        <li><a routerLink="/administration/roles">{{ 'MENU.ROLES' | translate }}</a></li>
-        <li><a routerLink="/administration/permissions">{{ 'MENU.PERMISSIONS' | translate }}</a></li>
-      </ul>
+      <p-tieredMenu [model]="menuItems"></p-tieredMenu>
     </aside>
 
     <div class="materials-content-wrapper">

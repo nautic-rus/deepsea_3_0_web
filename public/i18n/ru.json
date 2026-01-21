@@ -29,7 +29,10 @@
     "ROLES": "Роли",
     "NOTIFICATIONS": "Уведомления",
     "SUPPLIERS": "Поставщики",
-    "REPORTS": "Отчеты"
+    "REPORTS": "Отчеты",
+    "PERMISSIONS": "Разрешения",
+    "SPECIALISATIONS": "Специализация",
+    "DEPARTMENTS": "Отделы"
 
 
   }

@@ -1,12 +1,28 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TieredMenuModule } from 'primeng/tieredmenu';
+import { MenuItem } from 'primeng/api';
 
 @Component({
   selector: 'app-materials',
   standalone: true,
-  imports: [CommonModule, TranslateModule],
+  imports: [CommonModule, TranslateModule, TieredMenuModule],
   templateUrl: './materials.html',
   styleUrls: ['./materials.scss']
 })
-export class MaterialsComponent {}
+export class MaterialsComponent implements OnInit {
+  menuItems: MenuItem[] = [];
+
+  constructor(private translate: TranslateService) {}
+
+  ngOnInit(): void {
+    const t = (k: string) => this.translate.instant(k) || k;
+    this.menuItems = [
+      { label: t('MENU.USERS'), icon: 'pi pi-users', routerLink: ['/administration/users'] },
+      { label: t('MENU.ROLES'), icon: 'pi pi-briefcase', routerLink: ['/administration/roles'] },
+      { label: t('MENU.PERMISSIONS'), icon: 'pi pi-lock', routerLink: ['/administration/permissions'] },
+      { label: t('MENU.MATERIALS'), icon: 'pi pi-folder', routerLink: ['/materials'] }
+    ];
+  }
+}

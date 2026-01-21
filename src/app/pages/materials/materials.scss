@@ -35,6 +35,14 @@
 
 	.materials-menu-list a { color: var(--text-color, #333); text-decoration: none; }
 
+	/* remove border/shadow from PrimeNG TieredMenu inside the materials menu card */
+	.materials-menu p-tieredMenu,
+	.materials-menu ::ng-deep .p-tieredmenu {
+		border: 0 !important;
+		box-shadow: none !important;
+		background: transparent !important;
+	}
+
 	.materials-content-wrapper {
 		flex: 1 1 70%;
 		display: flex;

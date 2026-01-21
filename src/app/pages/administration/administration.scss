@@ -40,6 +40,14 @@
     text-decoration: none;
   }
 
+  /* remove border/shadow from PrimeNG TieredMenu inside the admin menu card */
+  .admin-menu p-tieredMenu,
+  .admin-menu ::ng-deep .p-tieredmenu {
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
   .admin-content-wrapper {
     flex: 1 1 70%;
     display: flex;
@@ -75,4 +83,5 @@
     width: 100%;
     height: 70px;
   }
+
 }
