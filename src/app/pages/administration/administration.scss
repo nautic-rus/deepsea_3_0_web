@@ -1,6 +1,11 @@
 .page-administration {
   padding: 0;
 
+  /* Make all headings within administration use the specified dark color */
+  h1, h2, h3, h4, h5, h6 {
+    color: #0f172a;
+  }
+
   .admin-grid {
     display: flex;
     gap: 1rem;
@@ -82,6 +87,49 @@
   .admin-tools {
     width: 100%;
     height: 70px;
+  }
+
+  /* Intro/title added above accordion */
+  .admin-section-title {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.125rem;
+    font-weight: 700;
+  }
+
+  .admin-intro {
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--surface-50, #fafafa);
+    border-radius: 8px;
+    color: var(--text-color, #222);
+  }
+
+  /* Ensure accordion header/title is visible and styled */
+  .admin-accordion-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-color, #222);
+  }
+
+  /* Slight padding for PrimeNG accordion headers inside admin area */
+  .p-accordion .p-accordionheader {
+    padding: 0.6rem 1rem;
+  }
+
+  /* styles for subpage inner layout: make content area fill remaining height */
+  .admin-subpage-tools {
+    width: 100%;
+    height: auto; /* match admin-tools toolbar height so content can fill remaining space */
+  }
+
+  .admin-subpage-content {
+    /* allow this block to grow and fill the column within .admin-content-wrapper */
+    flex: 1 1 flex;
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* enable proper flexbox scrolling behavior */
+    overflow: auto; /* internal scrolling when content is long */
   }
 
 }

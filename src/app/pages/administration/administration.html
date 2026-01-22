@@ -4,20 +4,85 @@
       <h2>{{ 'MENU.ADMINISTRATION' | translate }}</h2>
       <p-tieredMenu [model]="menuItems"></p-tieredMenu>
     </aside>
+    
+      <!-- Render child route content here -->
+      <section class="admin-content-wrapper">
+        <div *ngIf="isAdminRoot" class="admin-content-wrapper card">
+          <h3 class="admin-section-title">{{ 'ADMIN.INSTRUCTIONS' | translate }}</h3>
+          <div class="admin-intro card">
+            <p>Здесь вы можете управлять пользователями, ролями, правами и другими административными настройками. Выберите раздел ниже, чтобы увидеть краткие инструкции.</p>
+          </div>
+          <p-accordion>
+            <p-accordion-panel value="0">
+              <p-accordion-header>{{ 'MENU.USERS' | translate }}</p-accordion-header>
+              <p-accordion-content>
+                <ol class="m-0">
+                  <li>Просмотр списка пользователей и их свойств.</li>
+                  <li>Добавление нового пользователя: заполните форму, укажите роль и контактные данные.</li>
+                  <li>Редактирование: измените данные пользователя и сохраните.</li>
+                  <li>Удаление: выберите пользователя и подтвердите удаление.</li>
+                </ol>
+              </p-accordion-content>
+            </p-accordion-panel>
 
-    <div class="admin-content-wrapper">
-      <section class="admin-tools card">
-        <p>
-          This is the Administration page. Add administration-related tools and sub-pages here.
-        </p>
-      </section>
+            <p-accordion-panel value="1">
+              <p-accordion-header>{{ 'MENU.ROLES' | translate }}</p-accordion-header>
+              <p-accordion-content>
+                <ol class="m-0">
+                  <li>Просмотрите доступные роли в системе.</li>
+                  <li>Создайте новую роль с нужными правами доступа.</li>
+                  <li>Изменяйте или удаляйте существующие роли по необходимости.</li>
+                  <li>Назначайте роли пользователям через раздел «Пользователи».</li>
+                </ol>
+              </p-accordion-content>
+            </p-accordion-panel>
 
-      <section class="admin-content card">
-        <h3>Overview</h3>
-        <p>
-          This is the Administration page. Add administration-related tools and sub-pages here.
-        </p>
+            <p-accordion-panel value="2">
+              <p-accordion-header>{{ 'MENU.PERMISSIONS' | translate }}</p-accordion-header>
+              <p-accordion-content>
+                <ol class="m-0">
+                  <li>Определите наборы разрешений для различных действий.</li>
+                  <li>Группируйте разрешения по модулям и привязывайте к ролям.</li>
+                  <li>Проверяйте эффективные права пользователя через UI или логи.</li>
+                </ol>
+              </p-accordion-content>
+            </p-accordion-panel>
+
+            <p-accordion-panel value="3">
+              <p-accordion-header>{{ 'MENU.NOTIFICATIONS' | translate }}</p-accordion-header>
+              <p-accordion-content>
+                <ol class="m-0">
+                  <li>Настройка типов уведомлений (email, в приложении и т.д.).</li>
+                  <li>Просмотр списка отправленных/ожидающих уведомлений.</li>
+                  <li>Редактирование шаблонов и расписания рассылок.</li>
+                </ol>
+              </p-accordion-content>
+            </p-accordion-panel>
+
+            <p-accordion-panel value="4">
+              <p-accordion-header>{{ 'MENU.DEPARTMENTS' | translate }}</p-accordion-header>
+              <p-accordion-content>
+                <ol class="m-0">
+                  <li>Создавайте иерархию отделов/подразделений.</li>
+                  <li>Назначайте ответственных и связывайте отделы с проектами.</li>
+                  <li>Редактируйте информацию об отделе: название, описание, контакты.</li>
+                </ol>
+              </p-accordion-content>
+            </p-accordion-panel>
+
+            <p-accordion-panel value="5">
+              <p-accordion-header>{{ 'MENU.SPECIALIZATIONS' | translate }}</p-accordion-header>
+              <p-accordion-content>
+                <ol class="m-0">
+                  <li>Добавление и управление специализациями сотрудников.</li>
+                  <li>Связывание специализаций с ролями и задачами.</li>
+                  <li>Импорт/экспорт каталога специализаций при необходимости.</li>
+                </ol>
+              </p-accordion-content>
+            </p-accordion-panel>
+          </p-accordion>
+        </div>
+        <router-outlet></router-outlet>
       </section>
     </div>
   </div>
-</div>

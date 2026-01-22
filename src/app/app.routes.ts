@@ -28,7 +28,15 @@ export const routes: Routes = [
       {
         path: 'administration',
         loadComponent: () => import('./pages/administration/administration').then(m => m.AdministrationComponent),
-        canActivate: [AuthGuard]
+        canActivate: [AuthGuard],
+        children: [
+          { path: 'users', loadComponent: () => import('./pages/administration/users/users').then(m => m.AdminUsersComponent), canActivate: [AuthGuard] },
+          { path: 'roles', loadComponent: () => import('./pages/administration/roles/roles').then(m => m.AdminRolesComponent), canActivate: [AuthGuard] },
+          { path: 'permissions', loadComponent: () => import('./pages/administration/permissions/permissions').then(m => m.AdminPermissionsComponent), canActivate: [AuthGuard] },
+          { path: 'notifications', loadComponent: () => import('./pages/administration/notifications/notifications').then(m => m.AdminNotificationsComponent), canActivate: [AuthGuard] },
+          { path: 'departments', loadComponent: () => import('./pages/administration/departments/departments').then(m => m.AdminDepartmentsComponent), canActivate: [AuthGuard] },
+          { path: 'specializations', loadComponent: () => import('./pages/administration/specializations/specializations').then(m => m.AdminSpecializationsComponent), canActivate: [AuthGuard] }
+        ]
       }
       ,
       {

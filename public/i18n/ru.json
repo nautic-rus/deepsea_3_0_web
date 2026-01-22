@@ -30,10 +30,14 @@
     "NOTIFICATIONS": "Уведомления",
     "SUPPLIERS": "Поставщики",
     "REPORTS": "Отчеты",
-    "PERMISSIONS": "Разрешения",
-    "SPECIALISATIONS": "Специализация",
-    "DEPARTMENTS": "Отделы"
+  "PERMISSIONS": "Разрешения",
+  "SPECIALISATIONS": "Специализация",
+  "SPECIALIZATIONS": "Специализации",
+  "DEPARTMENTS": "Отделы"
 
 
+  }
+  ,"ADMIN": {
+    "INSTRUCTIONS": "Инструкции по администрированию"
   }
 }

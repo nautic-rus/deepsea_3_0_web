@@ -35,4 +35,7 @@
     "DEPARTMENTS": "Departments"
 
   }
+  ,"ADMIN": {
+    "INSTRUCTIONS": "Administration instructions"
+  }
 }
