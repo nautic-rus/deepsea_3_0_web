@@ -32,7 +32,10 @@
     "SUPPLIERS": "Suppliers",
     "NOTIFICATIONS": "Notifications",
     "SPECIALIZATIONS": "Specialization",
-    "DEPARTMENTS": "Departments"
+    "DEPARTMENTS": "Departments",
+    "WIKI": "WiKi",
+    "EQUIPMENTMENU": "Equipment",
+    "MATERIALSMENU": "Materials"
 
   }
   ,"ADMIN": {

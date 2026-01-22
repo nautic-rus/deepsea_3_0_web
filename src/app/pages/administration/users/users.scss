@@ -16,3 +16,16 @@
   flex-direction: column;
   overflow: auto;
 }
+
+.p-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding: var(--p-toolbar-padding);
+    background: var(--p-toolbar-background);
+    border: 0px solid var(--p-toolbar-border-color);
+    color: var(--p-toolbar-color);
+    border-radius: var(--p-toolbar-border-radius);
+    gap: var(--p-toolbar-gap);
+}

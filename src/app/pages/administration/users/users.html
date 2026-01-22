@@ -1,7 +1,83 @@
-<section class="admin-subpage-tools card">
-  <p>Manage application users here.</p>
-</section>
+<p-toolbar styleClass="mb-6">
+  <ng-template #start>
+      <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+      <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedProducts()" [disabled]="!selectedProducts || !selectedProducts.length" />
+  </ng-template>
+
+  <ng-template #end>
+      <p-button label="Export" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
+  </ng-template>
+</p-toolbar>
+
 
 <section class="admin-subpage-content card">
-  <p>Manage application users here.</p>
+  <div class="table-responsive">
+  <p-table
+      #dt
+      [value]="users"
+      [loading]="loading"
+      [paginator]="true"
+      [rows]="20"
+      [globalFilterFields]="['username','email','first_name','last_name','department','job_title']"
+      [(selection)]="selectedProducts"
+      [rowHover]="true"
+      dataKey="id"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users"
+      [showCurrentPageReport]="true"
+      [rowsPerPageOptions]="[10, 20, 30]"
+          >
+
+  <ng-template pTemplate="header">
+      <tr>
+          <th style="width: 3rem">
+              <p-tableHeaderCheckbox />
+          </th>
+                    <th >Username</th>
+                    <th pSortableColumn="email">
+              Email
+              <p-sortIcon field="email" />
+          </th>
+                    <th >Phone</th>
+                    <th pSortableColumn="first_name" >
+              Name
+              <p-sortIcon field="first_name" />
+          </th>
+                    <th pSortableColumn="department" >
+              Department
+              <p-sortIcon field="department" />
+          </th>
+                    <th pSortableColumn="job_title" >
+              Job Title
+              <p-sortIcon field="job_title" />
+          </th>
+                    <th pSortableColumn="is_active" >
+              Active
+              <p-sortIcon field="is_active" />
+          </th>
+                    <th ></th>
+      </tr>
+  </ng-template>
+  
+  <ng-template pTemplate="body" let-user>
+      <tr>
+          <td>
+              <p-tableCheckbox [value]="user" />
+          </td>
+          <td >{{ user.username }}</td>
+          <td>{{ user.email }}</td>
+          <td >{{ user.phone || '-' }}</td>
+          <td >{{ (user.first_name || '') + ' ' + (user.last_name || '') }}</td>
+          <td>{{ user.department }}</td>
+          <td>{{ user.job_title }}</td>
+          <td>
+              {{ user.is_active ? 'Yes' : 'No' }}
+          </td>
+          <td>
+            <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editProduct(user)" />
+            <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteProduct(user)" />
+          </td>
+      </tr>
+  </ng-template>
+</p-table>
+</div>
 </section>

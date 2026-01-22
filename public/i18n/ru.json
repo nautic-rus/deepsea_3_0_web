@@ -30,10 +30,13 @@
     "NOTIFICATIONS": "Уведомления",
     "SUPPLIERS": "Поставщики",
     "REPORTS": "Отчеты",
-  "PERMISSIONS": "Разрешения",
-  "SPECIALISATIONS": "Специализация",
-  "SPECIALIZATIONS": "Специализации",
-  "DEPARTMENTS": "Отделы"
+    "PERMISSIONS": "Разрешения",
+    "SPECIALISATIONS": "Специализация",
+    "SPECIALIZATIONS": "Специализации",
+    "DEPARTMENTS": "Отделы",
+    "WIKI": "База знаний",
+    "EQUIPMENTMENU": "Оборудование",
+    "MATERIALSMENU": "Материалы"
 
 
   }
