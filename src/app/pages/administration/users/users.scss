@@ -1,6 +1,4 @@
-.admin-subpage-tools {
-  height: 70px;
-}
+
 
 :host {
   display: flex;
@@ -14,7 +12,14 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
+}
+
+.table-responsive {
+  /* make the table area scrollable internally */
+  flex: 1 1 auto;
   overflow: auto;
+  /* ensure flex children can shrink properly */
+  display: block;
 }
 
 .p-toolbar {
@@ -22,10 +27,30 @@
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    padding: var(--p-toolbar-padding);
+    padding: 0;
     background: var(--p-toolbar-background);
     border: 0px solid var(--p-toolbar-border-color);
     color: var(--p-toolbar-color);
     border-radius: var(--p-toolbar-border-radius);
     gap: var(--p-toolbar-gap);
+}
+
+/* Style the confirm dialog to match the edit dialog appearance */
+.user-confirm-dialog {
+  /* card-like surface and subtle shadow to match edit dialog */
+  box-shadow: 0 4px 14px rgba(16,24,40,0.08);
+}
+.user-confirm-dialog .p-dialog-header {
+  background: var(--surface-0);
+  border-bottom: 1px solid var(--surface-border);
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+.user-confirm-dialog .p-dialog-content {
+  padding: 1rem;
+}
+
+/* Toast customization for user actions */
+.user-toast .p-toast-message {
+  border-radius: 8px;
 }

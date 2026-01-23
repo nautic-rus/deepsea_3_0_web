@@ -3,6 +3,8 @@
 
 /* PrimeNG Icons */
 @import "primeicons/primeicons.css";
+/* Google Fonts - Lato */
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap');
 
 /* Global Styles */
 * {
@@ -13,7 +15,12 @@
 
 html, body {
   height: 100%;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Disable page scrolling globally */
+  overflow: hidden;
+  /* Use Lato as the primary UI font with sensible fallbacks */
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* reduce base font size for the app */
+  font-size: 14px;
 }
 
 /* PrimeNG Surface Variables for Sakai Theme - Light Mode */
@@ -34,6 +41,7 @@ html, body {
   --text-color: var(--surface-900);
   --text-color-secondary: var(--surface-600);
   --muted-color: var(--surface-500);
+  --primary-color: #003e51;
 }
 
 /* Dark Mode Variables */
@@ -82,7 +90,7 @@ html, body {
 .card {
   background: var(--surface-0);
   /* border: 1px solid var(--surface-border); */
-  padding: 1.5rem;
+  padding: 1rem;
   margin-bottom: 1rem;
   border-radius: 12px;
   /* box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); */
@@ -104,5 +112,38 @@ body {
   background-color: var(--surface-50);
   color: var(--text-color);
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* PrimeNG button overrides: remove borders and set primary color */
+.p-button {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Primary buttons: background and text color */
+.p-button.p-button-primary,
+.p-button.p-button-primary.p-button-outlined {
+  background-color: var(--primary-color) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+}
+
+/* Hover/focus states for primary */
+.p-button.p-button-primary:hover,
+.p-button.p-button-primary:focus {
+  background-color: #00374a !important; /* slightly darker */
+  color: #ffffff !important;
+}
+
+/* Outlined primary should show primary background on hover */
+.p-button.p-button-primary.p-button-outlined:hover {
+  background-color: var(--primary-color) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+}
+
+/* Make sure secondary/outlined buttons don't show default borders */
+.p-button.p-button-outlined {
+  border: none !important;
 }
 

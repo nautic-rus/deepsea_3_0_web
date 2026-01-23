@@ -1,8 +1,14 @@
 <div class="page-administration" class ="page-administration">
   <div class="admin-grid">
     <aside class="admin-menu card">
-      <h2>{{ 'MENU.ADMINISTRATION' | translate }}</h2>
-      <p-tieredMenu [model]="menuItems"></p-tieredMenu>
+      <div class="admin-menu-header">
+      </div>
+      <!-- Render each menu group as a separate header + menu to keep headings and items on different levels -->
+      <div *ngFor="let group of menuItems" class="menu-group mb-4">
+        <div class="menu-group-title text-surface-700 font-bold mb-2">{{ group.label }}</div>
+        <!-- Render a Menu for group.items only -->
+        <p-menu [model]="group.items"></p-menu>
+      </div>
     </aside>
     
       <!-- Render child route content here -->

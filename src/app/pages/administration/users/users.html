@@ -1,14 +1,15 @@
-<p-toolbar styleClass="mb-6">
+<section class="admin-subpage-tools card">
+<p-toolbar >
   <ng-template #start>
-      <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
-      <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedProducts()" [disabled]="!selectedProducts || !selectedProducts.length" />
+    <p-button [label]="'MENU.CREATE_USER' | translate" icon="pi pi-plus" severity="primary" class="mr-2" (onClick)="openNew()" />
+    <p-button severity="secondary" [label]="'MENU.DELETE' | translate" icon="pi pi-trash" outlined (onClick)="deleteSelectedProducts()" [disabled]="!selectedProducts || !selectedProducts.length" />
   </ng-template>
 
   <ng-template #end>
-      <p-button label="Export" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
+      <p-button [label]="'MENU.EXPORT' | translate" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
   </ng-template>
 </p-toolbar>
-
+</section>
 
 <section class="admin-subpage-content card">
   <div class="table-responsive">
@@ -16,15 +17,19 @@
       #dt
       [value]="users"
       [loading]="loading"
-      [paginator]="true"
-      [rows]="20"
-      [globalFilterFields]="['username','email','first_name','last_name','department','job_title']"
+      
+      [scrollable]="true"
+      scrollHeight="700px"
+      [rows]="10"
+      size="small"
+      [globalFilterFields]="['id','email','first_name','last_name','department','job_title']"
       [(selection)]="selectedProducts"
       [rowHover]="true"
       dataKey="id"
       currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users"
       [showCurrentPageReport]="true"
       [rowsPerPageOptions]="[10, 20, 30]"
+      [globalFilterFields]="['name', 'country.name', 'representative.name', 'status']"
           >
 
   <ng-template pTemplate="header">
@@ -32,29 +37,95 @@
           <th style="width: 3rem">
               <p-tableHeaderCheckbox />
           </th>
-                    <th >Username</th>
-                    <th pSortableColumn="email">
-              Email
-              <p-sortIcon field="email" />
-          </th>
-                    <th >Phone</th>
-                    <th pSortableColumn="first_name" >
-              Name
+          <th>ID</th>
+          <th pSortableColumn="first_name">
+              {{ 'MENU.NAME' | translate }}
               <p-sortIcon field="first_name" />
           </th>
-                    <th pSortableColumn="department" >
-              Department
-              <p-sortIcon field="department" />
+          <th pSortableColumn="email">
+              {{ 'MENU.EMAIL' | translate }}
+              <p-sortIcon field="email" />
           </th>
-                    <th pSortableColumn="job_title" >
-              Job Title
-              <p-sortIcon field="job_title" />
+          <th>{{ 'MENU.PHONE' | translate }}</th>
+          <th pSortableColumn="department">
+              <div class="flex justify-between items-center">
+                  <div class="flex items-center gap-2">
+                      <span>{{ 'MENU.DEPARTMENT' | translate }}</span>
+                      <p-sortIcon field="department" />
+                  </div>
+                  <p-columnFilter field="department" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
+                      <ng-template #filter let-value let-filter="filterCallback">
+                          <p-multiselect [ngModel]="value"
+                                         [options]="departmentsFilter"
+                                         optionValue="value"
+                                         placeholder="{{ 'MENU.ANY' | translate }}"
+                                         (onChange)="filter($event.value)"
+                                         optionLabel="label"
+                                         styleClass="w-full"
+                                         appendTo="body">
+                              <ng-template let-option let-item #item>
+                                  <div class="flex items-center gap-2">
+                                      <span>{{ option.label }}</span>
+                                  </div>
+                              </ng-template>
+                          </p-multiselect>
+                      </ng-template>
+                  </p-columnFilter>
+              </div>
           </th>
-                    <th pSortableColumn="is_active" >
-              Active
-              <p-sortIcon field="is_active" />
+          <th pSortableColumn="job_title">
+              <div class="flex justify-between items-center">
+                  <div class="flex items-center gap-2">
+                      <span>{{ 'MENU.JOB_TITLE' | translate }}</span>
+                      <p-sortIcon field="job_title" />
+                  </div>
+                  <p-columnFilter field="job_title" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
+                      <ng-template #filter let-value let-filter="filterCallback">
+                          <p-multiselect [ngModel]="value"
+                                         [options]="jobTitles"
+                                         optionValue="value"
+                                         placeholder="{{ 'MENU.ANY' | translate }}"
+                                         (onChange)="filter($event.value)"
+                                         optionLabel="label"
+                                         styleClass="w-full"
+                                         appendTo="body">
+                              <ng-template let-option let-item #item>
+                                  <div class="flex items-center gap-2">
+                                      <span>{{ option.label }}</span>
+                                  </div>
+                              </ng-template>
+                          </p-multiselect>
+                      </ng-template>
+                  </p-columnFilter>
+              </div>
           </th>
-                    <th ></th>
+          <th pSortableColumn="is_active">
+              <div class="flex justify-between items-center">
+                  <div class="flex items-center gap-2">
+                      <span>{{ 'MENU.ACTIVE' | translate }}</span>
+                      <p-sortIcon field="is_active" />
+                  </div>
+                  <p-columnFilter field="is_active" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
+                      <ng-template #filter let-value let-filter="filterCallback">
+                          <p-multiselect [ngModel]="value"
+                                         [options]="statuses"
+                                         optionValue="value"
+                                         placeholder="{{ 'MENU.ANY' | translate }}"
+                                         (onChange)="filter($event.value)"
+                                         optionLabel="label"
+                                         styleClass="w-full"
+                                         appendTo="body">
+                              <ng-template let-option let-item #item>
+                                  <div class="flex items-center gap-2">
+                                      <span>{{ option.label | translate }}</span>
+                                  </div>
+                              </ng-template>
+                          </p-multiselect>
+                      </ng-template>
+                  </p-columnFilter>
+              </div>
+          </th>
+          <th></th>
       </tr>
   </ng-template>
   
@@ -63,21 +134,100 @@
           <td>
               <p-tableCheckbox [value]="user" />
           </td>
-          <td >{{ user.username }}</td>
+          <td>{{ user.id }}</td>
+          <td >{{ (user.first_name || '') + ' ' + (user.last_name || '') }}</td>
           <td>{{ user.email }}</td>
           <td >{{ user.phone || '-' }}</td>
-          <td >{{ (user.first_name || '') + ' ' + (user.last_name || '') }}</td>
           <td>{{ user.department }}</td>
           <td>{{ user.job_title }}</td>
           <td>
-              {{ user.is_active ? 'Yes' : 'No' }}
+              <p-tag [value]="user.is_active ? ('MENU.ACTIVE_YES' | translate) : ('MENU.ACTIVE_NO' | translate)" [severity]="user.is_active ? 'success' : 'danger'"></p-tag>
           </td>
           <td>
-            <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editProduct(user)" />
-            <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteProduct(user)" />
+            <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="openEdit(user)" />
+                        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="confirmDelete(user)" />
           </td>
       </tr>
   </ng-template>
 </p-table>
 </div>
 </section>
+
+<!-- Confirm dialog (styled similar to edit dialog) -->
+<p-confirmDialog
+    appendTo="body"
+    [dismissableMask]="true"
+    [baseZIndex]="10000"
+    [style]="{ width: '25%' }"
+    styleClass="user-confirm-dialog"
+    header="{{ 'MENU.CONFIRM' | translate }}"
+    acceptLabel="{{ 'MENU.DELETE' | translate }}"
+    rejectLabel="{{ 'MENU.CANCEL' | translate }}"
+    acceptIcon="pi pi-check"
+    acceptButtonStyleClass="p-button-danger"
+    rejectButtonStyleClass="secondary p-button-text"
+    rejectIcon="pi pi-times"
+    >
+</p-confirmDialog>
+<!-- Toast notifications (styled for user actions) -->
+<p-toast position="top-right" appendTo="body" [baseZIndex]="10001" styleClass="user-toast"></p-toast>
+
+<!-- Edit dialog -->
+<p-dialog [header]="isCreating ? ('MENU.CREATE_USER' | translate) : ('MENU.EDIT_USER' | translate)" [(visible)]="displayDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{width: '25%'}">
+        <div class=" flex flex-col gap-4">
+            <div class="flex flex-col gap-2">
+                <label for="email1">{{ 'MENU.EMAIL' | translate }}</label>
+                <input pInputText id="email1" type="text" [(ngModel)]="editModel.email" name="email" />
+                <small *ngIf="formErrors.email" class="text-red-600 block">{{ formErrors.email }}</small>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label for="phone1">{{ 'MENU.PHONE' | translate }}</label>
+                <!-- Use PrimeNG input mask for phone numbers (Russian mask used as default) -->
+                <p-inputMask id="phone1"
+                              mask="+7 (999) 999-99-99"
+                              placeholder="+7 (___) ___-__-__"
+                              [(ngModel)]="editModel.phone"
+                              name="phone">
+                </p-inputMask>
+            </div>
+            <div class="flex gap-2">
+                <div class="flex-1 flex flex-col gap-2">
+                    <label for="firstName">{{ 'MENU.FIRST_NAME' | translate }}</label>
+                    <input pInputText id="firstName" type="text" [(ngModel)]="editModel.first_name" name="first_name" />
+                    <small *ngIf="formErrors.first_name" class="text-red-600 block">{{ formErrors.first_name }}</small>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <div class="flex-1 flex flex-col gap-2">
+                    <label for="lastName">{{ 'MENU.LAST_NAME' | translate }}</label>
+                    <input pInputText id="lastName" type="text" [(ngModel)]="editModel.last_name" name="last_name" />
+                    <small *ngIf="formErrors.last_name" class="text-red-600 block">{{ formErrors.last_name }}</small>
+                </div>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label for="middleName">{{ 'MENU.MIDDLE_NAME' | translate }}</label>
+                <input pInputText id="middleName" type="text" [(ngModel)]="editModel.middle_name" name="middle_name" />
+            </div>
+            <div class="flex flex-col gap-2">
+                <label for="department">{{ 'MENU.DEPARTMENT' | translate }}</label>
+                <p-select id="department"
+                            [options]="departments"
+                            [(ngModel)]="editModel.department"
+                            optionLabel="label"
+                            optionValue="value"
+                            [placeholder]="'MENU.SELECT_DEPARTMENT' | translate"
+                            appendTo="body">
+                </p-select>
+            </div>
+            <!--
+            <div class="flex flex-col gap-2">
+                <label for="jobTitle">{{ 'MENU.JOB_TITLE' | translate }}</label>
+                <input pInputText id="jobTitle" type="text" [(ngModel)]="editModel.job_title" name="job_title" />
+            </div>
+            -->
+        <div class="flex justify-end gap-2 mt-4">
+            <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="displayDialog=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="loading"></p-button>
+            <p-button label="{{ 'MENU.SAVE' | translate }}" (onClick)="saveUser()" severity="primary" icon="pi pi-check" iconPos="left" [loading]="loading" [disabled]="loading"></p-button>
+        </div>
+    </div>
+</p-dialog>

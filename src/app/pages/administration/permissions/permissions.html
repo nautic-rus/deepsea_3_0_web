@@ -1,7 +1,115 @@
 <section class="admin-subpage-tools card">
-  <p>Configure permissions and access controls here.</p>
+  <p-toolbar >
+    <ng-template #start>
+      <p-button [label]="'PERMISSIONS.CREATE' | translate" icon="pi pi-plus" severity="primary" class="mr-2" (onClick)="openNew()" />
+      <p-button severity="secondary" [label]="'MENU.DELETE' | translate" icon="pi pi-trash" outlined (onClick)="deleteSelectedProducts()" [disabled]="!selectedProducts || !selectedProducts.length" />
+    </ng-template>
+
+    <ng-template #end>
+      <p-button [label]="'MENU.EXPORT' | translate" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
+    </ng-template>
+  </p-toolbar>
 </section>
 
 <section class="admin-subpage-content card">
-  <p>Configure permissions and access controls here.</p>
+  <div class="table-responsive">
+  <p-table
+    #dt
+    [value]="permissions"
+    [loading]="loading"
+    [scrollable]="true"
+    scrollHeight="700px"
+    [rows]="10"
+    size="small"
+    [globalFilterFields]="['id','name','code','description']"
+    [(selection)]="selectedProducts"
+    [rowHover]="true"
+    dataKey="id"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} items"
+    [showCurrentPageReport]="true"
+    [rowsPerPageOptions]="[10, 20, 30]"
+      >
+
+  <ng-template pTemplate="header">
+    <tr>
+      <th style="width: 3rem">
+        <p-tableHeaderCheckbox />
+      </th>
+      <th>ID</th>
+      <th pSortableColumn="name">
+        {{ 'PERMISSIONS.NAME' | translate }}
+        <p-sortIcon field="name" />
+      </th>
+      <th pSortableColumn="code">
+        {{ 'PERMISSIONS.CODE' | translate }}
+        <p-sortIcon field="code" />
+      </th>
+      <th>{{ 'PERMISSIONS.DESCRIPTION' | translate }}</th>
+      <th pSortableColumn="created_at">
+        {{ 'PERMISSIONS.CREATED_AT' | translate }}
+        <p-sortIcon field="created_at" />
+      </th>
+      <th></th>
+    </tr>
+  </ng-template>
+  
+  <ng-template pTemplate="body" let-permission>
+    <tr>
+      <td>
+        <p-tableCheckbox [value]="permission" />
+      </td>
+      <td>{{ permission.id }}</td>
+      <td>{{ permission.name }}</td>
+      <td>{{ permission.code }}</td>
+      <td>{{ permission.description || '-' }}</td>
+      <td>{{ permission.created_at | date:'short' }}</td>
+      <td>
+        <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="openEdit(permission)" />
+        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="confirmDelete(permission)" />
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+</div>
 </section>
+
+<!-- Confirm dialog (styled similar to edit dialog) -->
+<p-confirmDialog
+  appendTo="body"
+  [dismissableMask]="true"
+  [baseZIndex]="10000"
+  [style]="{ width: '25%' }"
+  styleClass="user-confirm-dialog"
+  header="{{ 'MENU.CONFIRM' | translate }}"
+  acceptLabel="{{ 'MENU.DELETE' | translate }}"
+  rejectLabel="{{ 'MENU.CANCEL' | translate }}"
+  acceptIcon="pi pi-check"
+  acceptButtonStyleClass="p-button-danger"
+  rejectButtonStyleClass="secondary p-button-text"
+  rejectIcon="pi pi-times"
+  >
+</p-confirmDialog>
+<!-- Toast notifications (styled for user actions) -->
+<p-toast position="top-right" appendTo="body" [baseZIndex]="10001" styleClass="user-toast"></p-toast>
+
+<!-- Edit dialog -->
+<p-dialog [header]="isCreating ? ('PERMISSIONS.CREATE' | translate) : ('PERMISSIONS.EDIT' | translate)" [(visible)]="displayDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{width: '35%'}">
+  <div class=" flex flex-col gap-4">
+    <div class="flex flex-col gap-2">
+      <label for="permName">{{ 'PERMISSIONS.NAME' | translate }}</label>
+      <input pInputText id="permName" type="text" [(ngModel)]="editModel.name" name="name" />
+    </div>
+    <div class="flex flex-col gap-2">
+      <label for="permCode">{{ 'PERMISSIONS.CODE' | translate }}</label>
+      <input pInputText id="permCode" type="text" [(ngModel)]="editModel.code" name="code" />
+    </div>
+    <div class="flex flex-col gap-2">
+      <label for="permDesc">{{ 'PERMISSIONS.DESCRIPTION' | translate }}</label>
+      <textarea id="permDesc" rows="3" [(ngModel)]="editModel.description" name="description" class="p-inputtext"></textarea>
+    </div>
+    <div class="flex justify-end gap-2 mt-4">
+      <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="displayDialog=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="loading"></p-button>
+      <p-button label="{{ 'MENU.SAVE' | translate }}" (onClick)="saveUser()" severity="primary" icon="pi pi-check" iconPos="left" [loading]="loading" [disabled]="loading"></p-button>
+    </div>
+  </div>
+</p-dialog>

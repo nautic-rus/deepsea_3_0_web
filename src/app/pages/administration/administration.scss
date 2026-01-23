@@ -3,14 +3,14 @@
 
   /* Make all headings within administration use the specified dark color */
   h1, h2, h3, h4, h5, h6 {
-    color: #0f172a;
+    color: #334155;
   }
 
   .admin-grid {
     display: flex;
     gap: 1rem;
     align-items: stretch; /* allow children to stretch to same height */
-    min-height: calc(100vh - 0px); /* full viewport height (page padding is 0) */
+    min-height: calc(90vh - 0px); /* full viewport height (page padding is 0) */
   }
 
   .card {
@@ -45,9 +45,9 @@
     text-decoration: none;
   }
 
-  /* remove border/shadow from PrimeNG TieredMenu inside the admin menu card */
-  .admin-menu p-tieredMenu,
-  .admin-menu ::ng-deep .p-tieredmenu {
+  /* remove border/shadow from PrimeNG Menu inside the admin menu card */
+  .admin-menu p-menu,
+  .admin-menu ::ng-deep .p-menu {
     border: 0 !important;
     box-shadow: none !important;
     background: transparent !important;

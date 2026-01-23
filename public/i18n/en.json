@@ -3,14 +3,27 @@
     "PROFILE": "Profile",
     "LOGOUT": "Logout"
   },
+  "PERMISSIONS": {
+    "NAME": "Name",
+    "CODE": "Code",
+    "DESCRIPTION": "Description",
+    "CREATED_AT": "Created At",
+    "CREATE": "Create",
+    "EDIT": "Edit",
+    "CREATED": "Permission created",
+    "UPDATED": "Permission updated",
+    "DELETED": "Permission deleted",
+    "EXPORTED": "Export completed",
+    "DELETE_QUESTION": "Attention! Do you really want to delete permission"
+  },
   "APP": {
     "TITLE": "DeepSea"
   },
   "LANG": {
     "EN": "EN",
     "RU": "RU"
-  }
-  ,"MENU": {
+  },
+  "MENU": {
     "DASHBOARD": "Dashboard",
     "DASHBORD": "Dashbord",
     "PROJECTSMENU": "Projects",
@@ -35,10 +48,43 @@
     "DEPARTMENTS": "Departments",
     "WIKI": "WiKi",
     "EQUIPMENTMENU": "Equipment",
-    "MATERIALSMENU": "Materials"
-
-  }
-  ,"ADMIN": {
+    "MATERIALSMENU": "Materials",
+    "USERNAME": "Username",
+    "EMAIL": "Email",
+    "PHONE": "Phone",
+    "NAME": "Name",
+    "DEPARTMENT": "Department",
+    "JOB_TITLE": "Job title",
+  "ACTIVE": "Status",
+    "ACTIONS": "Actions",
+    "USER_MANAGEMENT": "User management",
+    "ORGANIZATION": "Organization",
+    "COMMUNICATION": "Communication",
+    "EDIT_USER": "Edit user",
+    "AGE": "Age",
+    "CANCEL": "Cancel",
+    "SAVE": "Save",
+    "FIRST_NAME": "First name",
+    "LAST_NAME": "Last name",
+    "MIDDLE_NAME": "Middle name",
+    "SELECT_DEPARTMENT": "Select department",
+    "ACTIVE_YES": "Active",
+    "ACTIVE_NO": "Inactive",
+    "EXPORT": "Export",
+    "CREATE_USER": "Create user",
+  "DELETE": "Delete",
+    "ANY": "All",
+  "DELETE_USER_QUESTION": "Attention! Do you really want to delete user",
+  "USER_CREATED": "User created",
+  "USER_UPDATED": "User updated",
+  "USER_DELETED": "User deleted",
+    "CONFIRM": "Confirm"
+  },
+  "USER_ACTIONS": {
+    "CREATE_USER": "Create",
+    "DELETE": "Delete"
+  },
+  "ADMIN": {
     "INSTRUCTIONS": "Administration instructions"
   }
 }

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { TieredMenuModule } from 'primeng/tieredmenu';
+import { MenuModule } from 'primeng/menu';
 import { AccordionModule } from 'primeng/accordion';
 import { MenuItem } from 'primeng/api';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
@@ -10,7 +10,7 @@ import { filter } from 'rxjs/operators';
 @Component({
   selector: 'app-administration',
   standalone: true,
-  imports: [CommonModule, TranslateModule, TieredMenuModule, AccordionModule, RouterModule],
+  imports: [CommonModule, TranslateModule, MenuModule, AccordionModule, RouterModule],
   templateUrl: './administration.html',
   styleUrls: ['./administration.scss']
 })
@@ -23,13 +23,29 @@ export class AdministrationComponent implements OnInit {
   ngOnInit(): void {
     // Build a small tiered menu using translation keys; keep it simple and safe if translations are not loaded yet
     const t = (k: string) => this.translate.instant(k) || k;
+    // Group menu items into logical sections so p-menu renders group headers with child items
     this.menuItems = [
-      { label: t('MENU.USERS'), icon: 'pi pi-users', routerLink: ['/administration/users'] },
-      { label: t('MENU.ROLES'), icon: 'pi pi-briefcase', routerLink: ['/administration/roles'] },
-      { label: t('MENU.PERMISSIONS'), icon: 'pi pi-lock', routerLink: ['/administration/permissions'] },
-      { label: t('MENU.NOTIFICATIONS'), icon: 'pi pi-bell', routerLink: ['/administration/notifications'] },
-      { label: t('MENU.DEPARTMENTS'), icon: 'pi pi-truck', routerLink: ['/administration/departments'] },
-      { label: t('MENU.SPECIALIZATIONS'), icon: 'pi pi-tags', routerLink: ['/administration/specializations'] }
+      {
+        label: t('MENU.USER_MANAGEMENT'),
+        items: [
+          { label: t('MENU.USERS'), icon: 'pi pi-users', routerLink: ['/administration/users'] },
+          { label: t('MENU.ROLES'), icon: 'pi pi-briefcase', routerLink: ['/administration/roles'] },
+          { label: t('MENU.PERMISSIONS'), icon: 'pi pi-lock', routerLink: ['/administration/permissions'] }
+        ]
+      },
+      {
+        label: t('MENU.ORGANIZATION'),
+        items: [
+          { label: t('MENU.DEPARTMENTS'), icon: 'pi pi-truck', routerLink: ['/administration/departments'] },
+          { label: t('MENU.SPECIALIZATIONS'), icon: 'pi pi-tags', routerLink: ['/administration/specializations'] }
+        ]
+      },
+      {
+        label: t('MENU.COMMUNICATION'),
+        items: [
+          { label: t('MENU.NOTIFICATIONS'), icon: 'pi pi-bell', routerLink: ['/administration/notifications'] }
+        ]
+      }
     ];
 
     const isRoot = (url: string) => {
