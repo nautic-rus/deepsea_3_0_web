@@ -45,7 +45,7 @@ export class HeaderComponent implements OnInit {
         this.title = this.translate.instant('APP.TITLE');
         this.langEnLabel = this.translate.instant('LANG.EN');
         this.langRuLabel = this.translate.instant('LANG.RU');
-      } catch {}
+      } catch (e) { console.warn('i18n initialization failed', e); }
       this.buildUserMenu();
       this.remapPages();
       this.safeDetect();
@@ -79,21 +79,10 @@ export class HeaderComponent implements OnInit {
     this.langRuLabel = this.translate.instant('LANG.RU');
     // Build menus immediately (translations removed)
     this.buildUserMenu();
-    // Load menu items from backend (/api/user/pages) only when authenticated.
-    const token = sessionStorage.getItem('accessToken') ?? localStorage.getItem('accessToken');
-    if (!token) {
-      // not authenticated yet - leave menu empty
-      this.menuItems = [];
-      // also clear avatar
-      this.avatarUrl = undefined;
-      this.avatarLabel = undefined;
-      return;
-    }
-
-    // Fetch current user profile for avatar/label
+    // With cookie-based auth we'll attempt to fetch current user and menu.
     this.fetchCurrentUser();
 
-    this.http.get<any>('/api/user/pages').subscribe({
+    this.http.get<any>('/api/user/pages', { withCredentials: true }).subscribe({
       next: (resp) => {
         const pages = this.normalizePages(resp);
         this.rawPages = pages || [];
@@ -115,16 +104,12 @@ export class HeaderComponent implements OnInit {
   }
 
   private safeDetect() {
-    try { this.cdr.detectChanges(); } catch {}
+    try { this.cdr.detectChanges(); } catch (e) { console.warn('safeDetect failed', e); }
   }
 
   private reloadMenu() {
-    const token = sessionStorage.getItem('accessToken') ?? localStorage.getItem('accessToken');
-    if (!token) {
-      this.menuItems = [];
-      return;
-    }
-    this.http.get<any>('/api/user/pages').subscribe({
+    // reload menu using cookies (withCredentials)
+    this.http.get<any>('/api/user/pages', { withCredentials: true }).subscribe({
       next: (resp) => {
         const pages = this.normalizePages(resp);
         this.rawPages = pages || [];
@@ -146,7 +131,7 @@ export class HeaderComponent implements OnInit {
   }
 
   setLang(lang: string) {
-    try { localStorage.setItem('lang', lang); } catch {}
+  try { localStorage.setItem('lang', lang); } catch (e) { console.warn('localStorage.setItem lang failed', e); }
     
     // Use translate.use(lang) and wait for translations to load before rebuilding the menus.
     // This prevents a race where pages are remapped before translation files are ready.
@@ -180,13 +165,13 @@ export class HeaderComponent implements OnInit {
     // Try to read cached user from sessionStorage and then fetch fresh profile
     const cached = sessionStorage.getItem('currentUser');
     if (cached) {
-      try { this.currentUser = JSON.parse(cached); this.applyAvatarFromUser(this.currentUser); } catch {}
+      try { this.currentUser = JSON.parse(cached); this.applyAvatarFromUser(this.currentUser); } catch (e) { console.warn('parse cached currentUser failed', e); }
     }
     this.http.get<any>('/api/auth/me').subscribe({
       next: (u) => {
         if (!u) { return; }
         this.currentUser = u;
-        try { sessionStorage.setItem('currentUser', JSON.stringify(u)); } catch {}
+  try { sessionStorage.setItem('currentUser', JSON.stringify(u)); } catch (e) { console.warn('sessionStorage.setItem currentUser failed', e); }
         this.applyAvatarFromUser(u);
       },
       error: () => {}
@@ -250,7 +235,7 @@ export class HeaderComponent implements OnInit {
           const route = (p.path ?? p.url ?? p.route ?? (p.slug ? `/${p.slug}` : undefined) ?? p.href ?? '').toString();
           const parts = route.split('/').filter(Boolean);
           if (parts.length) keyBase = parts[parts.length - 1];
-        } catch {}
+        } catch (e) { console.warn('derive keyBase route failed', e); }
         if (!keyBase && typeof raw === 'string') {
           keyBase = raw.toString().trim().toLowerCase().replace(/[^a-z0-9]+/gi, '_');
         }
@@ -307,7 +292,7 @@ export class HeaderComponent implements OnInit {
 
     const items = pages.map(mapItem).filter(Boolean);
     if (missing.size) {
-      try { console.info('[I18N-MISSING]', JSON.stringify(Array.from(missing))); } catch {}
+      try { console.info('[I18N-MISSING]', JSON.stringify(Array.from(missing))); } catch (e) { console.warn('i18n missing log failed', e); }
     }
     return items;
   }
@@ -335,13 +320,14 @@ export class HeaderComponent implements OnInit {
         error: () => {}
       });
     } catch (e) {
-      // ignore
+      console.warn('logout request failed', e);
     }
 
     // Clear auth data from both storages
-    ['accessToken', 'refreshToken', 'expiresAt', 'currentUser'].forEach(k => {
-      try { sessionStorage.removeItem(k); } catch {}
-      try { localStorage.removeItem(k); } catch {}
+    // Tokens are stored as HttpOnly cookies on the server; clear only client-side cache
+    ['currentUser'].forEach(k => {
+      try { sessionStorage.removeItem(k); } catch (e) { console.warn('sessionStorage.removeItem failed', e); }
+      try { localStorage.removeItem(k); } catch (e) { console.warn('localStorage.removeItem failed', e); }
     });
 
     // Navigate to login

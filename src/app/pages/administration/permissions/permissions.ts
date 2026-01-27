@@ -19,7 +19,6 @@ import { ConfirmationService } from 'primeng/api';
 import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
-import { HttpClient } from '@angular/common/http';
 import { PermissionsService } from './permissions.service';
 
 interface Permission {
@@ -60,7 +59,7 @@ interface Permission {
 })
 export class AdminPermissionsComponent implements OnInit {
   permissions: Permission[] = [];
-  selectedProducts: Permission[] = [];
+  selectedPermissions: Permission[] = [];
   loading = false;
   error: string | null = null;
   // dialog / form state (reused if you want to edit users from permissions)
@@ -72,7 +71,6 @@ export class AdminPermissionsComponent implements OnInit {
 
   constructor(
     private permissionsService: PermissionsService,
-    private http: HttpClient,
     private cd: ChangeDetectorRef,
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
@@ -82,16 +80,18 @@ export class AdminPermissionsComponent implements OnInit {
   private safeDetect(): void {
     try {
       this.cd.detectChanges();
-    } catch (e) {}
+    } catch (e) { console.warn('safeDetect failed', e); }
   }
 
   ngOnInit(): void {
     this.loadPermissions();
   }
-  loadUsers(): void {
+
+  // load permissions list from API
+  loadPermissions(): void {
     this.loading = true;
     this.error = null;
-  this.permissionsService.getPermissions().subscribe({
+    this.permissionsService.getPermissions().subscribe({
       next: (data) => {
         // expect the API to return an array of permission-like objects
         this.permissions = (data && (data as any).data) ? (data as any).data : (data || []);
@@ -99,17 +99,12 @@ export class AdminPermissionsComponent implements OnInit {
         this.safeDetect();
       },
       error: (err) => {
-        console.error('Failed to load users:', err);
+        console.error('Failed to load permissions:', err);
         this.error = (err && err.message) ? err.message : 'Failed to load items';
         this.loading = false;
         this.safeDetect();
       }
     });
-  }
-
-  // kept name for compatibility with existing template bindings
-  loadPermissions(): void {
-    this.loadUsers();
   }
 
   // Open new user dialog
@@ -123,14 +118,16 @@ export class AdminPermissionsComponent implements OnInit {
     this.displayDialog = true;
   }
 
-  // Delete selected users (stub)
-  deleteSelectedProducts(): void {
-    if (!this.selectedProducts || !this.selectedProducts.length) return;
-    const ids = this.selectedProducts.map(s => s.id).join(', ');
-    console.log('bulk delete requested for', ids);
+  // Delete selected permissions (stub)
+  deleteSelectedPermissions(): void {
+    if (!this.selectedPermissions || !this.selectedPermissions.length) return;
+    const ids = this.selectedPermissions.map(s => s.id).join(', ');
+    try {
+      this.messageService.add({ severity: 'info', summary: 'Not implemented', detail: 'Bulk delete for permissions is not implemented yet' });
+    } catch (e) { console.warn('messageService.add failed', e); }
   }
 
-  // Edit existing user
+  // Edit existing permission
   openEdit(item: Permission): void {
     if (!item) return;
     this.editModel = { ...item } as any;
@@ -138,8 +135,8 @@ export class AdminPermissionsComponent implements OnInit {
     this.displayDialog = true;
   }
 
-  // Save edited or created user
-  saveUser(): void {
+  // Save edited or created permission
+  savePermission(): void {
     if (!this.editModel) return;
     if (!this.isCreating && (this.editModel.id == null)) return;
     const id = (this.editModel.id != null) ? this.editModel.id : null;
@@ -164,7 +161,7 @@ export class AdminPermissionsComponent implements OnInit {
           this.editModel = {} as any;
           this.loading = false;
           this.isCreating = false;
-          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.CREATE') || 'Success', detail: this.translate.instant('PERMISSIONS.CREATED') || 'Created' }); } catch (e) {}
+          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.CREATE') || 'Success', detail: this.translate.instant('components.permissions.messages.CREATED') || 'Created' }); } catch (e) {}
           this.loadPermissions();
           this.safeDetect();
         },
@@ -172,6 +169,7 @@ export class AdminPermissionsComponent implements OnInit {
           console.error('Failed to create item', err);
           this.error = (err && err.message) ? err.message : 'Failed to create item';
           this.loading = false;
+          try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CREATE') || 'Create', detail: (err && err.message) ? err.message : 'Failed to create permission' }); } catch (e) {}
           this.safeDetect();
         }
       });
@@ -181,7 +179,7 @@ export class AdminPermissionsComponent implements OnInit {
           this.displayDialog = false;
           this.editModel = {} as any;
           this.loading = false;
-          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Success', detail: this.translate.instant('PERMISSIONS.UPDATED') || 'Updated' }); } catch (e) {}
+          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Success', detail: this.translate.instant('components.permissions.messages.UPDATED') || 'Updated' }); } catch (e) {}
           this.loadPermissions();
           this.safeDetect();
         },
@@ -189,30 +187,30 @@ export class AdminPermissionsComponent implements OnInit {
           console.error('Failed to update item', err);
           this.error = (err && err.message) ? err.message : 'Failed to update item';
           this.loading = false;
+          try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.SAVE') || 'Save', detail: (err && err.message) ? err.message : 'Failed to update permission' }); } catch (e) {}
           this.safeDetect();
         }
       });
-    }
+      }
   }
 
   confirmDelete(item: Permission): void {
     if (!item) return;
     this.confirmationService.confirm({
-      message: `${this.translate.instant('PERMISSIONS.DELETE_QUESTION') || 'Delete item'} "${item.name || item.id}"?`,
+  message: `${this.translate.instant('components.permissions.confirm.DELETE_QUESTION') || 'Delete item'} "${item.name || item.id}"?`,
       icon: 'pi pi-exclamation-triangle',
-      accept: () => this.deleteProduct(item)
+      accept: () => this.deletePermission(item)
     });
   }
-
-  deleteProduct(item: Permission): void {
+  deletePermission(item: Permission): void {
     if (!item) return;
     this.loading = true;
-  this.permissionsService.deletePermission(item.id).subscribe({
+    this.permissionsService.deletePermission(item.id).subscribe({
       next: () => {
         this.permissions = this.permissions.filter(u => u.id !== item.id);
-        this.selectedProducts = this.selectedProducts.filter(s => s.id !== item.id);
+        this.selectedPermissions = this.selectedPermissions.filter(s => s.id !== item.id);
         this.loading = false;
-        try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Delete', detail: this.translate.instant('PERMISSIONS.DELETED') || 'Deleted' }); } catch (e) {}
+  try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Delete', detail: this.translate.instant('components.permissions.messages.DELETED') || 'Deleted' }); } catch (e) {}
         this.safeDetect();
       },
       error: (err) => {
@@ -231,7 +229,7 @@ export class AdminPermissionsComponent implements OnInit {
         try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('MENU.ANY') || 'No users to export' }); } catch (e) {}
         return;
       }
-      const headers = ['ID', this.translate.instant('PERMISSIONS.NAME') || 'Name', this.translate.instant('PERMISSIONS.CODE') || 'Code', this.translate.instant('PERMISSIONS.DESCRIPTION') || 'Description', this.translate.instant('PERMISSIONS.CREATED_AT') || 'Created At'];
+  const headers = ['ID', this.translate.instant('components.permissions.table.HEADERS.NAME') || 'Name', this.translate.instant('components.permissions.table.HEADERS.CODE') || 'Code', this.translate.instant('components.permissions.table.HEADERS.DESCRIPTION') || 'Description', this.translate.instant('components.permissions.table.HEADERS.CREATED_AT') || 'Created At'];
       const esc = (v: any) => {
         if (v === null || v === undefined) return '';
         if (typeof v === 'boolean') return v ? (this.translate.instant('MENU.ACTIVE_YES') || 'Active') : (this.translate.instant('MENU.ACTIVE_NO') || 'Inactive');
@@ -255,7 +253,7 @@ export class AdminPermissionsComponent implements OnInit {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-  try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('PERMISSIONS.EXPORTED') || 'Export completed' }); } catch (e) {}
+  try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('components.permissions.messages.EXPORTED') || 'Export completed' }); } catch (e) {}
     } catch (err) {
       console.error('Export failed', err);
       try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: 'Export failed' }); } catch (e) {}
@@ -267,8 +265,8 @@ export class AdminPermissionsComponent implements OnInit {
     this.formErrors = {};
     const name = (this.editModel && this.editModel.name) ? String(this.editModel.name).trim() : '';
     const code = (this.editModel && this.editModel.code) ? String(this.editModel.code).trim() : '';
-    if (!name) this.formErrors.name = (this.translate.instant('PERMISSIONS.NAME') || 'Name') + ' is required';
-    if (!code) this.formErrors.code = (this.translate.instant('PERMISSIONS.CODE') || 'Code') + ' is required';
+  if (!name) this.formErrors.name = (this.translate.instant('components.permissions.form.NAME') || 'Name') + ' is required';
+  if (!code) this.formErrors.code = (this.translate.instant('components.permissions.form.CODE') || 'Code') + ' is required';
     this.safeDetect();
     return Object.keys(this.formErrors).length === 0;
   }

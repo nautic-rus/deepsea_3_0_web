@@ -1,7 +1,131 @@
 <section class="admin-subpage-tools card">
-  <p>Manage user roles and role assignments here.</p>
+  <p-toolbar>
+    <ng-template #start>
+  <p-button label="Create" icon="pi pi-plus" severity="primary" class="mr-2" (click)="openCreateRole()"></p-button>
+  <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (click)="deleteSelectedRoles()" [disabled]="!selectedRoles || !selectedRoles.length"></p-button>
+    </ng-template>
+
+    <ng-template #end>
+  <p-button label="Export" icon="pi pi-upload" severity="secondary" (click)="exportCSV()"></p-button>
+    </ng-template>
+  </p-toolbar>
 </section>
 
-<section class="admin-subpage-content card">
-  <p>Manage user roles and role assignments here.</p>
+<!-- Dialog for creating / editing role -->
+<p-dialog [header]="isCreatingRole ? ('components.permissions.form.CREATE_LABEL' | translate) : ('components.permissions.form.EDIT_LABEL' | translate)" [(visible)]="roleDialogVisible" [modal]="true" [closable]="true" [resizable]="false" [style]="{width: '35%'}">
+  <div class=" flex flex-col gap-4">
+    <div class="flex flex-col gap-2">
+  <label for="roleName">{{ 'components.permissions.form.NAME' | translate }}</label>
+  <input pInputText id="roleName" type="text" [(ngModel)]="roleModel.name" name="name" />
+    </div>
+    <div class="flex flex-col gap-2">
+    </div>
+    <div class="flex flex-col gap-2">
+  <label for="roleDesc">{{ 'components.permissions.form.DESCRIPTION' | translate }}</label>
+  <textarea id="roleDesc" rows="3" [(ngModel)]="roleModel.description" name="description" class="p-inputtext"></textarea>
+    </div>
+    <div class="flex justify-end gap-2 mt-4">
+  <p-button label="{{ 'MENU.CANCEL' | translate }}" (click)="roleDialogVisible=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="loading"></p-button>
+  <p-button label="{{ 'MENU.SAVE' | translate }}" (click)="saveRole()" severity="primary" icon="pi pi-check" iconPos="left" [loading]="loading" [disabled]="loading"></p-button>
+    </div>
+  </div>
+</p-dialog>
+
+<!-- Confirm dialog (for delete confirmations) -->
+<p-confirmDialog
+  appendTo="body"
+  [dismissableMask]="true"
+  [baseZIndex]="10000"
+  [style]="{ width: '25%' }"
+  styleClass="user-confirm-dialog"
+  header="{{ 'MENU.CONFIRM' | translate }}"
+  acceptLabel="{{ 'MENU.DELETE' | translate }}"
+  rejectLabel="{{ 'MENU.CANCEL' | translate }}"
+  acceptIcon="pi pi-check"
+  acceptButtonStyleClass="p-button-danger"
+  rejectButtonStyleClass="secondary p-button-text"
+  rejectIcon="pi pi-times"
+  >
+</p-confirmDialog>
+<!-- Toast for messages -->
+<p-toast position="top-right" appendTo="body" [baseZIndex]="10001" styleClass="user-toast"></p-toast>
+
+<section class="admin-subpage-content grid grid-cols-1 md:grid-cols-4 gap-4">
+  <div class="card md:col-span-3">
+    <p-table [value]="roles"
+     [loading]="loading" 
+     dataKey="id"
+    [scrollable]="true"
+    scrollHeight="700px"
+    [rows]="10"
+    size="small"
+    [globalFilterFields]="['id','name','code','description']"
+    [rowHover]="true"
+    dataKey="id"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} items"
+    [showCurrentPageReport]="true"
+     >
+     
+      <ng-template pTemplate="header">
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Created</th>
+          <th></th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-role>
+        <tr (click)="selectRole(role)" [class.selected-row]="selectedRole && selectedRole.id === role.id" style="cursor: pointer;">
+          <td>{{ role.id }}</td>
+          <td>{{ role.name }}</td>
+          <td>{{ role.description || '-' }}</td>
+          <td>{{ role.created_at | date:'short' }}</td>
+          <td>
+            <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="$event.stopPropagation(); openEditRole(role)"></p-button>
+            <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="$event.stopPropagation(); confirmDeleteRole(role)"></p-button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <div class="card md:col-span-1">
+    <h3 class="mb-2">Role Assignments</h3>
+    <div *ngIf="!selectedRole">
+      <p class="text-muted">Select a role from the list to view its permissions.</p>
+    </div>
+    <div *ngIf="selectedRole">
+      <p-table 
+      [value]="rolePermissions" 
+      [loading]="permissionsLoading" 
+      [rows]="10" size="small"
+      [scrollable]="true"
+      scrollHeight="700px"
+      [rows]="10"
+      size="small"
+      [globalFilterFields]="['id','name','code','description']"
+      [rowHover]="true"
+      dataKey="id"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} items"
+      [showCurrentPageReport]="true">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>№</th>
+            <th>Name</th>
+            <th></th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-perm let-i="rowIndex">
+          <tr>
+            <td>{{ i + 1 }}</td>
+            <td>{{ perm.name }}</td>
+            <td>
+              <p-button icon="pi pi-times" severity="danger" [rounded]="true" [outlined]="true" (click)="$event.stopPropagation(); removePermissionFromRole(perm)"></p-button>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
 </section>

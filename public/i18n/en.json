@@ -78,7 +78,8 @@
   "USER_CREATED": "User created",
   "USER_UPDATED": "User updated",
   "USER_DELETED": "User deleted",
-    "CONFIRM": "Confirm"
+    "CONFIRM": "Confirm",
+    "CREATE": "Create"
   },
   "USER_ACTIONS": {
     "CREATE_USER": "Create",
@@ -86,5 +87,156 @@
   },
   "ADMIN": {
     "INSTRUCTIONS": "Administration instructions"
+  }
+  ,
+  "components": {
+    "header": {
+      "PROFILE": "Profile",
+      "LOGOUT": "Logout"
+    },
+    "permissions": {
+      "NAME": "Name",
+      "CODE": "Code",
+      "DESCRIPTION": "Description",
+      "CREATED_AT": "Created At",
+      "CREATE": "Create",
+      "EDIT": "Edit",
+      "CREATED": "Permission created",
+      "UPDATED": "Permission updated",
+      "DELETED": "Permission deleted",
+      "EXPORTED": "Export completed",
+      "DELETE_QUESTION": "Attention! Do you really want to delete permission",
+
+      "form": {
+        "NAME": "Name",
+        "CODE": "Code",
+        "DESCRIPTION": "Description",
+        "CREATE_LABEL": "Create",
+        "EDIT_LABEL": "Edit",
+        "SAVE": "Save",
+        "CANCEL": "Cancel"
+      },
+
+      "table": {
+        "HEADERS": {
+          "ID": "ID",
+          "NAME": "Name",
+          "CODE": "Code",
+          "DESCRIPTION": "Description",
+          "CREATED_AT": "Created At"
+        },
+        "EMPTY": "No permissions to display"
+      },
+
+      "messages": {
+        "CREATED": "Permission created",
+        "UPDATED": "Permission updated",
+        "DELETED": "Permission deleted",
+        "EXPORTED": "Export completed"
+      },
+
+      "confirm": {
+        "DELETE_QUESTION": "Attention! Do you really want to delete permission"
+      }
+    },
+    "roles": {
+      "form": {
+        "NAME": "Name",
+        "DESCRIPTION": "Description",
+        "CREATE_LABEL": "Create",
+        "EDIT_LABEL": "Edit",
+        "SAVE": "Save",
+        "CANCEL": "Cancel"
+      },
+      "table": {
+        "HEADERS": {
+          "ID": "ID",
+          "NAME": "Name",
+          "DESCRIPTION": "Description",
+          "CREATED_AT": "Created At"
+        },
+        "EMPTY": "No roles to display"
+      },
+      "messages": {
+        "CREATED": "Role created",
+        "UPDATED": "Role updated",
+        "DELETED": "Role deleted",
+        "EXPORTED": "Export completed"
+      },
+      "confirm": {
+        "DELETE_QUESTION": "Attention! Do you really want to delete role"
+      }
+    },
+    "app": {
+      "TITLE": "DeepSea"
+    },
+    "lang": {
+      "EN": "EN",
+      "RU": "RU"
+    },
+    "menu": {
+      "DASHBOARD": "Dashboard",
+      "PROJECTSMENU": "Projects",
+      "MATERIALS": "Materials",
+      "EQUIPMENT": "Equipment",
+      "ADMINISTRATION": "Administration",
+      "SETTINGS": "Settings",
+      "PROFILE": "Profile",
+      "LOGOUT": "Logout",
+      "USERS": "Users",
+      "ROLES": "Roles",
+      "PERMISSIONS": "Permissions",
+      "PROJECTS": "Projects",
+      "DOCUMENTS": "Documents",
+      "REPORTS": "Reports",
+      "ISSUES": "Issues",
+      "SPECIFICATIONS": "Specifications",
+      "STATEMENTS": "Statements",
+      "SUPPLIERS": "Suppliers",
+      "NOTIFICATIONS": "Notifications",
+      "SPECIALIZATIONS": "Specialization",
+      "DEPARTMENTS": "Departments",
+      "WIKI": "WiKi",
+      "EQUIPMENTMENU": "Equipment",
+      "MATERIALSMENU": "Materials",
+      "USERNAME": "Username",
+      "EMAIL": "Email",
+      "PHONE": "Phone",
+      "NAME": "Name",
+      "DEPARTMENT": "Department",
+      "JOB_TITLE": "Job title",
+      "ACTIVE": "Status",
+      "ACTIONS": "Actions",
+      "USER_MANAGEMENT": "User management",
+      "ORGANIZATION": "Organization",
+      "COMMUNICATION": "Communication",
+      "EDIT_USER": "Edit user",
+      "AGE": "Age",
+      "CANCEL": "Cancel",
+      "SAVE": "Save",
+      "FIRST_NAME": "First name",
+      "LAST_NAME": "Last name",
+      "MIDDLE_NAME": "Middle name",
+      "SELECT_DEPARTMENT": "Select department",
+      "ACTIVE_YES": "Active",
+      "ACTIVE_NO": "Inactive",
+      "EXPORT": "Export",
+      "CREATE_USER": "Create user",
+      "DELETE": "Delete",
+      "ANY": "All",
+      "DELETE_USER_QUESTION": "Attention! Do you really want to delete user",
+      "USER_CREATED": "User created",
+      "USER_UPDATED": "User updated",
+      "USER_DELETED": "User deleted",
+      "CONFIRM": "Confirm",
+      "CREATE": "Create"
+    },
+    "user_actions": {
+      "CREATE_USER": "Create",
+      "DELETE": "Delete"
+    },
+    "admin": {
+      "INSTRUCTIONS": "Administration instructions"
+    }
   }
 }

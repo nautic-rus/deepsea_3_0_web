@@ -1,8 +1,8 @@
 <section class="admin-subpage-tools card">
   <p-toolbar >
     <ng-template #start>
-      <p-button [label]="'PERMISSIONS.CREATE' | translate" icon="pi pi-plus" severity="primary" class="mr-2" (onClick)="openNew()" />
-      <p-button severity="secondary" [label]="'MENU.DELETE' | translate" icon="pi pi-trash" outlined (onClick)="deleteSelectedProducts()" [disabled]="!selectedProducts || !selectedProducts.length" />
+  <p-button [label]="'components.permissions.form.CREATE_LABEL' | translate" icon="pi pi-plus" severity="primary" class="mr-2" (onClick)="openNew()" />
+  <p-button severity="secondary" [label]="'MENU.DELETE' | translate" icon="pi pi-trash" outlined (onClick)="deleteSelectedPermissions()" [disabled]="!selectedPermissions || !selectedPermissions.length" />
     </ng-template>
 
     <ng-template #end>
@@ -22,7 +22,7 @@
     [rows]="10"
     size="small"
     [globalFilterFields]="['id','name','code','description']"
-    [(selection)]="selectedProducts"
+  [(selection)]="selectedPermissions"
     [rowHover]="true"
     dataKey="id"
     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} items"
@@ -37,16 +37,16 @@
       </th>
       <th>ID</th>
       <th pSortableColumn="name">
-        {{ 'PERMISSIONS.NAME' | translate }}
+          {{ 'components.permissions.table.HEADERS.NAME' | translate }}
         <p-sortIcon field="name" />
       </th>
       <th pSortableColumn="code">
-        {{ 'PERMISSIONS.CODE' | translate }}
+          {{ 'components.permissions.table.HEADERS.CODE' | translate }}
         <p-sortIcon field="code" />
       </th>
-      <th>{{ 'PERMISSIONS.DESCRIPTION' | translate }}</th>
+        <th>{{ 'components.permissions.table.HEADERS.DESCRIPTION' | translate }}</th>
       <th pSortableColumn="created_at">
-        {{ 'PERMISSIONS.CREATED_AT' | translate }}
+          {{ 'components.permissions.table.HEADERS.CREATED_AT' | translate }}
         <p-sortIcon field="created_at" />
       </th>
       <th></th>
@@ -93,23 +93,23 @@
 <p-toast position="top-right" appendTo="body" [baseZIndex]="10001" styleClass="user-toast"></p-toast>
 
 <!-- Edit dialog -->
-<p-dialog [header]="isCreating ? ('PERMISSIONS.CREATE' | translate) : ('PERMISSIONS.EDIT' | translate)" [(visible)]="displayDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{width: '35%'}">
+<p-dialog [header]="isCreating ? ('components.permissions.form.CREATE_LABEL' | translate) : ('components.permissions.form.EDIT_LABEL' | translate)" [(visible)]="displayDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{width: '35%'}">
   <div class=" flex flex-col gap-4">
     <div class="flex flex-col gap-2">
-      <label for="permName">{{ 'PERMISSIONS.NAME' | translate }}</label>
+  <label for="permName">{{ 'components.permissions.form.NAME' | translate }}</label>
       <input pInputText id="permName" type="text" [(ngModel)]="editModel.name" name="name" />
     </div>
     <div class="flex flex-col gap-2">
-      <label for="permCode">{{ 'PERMISSIONS.CODE' | translate }}</label>
+  <label for="permCode">{{ 'components.permissions.form.CODE' | translate }}</label>
       <input pInputText id="permCode" type="text" [(ngModel)]="editModel.code" name="code" />
     </div>
     <div class="flex flex-col gap-2">
-      <label for="permDesc">{{ 'PERMISSIONS.DESCRIPTION' | translate }}</label>
+  <label for="permDesc">{{ 'components.permissions.form.DESCRIPTION' | translate }}</label>
       <textarea id="permDesc" rows="3" [(ngModel)]="editModel.description" name="description" class="p-inputtext"></textarea>
     </div>
     <div class="flex justify-end gap-2 mt-4">
       <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="displayDialog=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="loading"></p-button>
-      <p-button label="{{ 'MENU.SAVE' | translate }}" (onClick)="saveUser()" severity="primary" icon="pi pi-check" iconPos="left" [loading]="loading" [disabled]="loading"></p-button>
+  <p-button label="{{ 'MENU.SAVE' | translate }}" (onClick)="savePermission()" severity="primary" icon="pi pi-check" iconPos="left" [loading]="loading" [disabled]="loading"></p-button>
     </div>
   </div>
 </p-dialog>

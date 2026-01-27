@@ -119,7 +119,8 @@ export class AdminUsersComponent implements OnInit {
     try {
       this.cd.detectChanges();
     } catch (e) {
-      // ignore - detection may not be allowed at some lifecycle moments
+      // detection may fail at some lifecycle moments — log for diagnostics
+      console.warn('safeDetect failed', e);
     }
   }
 
@@ -220,7 +221,11 @@ export class AdminUsersComponent implements OnInit {
   // Delete selected products/users (stub)
   deleteSelectedProducts(): void {
     // TODO: implement deletion logic with confirmation
-    console.log('deleteSelectedProducts called', this.selectedProducts);
+    try {
+      this.messageService.add({ severity: 'info', summary: 'Not implemented', detail: 'Bulk delete is not implemented yet' });
+    } catch (e) {
+      console.warn('messageService.add failed', e);
+    }
   }
 
   // Export CSV (stub)
@@ -228,7 +233,7 @@ export class AdminUsersComponent implements OnInit {
     try {
       const rows = this.users || [];
       if (!rows.length) {
-        try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('MENU.ANY') || 'No users to export' }); } catch (e) {}
+    try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('MENU.ANY') || 'No users to export' }); } catch (e) { console.warn('messageService.add failed', e); }
         return;
       }
 
@@ -272,10 +277,10 @@ export class AdminUsersComponent implements OnInit {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('MENU.USER_CREATED') || 'Export completed' }); } catch (e) {}
+  try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('MENU.USER_CREATED') || 'Export completed' }); } catch (e) { console.warn('messageService.add failed', e); }
     } catch (err) {
       console.error('Export failed', err);
-      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: 'Export failed' }); } catch (e) {}
+  try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: 'Export failed' }); } catch (e) { console.warn('messageService.add failed', e); }
     }
   }
 

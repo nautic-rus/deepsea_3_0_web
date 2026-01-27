@@ -46,15 +46,16 @@ export class LoginComponent {
     this.loading = true;
     const payload = { username: this.email, password: this.password };
 
-    this.http.post<any>('/api/auth/login', payload).subscribe({
+    // Use withCredentials so that server can set HttpOnly+Secure cookies for tokens
+    this.http.post<any>('/api/auth/login', payload, { withCredentials: true }).subscribe({
       next: (res) => {
-        this.saveTokens(res);
-        if (res.user) {
-          try { this.getStorage().setItem('currentUser', JSON.stringify(res.user)); } catch { }
+        // Server is expected to set HttpOnly refresh cookie. Server may also return an access token in body.
+        if (res && res.user) {
+          try { sessionStorage.setItem('currentUser', JSON.stringify(res.user)); } catch (e) { console.warn('store currentUser failed', e); }
         }
-  this.loading = false;
-  this.cdr.detectChanges();
-  this.router.navigate(['/dashboard']);
+        this.loading = false;
+        this.cdr.detectChanges();
+        this.router.navigate(['/dashboard']);
       },
       error: (err: HttpErrorResponse) => {
         this.loading = false;
@@ -66,30 +67,6 @@ export class LoginComponent {
     });
   }
 
-  private getStorage(): Storage {
-    return this.rememberMe ? localStorage : sessionStorage;
-  }
-
-  private saveTokens(res: any): void {
-    const access = res.access_token ?? res.token ?? res.accessToken ?? null;
-    const refresh = res.refresh_token ?? res.refreshToken ?? null;
-    const expiresAt = res.expires_at ?? res.expiresAt ?? null;
-    const storage = this.getStorage();
-    const other = this.rememberMe ? sessionStorage : localStorage;
-
-    if (access) {
-      storage.setItem('accessToken', access);
-      other.removeItem('accessToken');
-    }
-    if (refresh) {
-      storage.setItem('refreshToken', refresh);
-      other.removeItem('refreshToken');
-    }
-    if (expiresAt) {
-      storage.setItem('expiresAt', expiresAt);
-      other.removeItem('expiresAt');
-    }
-  }
 
   private getErrorMessage(err: HttpErrorResponse): string | null {
     if (!err || !err.error) { return null; }

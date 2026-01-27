@@ -78,7 +78,8 @@
     "DELETE_USER_QUESTION": "Внимание! Вы действительно хотите удалить пользователя",
     "USER_CREATED": "Пользователь создан",
     "USER_UPDATED": "Пользователь обновлён"
-    ,"USER_DELETED": "Пользователь удалён"
+    ,"USER_DELETED": "Пользователь удалён",
+    "CREATE": "Создание"
   },
   "USER_ACTIONS": {
     "CREATE_USER": "Создать пользователя",
@@ -86,5 +87,156 @@
   },
   "ADMIN": {
     "INSTRUCTIONS": "Инструкции по администрированию"
+  }
+  ,
+  "components": {
+    "header": {
+      "PROFILE": "Профиль",
+      "LOGOUT": "Выйти"
+    },
+    "permissions": {
+      "NAME": "Название",
+      "CODE": "Код",
+      "DESCRIPTION": "Описание",
+      "CREATED_AT": "Дата создания",
+      "CREATE": "Создать",
+      "EDIT": "Редактировать",
+      "CREATED": "Разрешение создано",
+      "UPDATED": "Разрешение обновлено",
+      "DELETED": "Разрешение удалено",
+      "EXPORTED": "Экспорт завершён",
+      "DELETE_QUESTION": "Внимание! Вы действительно хотите удалить разрешение",
+
+      "form": {
+        "NAME": "Название",
+        "CODE": "Код",
+        "DESCRIPTION": "Описание",
+        "CREATE_LABEL": "Создать",
+        "EDIT_LABEL": "Редактировать",
+        "SAVE": "Сохранить",
+        "CANCEL": "Отмена"
+      },
+
+      "table": {
+        "HEADERS": {
+          "ID": "ID",
+          "NAME": "Название",
+          "CODE": "Код",
+          "DESCRIPTION": "Описание",
+          "CREATED_AT": "Дата создания"
+        },
+        "EMPTY": "Нет разрешений для отображения"
+      },
+
+      "messages": {
+        "CREATED": "Разрешение создано",
+        "UPDATED": "Разрешение обновлено",
+        "DELETED": "Разрешение удалено",
+        "EXPORTED": "Экспорт завершён"
+      },
+
+      "confirm": {
+        "DELETE_QUESTION": "Внимание! Вы действительно хотите удалить разрешение"
+      }
+    },
+      "roles": {
+        "form": {
+          "NAME": "Название",
+          "DESCRIPTION": "Описание",
+          "CREATE_LABEL": "Создать",
+          "EDIT_LABEL": "Редактировать",
+          "SAVE": "Сохранить",
+          "CANCEL": "Отмена"
+        },
+        "table": {
+          "HEADERS": {
+            "ID": "ID",
+            "NAME": "Название",
+            "DESCRIPTION": "Описание",
+            "CREATED_AT": "Дата создания"
+          },
+          "EMPTY": "Нет ролей для отображения"
+        },
+        "messages": {
+          "CREATED": "Роль создана",
+          "UPDATED": "Роль обновлена",
+          "DELETED": "Роль удалена",
+          "EXPORTED": "Экспорт завершён"
+        },
+        "confirm": {
+          "DELETE_QUESTION": "Внимание! Вы действительно хотите удалить роль"
+        }
+      },
+    "app": {
+      "TITLE": "DeepSea"
+    },
+    "lang": {
+      "EN": "EN",
+      "RU": "RU"
+    },
+    "menu": {
+      "DASHBOARD": "Панель",
+      "PROJECTSMENU": "Проекты",
+      "MATERIALS": "Материалы",
+      "EQUIPMENT": "Оборудование",
+      "ADMINISTRATION": "Администрирование",
+      "SETTINGS": "Настройки",
+      "PROFILE": "Профиль",
+      "LOGOUT": "Выйти",
+      "USERS": "Пользователи",
+      "ROLES": "Роли",
+      "PERMISSIONS": "Разрешения",
+      "PROJECTS": "Проекты",
+      "DOCUMENTS": "Документы",
+      "REPORTS": "Отчеты",
+      "ISSUES": "Задачи",
+      "SPECIFICATIONS": "Спецификации",
+      "STATEMENTS": "Ведомости",
+      "SUPPLIERS": "Поставщики",
+      "NOTIFICATIONS": "Уведомления",
+      "SPECIALIZATIONS": "Специализации",
+      "DEPARTMENTS": "Отделы",
+      "WIKI": "База знаний",
+      "EQUIPMENTMENU": "Оборудование",
+      "MATERIALSMENU": "Материалы",
+      "USERNAME": "Имя пользователя",
+      "EMAIL": "Email",
+      "PHONE": "Телефон",
+      "NAME": "ФИО",
+      "DEPARTMENT": "Отдел",
+      "JOB_TITLE": "Должность",
+      "ACTIVE": "Статус",
+      "ACTIONS": "Действия",
+      "USER_MANAGEMENT": "Управление пользователями",
+      "ORGANIZATION": "Организация",
+      "COMMUNICATION": "Коммуникации",
+      "EDIT_USER": "Редактировать пользователя",
+      "AGE": "Возраст",
+      "CANCEL": "Отмена",
+      "SAVE": "Сохранить",
+      "FIRST_NAME": "Имя",
+      "LAST_NAME": "Фамилия",
+      "MIDDLE_NAME": "Отчество",
+      "SELECT_DEPARTMENT": "Выберите отдел",
+      "ACTIVE_YES": "Активен",
+      "ACTIVE_NO": "Неактивен",
+      "EXPORT": "Экспорт",
+      "CREATE_USER": "Создать",
+      "DELETE": "Удалить",
+      "ANY": "Все",
+      "CONFIRM": "Подтвердите",
+      "DELETE_USER_QUESTION": "Внимание! Вы действительно хотите удалить пользователя",
+      "USER_CREATED": "Пользователь создан",
+      "USER_UPDATED": "Пользователь обновлён",
+      "USER_DELETED": "Пользователь удалён",
+      "CREATE": "Создание"
+    },
+    "user_actions": {
+      "CREATE_USER": "Создать пользователя",
+      "DELETE": "Удалить"
+    },
+    "admin": {
+      "INSTRUCTIONS": "Инструкции по администрированию"
+    }
   }
 }
