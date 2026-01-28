@@ -1,37 +1,85 @@
+<!-- Roles management toolbar: create, delete, export -->
 <section class="admin-subpage-tools card">
   <p-toolbar>
     <ng-template #start>
-  <p-button label="Create" icon="pi pi-plus" severity="primary" class="mr-2" (click)="openCreateRole()"></p-button>
-  <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (click)="deleteSelectedRoles()" [disabled]="!selectedRoles || !selectedRoles.length"></p-button>
+      <p-button [label]="'MENU.CREATE' | translate" icon="pi pi-plus" severity="secondary" class="mr-2" (click)="openCreateRole()"></p-button>
+      <p-button severity="secondary" [label]="'MENU.DELETE' | translate" icon="pi pi-trash" outlined (click)="deleteSelectedRoles()" [disabled]="!selectedRoles || !selectedRoles.length"></p-button>
     </ng-template>
 
     <ng-template #end>
-  <p-button label="Export" icon="pi pi-upload" severity="secondary" (click)="exportCSV()"></p-button>
+      <p-button [label]="'MENU.EXPORT' | translate" icon="pi pi-upload" severity="secondary" (click)="exportCSV()"></p-button>
     </ng-template>
   </p-toolbar>
 </section>
 
 <!-- Dialog for creating / editing role -->
+<!-- Create / Edit Role dialog -->
 <p-dialog [header]="isCreatingRole ? ('components.permissions.form.CREATE_LABEL' | translate) : ('components.permissions.form.EDIT_LABEL' | translate)" [(visible)]="roleDialogVisible" [modal]="true" [closable]="true" [resizable]="false" [style]="{width: '35%'}">
-  <div class=" flex flex-col gap-4">
+  <div class="flex flex-col gap-4">
     <div class="flex flex-col gap-2">
-  <label for="roleName">{{ 'components.permissions.form.NAME' | translate }}</label>
-  <input pInputText id="roleName" type="text" [(ngModel)]="roleModel.name" name="name" />
+      <label for="roleName">{{ 'components.permissions.form.NAME' | translate }}</label>
+      <input pInputText id="roleName" type="text" [(ngModel)]="roleModel.name" name="name" />
     </div>
+
     <div class="flex flex-col gap-2">
     </div>
+
     <div class="flex flex-col gap-2">
-  <label for="roleDesc">{{ 'components.permissions.form.DESCRIPTION' | translate }}</label>
-  <textarea id="roleDesc" rows="3" [(ngModel)]="roleModel.description" name="description" class="p-inputtext"></textarea>
+      <label for="roleDesc">{{ 'components.permissions.form.DESCRIPTION' | translate }}</label>
+      <textarea id="roleDesc" rows="3" [(ngModel)]="roleModel.description" name="description" class="p-inputtext"></textarea>
     </div>
+
     <div class="flex justify-end gap-2 mt-4">
-  <p-button label="{{ 'MENU.CANCEL' | translate }}" (click)="roleDialogVisible=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="loading"></p-button>
-  <p-button label="{{ 'MENU.SAVE' | translate }}" (click)="saveRole()" severity="primary" icon="pi pi-check" iconPos="left" [loading]="loading" [disabled]="loading"></p-button>
+      <p-button label="{{ 'MENU.CANCEL' | translate }}" (click)="roleDialogVisible=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="loading"></p-button>
+      <p-button label="{{ 'MENU.SAVE' | translate }}" (click)="saveRole()" severity="primary" icon="pi pi-check" iconPos="left" [loading]="loading" [disabled]="loading"></p-button>
+    </div>
+  </div>
+</p-dialog>
+
+<!-- Dialog for assigning permissions to a role (simple stub) -->
+<!-- Assign Permissions dialog: fetches all permissions and allows selection -->
+<p-dialog [header]="'components.roles.ASSIGN_DIALOG.HEADER' | translate" [(visible)]="assignPermissionDialogVisible" [modal]="true" [closable]="true" [resizable]="false" [style]="{width: '35%'}">
+  <div class="flex flex-col gap-4">
+    <div *ngIf="selectedRole">
+      <p>{{ 'components.roles.ASSIGN_DIALOG.ASSIGN_TO' | translate:{name: selectedRole.name} }}</p>
+
+      <div class="flex flex-col mt-4">
+        <!-- MultiSelect with descriptions. appendTo body to avoid clipping in dialogs -->
+        <p-multiSelect
+          [options]="allPermissions"
+          optionLabel="label"
+          optionValue="value"
+          [(ngModel)]="selectedPermissionIds"
+          placeholder="{{ 'components.roles.ASSIGN_DIALOG.SELECT_PERMISSIONS' | translate }}"
+          [disabled]="assignPermissionLoading"
+          [filter]="true"
+          appendTo="body"
+          [panelStyle]="{ 'z-index': '10002'}"
+          display="chip"
+        >
+          <ng-template let-opt pTemplate="item">
+            <div class="p-multiselect-item">
+              <div>{{ opt.label }}</div>
+              <div class="text-muted-color text-sm">{{ opt.description }}</div>
+            </div>
+          </ng-template>
+        </p-multiSelect>
+      </div>
+    </div>
+
+    <div *ngIf="!selectedRole">
+      <p class="text-muted">{{ 'components.roles.ASSIGN_DIALOG.SELECT_ROLE_FIRST' | translate }}</p>
+    </div>
+
+    <div class="flex justify-end gap-2 mt-4">
+      <p-button label="{{ 'MENU.CANCEL' | translate }}" (click)="assignPermissionDialogVisible=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="assignPermissionLoading"></p-button>
+      <p-button label="{{ 'MENU.SAVE' | translate }}" (click)="assignPermissions()" severity="primary" icon="pi pi-check" iconPos="left" [loading]="assignPermissionLoading" [disabled]="assignPermissionLoading"></p-button>
     </div>
   </div>
 </p-dialog>
 
 <!-- Confirm dialog (for delete confirmations) -->
+<!-- Global confirmation dialog (used by delete/remove actions) -->
 <p-confirmDialog
   appendTo="body"
   [dismissableMask]="true"
@@ -45,36 +93,50 @@
   acceptButtonStyleClass="p-button-danger"
   rejectButtonStyleClass="secondary p-button-text"
   rejectIcon="pi pi-times"
-  >
+>
 </p-confirmDialog>
 <!-- Toast for messages -->
 <p-toast position="top-right" appendTo="body" [baseZIndex]="10001" styleClass="user-toast"></p-toast>
 
+<!-- Main content: roles list (left) and permissions card (right) -->
 <section class="admin-subpage-content grid grid-cols-1 md:grid-cols-4 gap-4">
   <div class="card md:col-span-3">
-    <p-table [value]="roles"
-     [loading]="loading" 
-     dataKey="id"
-    [scrollable]="true"
-    scrollHeight="700px"
-    [rows]="10"
-    size="small"
-    [globalFilterFields]="['id','name','code','description']"
-    [rowHover]="true"
-    dataKey="id"
-    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} items"
-    [showCurrentPageReport]="true"
-     >
-     
+
+    <p-table #dt
+      [value]="roles"
+      [loading]="loading"
+      dataKey="id"
+      [scrollable]="true"
+      scrollHeight="700px"
+      [rows]="10"
+      size="small"
+      [globalFilterFields]="['id','name','code','description']"
+      [rowHover]="true"
+      [currentPageReportTemplate]="'components.roles.table.PAGE_REPORT' | translate"
+      [showCurrentPageReport]="true"
+    >
+      <!-- Table caption: search and title -->
+      <ng-template #caption>
+        <div class="flex justify-between mb-2">
+          <h3>{{ 'MENU.ROLES' | translate }}</h3>
+          <p-iconfield>
+            <p-inputicon styleClass="pi pi-search" />
+            <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" [placeholder]="'components.roles.table.SEARCH' | translate" />
+          </p-iconfield>
+        </div>
+      </ng-template>
+
       <ng-template pTemplate="header">
         <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Description</th>
-          <th>Created</th>
+          <th>{{ 'components.roles.table.HEADERS.ID' | translate }}</th>
+          <th>{{ 'components.roles.table.HEADERS.NAME' | translate }}</th>
+          <th>{{ 'components.roles.table.HEADERS.DESCRIPTION' | translate }}</th>
+          <th>{{ 'components.roles.table.HEADERS.CREATED_AT' | translate }}</th>
           <th></th>
         </tr>
       </ng-template>
+
+      <!-- Table body: each row selects role on click -->
       <ng-template pTemplate="body" let-role>
         <tr (click)="selectRole(role)" [class.selected-row]="selectedRole && selectedRole.id === role.id" style="cursor: pointer;">
           <td>{{ role.id }}</td>
@@ -91,41 +153,53 @@
   </div>
 
   <div class="card md:col-span-1">
-    <h3 class="mb-2">Role Assignments</h3>
-    <div *ngIf="!selectedRole">
-      <p class="text-muted">Select a role from the list to view its permissions.</p>
+    <div class="flex justify-end">
     </div>
+    <div class="flex justify-between mb-4">
+      <h3>{{ 'components.roles.PERMISSIONS_TITLE' | translate }}</h3>
+      <div>
+        <!-- Ellipsis menu: disabled when no role is selected -->
+        <button pButton type="button" icon="pi pi-ellipsis-v" aria-label="Role actions" class="p-button-rounded p-button-text p-button-plain mt-0" (click)="openMenu($event)" [disabled]="!selectedRole"></button>
+        <p-menu #menu [popup]="true" [model]="items"></p-menu>
+      </div>
+    </div>
+
+    <div *ngIf="!selectedRole" class="flex flex-col items-center justify-center text-center" style="min-height:700px">
+      <h3 class="mb-2">{{ 'components.roles.NO_ROLE_SELECTED.TITLE' | translate }}</h3>
+      <p class="text-muted">{{ 'components.roles.NO_ROLE_SELECTED.TEXT' | translate }}</p>
+    </div>
+
     <div *ngIf="selectedRole">
-      <p-table 
-      [value]="rolePermissions" 
-      [loading]="permissionsLoading" 
-      [rows]="10" size="small"
-      [scrollable]="true"
-      scrollHeight="700px"
-      [rows]="10"
-      size="small"
-      [globalFilterFields]="['id','name','code','description']"
-      [rowHover]="true"
-      dataKey="id"
-      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} items"
-      [showCurrentPageReport]="true">
-        <ng-template pTemplate="header">
-          <tr>
-            <th>№</th>
-            <th>Name</th>
-            <th></th>
-          </tr>
+      <!-- Permissions list: shows loading spinner or permissions for selected role -->
+      <div class="permissions-scroll">
+        <!-- loading state for permissions -->
+        <div *ngIf="permissionsLoading" class="flex flex-col items-center justify-center text-center" style="height:100%">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;">
+            <p-progressSpinner style="width:36px;height:36px"></p-progressSpinner>
+          </div>
+        </div>
+
+        <ng-container *ngIf="!permissionsLoading">
+          <ng-container *ngIf="rolePermissions && rolePermissions.length; else noPermissions">
+            <ul class="list-none p-0 m-0">
+              <li *ngFor="let perm of rolePermissions; let i = index" class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                <div>
+                  <span>{{ perm.name }}</span>
+                  <div class="text-muted-color text">{{ perm.description || (perm.code || '-') }}</div>
+                </div>
+                <button pButton type="button" icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="$event.stopPropagation(); confirmRemovePermission(perm)" [disabled]="permissionsLoading"></button>
+              </li>
+            </ul>
+          </ng-container>
+        </ng-container>
+
+        <ng-template #noPermissions>
+          <div class="flex flex-col items-center justify-center text-center" style="height:100%">
+            <h3 class="mb-2">{{ 'components.roles.NO_PERMISSIONS.TITLE' | translate }}</h3>
+            <p class="text-muted">{{ 'components.roles.NO_PERMISSIONS.TEXT' | translate }}</p>
+          </div>
         </ng-template>
-        <ng-template pTemplate="body" let-perm let-i="rowIndex">
-          <tr>
-            <td>{{ i + 1 }}</td>
-            <td>{{ perm.name }}</td>
-            <td>
-              <p-button icon="pi pi-times" severity="danger" [rounded]="true" [outlined]="true" (click)="$event.stopPropagation(); removePermissionFromRole(perm)"></p-button>
-            </td>
-          </tr>
-        </ng-template>
-      </p-table>
+      </div>
     </div>
   </div>
 </section>

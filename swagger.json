@@ -2366,7 +2366,7 @@
         "tags": ["roles"],
         "summary": "Получить разрешения роли",
         "description": "Возвращает список разрешений, привязанных к роли. Требуется разрешение roles.view.",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
         "x-permissions": ["roles.view"],
         "parameters": [
           { "in": "path", "name": "id", "required": true, "schema": { "type": "integer" } }
@@ -2380,6 +2380,50 @@
                   "type": "object",
                   "properties": {
                     "data": { "type": "array", "items": { "$ref": "#/components/schemas/Permission" } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      ,
+      "post": {
+        "tags": ["roles"],
+        "summary": "Assign permission to role",
+        "description": "Assign a permission to a role. Requires roles.update.",
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "x-permissions": ["roles.update"],
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["permission_id"],
+                "properties": {
+                  "permission_id": { "type": "integer" }
+                }
+              },
+              "example": { "permission_id": 123 }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": { "created": { "type": "boolean" } }
+                    }
                   }
                 }
               }
@@ -2404,6 +2448,37 @@
             "content": {
               "application/json": {
                 "schema": { "type": "object", "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/Permission" } } } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/roles/{id}/permissions/{permission_id}": {
+      "delete": {
+        "tags": ["roles"],
+        "summary": "Remove permission from role",
+        "description": "Removes a permission from a role. Requires roles.update.",
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "x-permissions": ["roles.update"],
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "integer" } },
+          { "in": "path", "name": "permission_id", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": { "removed": { "type": "boolean" } }
+                    }
+                  }
+                }
               }
             }
           }

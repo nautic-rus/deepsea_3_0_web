@@ -26,6 +26,12 @@ export const routes: Routes = [
       }
       ,
       {
+        path: 'profile',
+        loadComponent: () => import('./pages/profile/profile').then(m => m.ProfileComponent),
+        canActivate: [AuthGuard]
+      }
+      ,
+      {
         path: 'administration',
         loadComponent: () => import('./pages/administration/administration').then(m => m.AdministrationComponent),
         canActivate: [AuthGuard],
@@ -33,6 +39,7 @@ export const routes: Routes = [
           { path: 'users', loadComponent: () => import('./pages/administration/users/users').then(m => m.AdminUsersComponent), canActivate: [AuthGuard] },
           { path: 'roles', loadComponent: () => import('./pages/administration/roles/roles').then(m => m.AdminRolesComponent), canActivate: [AuthGuard] },
           { path: 'permissions', loadComponent: () => import('./pages/administration/permissions/permissions').then(m => m.AdminPermissionsComponent), canActivate: [AuthGuard] },
+          { path: 'pages', loadComponent: () => import('./pages/administration/pages/pages').then(m => m.AdminPagesComponent), canActivate: [AuthGuard] },
           { path: 'notifications', loadComponent: () => import('./pages/administration/notifications/notifications').then(m => m.AdminNotificationsComponent), canActivate: [AuthGuard] },
           { path: 'departments', loadComponent: () => import('./pages/administration/departments/departments').then(m => m.AdminDepartmentsComponent), canActivate: [AuthGuard] },
           { path: 'specializations', loadComponent: () => import('./pages/administration/specializations/specializations').then(m => m.AdminSpecializationsComponent), canActivate: [AuthGuard] }

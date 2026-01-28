@@ -1,10 +1,6 @@
 .page-administration {
   padding: 0;
 
-  /* Make all headings within administration use the specified dark color */
-  h1, h2, h3, h4, h5, h6 {
-    color: #334155;
-  }
 
   .admin-grid {
     display: flex;
@@ -13,13 +9,6 @@
     min-height: calc(90vh - 0px); /* full viewport height (page padding is 0) */
   }
 
-  .card {
-    background: var(--surface, #fff);
-    border: 0px solid rgba(0,0,0,0.08);
-    border-radius: 8px;
-    padding: 1rem;
-    box-shadow: 0 0px 0px rgba(0,0,0,0.04);
-  }
 
   .admin-menu {
     width: 15%;
@@ -73,7 +62,6 @@
     overflow: auto; /* internal scrolling when content overflows */
   }
 
-  .page-administration h1,
   .admin-content h3 {
     margin: 0 0 1rem 0;
   }

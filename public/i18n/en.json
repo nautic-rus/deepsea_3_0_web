@@ -55,11 +55,11 @@
     "NAME": "Name",
     "DEPARTMENT": "Department",
     "JOB_TITLE": "Job title",
-  "ACTIVE": "Status",
+    "ACTIVE": "Status",
     "ACTIONS": "Actions",
-    "USER_MANAGEMENT": "User management",
-    "ORGANIZATION": "Organization",
-    "COMMUNICATION": "Communication",
+    "USER_MANAGEMENT": "USERS",
+    "ORGANIZATION": "ORGANIZATION",
+    "COMMUNICATION": "COMMUNICATIONS",
     "EDIT_USER": "Edit user",
     "AGE": "Age",
     "CANCEL": "Cancel",
@@ -71,15 +71,16 @@
     "ACTIVE_YES": "Active",
     "ACTIVE_NO": "Inactive",
     "EXPORT": "Export",
-    "CREATE_USER": "Create user",
-  "DELETE": "Delete",
+    "CREATE_USER": "Create",
+    "DELETE": "Delete",
     "ANY": "All",
-  "DELETE_USER_QUESTION": "Attention! Do you really want to delete user",
-  "USER_CREATED": "User created",
-  "USER_UPDATED": "User updated",
-  "USER_DELETED": "User deleted",
+    "DELETE_USER_QUESTION": "Attention! Do you really want to delete user",
+    "USER_CREATED": "User created",
+    "USER_UPDATED": "User updated",
+    "USER_DELETED": "User deleted",
     "CONFIRM": "Confirm",
-    "CREATE": "Create"
+    "CREATE": "Create",
+    "PAGES": "Pages"
   },
   "USER_ACTIONS": {
     "CREATE_USER": "Create",
@@ -93,6 +94,35 @@
     "header": {
       "PROFILE": "Profile",
       "LOGOUT": "Logout"
+    },
+    "login": {
+      "WELCOME": "Welcome to DeepSea v.3!",
+      "SUBTITLE": "Sign in to continue",
+      "EMAIL_LABEL": "Email",
+      "EMAIL_PLACEHOLDER": "Email address",
+      "PASSWORD_LABEL": "Password",
+      "PASSWORD_PLACEHOLDER": "Password",
+      "REMEMBER_ME": "Remember me",
+      "FORGOT_PASSWORD": "Forgot password?",
+      "SIGN_IN": "Sign In",
+      "SIGNING_IN": "Signing in...",
+      "ERROR_ENTER_CREDENTIALS": "Please enter email and password",
+      "ERROR_INVALID_CREDENTIALS": "Invalid username or password.",
+      "ERROR_LOGIN_FAILED": "Login failed. Please try again later.",
+      "ERROR_UNAUTHORIZED": "Authorization required.",
+      "ERROR_FORBIDDEN": "Access forbidden."
+    },
+    "passwordReset": {
+      "TITLE": "Password recovery",
+      "SUBTITLE": "Enter your email and we will send instructions to reset your password.",
+      "EMAIL_LABEL": "Email",
+      "EMAIL_PLACEHOLDER": "Email address",
+      "SEND_INSTRUCTIONS": "Send instructions",
+      "SENDING": "Sending...",
+      "BACK_TO_LOGIN": "Back to sign in",
+      "ERROR_ENTER_EMAIL": "Please enter email",
+      "MSG_SENT_IF_EXISTS": "If the email exists, an instruction message has been sent.",
+      "ERROR_SENDING": "Failed to send request. Please try again later."
     },
     "permissions": {
       "NAME": "Name",
@@ -148,6 +178,21 @@
         "SAVE": "Save",
         "CANCEL": "Cancel"
       },
+      "PERMISSIONS_TITLE": "Roles permissions",
+      "NO_ROLE_SELECTED": {
+        "TITLE": "No role selected",
+        "TEXT": "Select a role from the list to view its permissions."
+      },
+      "NO_PERMISSIONS": {
+        "TITLE": "No permissions assigned",
+        "TEXT": "Add first permission for this role"
+      },
+      "ASSIGN_DIALOG": {
+        "HEADER": "Assign permissions",
+        "ASSIGN_TO": "Assign permissions to role: {{name}}",
+        "SELECT_PERMISSIONS": "Select permissions",
+        "SELECT_ROLE_FIRST": "Select a role first to assign permissions."
+      },
       "table": {
         "HEADERS": {
           "ID": "ID",
@@ -155,6 +200,8 @@
           "DESCRIPTION": "Description",
           "CREATED_AT": "Created At"
         },
+        "SEARCH": "Search...",
+        "PAGE_REPORT": "Showing {first} to {last} of {totalRecords} items",
         "EMPTY": "No roles to display"
       },
       "messages": {
@@ -162,6 +209,11 @@
         "UPDATED": "Role updated",
         "DELETED": "Role deleted",
         "EXPORTED": "Export completed"
+      ,
+      "ASSIGNED": "Permissions assigned",
+      "NO_SELECTION": "No permissions selected",
+      "LOADING_PERMISSIONS_FAILED": "Failed to load permissions",
+      "ASSIGN_FAILED": "Failed to assign permissions"
       },
       "confirm": {
         "DELETE_QUESTION": "Attention! Do you really want to delete role"
@@ -221,7 +273,7 @@
       "ACTIVE_YES": "Active",
       "ACTIVE_NO": "Inactive",
       "EXPORT": "Export",
-      "CREATE_USER": "Create user",
+      "CREATE_USER": "Create",
       "DELETE": "Delete",
       "ANY": "All",
       "DELETE_USER_QUESTION": "Attention! Do you really want to delete user",

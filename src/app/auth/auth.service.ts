@@ -50,5 +50,15 @@ export class AuthService {
       })
     );
   }
+
+  // Perform login (server expected to set HttpOnly cookies)
+  login(payload: { username: string; password: string }): Observable<any> {
+    return this.http.post<any>('/api/auth/login', payload, { withCredentials: true });
+  }
+
+  // Request password reset email
+  requestPasswordReset(email: string): Observable<any> {
+    return this.http.post<any>('/api/auth/request_password_reset', { email });
+  }
 }
 

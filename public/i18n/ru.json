@@ -55,11 +55,11 @@
     "NAME": "ФИО",
     "DEPARTMENT": "Отдел",
     "JOB_TITLE": "Должность",
-  "ACTIVE": "Статус",
+    "ACTIVE": "Статус",
     "ACTIONS": "Действия",
-    "USER_MANAGEMENT": "Управление пользователями",
-    "ORGANIZATION": "Организация",
-    "COMMUNICATION": "Коммуникации",
+    "USER_MANAGEMENT": "ПОЛЬЗОВАТЕЛИ",
+    "ORGANIZATION": "ОРГАНИЗАЦИЯ",
+    "COMMUNICATION": "КОММУНИКАЦИИ",
     "EDIT_USER": "Редактировать пользователя",
     "AGE": "Возраст",
     "CANCEL": "Отмена",
@@ -68,8 +68,8 @@
     "LAST_NAME": "Фамилия",
     "MIDDLE_NAME": "Отчество",
     "SELECT_DEPARTMENT": "Выберите отдел",
-  "ACTIVE_YES": "Активен",
-  "ACTIVE_NO": "Неактивен",
+    "ACTIVE_YES": "Активен",
+    "ACTIVE_NO": "Неактивен",
     "EXPORT": "Экспорт",
     "CREATE_USER": "Создать",
     "DELETE": "Удалить",
@@ -79,7 +79,8 @@
     "USER_CREATED": "Пользователь создан",
     "USER_UPDATED": "Пользователь обновлён"
     ,"USER_DELETED": "Пользователь удалён",
-    "CREATE": "Создание"
+    "CREATE": "Создать",
+    "PAGES" : "Страницы"
   },
   "USER_ACTIONS": {
     "CREATE_USER": "Создать пользователя",
@@ -93,6 +94,35 @@
     "header": {
       "PROFILE": "Профиль",
       "LOGOUT": "Выйти"
+    },
+    "login": {
+      "WELCOME": "Добро пожаловать в DeepSea v.3!",
+      "SUBTITLE": "Войдите, чтобы продолжить",
+      "EMAIL_LABEL": "Email",
+      "EMAIL_PLACEHOLDER": "Email адрес",
+      "PASSWORD_LABEL": "Пароль",
+      "PASSWORD_PLACEHOLDER": "Пароль",
+      "REMEMBER_ME": "Запомнить меня",
+      "FORGOT_PASSWORD": "Забыли пароль?",
+      "SIGN_IN": "Войти",
+      "SIGNING_IN": "Вход...",
+      "ERROR_ENTER_CREDENTIALS": "Пожалуйста, введите email и пароль",
+      "ERROR_INVALID_CREDENTIALS": "Неверный логин или пароль.",
+      "ERROR_LOGIN_FAILED": "Ошибка входа. Пожалуйста, попробуйте позже.",
+      "ERROR_UNAUTHORIZED": "Требуется авторизация.",
+      "ERROR_FORBIDDEN": "Доступ запрещён."
+    },
+    "passwordReset": {
+      "TITLE": "Восстановление пароля",
+      "SUBTITLE": "Введите ваш email, и мы пришлём инструкцию по сбросу пароля.",
+      "EMAIL_LABEL": "Email",
+      "EMAIL_PLACEHOLDER": "Адрес электронной почты",
+      "SEND_INSTRUCTIONS": "Отправить инструкцию",
+      "SENDING": "Отправка...",
+      "BACK_TO_LOGIN": "Вернуться к входу",
+      "ERROR_ENTER_EMAIL": "Пожалуйста, введите email",
+      "MSG_SENT_IF_EXISTS": "Если указанный email существует, вы получите письмо с инструкцией.",
+      "ERROR_SENDING": "Ошибка при отправке запроса. Пожалуйста, попробуйте позже."
     },
     "permissions": {
       "NAME": "Название",
@@ -148,6 +178,21 @@
           "SAVE": "Сохранить",
           "CANCEL": "Отмена"
         },
+        "PERMISSIONS_TITLE": "Разрешения роли",
+        "NO_ROLE_SELECTED": {
+          "TITLE": "Роль не выбрана",
+          "TEXT": "Выберите роль из списка, чтобы просмотреть её разрешения."
+        },
+        "NO_PERMISSIONS": {
+          "TITLE": "Нет назначенных разрешений",
+          "TEXT": "Добавьте первое разрешение для этой роли"
+        },
+        "ASSIGN_DIALOG": {
+          "HEADER": "Назначить разрешения",
+          "ASSIGN_TO": "Назначить разрешения для роли: {{name}}",
+          "SELECT_PERMISSIONS": "Выберите разрешения",
+          "SELECT_ROLE_FIRST": "Сначала выберите роль, чтобы назначить разрешения."
+        },
         "table": {
           "HEADERS": {
             "ID": "ID",
@@ -155,6 +200,8 @@
             "DESCRIPTION": "Описание",
             "CREATED_AT": "Дата создания"
           },
+          "SEARCH": "Поиск...",
+          "PAGE_REPORT": "Показано {first}–{last} из {totalRecords}",
           "EMPTY": "Нет ролей для отображения"
         },
         "messages": {
@@ -162,6 +209,11 @@
           "UPDATED": "Роль обновлена",
           "DELETED": "Роль удалена",
           "EXPORTED": "Экспорт завершён"
+      ,
+      "ASSIGNED": "Разрешения назначены",
+      "NO_SELECTION": "Разрешения не выбраны",
+      "LOADING_PERMISSIONS_FAILED": "Не удалось загрузить список разрешений",
+      "ASSIGN_FAILED": "Не удалось назначить разрешения"
         },
         "confirm": {
           "DELETE_QUESTION": "Внимание! Вы действительно хотите удалить роль"

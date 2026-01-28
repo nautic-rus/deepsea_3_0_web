@@ -4,10 +4,10 @@
       <div class="admin-menu-header">
       </div>
       <!-- Render each menu group as a separate header + menu to keep headings and items on different levels -->
-      <div *ngFor="let group of menuItems" class="menu-group mb-4">
-        <div class="menu-group-title text-surface-700 font-bold mb-2">{{ group.label }}</div>
+      <div *ngFor="let group of menuItems" class="menu-group p-2">
+        <h5 style="padding-bottom: 0.7rem;">{{ group.label }}</h5>
         <!-- Render a Menu for group.items only -->
-        <p-menu [model]="group.items"></p-menu>
+        <p-menu [model]="group.items" ></p-menu>
       </div>
     </aside>
     

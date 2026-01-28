@@ -1,7 +1,6 @@
 import { Component, OnInit, Inject, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { ButtonModule } from 'primeng/button';
@@ -11,11 +10,13 @@ import { AvatarModule } from 'primeng/avatar';
 import { RippleModule } from 'primeng/ripple';
 import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
+import { AuthService } from '../../auth/auth.service';
+import { PagesService } from '../../services/pages.service';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterModule, HttpClientModule, ButtonModule, MenubarModule, BadgeModule, AvatarModule, RippleModule, MenuModule, TranslateModule],
+  imports: [CommonModule, RouterModule, ButtonModule, MenubarModule, BadgeModule, AvatarModule, RippleModule, MenuModule, TranslateModule],
   templateUrl: './header.html',
   styleUrls: ['./header.scss']
 })
@@ -33,7 +34,7 @@ export class HeaderComponent implements OnInit {
   langEnLabel = 'EN';
   langRuLabel = 'RU';
 
-  constructor(@Inject(DOCUMENT) private document: Document, private router: Router, private http: HttpClient, private cdr: ChangeDetectorRef, private translate: TranslateService) {
+  constructor(@Inject(DOCUMENT) private document: Document, private router: Router, private authService: AuthService, private pagesService: PagesService, private cdr: ChangeDetectorRef, private translate: TranslateService) {
     // Check if dark mode was previously enabled
     this.darkMode = localStorage.getItem('darkMode') === 'true';
     // Ensure translation handler rebuilds menu labels and header texts on language change
@@ -82,7 +83,7 @@ export class HeaderComponent implements OnInit {
     // With cookie-based auth we'll attempt to fetch current user and menu.
     this.fetchCurrentUser();
 
-    this.http.get<any>('/api/user/pages', { withCredentials: true }).subscribe({
+    this.pagesService.getUserPages().subscribe({
       next: (resp) => {
         const pages = this.normalizePages(resp);
         this.rawPages = pages || [];
@@ -109,7 +110,7 @@ export class HeaderComponent implements OnInit {
 
   private reloadMenu() {
     // reload menu using cookies (withCredentials)
-    this.http.get<any>('/api/user/pages', { withCredentials: true }).subscribe({
+    this.pagesService.getUserPages().subscribe({
       next: (resp) => {
         const pages = this.normalizePages(resp);
         this.rawPages = pages || [];
@@ -123,7 +124,7 @@ export class HeaderComponent implements OnInit {
 
   private buildUserMenu() {
     this.userMenuItems = [
-      { label: this.translate.instant('HEADER.PROFILE'), icon: 'pi pi-user', routerLink: '/settings/profile' },
+      { label: this.translate.instant('HEADER.PROFILE'), icon: 'pi pi-user', routerLink: '/profile' },
       { separator: true },
       { label: this.translate.instant('HEADER.LOGOUT'), icon: 'pi pi-sign-out', command: () => this.logout() }
     ];
@@ -167,11 +168,11 @@ export class HeaderComponent implements OnInit {
     if (cached) {
       try { this.currentUser = JSON.parse(cached); this.applyAvatarFromUser(this.currentUser); } catch (e) { console.warn('parse cached currentUser failed', e); }
     }
-    this.http.get<any>('/api/auth/me').subscribe({
+    this.authService.me().subscribe({
       next: (u) => {
         if (!u) { return; }
         this.currentUser = u;
-  try { sessionStorage.setItem('currentUser', JSON.stringify(u)); } catch (e) { console.warn('sessionStorage.setItem currentUser failed', e); }
+        try { sessionStorage.setItem('currentUser', JSON.stringify(u)); } catch (e) { console.warn('sessionStorage.setItem currentUser failed', e); }
         this.applyAvatarFromUser(u);
       },
       error: () => {}
@@ -315,10 +316,7 @@ export class HeaderComponent implements OnInit {
   logout(): void {
     // Attempt to notify backend (best-effort, do not block UI)
     try {
-      this.http.post('/api/auth/logout', {}).subscribe({
-        next: () => {},
-        error: () => {}
-      });
+      this.authService.logout().subscribe({ next: () => {}, error: () => {} });
     } catch (e) {
       console.warn('logout request failed', e);
     }

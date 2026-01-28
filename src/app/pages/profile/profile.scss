@@ -1,0 +1,41 @@
+.page-profile {
+  padding: 0;
+
+  .profile-grid {
+    display: flex;
+    gap: 1rem;
+    align-items: stretch;
+    min-height: calc(90vh - 0px);
+  }
+
+  .profile-menu {
+    width: 15%;
+    min-width: 200px;
+  }
+
+  /* Remove border/shadow for PrimeNG menu inside the profile card */
+  .profile-menu p-menu,
+  .profile-menu ::ng-deep .p-menu {
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  .profile-content-wrapper {
+    flex: 1 1 70%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .profile-content {
+    width: 100%;
+    min-height: 0;
+  }
+
+  .profile-content h1 {
+    margin: 0 0 12px 0;
+    font-size: 24px;
+    color: #2c3e50;
+  }
+}

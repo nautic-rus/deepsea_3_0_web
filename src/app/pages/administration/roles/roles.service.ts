@@ -18,6 +18,16 @@ export class RolesService {
     return this.http.get(`/api/roles/${encodeURIComponent(String(id))}/permissions`);
   }
 
+  // Fetch all available permissions
+  getPermissions(): Observable<any> {
+    return this.http.get('/api/permissions');
+  }
+
+  // Add permissions to a role (expects payload like { permissions: [id, ...] } or similar)
+  addRolePermissions(roleId: string | number, payload: any): Observable<any> {
+    return this.http.post(`/api/roles/${encodeURIComponent(String(roleId))}/permissions`, payload);
+  }
+
   deleteRolePermission(roleId: string | number, permissionId: string | number): Observable<any> {
     return this.http.delete(`/api/roles/${encodeURIComponent(String(roleId))}/permissions/${encodeURIComponent(String(permissionId))}`);
   }

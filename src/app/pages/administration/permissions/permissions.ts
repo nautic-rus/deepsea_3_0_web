@@ -87,6 +87,12 @@ export class AdminPermissionsComponent implements OnInit {
     this.loadPermissions();
   }
 
+  // global filter helper for p-table caption search
+  onGlobalFilter(table: any, event: Event): void {
+    const val = (event && (event.target as HTMLInputElement)) ? (event.target as HTMLInputElement).value : '';
+    try { table.filterGlobal(val, 'contains'); } catch (e) { console.warn('onGlobalFilter failed', e); }
+  }
+
   // load permissions list from API
   loadPermissions(): void {
     this.loading = true;

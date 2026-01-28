@@ -1,7 +1,7 @@
 <section class="admin-subpage-tools card">
   <p-toolbar >
     <ng-template #start>
-  <p-button [label]="'components.permissions.form.CREATE_LABEL' | translate" icon="pi pi-plus" severity="primary" class="mr-2" (onClick)="openNew()" />
+  <p-button [label]="'components.permissions.form.CREATE_LABEL' | translate" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
   <p-button severity="secondary" [label]="'MENU.DELETE' | translate" icon="pi pi-trash" outlined (onClick)="deleteSelectedPermissions()" [disabled]="!selectedPermissions || !selectedPermissions.length" />
     </ng-template>
 
@@ -29,6 +29,16 @@
     [showCurrentPageReport]="true"
     [rowsPerPageOptions]="[10, 20, 30]"
       >
+
+  <ng-template #caption>
+      <div class="flex justify-between mb-2">
+        <h3>Permission</h3>
+        <p-iconfield>
+          <p-inputicon styleClass="pi pi-search" /> 
+          <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
+        </p-iconfield>
+      </div>
+      </ng-template>
 
   <ng-template pTemplate="header">
     <tr>

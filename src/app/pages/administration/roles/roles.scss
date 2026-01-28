@@ -32,3 +32,17 @@
 .user-toast .p-toast-message {
 	border-radius: 8px;
 }
+
+/* Scrollable container for permissions list on the right-side card */
+.permissions-scroll {
+	height: 700px; /* match left table scroll height */
+	overflow: auto;
+	padding-right: 0.5rem; /* give space for a scrollbar */
+}
+
+.permissions-scroll .flex.items-center {
+	height: 100%;
+}
+
+/* Thin scrollbar styling */
+/* (scrollbar styling moved to global styles.scss) */

@@ -1,4 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
@@ -7,10 +8,16 @@ import { ToolbarModule } from 'primeng/toolbar';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { InputTextModule } from 'primeng/inputtext';
+import { IconFieldModule } from 'primeng/iconfield';
 import { DialogModule } from 'primeng/dialog';
+import { MultiSelectModule } from 'primeng/multiselect';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService, MenuItem } from 'primeng/api';
+import { Subscription } from 'rxjs';
+import { MenuModule } from 'primeng/menu';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ToastModule } from 'primeng/toast';
+import { InputIconModule } from 'primeng/inputicon';
 
 interface Role {
   id: number | string;
@@ -30,15 +37,20 @@ interface Role {
     ButtonModule,
     TableModule,
     InputTextModule,
+    IconFieldModule,
     DialogModule,
+    MenuModule,
+  ProgressSpinnerModule,
+    MultiSelectModule,
     ConfirmDialogModule,
-    ToastModule
+    ToastModule,
+    InputIconModule
   ],
   providers: [ConfirmationService, MessageService],
   templateUrl: './roles.html',
   styleUrls: ['./roles.scss']
 })
-export class AdminRolesComponent implements OnInit {
+export class AdminRolesComponent implements OnInit, OnDestroy {
   roles: Role[] = [];
   selectedRoles: Role[] = [];
   loading = false;
@@ -52,6 +64,18 @@ export class AdminRolesComponent implements OnInit {
   selectedRole: Role | null = null;
   rolePermissions: any[] = [];
   permissionsLoading = false;
+  // menu items for the permissions card header (placeholder)
+  items: MenuItem[] = [];
+  // permissions available in the system (for multiselect)
+  allPermissions: Array<{ label: string; value: any; description?: string; raw?: any }> = [];
+  // selected permission ids in the assign dialog
+  selectedPermissionIds: any[] = [];
+  assignPermissionLoading = false;
+  // internal subscriptions to unsubscribe on destroy
+  private subs: Subscription[] = [];
+  // dialog visibility for assigning permissions to a role (simple stub)
+  assignPermissionDialogVisible = false;
+  @ViewChild('menu') menu: any;
 
   constructor(
     private cd: ChangeDetectorRef,
@@ -61,18 +85,33 @@ export class AdminRolesComponent implements OnInit {
     private rolesService: RolesService
   ) {}
 
+  ngOnDestroy(): void {
+    // unsubscribe all stored subscriptions to avoid memory leaks
+    for (const s of this.subs) {
+      try { s.unsubscribe(); } catch (e) { /* ignore */ }
+    }
+  }
+
   private safeDetect(): void {
     try { this.cd.detectChanges(); } catch (e) { console.warn('safeDetect failed', e); }
   }
 
   ngOnInit(): void {
     this.loadRoles();
+    // context menu items for permissions card
+    this.items = [
+      {
+        label: 'Add permission',
+        icon: 'pi pi-plus',
+        command: () => this.openAssignPermission()
+      }
+    ];
   }
 
   loadRoles(page = 1, limit = 1000): void {
     this.loading = true;
     this.error = null;
-    this.rolesService.getRoles(page, limit).subscribe({
+    const sub = this.rolesService.getRoles(page, limit).subscribe({
       next: (res: any) => {
         this.roles = (res && res.data) ? res.data : (Array.isArray(res) ? res : (res || []));
         this.loading = false;
@@ -85,7 +124,14 @@ export class AdminRolesComponent implements OnInit {
         this.safeDetect();
       }
     });
+    this.subs.push(sub);
   }
+
+    openMenu(event: Event): void {
+      // Guard: menu is only relevant when a role is selected
+      if (!this.selectedRole) { return; }
+      try { this.menu?.toggle(event); } catch (e) { console.warn('menu toggle failed', e); }
+    }
 
   openNew(): void {
     this.roleModel = { name: '', description: '' };
@@ -112,10 +158,16 @@ export class AdminRolesComponent implements OnInit {
     this.loadRolePermissions(r.id);
   }
 
+  // global filter helper for p-table caption search
+  onGlobalFilter(table: any, event: Event): void {
+    const val = (event && (event.target as HTMLInputElement)) ? (event.target as HTMLInputElement).value : '';
+    try { table.filterGlobal(val, 'contains'); } catch (e) { console.warn('onGlobalFilter failed', e); }
+  }
+
   loadRolePermissions(roleId: string | number): void {
     this.permissionsLoading = true;
     this.rolePermissions = [];
-    this.rolesService.getRolePermissions(roleId).subscribe({
+    const sub = this.rolesService.getRolePermissions(roleId).subscribe({
       next: (res: any) => {
         this.rolePermissions = (res && res.data) ? res.data : (Array.isArray(res) ? res : (res || []));
         this.permissionsLoading = false;
@@ -128,6 +180,69 @@ export class AdminRolesComponent implements OnInit {
         this.safeDetect();
       }
     });
+    this.subs.push(sub);
+  }
+
+  // opens the assign-permission dialog (simple stub)
+  openAssignPermission(): void {
+    if (!this.selectedRole) {
+      try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.CONFIRM') || 'Info', detail: 'Select a role first' }); } catch (e) {}
+      return;
+    }
+    // prepare selection and fetch permissions list
+    this.selectedPermissionIds = (this.rolePermissions || []).map(p => p.id);
+    this.assignPermissionLoading = true;
+    const sub = this.rolesService.getPermissions().subscribe({
+      next: (res: any) => {
+        this.allPermissions = (res && res.data) ? res.data : (Array.isArray(res) ? res : (res || []));
+        // normalize to objects with label/value expected by MultiSelect (label=name, value=id)
+        this.allPermissions = this.allPermissions.map((p: any) => ({
+          label: p.name || p.code || String(p.id),
+          value: p.id,
+          description: p.description || p.code || '',
+          raw: p
+        }));
+        this.assignPermissionLoading = false;
+        this.assignPermissionDialogVisible = true;
+        this.safeDetect();
+      },
+      error: (err) => {
+        console.error('Failed to load permissions list:', err);
+        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.EXPORT') || 'Error', detail: this.translate.instant('components.roles.messages.LOADING_PERMISSIONS_FAILED') || ((err && err.message) ? err.message : 'Failed to load permissions') }); } catch (e) {}
+        this.assignPermissionLoading = false;
+        this.safeDetect();
+      }
+    });
+    this.subs.push(sub);
+  }
+
+  // stub for assigning permissions (should call API in future)
+  assignPermissions(): void {
+    if (!this.selectedRole) return;
+    if (!this.selectedPermissionIds || !this.selectedPermissionIds.length) {
+      try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.SAVE') || 'Save', detail: this.translate.instant('components.roles.messages.NO_SELECTION') || 'No permissions selected' }); } catch (e) {}
+      return;
+    }
+    this.assignPermissionLoading = true;
+    // API expects payload in the shape: { permission_ids: [id, ...] }
+    const payload = { permission_ids: this.selectedPermissionIds };
+    const sub = this.rolesService.addRolePermissions(this.selectedRole.id as any, payload).subscribe({
+      next: (res: any) => {
+        // reload permissions for the role to reflect changes
+        this.loadRolePermissions(this.selectedRole!.id as any);
+        try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Save', detail: this.translate.instant('components.roles.messages.ASSIGNED') || 'Permissions assigned' }); } catch (e) {}
+        this.assignPermissionDialogVisible = false;
+        this.assignPermissionLoading = false;
+        this.safeDetect();
+      },
+      error: (err) => {
+        console.error('Failed to assign permissions:', err);
+        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.SAVE') || 'Save', detail: this.translate.instant('components.roles.messages.ASSIGN_FAILED') || ((err && err.message) ? err.message : 'Failed to assign permissions') }); } catch (e) {}
+        this.assignPermissionLoading = false;
+        this.safeDetect();
+      }
+    });
+    this.subs.push(sub);
   }
 
   saveRole(): void {
@@ -200,6 +315,15 @@ export class AdminRolesComponent implements OnInit {
       message: `Delete role "${role.name}"?`,
       icon: 'pi pi-exclamation-triangle',
       accept: () => this.deleteRole(role)
+    });
+  }
+
+  confirmRemovePermission(perm: any): void {
+    if (!perm || !this.selectedRole) return;
+    this.confirmationService.confirm({
+      message: `Remove permission "${perm.name || perm.id}" from role "${this.selectedRole.name}"?`,
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => this.removePermissionFromRole(perm)
     });
   }
 

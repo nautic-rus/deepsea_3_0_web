@@ -29,8 +29,9 @@ export class AdministrationComponent implements OnInit {
         label: t('MENU.USER_MANAGEMENT'),
         items: [
           { label: t('MENU.USERS'), icon: 'pi pi-users', routerLink: ['/administration/users'] },
+          { label: t('MENU.PERMISSIONS'), icon: 'pi pi-lock', routerLink: ['/administration/permissions'] },
           { label: t('MENU.ROLES'), icon: 'pi pi-briefcase', routerLink: ['/administration/roles'] },
-          { label: t('MENU.PERMISSIONS'), icon: 'pi pi-lock', routerLink: ['/administration/permissions'] }
+          { label: t('MENU.PAGES'), icon: 'pi pi-lock', routerLink: ['/administration/pages'] }
         ]
       },
       {

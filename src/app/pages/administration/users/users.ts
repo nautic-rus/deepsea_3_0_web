@@ -20,7 +20,6 @@ import { ConfirmationService } from 'primeng/api';
 import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
-import { HttpClient } from '@angular/common/http';
 import { UsersService } from './users.service';
 import { Select } from "primeng/select";
 
@@ -95,7 +94,6 @@ export class AdminUsersComponent implements OnInit {
 
   constructor(
     private usersService: UsersService,
-    private http: HttpClient,
     private cd: ChangeDetectorRef,
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
@@ -127,6 +125,12 @@ export class AdminUsersComponent implements OnInit {
   ngOnInit(): void {
     this.loadUsers();
     this.loadDepartments();
+  }
+
+  // global filter helper for p-table caption search
+  onGlobalFilter(table: any, event: Event): void {
+    const val = (event && (event.target as HTMLInputElement)) ? (event.target as HTMLInputElement).value : '';
+    try { table.filterGlobal(val, 'contains'); } catch (e) { console.warn('onGlobalFilter failed', e); }
   }
 
   // Simple client-side validation

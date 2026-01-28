@@ -1,7 +1,7 @@
 <section class="admin-subpage-tools card">
 <p-toolbar >
   <ng-template #start>
-    <p-button [label]="'MENU.CREATE_USER' | translate" icon="pi pi-plus" severity="primary" class="mr-2" (onClick)="openNew()" />
+    <p-button [label]="'MENU.CREATE_USER' | translate" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
     <p-button severity="secondary" [label]="'MENU.DELETE' | translate" icon="pi pi-trash" outlined (onClick)="deleteSelectedProducts()" [disabled]="!selectedProducts || !selectedProducts.length" />
   </ng-template>
 
@@ -17,7 +17,6 @@
       #dt
       [value]="users"
       [loading]="loading"
-      
       [scrollable]="true"
       scrollHeight="700px"
       [rows]="10"
@@ -32,7 +31,17 @@
       [globalFilterFields]="['name', 'country.name', 'representative.name', 'status']"
           >
 
-  <ng-template pTemplate="header">
+    <ng-template #caption>
+            <div class="flex justify-between mb-2">
+                <h3>Users</h3>
+                <p-iconfield>
+                    <p-inputicon styleClass="pi pi-search" /> 
+                    <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
+                </p-iconfield>
+            </div>
+            </ng-template>
+
+    <ng-template pTemplate="header">
       <tr>
           <th style="width: 3rem">
               <p-tableHeaderCheckbox />
