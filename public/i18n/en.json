@@ -1,294 +1,408 @@
 {
-  "HEADER": {
-    "PROFILE": "Profile",
-    "LOGOUT": "Logout"
-  },
-  "PERMISSIONS": {
-    "NAME": "Name",
-    "CODE": "Code",
-    "DESCRIPTION": "Description",
-    "CREATED_AT": "Created At",
-    "CREATE": "Create",
-    "EDIT": "Edit",
-    "CREATED": "Permission created",
-    "UPDATED": "Permission updated",
-    "DELETED": "Permission deleted",
-    "EXPORTED": "Export completed",
-    "DELETE_QUESTION": "Attention! Do you really want to delete permission"
+  "ADMIN": {
+    "INSTRUCTIONS": "Administration instructions"
   },
   "APP": {
     "TITLE": "DeepSea"
+  },
+  "HEADER": {
+    "LOGOUT": "Logout",
+    "PROFILE": "Profile"
   },
   "LANG": {
     "EN": "EN",
     "RU": "RU"
   },
   "MENU": {
+    "ACTIONS": "Actions",
+    "ACTIVE": "Status",
+    "ACTIVE_NO": "Inactive",
+    "ACTIVE_YES": "Active",
+    "ADMINISTRATION": "Administration",
+    "AGE": "Age",
+    "ANY": "All",
+    "CANCEL": "Cancel",
+    "COMMUNICATION": "COMMUNICATIONS",
+    "CONFIRM": "Confirm",
+    "CREATE": "Create",
+    "CREATE_USER": "Create",
     "DASHBOARD": "Dashboard",
     "DASHBORD": "Dashbord",
-    "PROJECTSMENU": "Projects",
-    "MATERIALS": "Materials",
-    "EQUIPMENT": "Equipment",
-    "ADMINISTRATION": "Administration",
-    "SETTINGS": "Settings",
-    "PROFILE": "Profile",
-    "LOGOUT": "Logout",
-    "USERS": "Users",
-    "ROLES": "Roles",
-    "PERMISSIONS": "Permissions",
-    "PROJECTS": "Projects",
+    "DELETE": "Delete",
+    "DELETE_USER_QUESTION": "Attention! Do you really want to delete user",
+    "DEPARTMENT": "Department",
+    "DEPARTMENTS": "Departments",
     "DOCUMENTS": "Documents",
-    "REPORTS": "Reports",
+    "EDIT": "EDIT",
+    "EDIT_USER": "Edit user",
+    "EMAIL": "Email",
+    "EQUIPMENT": "Equipment",
+    "EQUIPMENTMENU": "Equipment",
+    "EXPORT": "Export",
+    "FIRST_NAME": "First name",
     "ISSUES": "Issues",
+    "JOB_TITLE": "Job title",
+    "LAST_NAME": "Last name",
+    "LOGOUT": "Logout",
+    "MATERIALS": "Materials",
+    "MATERIALSMENU": "Materials",
+    "MIDDLE_NAME": "Middle name",
+    "NAME": "Name",
+    "NOTIFICATIONS": "Notifications",
+    "ORGANIZATION": "ORGANIZATION",
+    "PAGES": "Pages",
+    "PERMISSIONS": "Permissions",
+    "PHONE": "Phone",
+    "PROFILE": "Profile",
+    "PROJECTS": "Projects",
+    "PROJECTSMENU": "Projects",
+    "PROJECT_USERS": "Users of the project",
+    "REPORTS": "Reports",
+    "ROLES": "Roles",
+    "SAVE": "Save",
+    "SELECT_DEPARTMENT": "Select department",
+    "SETTINGS": "Settings",
+    "SPECIALIZATIONS": "Specialization",
     "SPECIFICATIONS": "Specifications",
     "STATEMENTS": "Statements",
     "SUPPLIERS": "Suppliers",
-    "NOTIFICATIONS": "Notifications",
-    "SPECIALIZATIONS": "Specialization",
-    "DEPARTMENTS": "Departments",
-    "WIKI": "WiKi",
-    "EQUIPMENTMENU": "Equipment",
-    "MATERIALSMENU": "Materials",
     "USERNAME": "Username",
-    "EMAIL": "Email",
-    "PHONE": "Phone",
-    "NAME": "Name",
-    "DEPARTMENT": "Department",
-    "JOB_TITLE": "Job title",
-    "ACTIVE": "Status",
-    "ACTIONS": "Actions",
-    "USER_MANAGEMENT": "USERS",
-    "ORGANIZATION": "ORGANIZATION",
-    "COMMUNICATION": "COMMUNICATIONS",
-    "EDIT_USER": "Edit user",
-    "AGE": "Age",
-    "CANCEL": "Cancel",
-    "SAVE": "Save",
-    "FIRST_NAME": "First name",
-    "LAST_NAME": "Last name",
-    "MIDDLE_NAME": "Middle name",
-    "SELECT_DEPARTMENT": "Select department",
-    "ACTIVE_YES": "Active",
-    "ACTIVE_NO": "Inactive",
-    "EXPORT": "Export",
-    "CREATE_USER": "Create",
-    "DELETE": "Delete",
-    "ANY": "All",
-    "DELETE_USER_QUESTION": "Attention! Do you really want to delete user",
+    "USERS": "Users",
     "USER_CREATED": "User created",
-    "USER_UPDATED": "User updated",
     "USER_DELETED": "User deleted",
-    "CONFIRM": "Confirm",
+    "USER_MANAGEMENT": "USERS",
+    "USER_UPDATED": "User updated",
+    "WIKI": "WiKi"
+    ,
+    "ID": "ID",
+    "CREATE_ISSUE": "Create issue",
+    "EDIT_ISSUE": "Edit issue",
+    "QUERY": "Query",
+    "APPLY": "Apply",
+    "RESET": "Reset"
+    ,
+    "COLUMNS": "Columns"
+  },
+  "PERMISSIONS": {
+    "CODE": "Code",
     "CREATE": "Create",
-    "PAGES": "Pages"
+    "CREATED": "Permission created",
+    "CREATED_AT": "Created At",
+    "DELETED": "Permission deleted",
+    "DELETE_QUESTION": "Attention! Do you really want to delete permission",
+    "DESCRIPTION": "Description",
+    "EDIT": "Edit",
+    "EXPORTED": "Export completed",
+    "NAME": "Name",
+    "UPDATED": "Permission updated"
   },
   "USER_ACTIONS": {
     "CREATE_USER": "Create",
     "DELETE": "Delete"
   },
-  "ADMIN": {
-    "INSTRUCTIONS": "Administration instructions"
-  }
-  ,
   "components": {
-    "header": {
-      "PROFILE": "Profile",
-      "LOGOUT": "Logout"
-    },
-    "login": {
-      "WELCOME": "Welcome to DeepSea v.3!",
-      "SUBTITLE": "Sign in to continue",
-      "EMAIL_LABEL": "Email",
-      "EMAIL_PLACEHOLDER": "Email address",
-      "PASSWORD_LABEL": "Password",
-      "PASSWORD_PLACEHOLDER": "Password",
-      "REMEMBER_ME": "Remember me",
-      "FORGOT_PASSWORD": "Forgot password?",
-      "SIGN_IN": "Sign In",
-      "SIGNING_IN": "Signing in...",
-      "ERROR_ENTER_CREDENTIALS": "Please enter email and password",
-      "ERROR_INVALID_CREDENTIALS": "Invalid username or password.",
-      "ERROR_LOGIN_FAILED": "Login failed. Please try again later.",
-      "ERROR_UNAUTHORIZED": "Authorization required.",
-      "ERROR_FORBIDDEN": "Access forbidden."
-    },
-    "passwordReset": {
-      "TITLE": "Password recovery",
-      "SUBTITLE": "Enter your email and we will send instructions to reset your password.",
-      "EMAIL_LABEL": "Email",
-      "EMAIL_PLACEHOLDER": "Email address",
-      "SEND_INSTRUCTIONS": "Send instructions",
-      "SENDING": "Sending...",
-      "BACK_TO_LOGIN": "Back to sign in",
-      "ERROR_ENTER_EMAIL": "Please enter email",
-      "MSG_SENT_IF_EXISTS": "If the email exists, an instruction message has been sent.",
-      "ERROR_SENDING": "Failed to send request. Please try again later."
-    },
-    "permissions": {
-      "NAME": "Name",
-      "CODE": "Code",
-      "DESCRIPTION": "Description",
-      "CREATED_AT": "Created At",
-      "CREATE": "Create",
-      "EDIT": "Edit",
-      "CREATED": "Permission created",
-      "UPDATED": "Permission updated",
-      "DELETED": "Permission deleted",
-      "EXPORTED": "Export completed",
-      "DELETE_QUESTION": "Attention! Do you really want to delete permission",
-
-      "form": {
-        "NAME": "Name",
-        "CODE": "Code",
-        "DESCRIPTION": "Description",
-        "CREATE_LABEL": "Create",
-        "EDIT_LABEL": "Edit",
-        "SAVE": "Save",
-        "CANCEL": "Cancel"
-      },
-
-      "table": {
-        "HEADERS": {
-          "ID": "ID",
-          "NAME": "Name",
-          "CODE": "Code",
-          "DESCRIPTION": "Description",
-          "CREATED_AT": "Created At"
-        },
-        "EMPTY": "No permissions to display"
-      },
-
-      "messages": {
-        "CREATED": "Permission created",
-        "UPDATED": "Permission updated",
-        "DELETED": "Permission deleted",
-        "EXPORTED": "Export completed"
-      },
-
-      "confirm": {
-        "DELETE_QUESTION": "Attention! Do you really want to delete permission"
-      }
-    },
-    "roles": {
-      "form": {
-        "NAME": "Name",
-        "DESCRIPTION": "Description",
-        "CREATE_LABEL": "Create",
-        "EDIT_LABEL": "Edit",
-        "SAVE": "Save",
-        "CANCEL": "Cancel"
-      },
-      "PERMISSIONS_TITLE": "Roles permissions",
-      "NO_ROLE_SELECTED": {
-        "TITLE": "No role selected",
-        "TEXT": "Select a role from the list to view its permissions."
-      },
-      "NO_PERMISSIONS": {
-        "TITLE": "No permissions assigned",
-        "TEXT": "Add first permission for this role"
-      },
-      "ASSIGN_DIALOG": {
-        "HEADER": "Assign permissions",
-        "ASSIGN_TO": "Assign permissions to role: {{name}}",
-        "SELECT_PERMISSIONS": "Select permissions",
-        "SELECT_ROLE_FIRST": "Select a role first to assign permissions."
-      },
-      "table": {
-        "HEADERS": {
-          "ID": "ID",
-          "NAME": "Name",
-          "DESCRIPTION": "Description",
-          "CREATED_AT": "Created At"
-        },
-        "SEARCH": "Search...",
-        "PAGE_REPORT": "Showing {first} to {last} of {totalRecords} items",
-        "EMPTY": "No roles to display"
-      },
-      "messages": {
-        "CREATED": "Role created",
-        "UPDATED": "Role updated",
-        "DELETED": "Role deleted",
-        "EXPORTED": "Export completed"
-      ,
-      "ASSIGNED": "Permissions assigned",
-      "NO_SELECTION": "No permissions selected",
-      "LOADING_PERMISSIONS_FAILED": "Failed to load permissions",
-      "ASSIGN_FAILED": "Failed to assign permissions"
-      },
-      "confirm": {
-        "DELETE_QUESTION": "Attention! Do you really want to delete role"
-      }
+    "admin": {
+      "INSTRUCTIONS": "Administration instructions"
     },
     "app": {
       "TITLE": "DeepSea"
+    },
+    "header": {
+      "LOGOUT": "Logout",
+      "PROFILE": "Profile"
     },
     "lang": {
       "EN": "EN",
       "RU": "RU"
     },
+    "login": {
+      "EMAIL_LABEL": "Email",
+      "EMAIL_PLACEHOLDER": "Email address",
+      "ERROR_ENTER_CREDENTIALS": "Please enter email and password",
+      "ERROR_FORBIDDEN": "Access forbidden.",
+      "ERROR_INVALID_CREDENTIALS": "Invalid username or password.",
+      "ERROR_LOGIN_FAILED": "Login failed. Please try again later.",
+      "ERROR_UNAUTHORIZED": "Authorization required.",
+      "FORGOT_PASSWORD": "Forgot password?",
+      "PASSWORD_LABEL": "Password",
+      "PASSWORD_PLACEHOLDER": "Password",
+      "REMEMBER_ME": "Remember me",
+      "SIGNING_IN": "Signing in...",
+      "SIGN_IN": "Sign In",
+      "SUBTITLE": "Sign in to continue",
+      "WELCOME": "Welcome to DeepSea v.3!"
+    },
     "menu": {
-      "DASHBOARD": "Dashboard",
-      "PROJECTSMENU": "Projects",
-      "MATERIALS": "Materials",
-      "EQUIPMENT": "Equipment",
+      "ACTIONS": "Actions",
+      "ACTIVE": "Status",
+      "ACTIVE_NO": "Inactive",
+      "ACTIVE_YES": "Active",
       "ADMINISTRATION": "Administration",
-      "SETTINGS": "Settings",
-      "PROFILE": "Profile",
-      "LOGOUT": "Logout",
-      "USERS": "Users",
-      "ROLES": "Roles",
-      "PERMISSIONS": "Permissions",
-      "PROJECTS": "Projects",
+      "AGE": "Age",
+      "ANY": "All",
+      "CANCEL": "Cancel",
+      "COMMUNICATION": "Communication",
+      "CONFIRM": "Confirm",
+      "CREATE": "Create",
+      "CREATE_USER": "Create",
+      "DASHBOARD": "Dashboard",
+      "DELETE": "Delete",
+      "DELETE_USER_QUESTION": "Attention! Do you really want to delete user",
+      "DEPARTMENT": "Department",
+      "DEPARTMENTS": "Departments",
       "DOCUMENTS": "Documents",
-      "REPORTS": "Reports",
+      "EDIT_USER": "Edit user",
+      "EMAIL": "Email",
+      "EQUIPMENT": "Equipment",
+      "EQUIPMENTMENU": "Equipment",
+      "EXPORT": "Export",
+      "FIRST_NAME": "First name",
       "ISSUES": "Issues",
+      "JOB_TITLE": "Job title",
+      "LAST_NAME": "Last name",
+      "LOGOUT": "Logout",
+      "MATERIALS": "Materials",
+      "MATERIALSMENU": "Materials",
+      "MIDDLE_NAME": "Middle name",
+      "NAME": "Name",
+      "NOTIFICATIONS": "Notifications",
+      "ORGANIZATION": "Organization",
+      "PERMISSIONS": "Permissions",
+      "PHONE": "Phone",
+      "PROFILE": "Profile",
+      "PROJECTS": "Projects",
+      "PROJECTSMENU": "Projects",
+      "REPORTS": "Reports",
+      "ROLES": "Roles",
+      "SAVE": "Save",
+      "SELECT_DEPARTMENT": "Select department",
+      "SETTINGS": "Settings",
+      "SPECIALIZATIONS": "Specialization",
       "SPECIFICATIONS": "Specifications",
       "STATEMENTS": "Statements",
       "SUPPLIERS": "Suppliers",
-      "NOTIFICATIONS": "Notifications",
-      "SPECIALIZATIONS": "Specialization",
-      "DEPARTMENTS": "Departments",
-      "WIKI": "WiKi",
-      "EQUIPMENTMENU": "Equipment",
-      "MATERIALSMENU": "Materials",
       "USERNAME": "Username",
-      "EMAIL": "Email",
-      "PHONE": "Phone",
-      "NAME": "Name",
-      "DEPARTMENT": "Department",
-      "JOB_TITLE": "Job title",
-      "ACTIVE": "Status",
-      "ACTIONS": "Actions",
-      "USER_MANAGEMENT": "User management",
-      "ORGANIZATION": "Organization",
-      "COMMUNICATION": "Communication",
-      "EDIT_USER": "Edit user",
-      "AGE": "Age",
-      "CANCEL": "Cancel",
-      "SAVE": "Save",
-      "FIRST_NAME": "First name",
-      "LAST_NAME": "Last name",
-      "MIDDLE_NAME": "Middle name",
-      "SELECT_DEPARTMENT": "Select department",
-      "ACTIVE_YES": "Active",
-      "ACTIVE_NO": "Inactive",
-      "EXPORT": "Export",
-      "CREATE_USER": "Create",
-      "DELETE": "Delete",
-      "ANY": "All",
-      "DELETE_USER_QUESTION": "Attention! Do you really want to delete user",
+      "USERS": "Users",
       "USER_CREATED": "User created",
-      "USER_UPDATED": "User updated",
       "USER_DELETED": "User deleted",
-      "CONFIRM": "Confirm",
-      "CREATE": "Create"
+      "USER_MANAGEMENT": "User management",
+      "USER_UPDATED": "User updated",
+      "WIKI": "WiKi"
+    },
+    "passwordReset": {
+      "BACK_TO_LOGIN": "Back to sign in",
+      "EMAIL_LABEL": "Email",
+      "EMAIL_PLACEHOLDER": "Email address",
+      "ERROR_ENTER_EMAIL": "Please enter email",
+      "ERROR_SENDING": "Failed to send request. Please try again later.",
+      "MSG_SENT_IF_EXISTS": "If the email exists, an instruction message has been sent.",
+      "SENDING": "Sending...",
+      "SEND_INSTRUCTIONS": "Send instructions",
+      "SUBTITLE": "Enter your email and we will send instructions to reset your password.",
+      "TITLE": "Password recovery"
+    },
+    "permissions": {
+      "CODE": "Code",
+      "CREATE": "Create",
+      "CREATED": "Permission created",
+      "CREATED_AT": "Created At",
+      "DELETED": "Permission deleted",
+      "DELETE_QUESTION": "Attention! Do you really want to delete permission",
+      "DESCRIPTION": "Description",
+      "EDIT": "Edit",
+      "EXPORTED": "Export completed",
+      "NAME": "Name",
+      "UPDATED": "Permission updated",
+      "confirm": {
+        "DELETE_QUESTION": "Attention! Do you really want to delete permission"
+      },
+      "form": {
+        "CANCEL": "Cancel",
+        "CODE": "Code",
+        "CREATE_LABEL": "Create",
+        "DESCRIPTION": "Description",
+        "EDIT_LABEL": "Edit",
+        "NAME": "Name",
+        "SAVE": "Save"
+      },
+      "messages": {
+        "CREATED": "Permission created",
+        "DELETED": "Permission deleted",
+        "EXPORTED": "Export completed",
+        "UPDATED": "Permission updated"
+      },
+      "table": {
+        "EMPTY": "No permissions to display",
+        "HEADERS": {
+          "CODE": "Code",
+          "CREATED_AT": "Created At",
+          "DESCRIPTION": "Description",
+          "ID": "ID",
+          "NAME": "Name"
+        }
+      }
+    },
+    "projects": {
+      "STATUS_COMPLETED": "Status Completed",
+      "confirm": {
+        "DELETE_QUESTION": "Attention! Do you really want to delete project"
+      },
+      "form": {
+        "CANCEL": "Cancel",
+        "CODE": "Code",
+        "DESCRIPTION": "Description",
+        "NAME": "Name",
+        "OWNER": "Owner",
+        "SAVE": "Save",
+        "STATUS": "Status"
+      },
+      "menu": {
+        "LIST": "Projects List",
+        "USERS": "Project Users",
+        "TITLE": "PROJECT MANAGEMENT"
+      },
+      "messages": {
+        "CREATED": "CREATED",
+        "DELETED": "DELETED",
+        "SUMMARY_CREATE": "SUMMARY CREATE",
+        "SUMMARY_DELETE": "SUMMARY DELETE",
+        "SUMMARY_EDIT": "SUMMARY EDIT",
+        "UPDATED": "UPDATED"
+      },
+      "table": {
+        "HEADERS": {
+          "CODE": "Code",
+          "CREATED_AT": "Created At",
+          "ROLE": "Role",
+          "USER": "User",
+          "DESCRIPTION": "Description",
+          "ID": "ID",
+          "NAME": "Name",
+          "OWNER": "Owner",
+          "STATUS": "Status"
+        },
+        "SEARCH": "Search"
+      },
+      "users": {
+        "ASSIGN": "Assign",
+        "ASSIGNMENTS_ROLES": "Assignments Roles",
+        "ASSIGNMENTS_SELECT_ROLES": "Select Roles",
+        "ASSIGNMENTS_SELECT_USERS": "Select Users",
+        "ASSIGNMENTS_USERS": "Assignments Users",
+        "SELECT_PROJECT": {
+          "TEXT": "Select a project on the left to display users",
+          "TITLE": "Project not selected"
+        },
+        "confirm": {
+          "DELETE_QUESTION": "Attention! Do you really want to delete user from project"
+        },
+        "messages": {
+          "CREATED": "Created",
+          "DELETED": "Deleted",
+          "SUMMARY_CREATE": "Summary Create",
+          "SUMMARY_DELETE": "Summary Delete"
+        }
+      }
+    },
+    "roles": {
+      "ASSIGN_DIALOG": {
+        "ASSIGN_TO": "Assign permissions to role: {{name}}",
+        "HEADER": "Assign permissions",
+        "SELECT_PERMISSIONS": "Select permissions",
+        "SELECT_ROLE_FIRST": "Select a role first to assign permissions."
+      },
+      "NO_PERMISSIONS": {
+        "TEXT": "Add first permission for this role",
+        "TITLE": "No permissions assigned"
+      },
+      "NO_ROLE_SELECTED": {
+        "TEXT": "Select a role from the list to view its permissions.",
+        "TITLE": "No role selected"
+      },
+      "PERMISSIONS_TITLE": "Roles permissions",
+      "confirm": {
+        "DELETE_QUESTION": "Attention! Do you really want to delete role"
+      },
+      "form": {
+        "CANCEL": "Cancel",
+        "CREATE_LABEL": "Create",
+        "DESCRIPTION": "Description",
+        "EDIT_LABEL": "Edit",
+        "NAME": "Name",
+        "SAVE": "Save"
+      },
+      "messages": {
+        "ASSIGNED": "Permissions assigned",
+        "ASSIGN_FAILED": "Failed to assign permissions",
+        "CREATED": "Role created",
+        "DELETED": "Role deleted",
+        "EXPORTED": "Export completed",
+        "LOADING_PERMISSIONS_FAILED": "Failed to load permissions",
+        "NO_SELECTION": "No permissions selected",
+        "UPDATED": "Role updated"
+      },
+      "table": {
+        "EMPTY": "No roles to display",
+        "HEADERS": {
+          "CREATED_AT": "Created At",
+          "DESCRIPTION": "Description",
+          "ID": "ID",
+          "NAME": "Name"
+        },
+        "PAGE_REPORT": "Showing {first} to {last} of {totalRecords} items",
+        "SEARCH": "Search..."
+      }
     },
     "user_actions": {
       "CREATE_USER": "Create",
       "DELETE": "Delete"
-    },
-    "admin": {
-      "INSTRUCTIONS": "Administration instructions"
+    }
+    ,
+    "issues": {
+      "filters": {
+        "IS_CLOSED": "Closed",
+        "IS_ACTIVE": "Active",
+        "PROJECT_ID": "Project",
+        "STATUS_ID": "Status",
+        "ASSIGNEE_ID": "Assignee",
+        "AUTHOR_ID": "Author",
+        "TYPE_ID": "Type",
+  "PRIORITY": "Priority",
+        "ESTIMATED_HOURS": "Estimated hours",
+        "ESTIMATED_HOURS_MIN": "Estimated hours (min)",
+        "ESTIMATED_HOURS_MAX": "Estimated hours (max)",
+        "START_DATE_FROM": "Start date from",
+        "START_DATE_TO": "Start date to",
+        "DUE_DATE_FROM": "Due date from",
+        "DUE_DATE_TO": "Due date to",
+        "SELECT_PROJECTS": "Select projects",
+        "SELECT_STATUSES": "Select statuses",
+        "SELECT_ASSIGNEES": "Select assignees",
+        "SELECT_AUTHORS": "Select authors",
+        "SELECT_PRIORITIES": "Select priorities"
+      },
+      "table": {
+          "SEARCH": "Search...",
+          "PROJECT": "Project",
+          "TITLE": "Title",
+          "ASSIGNEE": "Assignee",
+          "AUTHOR": "Author",
+          "STATUS": "Status",
+          "PRIORITY": "Priority",
+          "ESTIMATED_HOURS": "Estimated hours",
+          "START_DATE": "Start date",
+          "DUE_DATE": "Due date",
+          "CREATED_AT": "Created at",
+          "EMPTY": "No issues to display",
+          "FILTERS_APPLIED": "Filters applied",
+          "FILTERS_APPLY_ERROR": "Failed to apply filters"
+      },
+      "priority": {
+        "HIGH": "High",
+        "MEDIUM": "Medium",
+        "LOW": "Low"
+      }
     }
   }
 }
+

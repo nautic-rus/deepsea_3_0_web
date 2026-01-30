@@ -9,7 +9,7 @@
 
 .admin-subpage-content {
   flex: 1 1 auto;
-  min-height: 0;
+  height: 80vh;
   display: flex;
   flex-direction: column;
 }
@@ -53,4 +53,23 @@
 /* Toast customization for user actions */
 .user-toast .p-toast-message {
   border-radius: 8px;
+}
+
+/* Avatar styles for users table */
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: inline-block;
+}
+.user-avatar-initials {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-400, #cbd5e1);
+  color: var(--text-color-on-primary, #fff);
+  font-weight: 600;
+  font-size: 0.85rem;
+  line-height: 32px;
 }

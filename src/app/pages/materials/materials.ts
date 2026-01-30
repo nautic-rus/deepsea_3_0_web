@@ -17,7 +17,7 @@ export class MaterialsComponent implements OnInit {
   constructor(private translate: TranslateService) {}
 
   ngOnInit(): void {
-    const t = (k: string) => this.translate.instant(k) || k;
+    const t = (k: string) => this.translate.instant(k) || k; // TODO: make reactive (refresh on translate.onLangChange)
     this.menuItems = [
       { label: t('MENU.USERS'), icon: 'pi pi-users', routerLink: ['/administration/users'] },
       { label: t('MENU.ROLES'), icon: 'pi pi-briefcase', routerLink: ['/administration/roles'] },

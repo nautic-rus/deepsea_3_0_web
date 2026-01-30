@@ -23,6 +23,10 @@ export class UsersService {
     return this.http.post('/api/create_users', payload);
   }
 
+  getUser(id: string | number): Observable<any> {
+    return this.http.get(`/api/users/${encodeURIComponent(String(id))}`);
+  }
+
   deleteUser(id: string | number): Observable<any> {
     return this.http.delete(`/api/users/${encodeURIComponent(String(id))}`);
   }

@@ -175,7 +175,7 @@ export class AdminRolesComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Failed to load role permissions:', err);
-        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.EXPORT') || 'Error', detail: (err && err.message) ? err.message : 'Failed to load permissions' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.EXPORT') || 'Error', detail: (err && err.message) ? err.message : 'Failed to load permissions' }); } catch (e) {}
         this.permissionsLoading = false;
         this.safeDetect();
       }
@@ -186,7 +186,7 @@ export class AdminRolesComponent implements OnInit, OnDestroy {
   // opens the assign-permission dialog (simple stub)
   openAssignPermission(): void {
     if (!this.selectedRole) {
-      try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.CONFIRM') || 'Info', detail: 'Select a role first' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+      try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.CONFIRM') || 'Info', detail: 'Select a role first' }); } catch (e) {}
       return;
     }
     // prepare selection and fetch permissions list
@@ -208,7 +208,7 @@ export class AdminRolesComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Failed to load permissions list:', err);
-        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.EXPORT') || 'Error', detail: this.translate.instant('components.roles.messages.LOADING_PERMISSIONS_FAILED') || ((err && err.message) ? err.message : 'Failed to load permissions') }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.EXPORT') || 'Error', detail: this.translate.instant('components.roles.messages.LOADING_PERMISSIONS_FAILED') || ((err && err.message) ? err.message : 'Failed to load permissions') }); } catch (e) {}
         this.assignPermissionLoading = false;
         this.safeDetect();
       }
@@ -220,7 +220,7 @@ export class AdminRolesComponent implements OnInit, OnDestroy {
   assignPermissions(): void {
     if (!this.selectedRole) return;
     if (!this.selectedPermissionIds || !this.selectedPermissionIds.length) {
-      try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.SAVE') || 'Save', detail: this.translate.instant('components.roles.messages.NO_SELECTION') || 'No permissions selected' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+      try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.SAVE') || 'Save', detail: this.translate.instant('components.roles.messages.NO_SELECTION') || 'No permissions selected' }); } catch (e) {}
       return;
     }
     this.assignPermissionLoading = true;
@@ -230,14 +230,14 @@ export class AdminRolesComponent implements OnInit, OnDestroy {
       next: (res: any) => {
         // reload permissions for the role to reflect changes
         this.loadRolePermissions(this.selectedRole!.id as any);
-        try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Save', detail: this.translate.instant('components.roles.messages.ASSIGNED') || 'Permissions assigned' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+        try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Save', detail: this.translate.instant('components.roles.messages.ASSIGNED') || 'Permissions assigned' }); } catch (e) {}
         this.assignPermissionDialogVisible = false;
         this.assignPermissionLoading = false;
         this.safeDetect();
       },
       error: (err) => {
         console.error('Failed to assign permissions:', err);
-        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.SAVE') || 'Save', detail: this.translate.instant('components.roles.messages.ASSIGN_FAILED') || ((err && err.message) ? err.message : 'Failed to assign permissions') }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.SAVE') || 'Save', detail: this.translate.instant('components.roles.messages.ASSIGN_FAILED') || ((err && err.message) ? err.message : 'Failed to assign permissions') }); } catch (e) {}
         this.assignPermissionLoading = false;
         this.safeDetect();
       }
@@ -253,7 +253,7 @@ export class AdminRolesComponent implements OnInit, OnDestroy {
     };
 
     if (!this.validateRoleForm()) {
-      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CONFIRM') || 'Error', detail: 'Please fix form errors' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CONFIRM') || 'Error', detail: 'Please fix form errors' }); } catch (e) {}
       return;
     }
 
@@ -264,7 +264,7 @@ export class AdminRolesComponent implements OnInit, OnDestroy {
           const item = created && created.data ? created.data : (created || payload);
           const newRole: Role = { id: item.id ?? item._id ?? (this.roles.length ? Math.max(...this.roles.map(x => Number(x.id))) + 1 : 1), name: item.name, description: item.description || '', created_at: item.created_at || new Date().toISOString() };
           this.roles = [newRole, ...this.roles];
-          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.CREATE') || 'Create', detail: this.translate.instant('components.permissions.messages.CREATED') || 'Role created' }); } catch (e) { console.warn('messageService.add failed', e); } // TODO: make reactive (refresh on translate.onLangChange)
+          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.CREATE') || 'Create', detail: this.translate.instant('components.permissions.messages.CREATED') || 'Role created' }); } catch (e) { console.warn('messageService.add failed', e); }
           this.roleDialogVisible = false;
           this.roleModel = {};
           this.isCreatingRole = false;
@@ -273,7 +273,7 @@ export class AdminRolesComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           console.error('Failed to create role', err);
-          try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CREATE') || 'Create', detail: (err && err.message) ? err.message : 'Failed to create role' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+          try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CREATE') || 'Create', detail: (err && err.message) ? err.message : 'Failed to create role' }); } catch (e) {}
           this.loading = false;
           this.safeDetect();
         }
@@ -284,7 +284,7 @@ export class AdminRolesComponent implements OnInit, OnDestroy {
         next: (updated: any) => {
           const item = updated && updated.data ? updated.data : (updated || payload);
           this.roles = this.roles.map(r => (r.id === id ? { ...r, ...item } as Role : r));
-          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Save', detail: this.translate.instant('components.permissions.messages.UPDATED') || 'Role updated' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Save', detail: this.translate.instant('components.permissions.messages.UPDATED') || 'Role updated' }); } catch (e) {}
           this.roleDialogVisible = false;
           this.roleModel = {};
           this.loading = false;
@@ -292,7 +292,7 @@ export class AdminRolesComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           console.error('Failed to update role', err);
-          try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.SAVE') || 'Save', detail: (err && err.message) ? err.message : 'Failed to update role' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+          try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.SAVE') || 'Save', detail: (err && err.message) ? err.message : 'Failed to update role' }); } catch (e) {}
           this.loading = false;
           this.safeDetect();
         }
@@ -304,7 +304,7 @@ export class AdminRolesComponent implements OnInit, OnDestroy {
     validateRoleForm(): boolean {
       this.formErrors = {};
       const name = (this.roleModel && this.roleModel.name) ? String(this.roleModel.name).trim() : '';
-      if (!name) this.formErrors.name = (this.translate.instant('components.permissions.form.NAME') || 'Name') + ' is required'; // TODO: make reactive (refresh on translate.onLangChange)
+      if (!name) this.formErrors.name = (this.translate.instant('components.permissions.form.NAME') || 'Name') + ' is required';
       this.safeDetect();
       return Object.keys(this.formErrors).length === 0;
     }
@@ -333,13 +333,13 @@ export class AdminRolesComponent implements OnInit, OnDestroy {
     this.rolesService.deleteRole(role.id).subscribe({
       next: () => {
         this.roles = this.roles.filter(r => r.id !== role.id);
-        try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Delete', detail: 'Role deleted' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+        try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Delete', detail: 'Role deleted' }); } catch (e) {}
         this.loading = false;
         this.safeDetect();
       },
       error: (err) => {
         console.error('Failed to delete role', err);
-        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.DELETE') || 'Delete', detail: (err && err.message) ? err.message : 'Failed to delete role' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.DELETE') || 'Delete', detail: (err && err.message) ? err.message : 'Failed to delete role' }); } catch (e) {}
         this.loading = false;
         this.safeDetect();
       }
@@ -359,7 +359,7 @@ export class AdminRolesComponent implements OnInit, OnDestroy {
     try {
       const rows = this.roles || [];
       if (!rows.length) {
-        try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('MENU.ANY') || 'No items to export' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+        try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('MENU.ANY') || 'No items to export' }); } catch (e) {}
         return;
       }
       const headers = ['ID', 'Name', 'Description', 'Created At'];
@@ -385,10 +385,10 @@ export class AdminRolesComponent implements OnInit, OnDestroy {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-      try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: 'Export completed' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+      try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: 'Export completed' }); } catch (e) {}
     } catch (err) {
       console.error('Export failed', err);
-      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: 'Export failed' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: 'Export failed' }); } catch (e) {}
     }
   }
 
@@ -398,13 +398,13 @@ export class AdminRolesComponent implements OnInit, OnDestroy {
     this.rolesService.deleteRolePermission(this.selectedRole.id as any, perm.id as any).subscribe({
       next: () => {
         this.rolePermissions = this.rolePermissions.filter(p => p.id !== perm.id);
-        try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Delete', detail: 'Permission removed from role' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+        try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Delete', detail: 'Permission removed from role' }); } catch (e) {}
         this.permissionsLoading = false;
         this.safeDetect();
       },
       error: (err) => {
         console.error('Failed to remove permission from role', err);
-        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.DELETE') || 'Delete', detail: (err && err.message) ? err.message : 'Failed to remove permission' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.DELETE') || 'Delete', detail: (err && err.message) ? err.message : 'Failed to remove permission' }); } catch (e) {}
         this.permissionsLoading = false;
         this.safeDetect();
       }

@@ -18,7 +18,7 @@
       [value]="users"
       [loading]="loading"
       [scrollable]="true"
-      scrollHeight="700px"
+      scrollHeight="flex"
       [rows]="10"
       size="small"
       [globalFilterFields]="['id','email','first_name','last_name','department','job_title']"
@@ -144,7 +144,17 @@
               <p-tableCheckbox [value]="user" />
           </td>
           <td>{{ user.id }}</td>
-          <td >{{ (user.first_name || '') + ' ' + (user.last_name || '') }}</td>
+                    <td>
+                        <div class="flex items-center gap-2">
+                            <ng-container *ngIf="user?.avatar_url; else initialsTpl">
+                                <img [src]="user.avatar_url" alt="avatar" class="user-avatar" />
+                            </ng-container>
+                            <ng-template #initialsTpl>
+                                <div class="user-avatar user-avatar-initials" [style.background]="avatarColor(user)" [style.color]="avatarTextColor(user)">{{ getInitials(user) }}</div>
+                            </ng-template>
+                            <span>{{ formatSurnameInitials(user) }}</span>
+                        </div>
+                    </td>
           <td>{{ user.email }}</td>
           <td >{{ user.phone || '-' }}</td>
           <td>{{ user.department }}</td>

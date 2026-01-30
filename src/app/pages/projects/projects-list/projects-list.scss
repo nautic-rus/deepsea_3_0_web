@@ -5,14 +5,9 @@
   min-height: 0;
 }
 
-.admin-subpage-tools {
-  padding: 1rem;
-}
-
 .admin-subpage-content {
   flex: 1 1 auto;
-  /* set height to viewport minus header. Use CSS var --app-header-height to configure (fallback 64px) */
-  height: 80vh;
+  min-height: 0;
   display: flex;
   flex-direction: column;
 }
@@ -40,6 +35,7 @@
 
 /* Style the confirm dialog to match the edit dialog appearance */
 .user-confirm-dialog {
+  /* card-like surface and subtle shadow to match edit dialog */
   box-shadow: 0 4px 14px rgba(16,24,40,0.08);
 }
 .user-confirm-dialog .p-dialog-header {
@@ -55,41 +51,5 @@
 /* Toast customization for user actions */
 .user-toast .p-toast-message {
   border-radius: 8px;
-}
-
-/* Avatar styles for issues table - match users page */
-.user-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-  display: inline-block;
-}
-.user-avatar-initials {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--surface-400, #cbd5e1);
-  color: var(--text-color-on-primary, #fff);
-  font-weight: 600;
-  font-size: 0.85rem;
-  line-height: 32px;
-}
-
-.issue-query-grid{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
-/* Make table cells wrap long text for the issues table only */
-.issues-table th,
-.issues-table td {
-  white-space: normal !important;
-}
-
-/* Ensure avatar + text alignment doesn't force nowrap */
-.issues-table .flex.items-center {
-  white-space: normal !important;
 }
 

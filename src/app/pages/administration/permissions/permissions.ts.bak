@@ -154,7 +154,7 @@ export class AdminPermissionsComponent implements OnInit {
     };
 
     if (!this.validateForm()) {
-      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CONFIRM') || 'Error', detail: 'Please fix form errors' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CONFIRM') || 'Error', detail: 'Please fix form errors' }); } catch (e) {}
       return;
     }
 
@@ -167,7 +167,7 @@ export class AdminPermissionsComponent implements OnInit {
           this.editModel = {} as any;
           this.loading = false;
           this.isCreating = false;
-          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.CREATE') || 'Success', detail: this.translate.instant('components.permissions.messages.CREATED') || 'Created' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.CREATE') || 'Success', detail: this.translate.instant('components.permissions.messages.CREATED') || 'Created' }); } catch (e) {}
           this.loadPermissions();
           this.safeDetect();
         },
@@ -175,7 +175,7 @@ export class AdminPermissionsComponent implements OnInit {
           console.error('Failed to create item', err);
           this.error = (err && err.message) ? err.message : 'Failed to create item';
           this.loading = false;
-          try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CREATE') || 'Create', detail: (err && err.message) ? err.message : 'Failed to create permission' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+          try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CREATE') || 'Create', detail: (err && err.message) ? err.message : 'Failed to create permission' }); } catch (e) {}
           this.safeDetect();
         }
       });
@@ -185,7 +185,7 @@ export class AdminPermissionsComponent implements OnInit {
           this.displayDialog = false;
           this.editModel = {} as any;
           this.loading = false;
-          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Success', detail: this.translate.instant('components.permissions.messages.UPDATED') || 'Updated' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Success', detail: this.translate.instant('components.permissions.messages.UPDATED') || 'Updated' }); } catch (e) {}
           this.loadPermissions();
           this.safeDetect();
         },
@@ -193,7 +193,7 @@ export class AdminPermissionsComponent implements OnInit {
           console.error('Failed to update item', err);
           this.error = (err && err.message) ? err.message : 'Failed to update item';
           this.loading = false;
-          try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.SAVE') || 'Save', detail: (err && err.message) ? err.message : 'Failed to update permission' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+          try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.SAVE') || 'Save', detail: (err && err.message) ? err.message : 'Failed to update permission' }); } catch (e) {}
           this.safeDetect();
         }
       });
@@ -203,7 +203,7 @@ export class AdminPermissionsComponent implements OnInit {
   confirmDelete(item: Permission): void {
     if (!item) return;
     this.confirmationService.confirm({
-  message: `${this.translate.instant('components.permissions.confirm.DELETE_QUESTION') || 'Delete item'} "${item.name || item.id}"?`, // TODO: make reactive (refresh on translate.onLangChange)
+  message: `${this.translate.instant('components.permissions.confirm.DELETE_QUESTION') || 'Delete item'} "${item.name || item.id}"?`,
       icon: 'pi pi-exclamation-triangle',
       accept: () => this.deletePermission(item)
     });
@@ -216,7 +216,7 @@ export class AdminPermissionsComponent implements OnInit {
         this.permissions = this.permissions.filter(u => u.id !== item.id);
         this.selectedPermissions = this.selectedPermissions.filter(s => s.id !== item.id);
         this.loading = false;
-  try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Delete', detail: this.translate.instant('components.permissions.messages.DELETED') || 'Deleted' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+  try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Delete', detail: this.translate.instant('components.permissions.messages.DELETED') || 'Deleted' }); } catch (e) {}
         this.safeDetect();
       },
       error: (err) => {
@@ -232,13 +232,13 @@ export class AdminPermissionsComponent implements OnInit {
     try {
       const rows = this.permissions || [];
       if (!rows.length) {
-        try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('MENU.ANY') || 'No users to export' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+        try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('MENU.ANY') || 'No users to export' }); } catch (e) {}
         return;
       }
-  const headers = ['ID', this.translate.instant('components.permissions.table.HEADERS.NAME') || 'Name', this.translate.instant('components.permissions.table.HEADERS.CODE') || 'Code', this.translate.instant('components.permissions.table.HEADERS.DESCRIPTION') || 'Description', this.translate.instant('components.permissions.table.HEADERS.CREATED_AT') || 'Created At']; // TODO: make reactive (refresh on translate.onLangChange)
+  const headers = ['ID', this.translate.instant('components.permissions.table.HEADERS.NAME') || 'Name', this.translate.instant('components.permissions.table.HEADERS.CODE') || 'Code', this.translate.instant('components.permissions.table.HEADERS.DESCRIPTION') || 'Description', this.translate.instant('components.permissions.table.HEADERS.CREATED_AT') || 'Created At'];
       const esc = (v: any) => {
         if (v === null || v === undefined) return '';
-        if (typeof v === 'boolean') return v ? (this.translate.instant('MENU.ACTIVE_YES') || 'Active') : (this.translate.instant('MENU.ACTIVE_NO') || 'Inactive'); // TODO: make reactive (refresh on translate.onLangChange)
+        if (typeof v === 'boolean') return v ? (this.translate.instant('MENU.ACTIVE_YES') || 'Active') : (this.translate.instant('MENU.ACTIVE_NO') || 'Inactive');
         const s = String(v);
         return '"' + s.replace(/"/g, '""') + '"';
       };
@@ -259,10 +259,10 @@ export class AdminPermissionsComponent implements OnInit {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-  try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('components.permissions.messages.EXPORTED') || 'Export completed' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+  try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('components.permissions.messages.EXPORTED') || 'Export completed' }); } catch (e) {}
     } catch (err) {
       console.error('Export failed', err);
-      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: 'Export failed' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: 'Export failed' }); } catch (e) {}
     }
   }
 
@@ -271,8 +271,8 @@ export class AdminPermissionsComponent implements OnInit {
     this.formErrors = {};
     const name = (this.editModel && this.editModel.name) ? String(this.editModel.name).trim() : '';
     const code = (this.editModel && this.editModel.code) ? String(this.editModel.code).trim() : '';
-  if (!name) this.formErrors.name = (this.translate.instant('components.permissions.form.NAME') || 'Name') + ' is required'; // TODO: make reactive (refresh on translate.onLangChange)
-  if (!code) this.formErrors.code = (this.translate.instant('components.permissions.form.CODE') || 'Code') + ' is required'; // TODO: make reactive (refresh on translate.onLangChange)
+  if (!name) this.formErrors.name = (this.translate.instant('components.permissions.form.NAME') || 'Name') + ' is required';
+  if (!code) this.formErrors.code = (this.translate.instant('components.permissions.form.CODE') || 'Code') + ' is required';
     this.safeDetect();
     return Object.keys(this.formErrors).length === 0;
   }

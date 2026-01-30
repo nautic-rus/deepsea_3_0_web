@@ -1,0 +1,316 @@
+import { Component, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { FormsModule } from '@angular/forms';
+import { ToolbarModule } from 'primeng/toolbar';
+import { ButtonModule } from 'primeng/button';
+import { TableModule } from 'primeng/table';
+import { InputTextModule } from 'primeng/inputtext';
+import { InputIconModule } from 'primeng/inputicon';
+import { ProjectsListService } from './projects-list.service';
+import { Injectable } from '@angular/core';
+import { UsersService } from '../../administration/users/users.service';
+import { forkJoin } from 'rxjs';
+import { AuthService } from '../../../auth/auth.service';
+import { IconFieldModule } from 'primeng/iconfield';
+import { DialogModule } from 'primeng/dialog';
+import { ToastModule } from 'primeng/toast';
+import { MessageService, ConfirmationService } from 'primeng/api';
+import { TagModule } from 'primeng/tag';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { Select } from 'primeng/select';
+
+@Component({
+  selector: 'app-projects-list',
+  standalone: true,
+  imports: [CommonModule, TranslateModule, FormsModule, ToolbarModule, ButtonModule, TableModule, InputTextModule, InputIconModule, IconFieldModule, DialogModule, ToastModule, TagModule, ConfirmDialogModule, Select],
+  providers: [MessageService, ConfirmationService],
+  templateUrl: './projects-list.html',
+  styleUrls: ['./projects-list.scss']
+})
+export class ProjectsListComponent implements OnInit, AfterViewInit {
+  projects: any[] = [];
+  loading = false;
+  selectedProjects: any[] = [];
+  // Cache of owner id -> display name (ФИО)
+  ownerNames: Record<string, string> = {};
+  // current logged in user id (used as default owner_id)
+  currentUserId: string | number | null = null;
+  // dialog / form state
+  displayDialog = false;
+  editModel: any = {};
+  isCreating = false;
+  error: string | null = null;
+  // options for owner select
+  usersOptions: { label: string; value: any }[] = [];
+  // status options for select (populated in ngOnInit to support translations)
+  statuses: { label: string; value: any }[] = [];
+
+  constructor(private svc: ProjectsListService, private cd: ChangeDetectorRef, private messageService: MessageService, private translate: TranslateService, private usersService: UsersService, private confirmationService: ConfirmationService, private auth: AuthService) {}
+
+  private safeDetect(): void {
+    try { this.cd.detectChanges(); } catch (e) { /* noop */ }
+  }
+
+  ngOnInit(): void {
+    // get current user id for owner defaults
+    try {
+      this.auth.me().subscribe({
+        next: (res: any) => {
+          const user = (res && (res as any).data) ? (res as any).data : res;
+          if (user && (user.id !== undefined && user.id !== null)) {
+            this.currentUserId = user.id;
+            // also cache current user's name for owner display
+            this.ownerNames[String(this.currentUserId)] = this.formatUserName(user) || String(this.currentUserId);
+          }
+        },
+        error: () => {
+          // ignore — fallback to null
+        }
+      });
+    } catch (e) {
+      console.warn('Failed to get current user', e);
+    }
+    // prepare status options with translations
+    try {
+      this.statuses = [
+        { label: this.translate.instant('MENU.ACTIVE_YES') || 'Active', value: 'active' }, // TODO: make reactive (refresh on translate.onLangChange)
+        { label: this.translate.instant('MENU.ACTIVE_NO') || 'Inactive', value: 'inactive' }, // TODO: make reactive (refresh on translate.onLangChange)
+        { label: this.translate.instant('components.projects.STATUS_COMPLETED') || 'Completed', value: 'completed' } // TODO: make reactive (refresh on translate.onLangChange)
+      ];
+    } catch (e) {
+      this.statuses = [{ label: 'Active', value: 'active' }, { label: 'Inactive', value: 'inactive' }, { label: 'Completed', value: 'completed' }];
+    }
+
+    // Defer loading users and projects until after the first change detection
+    // to avoid ExpressionChangedAfterItHasBeenCheckedError caused by
+    // asynchronous updates to template-bound properties during init.
+  }
+
+  ngAfterViewInit(): void {
+    // Schedule after view init so initial change detection completes first.
+    setTimeout(() => {
+      this.loadUsersForSelect();
+      this.loadProjects();
+    }, 0);
+  }
+
+  private loadUsersForSelect(): void {
+    try {
+      this.usersService.getUsers(1, 1000).subscribe({
+        next: (res: any) => {
+          const list = (res && res.data) ? res.data : (Array.isArray(res) ? res : (res || []));
+          this.usersOptions = (list || []).map((u: any) => ({ label: this.formatUserName(u) || (u.email || String(u.id)), value: u.id }));
+          this.safeDetect();
+        },
+        error: (err: any) => {
+          console.warn('Failed to load users for owner select', err);
+        }
+      });
+    } catch (e) {
+      console.warn('loadUsersForSelect failed', e);
+    }
+  }
+
+  // global filter helper for p-table caption search
+  onGlobalFilter(table: any, event: Event): void {
+    const val = (event && (event.target as HTMLInputElement)) ? (event.target as HTMLInputElement).value : '';
+    try { table.filterGlobal(val, 'contains'); } catch (e) { console.warn('onGlobalFilter failed', e); }
+  }
+
+  private loadProjects(): void {
+    this.loading = true;
+    this.svc.getProjects().subscribe({
+      next: (res: any) => {
+        // Accept both array responses and { data: [] } shapes
+        if (Array.isArray(res)) {
+          this.projects = res;
+        } else if (res && Array.isArray(res.data)) {
+          this.projects = res.data;
+        } else {
+          this.projects = [];
+        }
+        // After loading projects, ensure we have owner names cached
+        this.loadOwnerNames();
+        this.loading = false;
+      },
+      error: (err: any) => {
+        console.error('Failed to load projects', err);
+        this.projects = [];
+        this.loading = false;
+        this.safeDetect();
+      }
+    });
+  }
+
+  // Load owner (user) names for all projects and cache them to avoid repeated calls.
+  private loadOwnerNames(): void {
+    try {
+      const ids = Array.from(new Set((this.projects || []).map(p => p?.owner_id).filter(Boolean)));
+      const idsToFetch = ids.filter(id => !this.ownerNames[String(id)]);
+      if (!idsToFetch.length) return;
+      const calls = idsToFetch.map(id => this.usersService.getUser(id));
+      forkJoin(calls).subscribe({
+        next: (responses: any[]) => {
+          responses.forEach((resp: any, idx: number) => {
+            const id = idsToFetch[idx];
+            // Accept either direct user object or { data: user }
+            const user = (resp && (resp as any).data) ? (resp as any).data : resp;
+            this.ownerNames[String(id)] = this.formatUserName(user) || String(id);
+          });
+          this.safeDetect();
+        },
+        error: (err: any) => {
+          console.warn('Failed to load owner names', err);
+        }
+      });
+    } catch (e) {
+      console.warn('loadOwnerNames failed', e);
+    }
+  }
+
+  // Format user object to ФИО (Lastname Firstname Middlename) trimmed
+  private formatUserName(user: any): string {
+    if (!user) return '';
+    const parts = [user.last_name, user.first_name, user.middle_name].filter((s: any) => !!s).map((s: any) => String(s).trim());
+    return parts.join(' ').trim();
+  }
+
+  getOwnerName(id: any): string {
+    if (!id && id !== 0) return '—';
+    return this.ownerNames[String(id)] || String(id);
+  }
+
+  // Open edit dialog for an existing project
+  openEdit(project: any): void {
+    if (!project) return;
+    // shallow copy to edit
+    this.editModel = { ...project };
+    this.isCreating = false;
+    this.displayDialog = true;
+    this.error = null;
+  }
+
+  // Confirm deletion of a project
+  confirmDelete(project: any): void {
+    if (!project) return;
+    try {
+      this.confirmationService.confirm({
+        message: `${this.translate.instant('components.projects.confirm.DELETE_QUESTION') || 'Attention! Do you really want to delete project'} ${project.name || project.id}?`, // TODO: make reactive (refresh on translate.onLangChange)
+        icon: 'pi pi-exclamation-triangle',
+        accept: () => this.deleteProject(project)
+      });
+    } catch (e) {
+      // fallback immediate delete
+      this.deleteProject(project);
+    }
+  }
+
+  // Delete project API call
+  deleteProject(project: any): void {
+    if (!project || !project.id) return;
+    this.loading = true;
+    this.svc.deleteProject(project.id).subscribe({
+  next: () => {
+  try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.projects.messages.SUMMARY_DELETE') || 'Delete', detail: this.translate.instant('components.projects.messages.DELETED') || 'Project deleted' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+        this.loadProjects();
+        this.safeDetect();
+        this.loading = false;
+      },
+  error: (err: any) => {
+  console.error('Failed to delete project', err);
+  try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.messages.SUMMARY_DELETE') || 'Delete', detail: (err && err.message) ? err.message : 'Failed to delete project' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+        this.loading = false;
+        this.safeDetect();
+      }
+    });
+  }
+
+  openNew(): void {
+    this.editModel = { name: '', code: '', description: '' };
+    this.isCreating = true;
+    this.displayDialog = true;
+    this.error = null;
+  }
+
+  validateForm(): boolean {
+    if (!this.editModel || !this.editModel.name) {
+      this.error = 'Name is required';
+      return false;
+    }
+    this.error = null;
+    return true;
+  }
+
+  // Map project status strings to p-tag severity literal types used by PrimeNG.
+  // Returns one of: 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast'
+  getSeverity(status: any): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' {
+    if (!status) return 'info';
+    const s = String(status).toLowerCase();
+    if (s === 'active' || s === 'активный' || s.includes('актив')) return 'success';
+    if (s === 'inactive' || s === 'disabled' || s === 'завершён' || s === 'завершен' || s.includes('заверш')) return 'danger';
+    if (s === 'info' || s.includes('info')) return 'info';
+    return 'warn';
+  }
+
+  saveProject(): void {
+    if (!this.validateForm()) return;
+    this.loading = true;
+  const payload: any = { name: this.editModel.name, code: this.editModel.code };
+  // include optional description
+  if (this.editModel.description !== undefined) payload.description = this.editModel.description;
+    // If creating a new project => POST, otherwise update existing via PUT /api/projects/{id}
+    if (this.isCreating) {
+      this.svc.createProject(payload).subscribe({
+        next: (created: any) => {
+          this.displayDialog = false;
+          this.editModel = {};
+          this.loading = false;
+          this.isCreating = false;
+          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.projects.messages.SUMMARY_CREATE') || 'Create', detail: this.translate.instant('components.projects.messages.CREATED') || 'Project created' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+          this.loadProjects();
+          this.safeDetect();
+        },
+        error: (err: any) => {
+          console.error('Failed to create project', err);
+          this.error = (err && err.message) ? err.message : 'Failed to create project';
+          this.loading = false;
+          try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.messages.SUMMARY_CREATE') || 'Create', detail: this.error || '' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+          this.safeDetect();
+        }
+      });
+    } else {
+      // update existing project
+      const id = this.editModel && (this.editModel.id || this.editModel._id || this.editModel.ID);
+      if (!id) {
+        this.error = 'Project id is missing';
+        this.loading = false;
+        this.safeDetect();
+        return;
+      }
+      // include optional status/owner if present in editModel
+      if (this.editModel.status !== undefined) payload.status = this.editModel.status;
+      if (this.editModel.owner_id !== undefined) payload.owner_id = this.editModel.owner_id;
+
+      this.svc.updateProject(id, payload).subscribe({
+        next: (updated: any) => {
+          this.displayDialog = false;
+          this.editModel = {};
+          this.loading = false;
+          this.isCreating = false;
+          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.projects.messages.SUMMARY_EDIT') || 'Edit', detail: this.translate.instant('components.projects.messages.UPDATED') || 'Project updated' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+          this.loadProjects();
+          this.safeDetect();
+        },
+        error: (err: any) => {
+          console.error('Failed to update project', err);
+          this.error = (err && err.message) ? err.message : 'Failed to update project';
+          this.loading = false;
+          try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.messages.SUMMARY_EDIT') || 'Edit', detail: this.error || '' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+          this.safeDetect();
+        }
+      });
+    }
+  }
+}
+

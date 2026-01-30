@@ -59,7 +59,7 @@ export class LoginComponent {
   onLogin(): void {
     this.errorMessage = null;
     if (!this.email || !this.password) {
-      this.errorMessage = this.translate.instant('components.login.ERROR_ENTER_CREDENTIALS'); // TODO: make reactive (refresh on translate.onLangChange)
+      this.errorMessage = this.translate.instant('components.login.ERROR_ENTER_CREDENTIALS');
       return;
     }
 
@@ -78,7 +78,7 @@ export class LoginComponent {
       },
       error: (err: HttpErrorResponse) => {
         this.loading = false;
-        this.errorMessage = this.getErrorMessage(err) ?? (err.status === 401 ? this.translate.instant('components.login.ERROR_INVALID_CREDENTIALS') : this.translate.instant('components.login.ERROR_LOGIN_FAILED')); // TODO: make reactive (refresh on translate.onLangChange)
+        this.errorMessage = this.getErrorMessage(err) ?? (err.status === 401 ? this.translate.instant('components.login.ERROR_INVALID_CREDENTIALS') : this.translate.instant('components.login.ERROR_LOGIN_FAILED'));
         console.error('Login error', err);
         this.cdr.detectChanges();
       }
@@ -92,9 +92,9 @@ export class LoginComponent {
     const translate = (s: string) => {
       const key = s.trim().toLowerCase().replace(/\.+$/g, '');
       const map: Record<string, string> = {
-        'invalid credentials': this.translate.instant('components.login.ERROR_INVALID_CREDENTIALS'), // TODO: make reactive (refresh on translate.onLangChange)
-        'unauthorized': this.translate.instant('components.login.ERROR_UNAUTHORIZED'), // TODO: make reactive (refresh on translate.onLangChange)
-        'forbidden': this.translate.instant('components.login.ERROR_FORBIDDEN') // TODO: make reactive (refresh on translate.onLangChange)
+        'invalid credentials': this.translate.instant('components.login.ERROR_INVALID_CREDENTIALS'),
+        'unauthorized': this.translate.instant('components.login.ERROR_UNAUTHORIZED'),
+        'forbidden': this.translate.instant('components.login.ERROR_FORBIDDEN')
       };
       return map[key] ?? s;
     };

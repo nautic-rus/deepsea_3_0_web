@@ -44,5 +44,46 @@
 	height: 100%;
 }
 
+/* Framed appearance for roles table rows to match projects sidebar cards */
+/* PrimeNG table rows are <tr> — make them block-level cards so they can have a border and spacing */
+:host ::ng-deep .p-table .p-datatable-tbody > tr {
+	display: block;
+	border: 1px solid rgba(0,0,0,0.06);
+	border-radius: 6px;
+	padding: 0.6rem 0.75rem;
+	margin-bottom: 0.75rem;
+	background: var(--surface, #fff);
+}
+
+:host ::ng-deep .p-table .p-datatable-tbody > tr > td {
+	display: inline-block;
+	vertical-align: middle;
+	padding: 0.2rem 0.6rem;
+	/* allow table cells to wrap naturally — first columns take remaining space */
+}
+
+/* Make the actions cell align to the right */
+:host ::ng-deep .p-table .p-datatable-tbody > tr > td:last-child {
+	float: right;
+	padding-left: 1rem;
+}
+
+/* Selected row visual (static, no animation) */
+:host ::ng-deep .p-table .p-datatable-tbody > tr.selected-row {
+	border-color: var(--primary-color, #0d6efd);
+	box-shadow: none;
+}
+
+/* Permissions list items (right card) — give same framed card look */
+.permissions-scroll ul { list-style: none; padding: 0; margin: 0; }
+.permissions-scroll li {
+	border: 1px solid rgba(0,0,0,0.06);
+	border-radius: 6px;
+	padding: 0.6rem 0.75rem;
+	margin-bottom: 0.75rem;
+	background: var(--surface, #fff);
+}
+
+
 /* Thin scrollbar styling */
 /* (scrollbar styling moved to global styles.scss) */

@@ -1,0 +1,155 @@
+<section class="admin-subpage-tools card">
+  <p-toolbar>
+    <div class="p-toolbar-group-left">
+  <p-select [options]="projectOptions" [(ngModel)]="selectedProject" (ngModelChange)="onProjectChange($event)" [checkmark]="true" optionLabel="label" optionValue="value" [showClear]="true" placeholder="{{ 'components.projects.menu.LIST' | translate }}" class="mr-2" style="width: 280px;"></p-select>
+  <p-button label="{{ 'components.projects.users.ASSIGN' | translate }}" icon="pi pi-user-plus" class="mr-2" severity="secondary" (onClick)="openAssignDialog()" [disabled]="!selectedProject"></p-button>
+  <p-button label="{{ 'MENU.DELETE' | translate }}" icon="pi pi-trash" severity="secondary" class="mr-2" (onClick)="confirmDeleteSelected()" [disabled]="!selectedProjects || !selectedProjects.length"></p-button>    
+</div>
+    <div class="p-toolbar-group-right">
+      <p-button label="{{ 'MENU.EXPORT' | translate }}" icon="pi pi-upload" severity="secondary"></p-button>
+    </div>
+  </p-toolbar>
+</section>
+
+<section class="admin-subpage-content card">
+  <div class="table-responsive">
+    <p-toast></p-toast>
+
+    <ng-container *ngIf="selectedProject; else noProjectSelected">
+      <p-table
+        #dt
+        [value]="assignments"
+        [loading]="loading"
+        [scrollable]="true"
+        scrollHeight="flex"
+        [rows]="10"
+        size="small"
+        [globalFilterFields]="['user_id','role_id','created_at']"
+        [(selection)]="selectedProjects"
+        [rowHover]="true"
+        dataKey="id"
+        [showCurrentPageReport]="true"
+        [rowsPerPageOptions]="[10,20,30]">
+
+        <ng-template pTemplate="caption">
+          <div class="flex justify-between mb-2">
+      <h3>{{ 'MENU.PROJECT_USERS' | translate }} : {{ getSelectedProjectLabel() }}</h3>
+            <p-iconfield>
+              <p-inputicon styleClass="pi pi-search"></p-inputicon>
+              <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="{{ 'components.projects.table.SEARCH' | translate }}" />
+            </p-iconfield>
+          </div>
+        </ng-template>
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width:3rem">
+              <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+            </th>
+            <th pSortableColumn="id">{{ 'components.projects.table.HEADERS.ID' | translate }} <p-sortIcon field="id"></p-sortIcon></th>
+            <th pSortableColumn="user_id">{{ 'components.projects.table.HEADERS.USER' | translate }} <p-sortIcon field="user_id"></p-sortIcon></th>
+            <th pSortableColumn="role_name">{{ 'components.projects.table.HEADERS.ROLE' | translate }} <p-sortIcon field="role_name"></p-sortIcon></th>
+            <th pSortableColumn="created_at">{{ 'components.projects.table.HEADERS.CREATED_AT' | translate }} <p-sortIcon field="created_at"></p-sortIcon></th>
+            <th></th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-a>
+          <tr>
+            <td>
+              <p-tableCheckbox [value]="a"></p-tableCheckbox>
+            </td>
+            <td>{{ a?.id || '—' }}</td>
+            <td>{{ getOwnerName(a?.user_id) }}</td>
+            <td>{{ a?.role_name || a?.role_id || '—' }}</td>
+            <td>{{ a?.created_at ? (a.created_at | date:'short') : '—' }}</td>
+            <td>
+              <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="confirmDeleteAssignment(a)"></p-button>
+            </td>
+          </tr>
+        </ng-template>
+
+      </p-table>
+    </ng-container>
+
+        <ng-template #noProjectSelected>
+      <div class="flex flex-col items-center justify-center p-8 text-center text-gray-600">
+        <h3 class="text-xl font-semibold">{{ 'components.projects.users.SELECT_PROJECT.TITLE' | translate }}</h3>
+        <p class="mt-2">{{ 'components.projects.users.SELECT_PROJECT.TEXT' | translate }}</p>
+      </div>
+    </ng-template>
+  </div>
+</section>
+
+<!-- Create / Edit dialog (aligned with Users dialog structure) -->
+<p-dialog [header]="isCreating ? ('MENU.CREATE' | translate) : ('MENU.EDIT' | translate)" [(visible)]="displayDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{width: '25%'}">
+    <div class=" flex flex-col gap-4">
+    <div class="flex flex-col gap-2">
+      <label for="projectName">{{ 'components.projects.form.NAME' | translate }}</label>
+      <input pInputText id="projectName" type="text" [(ngModel)]="editModel.name" name="name" />
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label for="projectCode">{{ 'components.projects.form.CODE' | translate }}</label>
+      <input pInputText id="projectCode" type="text" [(ngModel)]="editModel.code" name="code" />
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label for="projectDescription">{{ 'components.projects.form.DESCRIPTION' | translate }}</label>
+      <input pInputText id="projectDescription" type="text" [(ngModel)]="editModel.description" name="description" />
+    </div>
+
+    <!-- Status and Owner are editable only in edit mode -->
+    <div *ngIf="!isCreating" class="flex flex-col gap-2">
+      <label for="projectStatus">{{ 'components.projects.form.STATUS' | translate }}</label>
+      <p-select id="projectStatus" [options]="statuses" optionLabel="label" optionValue="value" [(ngModel)]="editModel.status" name="status" appendTo="body"></p-select>
+    </div>
+
+    <div *ngIf="!isCreating" class="flex flex-col gap-2">
+      <label for="projectOwner">{{ 'components.projects.form.OWNER' | translate }}</label>
+      <p-select id="projectOwner" [options]="usersOptions" optionLabel="label" optionValue="value" [(ngModel)]="editModel.owner_id" name="owner_id" appendTo="body"></p-select>
+    </div>
+
+    <div *ngIf="error" class="text-red-600 block">{{ error }}</div>
+
+    <div class="flex justify-end gap-2 mt-4">
+  <p-button label="{{ 'components.projects.form.CANCEL' | translate }}" (onClick)="displayDialog=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="loading"></p-button>
+  <p-button label="{{ 'components.projects.form.SAVE' | translate }}" (onClick)="saveProject()" class="" severity="primary" icon="pi pi-check" iconPos="left" [disabled]="loading"></p-button>
+</div>
+<p-confirmDialog
+
+  [style]="{ width: '25%' }"
+  styleClass="project-confirm-dialog"
+  header="{{ 'MENU.CONFIRM' | translate }}"
+  acceptLabel="{{ 'MENU.DELETE' | translate }}"
+  rejectLabel="{{ 'MENU.CANCEL' | translate }}"
+  acceptIcon="pi pi-check"
+  acceptButtonStyleClass="p-button-danger"
+  rejectButtonStyleClass="secondary p-button-text"
+  rejectIcon="pi pi-times"
+  >
+</p-confirmDialog>
+</div>
+</p-dialog>
+
+<!-- Assign dialog: assign multiple users and roles to selected project -->
+<p-dialog header="{{ 'components.projects.users.ASSIGN' | translate }}" [(visible)]="assignDialog" [modal]="true" [closable]="true" [resizable]="false" appendTo="body" [style]="{width: '40%'}">
+  <div class="flex flex-col gap-4">
+    <div class="flex flex-col gap-2">
+  <label for="assignUsers">{{ 'components.projects.users.ASSIGNMENTS_USERS' | translate }}</label>
+  <p-multiSelect id="assignUsers" [options]="usersOptions" optionLabel="label" optionValue="value" [(ngModel)]="assignModel.user_id" placeholder="{{ 'components.projects.users.ASSIGNMENTS_SELECT_USERS' | translate }}" appendTo="body" [panelStyle]="{ 'max-height': '300px' }"></p-multiSelect>
+    </div>
+
+    <div class="flex flex-col gap-2">
+  <label for="assignRoles">{{ 'components.projects.users.ASSIGNMENTS_ROLES' | translate }}</label>
+  <p-multiSelect id="assignRoles" [options]="rolesOptions" optionLabel="label" optionValue="value" [(ngModel)]="assignModel.roles" placeholder="{{ 'components.projects.users.ASSIGNMENTS_SELECT_ROLES' | translate }}" appendTo="body" [panelStyle]="{ 'max-height': '300px' }"></p-multiSelect>
+    </div>
+
+    <div *ngIf="error" class="text-red-600 block">{{ error }}</div>
+
+    <div class="flex justify-end gap-2 mt-4">
+  <p-button label="{{ 'components.projects.form.CANCEL' | translate }}" (onClick)="assignDialog=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="loading"></p-button>
+  <p-button label="{{ 'components.projects.users.ASSIGN' | translate }}" (onClick)="saveAssignments()" class="" severity="primary" icon="pi pi-check" iconPos="left" [disabled]="loading"></p-button>
+    </div>
+  </div>
+</p-dialog>
