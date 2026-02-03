@@ -196,12 +196,23 @@ export class HeaderComponent implements OnInit {
       this.safeDetect();
       return;
     }
-
     const candidates = ['avatarUrl','avatar','photo','image','profilePicture','picture','avatar_url','profile_image'];
     let url: string | undefined;
     for (const k of candidates) {
       const v = u?.[k];
       if (typeof v === 'string' && v.trim()) { url = v.trim(); break; }
+    }
+    // New API may return avatar_id instead of avatar_url — map it to a URL path.
+    // Assumption: uploaded avatars are served from '/uploads/{id}'. If your backend uses a different
+    // path (for example '/files/{id}' or '/api/attachments/{id}/download'), update the template below.
+    if (!url && (u?.avatar_id || u?.avatarId)) {
+      const aid = u?.avatar_id ?? u?.avatarId;
+      try {
+        if (typeof aid === 'number' || (typeof aid === 'string' && String(aid).trim())) {
+          // Use storage download endpoint for avatars by id
+          url = `/api/storage/${String(aid).trim()}/download`;
+        }
+      } catch (e) { /* ignore */ }
     }
     this.avatarUrl = url;
     this.avatarLabel = this.avatarUrl ? undefined : (this.computeInitials(u) || undefined);

@@ -4,6 +4,7 @@ import { FileUploadModule } from 'primeng/fileupload';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { ButtonModule } from 'primeng/button';
 
 interface UploadEvent {
   originalEvent: any;
@@ -13,11 +14,14 @@ interface UploadEvent {
 @Component({
   selector: 'app-issue-detail-attach',
   standalone: true,
-  imports: [CommonModule, FileUploadModule, ToastModule, TranslateModule],
+  imports: [CommonModule, FileUploadModule, ToastModule, TranslateModule, ButtonModule],
   providers: [MessageService],
   template: `
     <section class="admin-subpage-attachments card ">
-      <h4 class="mb-3">{{ 'components.issues.detail.ATTACHMENTS' | translate }}</h4>
+      <div class="flex items-center justify-between mt-0 mb-2">
+          <h4 class="mb-">{{ 'components.issues.detail.DESCRIPTION' | translate }}</h4>
+          <p-button severity="secondary" icon="pi pi-plus" class="mt-0" [outlined]="true" ></p-button>
+        </div>
       <p-toast></p-toast>
 
       <div *ngIf="!attachments || !attachments.length" class="text-surface-500">{{ '-' }}</div>

@@ -86,7 +86,7 @@ export class IssueDetailChatComponent implements OnChanges, AfterViewInit {
             id,
             _localId: id ? undefined : `local-${Math.random().toString(36).slice(2,9)}`,
             parent_id: it.parent_id || it.parentId || null,
-            author: it.author_name || it.user_name || it.author || (it.user?.name) || this._issue?.author_name || 'Unknown',
+            author: it.user?.full_name || it.author_name || it.user_name || it.author || this._issue?.author_name || 'Unknown',
             text: it.content || it.text || '',
             time: it.created_at || it.createdAt || it.created || it.timestamp || it.date || it.time || null
           };
@@ -111,7 +111,7 @@ export class IssueDetailChatComponent implements OnChanges, AfterViewInit {
                 id,
                 _localId: id ? undefined : `local-${Math.random().toString(36).slice(2,9)}`,
                 parent_id: it.parent_id || it.parentId || null,
-                author: it.author_name || it.user_name || it.author || (it.user?.name) || this._issue?.author_name || 'Unknown',
+                author: it.user?.full_name || it.author_name || it.user_name || it.author || this._issue?.author_name || 'Unknown',
                 text: it.content || it.text || '',
                 time: it.created_at || it.createdAt || it.created || it.timestamp || it.date || it.time || null
               };
@@ -159,10 +159,10 @@ export class IssueDetailChatComponent implements OnChanges, AfterViewInit {
     this.issuesService.postMessage(this._issue.id, payload).subscribe({
       next: (res: any) => {
         const data = res?.data ?? res;
-        const pushed = {
+          const pushed = {
           id: data?.id || data?._id || data?.message_id || null,
           parent_id: data?.parent_id ?? data?.parentId ?? (this.replyToId ?? null),
-          author: data?.author_name || data?.author || this.currentUserName() || '',
+          author: data?.user?.full_name || data?.author_name || data?.author || this.currentUserName() || '',
           text: data?.content || data?.message || data?.text || this.newMessage,
           time: data?.created_at || data?.createdAt || new Date().toISOString()
         };

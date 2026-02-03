@@ -318,7 +318,19 @@ export class IssuesComponent implements OnInit {
             const id = part.id;
             if (id == null) continue;
             const label = part.full_name || part.fullName || part.name || part.email || String(id);
-            const avatar = part.avatar_url || part.avatar || part.avatarUrl || null;
+            // prefer explicit URL fields; if backend returns avatar_id use uploads/{id}
+            let avatar: string | null = null;
+            if (part.avatar_url || part.avatar || part.avatarUrl) {
+              avatar = part.avatar_url || part.avatar || part.avatarUrl || null;
+            } else if (part.avatar_id || part.avatarId) {
+              const aid = part.avatar_id ?? part.avatarId;
+              try {
+                if (typeof aid === 'number' || (typeof aid === 'string' && String(aid).trim())) {
+                  // Use storage download endpoint
+                  avatar = `/api/storage/${String(aid).trim()}/download`;
+                }
+              } catch (e) { avatar = null; }
+            }
             if (!map.has(id)) map.set(id, { label: label, value: id, avatar });
           }
         }
