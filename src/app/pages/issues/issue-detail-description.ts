@@ -1,63 +1,131 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, inject, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { EditorModule } from 'primeng/editor';
-import { InputTextModule } from 'primeng/inputtext';
+import { MessageModule } from 'primeng/message';
 import { ToastModule } from 'primeng/toast';
 import { ButtonModule } from 'primeng/button';
-import { MessageModule } from 'primeng/message';
 import { MessageService } from 'primeng/api';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { IssuesService } from './issues.service';
-import { TextareaModule } from 'primeng/textarea';
 
 @Component({
   selector: 'app-issue-detail-description',
   standalone: true,
   providers: [MessageService],
-  imports: [CommonModule, TranslateModule, FormsModule, EditorModule, InputTextModule, ToastModule, ButtonModule, MessageModule, TextareaModule],
+  imports: [CommonModule, FormsModule, EditorModule, MessageModule, ToastModule, ButtonModule,TranslateModule],
+  styles: [
+    // increase editor text size and improve readability
+    `:host ::ng-deep .ql-editor { font-size: 1rem; line-height: 1.6; }`
+  ],
   template: `
-    <section class="admin-subpage-description card ">
-      <p-toast position="top-right" appendTo="body"></p-toast>
-      <h4 class="mb-3">{{ 'components.issues.detail.DESCRIPTION' | translate }}</h4>
-      <div class="prose max-w-full text-surface-900 dark:text-surface-0">
-        <div *ngIf="!editing">
-          <textarea class="p-inputtextarea w-full p-3"  [value]="plainText || ''" placeholder="-" readonly (click)="startEdit()" ></textarea>
+    <p-toast></p-toast>
+    <div class="card">
+        <div class="flex items-center justify-between mt-0 mb-2">
+          <h4 class="mb-">{{ 'components.issues.detail.DESCRIPTION' | translate }}</h4>
+          <p-button severity="secondary" icon="pi pi-pencil" class="mt-0" [outlined]="true" (click)="startEdit()" [style.visibility]="editing ? 'hidden' : 'visible'"></p-button>
         </div>
 
-        <div *ngIf="editing">
-          <form #descForm="ngForm" (ngSubmit)="onSubmit(descForm)" class="flex flex-col gap-2">
-            <div class="flex flex-col gap-1">
-              <p-editor #contentCtrl="ngModel" [(ngModel)]="content" name="content" required [style]="{height: '150px'}"></p-editor>
-              <p-message *ngIf="contentCtrl.invalid && (contentCtrl.touched || descForm.submitted)" severity="error" size="small" variant="simple">{{ 'components.issues.detail.DESCRIPTION_REQUIRED' | translate }}</p-message>
-            </div>
+      <form #exampleForm="ngForm" (ngSubmit)="onSubmit(exampleForm)" class="flex flex-col">
+        <div class="flex flex-col gap-4">
+          <p-editor #contentCtrl="ngModel" [(ngModel)]="text" [readonly]="!editing" name="content" required [style]="{ height: 'flex' }">
+              <ng-template pTemplate="header">
+    <span class="ql-formats">
+      <button type="button" class="ql-bold" aria-label="Bold"></button>
+      <button type="button" class="ql-italic" aria-label="Italic"></button>
+      <button type="button" class="ql-underline" aria-label="Underline"></button>
+      <button type="button" class="ql-strike" aria-label="Strike"></button>
+    </span>
+    <span class="ql-formats">
+        <button type="button" class="ql-blockquote" aria-label="Block Quote"></button>
+        <button type="button" class="ql-code-block" aria-label="Code Block"></button>
+        <button type="button" class="ql-header" value="1" aria-label="Header 1"></button>
+        <button type="button" class="ql-header" value="2" aria-label="Header 2"></button>
+    </span>
 
-            <div class="flex gap-2 mt-2">
-              <button pButton severity="primary" type="submit" class="p-button">{{ 'MENU.SAVE' | translate }}</button>
-              <button pButton type="button" (click)="cancel()" [disabled]="saving" class="p-button p-button-text p-button-secondary">{{ 'MENU.CANCEL' | translate }}</button>
-            </div>
-          </form>
+    <span class="ql-formats">
+        <button type="button" class="ql-color" aria-label="Text Color"></button>
+        <button type="button" class="ql-background" aria-label="Background Color"></button>
+    </span>
+    
+    <span class="ql-formats">
+        <button type="button" class="ql-list" value="ordered" aria-label="Ordered List"></button>
+        <button type="button" class="ql-list" value="bullet" aria-label="Bullet List"></button>
+        <select class="ql-align">
+            <option selected></option>
+            <option value="center"></option>
+            <option value="right"></option>
+            <option value="justify"></option>
+        </select>
+    </span>
+        <span class="ql-formats">
+        <button type="button" class="ql-link" aria-label="Insert Link"></button>
+        <button type="button" class="ql-image" aria-label="Insert Image"></button>
+    </span>
+    <!-- Add more ql-formats spans for other controls like links, images, colors, etc. -->
+  </ng-template>
+          
+          </p-editor>
         </div>
-      </div>
-    </section>
+
+        <div class="flex gap-2 mt-4" *ngIf="editing">
+          <p-button severity="primary" type="submit" *ngIf="editing">{{ 'MENU.SAVE' | translate }}</p-button>
+          <p-button severity="secondary" (click)="cancel()" *ngIf="editing">{{ 'MENU.CANCEL' | translate }}</p-button>
+        </div>
+      </form>
+    </div>
   `
 })
-export class IssueDetailDescriptionComponent {
+export class IssueDetailDescriptionComponent implements OnChanges {
+  /** Optional input: if provided, we'll update issue.description on submit */
   @Input() issue: any | null = null;
-  content = '';
+  /** Emits the updated issue after successful save (local or server) */
+  @Output() descriptionSaved = new EventEmitter<any>();
+
+  messageService = inject(MessageService);
+  issuesService = inject(IssuesService);
+  translate = inject(TranslateService);
+  text: string | undefined;
   editing = false;
-  sanitizedContent: SafeHtml | null = null;
-  plainText = '';
   saving = false;
 
-  constructor(private sanitizer: DomSanitizer, private issuesService: IssuesService, private messageService: MessageService, private translate: TranslateService) {}
+  onSubmit(form: any) {
+    if (form && form.valid) {
+      // If we have an issue with id, persist to server via PUT
+      if (this.issue && this.issue.id) {
+        this.saving = true;
+        const payload = Object.assign({}, this.issue || {}, { description: this.text || '' });
+        this.issuesService.updateIssue(this.issue.id, payload).subscribe({
+          next: (res: any) => {
+            const data = (res && res.data) ? res.data : res;
+            this.issue = data || this.issue;
+            this.text = this.issue.description || this.text;
+            this.editing = false;
+            // notify parent that the issue (and its description) was updated
+            try { this.descriptionSaved.emit(this.issue); } catch (e) { /* ignore */ }
+            this.saving = false;
+            try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.issues.messages.SAVED') || 'Saved', detail: this.translate.instant('components.issues.messages.SAVED') || 'Description saved' }); } catch (e) { this.messageService.add({ severity: 'success', summary: 'Saved', detail: 'Description saved' }); }
+            try { form.resetForm({ content: this.text || '' }); } catch (e) { /* ignore */ }
+          },
+          error: (err: any) => {
+            this.saving = false;
+            try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR') || 'Error', detail: (err && err.message) ? err.message : this.translate.instant('components.issues.messages.DESCRIPTION_SAVE_FAILED') || 'Failed to save description' }); } catch (e) { this.messageService.add({ severity: 'error', summary: 'Error', detail: (err && err.message) ? err.message : 'Failed to save description' }); }
+          }
+        });
+        return;
+      }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['issue']) {
-      this.content = this.issue && this.issue.description ? this.issue.description : '';
-      this.sanitizedContent = this.sanitizer.bypassSecurityTrustHtml(this.content || '');
-      this.plainText = this.decodeHtmlEntities(this.stripHtml(this.content || ''));
+      // No server id — update locally
+      if (this.issue) {
+        this.issue.description = this.text || '';
+      }
+      // notify parent about local update as well
+      try { this.descriptionSaved.emit(this.issue); } catch (e) { /* ignore */ }
+  this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Form Submitted', life: 3000 });
+  this.editing = false;
+  try { form.resetForm({ content: this.text || '' }); } catch (e) { /* ignore */ }
+    } else {
+      try { form.control?.markAllAsTouched(); } catch (e) { /* ignore */ }
     }
   }
 
@@ -65,77 +133,14 @@ export class IssueDetailDescriptionComponent {
     this.editing = true;
   }
 
-  onSubmit(form: any): void {
-    // template-driven form submit handler — call save if valid
-    if (form && form.valid) {
-      this.save();
-    } else {
-      // mark as touched so validation messages show
-      try { form.control?.markAllAsTouched(); } catch (e) {}
-    }
-  }
-
-  save(): void {
-    if (!this.issue || !this.issue.id) {
-      // no issue id — fallback to local update
-      if (this.issue) this.issue.description = this.content;
-      this.sanitizedContent = this.sanitizer.bypassSecurityTrustHtml(this.content || '');
-      this.plainText = this.decodeHtmlEntities(this.stripHtml(this.content || ''));
-      this.editing = false;
-        try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.issues.messages.SAVED'), detail: this.translate.instant('components.issues.messages.SAVED_LOCAL') }); } catch (e) {}
-      return;
-    }
-
-    this.saving = true;
-    // debug log: start saving
-    console.debug('[IssueDetailDescription] save() start', { id: this.issue?.id, content: this.content });
-    // send full issue object via PUT to /api/issues/{id} so server receives complete resource
-    const payload = Object.assign({}, this.issue || {}, { description: this.content });
-    console.debug('[IssueDetailDescription] PUT payload', payload);
-    this.issuesService.updateIssue(this.issue.id, payload).subscribe({
-      next: (res: any) => {
-        console.debug('[IssueDetailDescription] PUT success', res);
-        // update local model from server response if provided
-        const data = (res && res.data) ? res.data : res;
-        this.issue = data || this.issue;
-        // ensure description reflects saved content
-        this.issue.description = (this.issue.description !== undefined && this.issue.description !== null) ? this.issue.description : this.content;
-        this.sanitizedContent = this.sanitizer.bypassSecurityTrustHtml(this.issue.description || '');
-        this.plainText = this.decodeHtmlEntities(this.stripHtml(this.issue.description || ''));
-        this.editing = false;
-        this.saving = false;
-        try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.issues.messages.SAVED'), detail: this.translate.instant('components.issues.messages.SAVED') }); } catch (e) {}
-      },
-      error: (err: any) => {
-        console.error('[IssueDetailDescription] PUT error', err);
-        this.saving = false;
-        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR'), detail: (err && err.message) ? err.message : this.translate.instant('components.issues.messages.DESCRIPTION_SAVE_FAILED') }); } catch (e) {}
-      }
-    });
-  }
-
   cancel(): void {
-    // revert local content to issue description
-    this.content = this.issue && this.issue.description ? this.issue.description : '';
     this.editing = false;
+    this.text = this.issue && this.issue.description ? this.issue.description : '';
   }
 
-  private stripHtml(html: string): string {
-    return html ? html.replace(/<[^>]*>/g, '').trim() : '';
-  }
-
-  private decodeHtmlEntities(text: string): string {
-    if (!text) return '';
-    try {
-      if (typeof document !== 'undefined') {
-        const txt = document.createElement('textarea');
-        txt.innerHTML = text;
-        return (txt.value || txt.textContent || '').replace(/\u00A0/g, ' ').trim();
-      }
-    } catch (e) {
-      // fallback simple replacements for common entities
-      return text.replace(/&nbsp;?/g, ' ').replace(/&amp;?/g, '&').replace(/&lt;?/g, '<').replace(/&gt;?/g, '>').trim();
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['issue']) {
+      this.text = this.issue && this.issue.description ? this.issue.description : '';
     }
-    return text.replace(/&nbsp;?/g, ' ').trim();
   }
 }

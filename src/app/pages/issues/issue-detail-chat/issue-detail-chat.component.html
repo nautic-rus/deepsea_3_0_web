@@ -4,28 +4,63 @@
 
   <!-- Messages area: takes remaining space above editor -->
   <div #messagesContainer class="chat-messages">
+
+    <div *ngIf="loadingMessages" class="messages-loading">
+      <p-progressSpinner styleClass="spinner"></p-progressSpinner>
+    </div>
+
     <div *ngIf="!loadingMessages && messages.length === 0" class="text-sm text-surface-500">
       {{ 'components.issues.chat.NO_MESSAGES' | translate }}
     </div>
 
-    <div *ngFor="let m of messages" class="chat-message">
-      <p-avatar [label]="initials(m.author)" styleClass="mr-2"></p-avatar>
-      <div>
-        <div class="font-medium">{{ m.author }}</div>
-        <div class="text-sm text-surface-500" [innerHTML]="m.text"></div>
+  <div *ngFor="let m of messages" class="chat-message" [attr.id]="'msg-' + (m.id ?? m._localId)">
+    <p-avatar [label]="initials(m.author)" styleClass="mr-2"></p-avatar>
+      <div class="chat-message-body">
+        <div class="msg-header">
+          <div class="font-medium">{{ m.author }}</div>
+          <div class="msg-controls">
+            <div class="msg-time text-sm text-surface-500">{{ formatMessageTime(m) }}</div>
+            <p-button severity="secondary" icon="pi pi-reply" class="mt-0"[outlined]="true" (click)="answer(m)"></p-button>
+          </div>
+        </div>
+          <div class="text-sm text-surface-700" [innerHTML]="m.text"></div>
+          <div *ngIf="m.parent_id" class="in-reply-to text-sm text-surface-500">
+            {{ 'components.issues.chat.IN_REPLY_TO' | translate }}
+            <a href="#" (click)="scrollToMessage(m.parent_id); $event.preventDefault()">#{{ m.parent_id }}</a>
+          </div>
       </div>
     </div>
   </div>
 
   <!-- Editor area: always at the bottom, grows upward as content increases -->
-  <div class="chat-editor" (keydown)="onComposerKeydown($event)">
-    <p-editor
-      #pEditorEl
-      [(ngModel)]="newMessage"
-      [style]="{'height': editorHeight + 'px'}"
-      (onTextChange)="onEditorTextChange()"
-      (ngModelChange)="adjustEditorHeight()"
-    ></p-editor>
-    <small class="text-surface-500 mt-1">{{ 'components.issues.chat.SEND_HINT' | translate }} (Ctrl+Enter)</small>
+  <div class="chat-editor">
+    <div class="chat-editor-row">
+      <div class="chat-editor-left">
+        <button pButton type="button" class="p-button-text p-button-plain attach-btn" icon="pi pi-paperclip" (click)="onAttachClick()"></button>
+      </div>
+
+      <div class="chat-editor-center">
+        <div *ngIf="replyToId" class="replying-bar">
+          <span class="replying-label">{{ 'components.issues.chat.REPLYING_TO' | translate }} #{{ replyToId }}</span>
+          <button pButton type="button" class="p-button-text p-button-plain cancel-reply" icon="pi pi-times" (click)="cancelReply()" aria-label="{{ 'components.issues.chat.CANCEL_REPLY' | translate }}"></button>
+        </div>
+        <textarea
+          #textareaRef
+          [(ngModel)]="newMessage"
+          rows="1"
+          (input)="onTextareaInput()"
+          (keydown)="onComposerKeydown($event)"
+          class="chat-textarea"
+          placeholder="{{ 'components.issues.chat.PLACEHOLDER' | translate }}"
+        ></textarea>
+        <input #fileInput type="file" hidden (change)="onFileSelected($event)" multiple />
+      </div>
+
+      <div class="chat-editor-right">
+  <button pButton type="button" class="p-button-plain send-btn" icon="pi pi-send" (click)="send()" [disabled]="!newMessage.trim() || sending"></button>
+      </div>
+    </div>
+
+    <!-- hint moved inside center column to sit directly under the input -->
   </div>
 </section>

@@ -1,0 +1,7 @@
+.chat-history { margin-bottom: 0.75rem; }
+.chat-history .history-title { margin: 0 0 0.5rem 0; font-weight: 600; }
+.chat-history-item { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px dashed rgba(0,0,0,0.04); }
+.chat-history-item .font-medium { font-weight: 600; }
+.chat-history-body { flex: 1 1 auto; min-width: 0; }
+.msg-header { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.msg-time { color: var(--surface-500, #6b6b6b); font-size: 0.85rem; white-space: nowrap; }

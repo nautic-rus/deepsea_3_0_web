@@ -452,7 +452,12 @@
       "CHANGE_STATUS": "Действия",
       "chat": {
         "TITLE": "Чат",
-        "PLACEHOLDER": "Введите сообщение..."
+        "PLACEHOLDER": "Отправить сообщение (Ctrl/Cmd + Enter)",
+        "NO_MESSAGES": "Нет сообщений для отображения",
+        "IN_REPLY_TO": "В ответ на",
+        "REPLYING_TO": "Отвечая на",
+        "CANCEL_REPLY": "Отменить ответ",
+        "ANSWER": "Ответить"
       },
       "attach": {
         "DRAG_DROP": "Перетащите файлы сюда для загрузки."

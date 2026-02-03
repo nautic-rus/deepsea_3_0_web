@@ -451,7 +451,12 @@
       "CHANGE_STATUS": "Change status",
       "chat": {
         "TITLE": "Chat",
-        "PLACEHOLDER": "Write a message..."
+        "PLACEHOLDER": "Write a message...",
+        "NO_MESSAGES": "No messages to display",
+        "IN_REPLY_TO": "In reply to",
+        "REPLYING_TO": "Replying to",
+        "CANCEL_REPLY": "Cancel reply",
+        "ANSWER": "Answer"
       },
       "attach": {
         "DRAG_DROP": "Drag and drop files here to upload."
