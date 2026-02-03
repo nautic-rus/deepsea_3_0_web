@@ -3,8 +3,8 @@
   <ng-template #start>
     <p-button [label]="'MENU.CREATE_ISSUE' | translate" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNewIssue()" />
       <!-- <p-button severity="secondary" [label]="'MENU.DELETE' | translate" icon="pi pi-trash" outlined (onClick)="deleteSelectedIssues()" [disabled]="!selectedIssues || !selectedIssues.length" /> -->
-      <p-button severity="secondary" [label]="'MENU.BULK_EDIT' | translate" icon="pi pi-pencil" class="ml-2" (onClick)="openBulkEditDialog()" [disabled]="!selectedIssues || !selectedIssues.length" />
-      <p-button severity="secondary" [label]="'MENU.QUERY' | translate" icon="pi pi-filter" class="ml-2" (onClick)="openQueryDialog()" />
+      <p-button severity="secondary" icon="pi pi-pencil" class="ml-2" (onClick)="openBulkEditDialog()" [disabled]="!selectedIssues || !selectedIssues.length" />
+      <p-button severity="secondary" icon="pi pi-filter" class="ml-2" (onClick)="openQueryDialog()" />
   </ng-template>
 
   <ng-template #end>
@@ -154,7 +154,7 @@
         </ng-template>
 
         <ng-template pTemplate="body" let-issue>
-            <tr>
+            <tr (click)="onRowClick(issue, $event)">
                 <td>
                     <p-tableCheckbox [value]="issue" />
                 </td>
@@ -223,51 +223,67 @@
 </p-confirmDialog>
 <p-toast position="top-right" appendTo="body" [baseZIndex]="10001" styleClass="user-toast"></p-toast>
 
-<p-dialog [header]="isCreating ? ('MENU.CREATE_ISSUE' | translate) : ('MENU.EDIT_ISSUE' | translate)" [(visible)]="displayDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{width: '25%'}">
+<p-dialog [header]="isCreating ? ('MENU.CREATE_ISSUE' | translate) : ('MENU.EDIT_ISSUE' | translate)" [(visible)]="displayDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{width: '40%'}">
         <div class=" flex flex-col gap-4">
-            <div class="flex flex-col gap-2">
-                <label for="email1">{{ 'MENU.EMAIL' | translate }}</label>
-                <input pInputText id="email1" type="text" [(ngModel)]="editModel.email" name="email" />
-                <small *ngIf="formErrors.email" class="text-red-600 block">{{ formErrors.email }}</small>
-            </div>
-            <div class="flex flex-col gap-2">
-                <label for="phone1">{{ 'MENU.PHONE' | translate }}</label>
-                <p-inputMask id="phone1"
-                              mask="+7 (999) 999-99-99"
-                              placeholder="+7 (___) ___-__-__"
-                              [(ngModel)]="editModel.phone"
-                              name="phone">
-                </p-inputMask>
-            </div>
             <div class="flex gap-2">
                 <div class="flex-1 flex flex-col gap-2">
-                    <label for="firstName">{{ 'MENU.FIRST_NAME' | translate }}</label>
-                    <input pInputText id="firstName" type="text" [(ngModel)]="editModel.first_name" name="first_name" />
-                    <small *ngIf="formErrors.first_name" class="text-red-600 block">{{ formErrors.first_name }}</small>
+                    <label for="projectId" class="font-bold">{{ 'components.issues.form.PROJECT' | translate }}</label>
+                    <p-select id="projectId" [options]="projectOptions" [(ngModel)]="editModel.project_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body"></p-select>
+                    <small *ngIf="formErrors.project_id" class="text-red-600 block">{{ formErrors.project_id }}</small>
+                </div>
+
+                <div class="w-40 flex flex-col gap-2">
+                    <label for="typeId" class="font-bold">{{ 'components.issues.form.TYPE' | translate }}</label>
+                    <p-select id="typeId" [options]="typeOptions" [(ngModel)]="editModel.type_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
                 </div>
             </div>
+
+            <div class="flex flex-col gap-2">
+                <label for="title" class="font-bold">{{ 'components.issues.form.TITLE' | translate }}</label>
+                <input pInputText id="title" type="text" [(ngModel)]="editModel.title" name="title" />
+                <small *ngIf="formErrors.title" class="text-red-600 block">{{ formErrors.title }}</small>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label for="description" class="font-bold">{{ 'components.issues.form.DESCRIPTION' | translate }}</label>
+                <p-editor id="description" [(ngModel)]="editModel.description" name="description" styleClass="w-full" [style]="{ height: '100px' }"></p-editor>
+            </div>
+
             <div class="flex gap-2">
                 <div class="flex-1 flex flex-col gap-2">
-                    <label for="lastName">{{ 'MENU.LAST_NAME' | translate }}</label>
-                    <input pInputText id="lastName" type="text" [(ngModel)]="editModel.last_name" name="last_name" />
-                    <small *ngIf="formErrors.last_name" class="text-red-600 block">{{ formErrors.last_name }}</small>
+                    <label for="assigneeId" class="font-bold">{{ 'components.issues.form.ASSIGNEE' | translate }}</label>
+                    <p-select id="assigneeId" [options]="usersOptions" [(ngModel)]="editModel.assignee_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body">
+                        <ng-template let-opt pTemplate="item">
+                            <div class="flex items-center gap-2">
+                                <ng-container *ngIf="opt.avatar; else initialsItem">
+                                    <img [src]="opt.avatar" alt="avatar" class="select-avatar" />
+                                </ng-container>
+                                <ng-template #initialsItem>
+                                    <div class="select-avatar-initials" [style.background]="selectAvatarBg(opt.label)" [style.color]="selectAvatarTextColor(opt.label)">{{ initialsFromName(opt.label) }}</div>
+                                </ng-template>
+                                <div>{{ opt.label }}</div>
+                            </div>
+                        </ng-template>
+                        <ng-template let-opt pTemplate="value">
+                            <div class="flex items-center gap-2">
+                                <ng-container *ngIf="opt.avatar; else initialsValue">
+                                    <img [src]="opt.avatar" alt="avatar" class="select-avatar" />
+                                </ng-container>
+                                <ng-template #initialsValue>
+                                    <div class="select-avatar-initials" [style.background]="selectAvatarBg(opt.label)" [style.color]="selectAvatarTextColor(opt.label)">{{ initialsFromName(opt.label) }}</div>
+                                </ng-template>
+                                <div>{{ opt.label }}</div>
+                            </div>
+                        </ng-template>
+                    </p-select>
                 </div>
             </div>
+
             <div class="flex flex-col gap-2">
-                <label for="middleName">{{ 'MENU.MIDDLE_NAME' | translate }}</label>
-                <input pInputText id="middleName" type="text" [(ngModel)]="editModel.middle_name" name="middle_name" />
+                <label for="priority" class="font-bold">{{ 'components.issues.form.PRIORITY' | translate }}</label>
+                <p-select id="priority" [options]="priorityOptions" [(ngModel)]="editModel.priority" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
             </div>
-            <div class="flex flex-col gap-2">
-                <label for="department">{{ 'MENU.DEPARTMENT' | translate }}</label>
-                <p-select id="department"
-                            [options]="departments"
-                            [(ngModel)]="editModel.department"
-                            optionLabel="label"
-                            optionValue="value"
-                            [placeholder]="'MENU.SELECT_DEPARTMENT' | translate"
-                            appendTo="body">
-                </p-select>
-            </div>
+
         <div class="flex justify-end gap-2 mt-4">
             <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="displayDialog=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="loading"></p-button>
             <p-button label="{{ 'MENU.SAVE' | translate }}" (onClick)="saveIssue()" severity="primary" icon="pi pi-check" iconPos="left" [loading]="loading" [disabled]="loading"></p-button>
@@ -377,7 +393,20 @@
             </div>
             <div>
                 <label class="font-bold">{{ 'components.issues.bulk.ASSIGNEE' | translate }}</label>
-                <p-select [options]="usersOptions" [(ngModel)]="bulkEditModel.assignee_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+                <p-select [options]="usersOptions" [(ngModel)]="bulkEditModel.assignee_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body">
+                    <ng-template let-opt pTemplate="item">
+                        <div class="flex items-center gap-2">
+                            <img *ngIf="opt.avatar" [src]="opt.avatar" alt="avatar" class="select-avatar" />
+                            <div>{{ opt.label }}</div>
+                        </div>
+                    </ng-template>
+                    <ng-template let-opt pTemplate="value">
+                        <div class="flex items-center gap-2">
+                            <img *ngIf="opt.avatar" [src]="opt.avatar" alt="avatar" class="select-avatar" />
+                            <div>{{ opt.label }}</div>
+                        </div>
+                    </ng-template>
+                </p-select>
             </div>
         </div>
 

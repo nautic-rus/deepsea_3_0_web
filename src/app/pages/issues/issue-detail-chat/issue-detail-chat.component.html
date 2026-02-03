@@ -1,0 +1,31 @@
+<section class="chat-container card">
+  <p-toast></p-toast>
+  <h4 class="chat-title">{{ 'components.issues.chat.TITLE' | translate }}</h4>
+
+  <!-- Messages area: takes remaining space above editor -->
+  <div #messagesContainer class="chat-messages">
+    <div *ngIf="!loadingMessages && messages.length === 0" class="text-sm text-surface-500">
+      {{ 'components.issues.chat.NO_MESSAGES' | translate }}
+    </div>
+
+    <div *ngFor="let m of messages" class="chat-message">
+      <p-avatar [label]="initials(m.author)" styleClass="mr-2"></p-avatar>
+      <div>
+        <div class="font-medium">{{ m.author }}</div>
+        <div class="text-sm text-surface-500" [innerHTML]="m.text"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Editor area: always at the bottom, grows upward as content increases -->
+  <div class="chat-editor" (keydown)="onComposerKeydown($event)">
+    <p-editor
+      #pEditorEl
+      [(ngModel)]="newMessage"
+      [style]="{'height': editorHeight + 'px'}"
+      (onTextChange)="onEditorTextChange()"
+      (ngModelChange)="adjustEditorHeight()"
+    ></p-editor>
+    <small class="text-surface-500 mt-1">{{ 'components.issues.chat.SEND_HINT' | translate }} (Ctrl+Enter)</small>
+  </div>
+</section>

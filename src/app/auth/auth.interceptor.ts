@@ -1,101 +1,106 @@
 import { Injectable } from '@angular/core';
 import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError, of } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { AuthService } from './auth.service';
 
 /**
- * Attaches Authorization header from in-memory access token and tries refresh on 401.
- * Refresh token is expected to be stored as HttpOnly cookie by the server.
+ * HTTP Interceptor for authentication handling:
+ * - Attaches withCredentials for API calls (HttpOnly cookies)
+ * - Handles 401 errors with automatic token refresh and retry
  */
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
-  constructor(private router: Router, private auth: AuthService) {}
+  constructor(
+    private router: Router,
+    private auth: AuthService
+  ) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    try {
-      let authReq = req;
+    let authReq = req;
 
-      // No client-side access token: server issues HttpOnly access/refresh cookies.
-      // authReq remains as original; we'll ensure withCredentials for API calls below.
-
-      // For same-origin API calls ensure cookies are sent so refresh endpoint can work.
-      // Accept both relative URLs (/api/...) and absolute URLs that resolve to the same origin.
-      try {
-        let isApi = false;
-        if (typeof req.url === 'string') {
-          if (req.url.startsWith('/api')) {
-            isApi = true;
-          } else {
-            // Try to parse absolute URL and compare origin with the app origin
-            try {
-              const parsed = new URL(req.url, window.location.origin);
-              if (parsed.origin === window.location.origin && parsed.pathname.startsWith('/api')) {
-                isApi = true;
-              }
-            } catch (e) {
-              // If URL parsing fails, fall back to a simple host check
-              if (req.url.includes(window.location.host)) {
-                isApi = true;
-              }
-            }
-          }
-        }
-
-        if (isApi) {
-          authReq = authReq.clone({ withCredentials: true });
-        }
-      } catch (e) {
-        // ignore any window/url parsing errors
-      }
-
-      // If this request is the refresh call itself or marked to skip, do not attach refresh logic
-      const isRefreshCall = req.headers.has('x-skip-refresh') || (typeof req.url === 'string' && req.url.includes('/api/auth/refresh'));
-      const isAuthCall = (typeof req.url === 'string' && (req.url.includes('/api/auth/login') || req.url.includes('/api/auth/logout')));
-
-      return next.handle(authReq).pipe(
-        catchError((err: HttpErrorResponse) => {
-          // If this request is a refresh/login/logout call, don't attempt refresh to avoid recursion
-          if (isRefreshCall || isAuthCall) {
-            return throwError(() => err);
-          }
-
-          // If 401, try one refresh attempt and then retry the original request
-          if (err.status === 401) {
-            // Avoid retry loops: if request already had a custom header we set, fail
-            const alreadyTried = req.headers.get('x-refresh-tried');
-            if (alreadyTried) {
-              try { sessionStorage.removeItem('currentUser'); } catch (e) { console.warn('sessionStorage.removeItem failed', e); }
-              try { this.router.navigate(['/login']); } catch (e) { console.warn('router.navigate failed', e); }
-              return throwError(() => err);
-            }
-
-            // Attempt refresh using refresh cookie
-            return this.auth.refreshToken().pipe(
-              switchMap(success => {
-                if (!success) {
-                  try { sessionStorage.removeItem('currentUser'); } catch (e) { console.warn('sessionStorage.removeItem failed', e); }
-                  try { this.router.navigate(['/login']); } catch (e) { console.warn('router.navigate failed', e); }
-                  return throwError(() => err);
-                }
-                // assume server set new HttpOnly cookies on refresh; retry original request
-                const retryReq = req.clone({ headers: req.headers.set('x-refresh-tried', '1'), withCredentials: true });
-                return next.handle(retryReq);
-              }),
-              catchError(e => {
-                try { sessionStorage.removeItem('currentUser'); } catch (ee) { console.warn('sessionStorage.removeItem failed', ee); }
-                try { this.router.navigate(['/login']); } catch (ee) { console.warn('router.navigate failed', ee); }
-                return throwError(() => e);
-              })
-            );
-          }
-          return throwError(() => err);
-        })
-      );
-    } catch (e) {
-      console.warn('AuthInterceptor failure', e);
-      return next.handle(req);
+    // Attach withCredentials for API calls
+    if (this.isApiRequest(req.url)) {
+      authReq = authReq.clone({ withCredentials: true });
     }
+
+    const isRefreshCall = this.isRefreshRequest(req);
+    const isAuthCall = this.isAuthRequest(req.url);
+
+    return next.handle(authReq).pipe(
+      catchError((err: HttpErrorResponse) => {
+        // Don't attempt refresh for auth-related calls to avoid recursion
+        if (isRefreshCall || isAuthCall) {
+          return throwError(() => err);
+        }
+
+        // Handle 401 with refresh attempt
+        if (err.status === 401) {
+          return this.handle401Error(req, next, err);
+        }
+
+        return throwError(() => err);
+      })
+    );
+  }
+
+  /** Check if URL is an API request */
+  private isApiRequest(url: string): boolean {
+    if (!url) return false;
+
+    if (url.startsWith('/api')) return true;
+
+    try {
+      const parsed = new URL(url, window.location.origin);
+      return parsed.origin === window.location.origin && parsed.pathname.startsWith('/api');
+    } catch {
+      return url.includes(window.location.host);
+    }
+  }
+
+  /** Check if request is a refresh token call */
+  private isRefreshRequest(req: HttpRequest<any>): boolean {
+    return req.headers.has('x-skip-refresh') || req.url?.includes('/api/auth/refresh');
+  }
+
+  /** Check if request is an auth-related call */
+  private isAuthRequest(url: string): boolean {
+    return url?.includes('/api/auth/login') || url?.includes('/api/auth/logout');
+  }
+
+  /** Handle 401 error with token refresh */
+  private handle401Error(req: HttpRequest<any>, next: HttpHandler, err: HttpErrorResponse): Observable<HttpEvent<any>> {
+    // Prevent retry loops
+    if (req.headers.get('x-refresh-tried')) {
+      this.clearSessionAndRedirect();
+      return throwError(() => err);
+    }
+
+    return this.auth.refreshToken().pipe(
+      switchMap((success) => {
+        if (!success) {
+          this.clearSessionAndRedirect();
+          return throwError(() => err);
+        }
+
+        // Retry request with marker to prevent infinite loops
+        const retryReq = req.clone({
+          headers: req.headers.set('x-refresh-tried', '1'),
+          withCredentials: true
+        });
+        return next.handle(retryReq);
+      }),
+      catchError((refreshErr) => {
+        this.clearSessionAndRedirect();
+        return throwError(() => refreshErr);
+      })
+    );
+  }
+
+  /** Clear session storage and redirect to login */
+  private clearSessionAndRedirect(): void {
+    sessionStorage.removeItem('currentUser');
+    this.router.navigate(['/login']);
   }
 }

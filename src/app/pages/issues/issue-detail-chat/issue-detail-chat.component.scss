@@ -1,0 +1,44 @@
+/* Chat container: flex column, fixed height */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 80vh;
+
+  overflow: hidden; /* CRITICAL: prevent overflow */
+}
+
+.chat-title {
+  flex: 0 0 auto;
+  margin-bottom: 0.75rem;
+}
+
+/* Messages: takes ALL remaining space, scrolls internally */
+.chat-messages {
+  flex: 1 1 0; /* key: basis 0 allows proper shrinking */
+  min-height: 0; /* key: allows flex item to shrink below content */
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.chat-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Editor: fixed at bottom, height controlled by JS */
+.chat-editor {
+  flex: 0 0 auto;
+  margin-top: 0.75rem;
+  /* No min-height here - controlled by editorHeight in JS */
+}
+
+/* Style the p-editor to respect height */
+.chat-editor ::ng-deep .p-editor-container {
+  height: 100%;
+}
+
+.chat-editor ::ng-deep .p-editor-content {
+  overflow-y: auto;
+}

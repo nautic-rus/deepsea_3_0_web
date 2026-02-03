@@ -5,8 +5,9 @@
 
 /* PrimeNG Icons */
 @import "primeicons/primeicons.css";
-/* Google Fonts - Lato (from previous styles.css) */
-@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap');
+/* Quill editor styles (required by PrimeNG Editor) */
+@import 'quill/dist/quill.snow.css';
+/* Google Fonts - Lato (moved to index.html to avoid build-time inlining) */
 
 /* Global Styles (merged from styles.css + previous styles.scss additions) */
 * {
@@ -43,9 +44,14 @@ html, body {
   --text-color: #334155;
   --text-color-secondary: var(--surface-600);
   --muted-color: var(--surface-500);
-  --primary-color: #003e51;
+  /* Semantic brand colors (updated) */
+  --primary-color: #3b82f6; /* Primary */
+  --secondary-color: #E2EEF2; /* Secondary */
+  --warn-color: #F2997A; /* Warn */
+  --info-color: #4EC6C1; /* Info */
+  --success-color: #6FCF97; /* Success */
+  --danger-color: #F77548 !important; /* Danger */
 }
-
 /* Dark Mode Variables */
 .app-dark {
   --surface-0: #121212;
@@ -129,27 +135,12 @@ body {
   box-shadow: none !important;
 }
 
-/* Primary buttons: background and text color */
-.p-button.p-button-primary,
-.p-button.p-button-primary.p-button-outlined {
-  background-color: var(--primary-color) !important;
-  color: #ffffff !important;
-  border-color: transparent !important;
-}
 
-/* Hover/focus states for primary */
-.p-button.p-button-primary:hover,
-.p-button.p-button-primary:focus {
-  background-color: #00374a !important; /* slightly darker */
-  color: #ffffff !important;
-}
 
-/* Outlined primary should show primary background on hover */
-.p-button.p-button-primary.p-button-outlined:hover {
-  background-color: var(--primary-color) !important;
-  color: #ffffff !important;
-  border-color: transparent !important;
-}
+
+
+
+
 
 /* Make sure secondary/outlined buttons don't show default borders */
 .p-button.p-button-outlined {
@@ -221,4 +212,23 @@ html::-webkit-scrollbar-thumb:hover, body::-webkit-scrollbar-thumb:hover, .permi
 
 .logo-color {
     filter: brightness(0) saturate(100%) invert(14%) sepia(72%) saturate(2156%) hue-rotate(171deg) brightness(94%) contrast(101%);
+}
+
+.p-fileupload-advanced {
+    border: 0px solid var(--p-fileupload-border-color) !important;
+    border-radius: var(--p-fileupload-border-radius);
+    background: var(--p-fileupload-background);
+    color: var(--p-fileupload-color);
+}
+
+.p-fileupload-header {
+    padding: 0 !important;
+}
+
+.p-fileupload-content {
+  margin-top: 1rem !important;  
+  padding: 1rem !important; 
+  border: 1px dashed !important;
+  border-color: var(--p-fileupload-border-color) !important;
+  text-align: center !important;
 }

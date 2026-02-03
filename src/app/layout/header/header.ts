@@ -11,6 +11,7 @@ import { RippleModule } from 'primeng/ripple';
 import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
 import { AuthService } from '../../auth/auth.service';
+import { AuthGuard } from '../../auth/auth.guard';
 import { PagesService } from '../../services/pages.service';
 
 @Component({
@@ -34,7 +35,15 @@ export class HeaderComponent implements OnInit {
   langEnLabel = 'EN';
   langRuLabel = 'RU';
 
-  constructor(@Inject(DOCUMENT) private document: Document, private router: Router, private authService: AuthService, private pagesService: PagesService, private cdr: ChangeDetectorRef, private translate: TranslateService) {
+  constructor(
+    @Inject(DOCUMENT) private document: Document,
+    private router: Router,
+    private authService: AuthService,
+    private authGuard: AuthGuard,
+    private pagesService: PagesService,
+    private cdr: ChangeDetectorRef,
+    private translate: TranslateService
+  ) {
     // Check if dark mode was previously enabled
     this.darkMode = localStorage.getItem('darkMode') === 'true';
     // Ensure translation handler rebuilds menu labels and header texts on language change
@@ -314,19 +323,15 @@ export class HeaderComponent implements OnInit {
   
 
   logout(): void {
+    // Clear auth guard cache
+    this.authGuard.clearCache();
+
     // Attempt to notify backend (best-effort, do not block UI)
-    try {
-      this.authService.logout().subscribe({ next: () => {}, error: () => {} });
-    } catch (e) {
-      console.warn('logout request failed', e);
-    }
+    this.authService.logout().subscribe({ next: () => {}, error: () => {} });
 
     // Clear auth data from both storages
-    // Tokens are stored as HttpOnly cookies on the server; clear only client-side cache
-    ['currentUser'].forEach(k => {
-      try { sessionStorage.removeItem(k); } catch (e) { console.warn('sessionStorage.removeItem failed', e); }
-      try { localStorage.removeItem(k); } catch (e) { console.warn('localStorage.removeItem failed', e); }
-    });
+    sessionStorage.removeItem('currentUser');
+    localStorage.removeItem('currentUser');
 
     // Navigate to login
     this.router.navigate(['/login']);

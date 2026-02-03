@@ -16,6 +16,7 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { DatePickerModule } from 'primeng/datepicker';
 import { CheckboxModule } from 'primeng/checkbox';
 import { AvatarModule } from 'primeng/avatar';
+import { EditorModule } from 'primeng/editor';
 import { DragDropModule } from 'primeng/dragdrop';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
@@ -25,6 +26,7 @@ import { MessageService } from 'primeng/api';
 import { UsersService } from '../administration/users/users.service';
 import { IssuesService } from './issues.service';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { Select } from 'primeng/select';
 
 interface User {
@@ -66,6 +68,7 @@ interface User {
     CheckboxModule,
     DragDropModule,
     AvatarModule,
+  EditorModule,
     Select,
     TagModule,
     ConfirmDialogModule,
@@ -82,7 +85,8 @@ export class IssuesComponent implements OnInit {
   loading = false;
   error: string | null = null;
   displayDialog = false;
-  editModel: Partial<User & { name?: string; age?: number }> = {};
+  // issue edit/create model — use a flexible shape matching issue payload
+  editModel: any = {};
   isCreating = false;
   departments: { label: string; value: any }[] = [];
   departmentsFilter: { label: string; value: any }[] = [];
@@ -91,7 +95,7 @@ export class IssuesComponent implements OnInit {
     { label: 'MENU.ACTIVE_NO', value: false }
   ];
   jobTitles: { label: string; value: any }[] = [];
-  formErrors: { email?: string; first_name?: string; last_name?: string } = {};
+  formErrors: { title?: string; project_id?: string } = {};
   // query dialog state and filters
   queryDialogVisible = false;
   // bulk edit dialog state
@@ -125,7 +129,9 @@ export class IssuesComponent implements OnInit {
   statusOptions: { label: string; value: any }[] = [];
   // priority options will be localized in ngOnInit
   priorityOptions: { label: string; value: any }[] = [];
-  usersOptions: { label: string; value: any }[] = [];
+  usersOptions: { label: string; value: any; avatar?: string | null }[] = [];
+  // issue type options (select)
+  typeOptions: { label: string; value: any }[] = [];
 
   // column toggle support
   columns: { field: string; headerKey: string; visible: boolean }[] = [
@@ -159,7 +165,25 @@ export class IssuesComponent implements OnInit {
     private translate: TranslateService,
     private http: HttpClient,
     private issuesService: IssuesService
+    , private router: Router
   ) {}
+
+  // Navigate to issue detail page when a table row is clicked
+  onRowClick(issue: any, event?: Event): void {
+    try {
+      // prevent navigation when clicking interactive elements inside the row (checkboxes, buttons, inputs, links)
+      const target = event && (event.target as HTMLElement);
+      if (target && target.closest) {
+        const interactive = target.closest('button, a, input, textarea, select, .p-tablecheckbox, .p-checkbox, .p-button');
+        if (interactive) return;
+      }
+      if (!issue || (issue.id == null)) return;
+      // navigate to /issues/:id (router will handle route matching)
+      this.router.navigate(['/issues', issue.id]);
+    } catch (e) {
+      console.warn('onRowClick failed', e);
+    }
+  }
 
   private safeDetect(): void {
     try { this.cd.detectChanges(); } catch (e) { console.warn('safeDetect failed', e); }
@@ -172,6 +196,7 @@ export class IssuesComponent implements OnInit {
     // preload options for multiselects
     this.loadProjects();
     this.loadStatuses();
+    this.loadTypes();
     // initialize localized priority labels
     this.priorityOptions = [
       { label: this.translate.instant('components.issues.priority.HIGH') || 'High', value: 'high' },
@@ -286,14 +311,15 @@ export class IssuesComponent implements OnInit {
         const items = (res && res.data) ? res.data : (res || []);
         this.projectOptions = (items || []).map((p: any) => ({ label: p.name || p.title || String(p.id), value: p.id }));
         // collect participants across projects to populate assignee/author options
-        const map = new Map<number | string, { label: string; value: any }>();
+  const map = new Map<number | string, { label: string; value: any; avatar?: string | null }>();
         for (const p of (items || [])) {
           const parts = p.participants || [];
           for (const part of (parts || [])) {
             const id = part.id;
             if (id == null) continue;
             const label = part.full_name || part.fullName || part.name || part.email || String(id);
-            if (!map.has(id)) map.set(id, { label: label, value: id });
+            const avatar = part.avatar_url || part.avatar || part.avatarUrl || null;
+            if (!map.has(id)) map.set(id, { label: label, value: id, avatar });
           }
         }
         this.usersOptions = Array.from(map.values());
@@ -312,6 +338,34 @@ export class IssuesComponent implements OnInit {
         this.safeDetect();
       },
       error: (err) => { console.warn('Failed to load statuses', err); this.statusOptions = []; this.safeDetect(); }
+    });
+  }
+
+    
+
+  // load issue types from server (fallbacks provided)
+  loadTypes(): void {
+    this.http.get('/api/issue_types').subscribe({
+      next: (res: any) => {
+        const items = (res && res.data) ? res.data : (res || []);
+        this.typeOptions = (items || []).map((t: any) => ({ label: t.name || t.title || String(t.id), value: t.id }));
+        // ensure there's at least a sensible default list
+        if (!this.typeOptions.length) this.typeOptions = [
+          { label: 'Bug', value: 1 },
+          { label: 'Task', value: 2 },
+          { label: 'Feature', value: 3 }
+        ];
+        this.safeDetect();
+      },
+      error: (err) => {
+        // fallback types
+        this.typeOptions = [
+          { label: 'Bug', value: 1 },
+          { label: 'Task', value: 2 },
+          { label: 'Feature', value: 3 }
+        ];
+        this.safeDetect();
+      }
     });
   }
 
@@ -571,17 +625,11 @@ export class IssuesComponent implements OnInit {
 
   validateIssueForm(): boolean {
     this.formErrors = {};
-    const email = (this.editModel && this.editModel.email) ? String(this.editModel.email).trim() : '';
-    const firstName = (this.editModel && this.editModel.first_name) ? String(this.editModel.first_name).trim() : '';
-    const lastName = (this.editModel && this.editModel.last_name) ? String(this.editModel.last_name).trim() : '';
+    const title = (this.editModel && this.editModel.title) ? String(this.editModel.title).trim() : '';
+    const projectId = (this.editModel && (this.editModel.project_id != null)) ? this.editModel.project_id : null;
 
-    if (!firstName) this.formErrors.first_name = this.translate.instant('MENU.FIRST_NAME') + ' is required';
-    if (!lastName) this.formErrors.last_name = this.translate.instant('MENU.LAST_NAME') + ' is required';
-    if (!email) this.formErrors.email = this.translate.instant('MENU.EMAIL') + ' is required';
-    else {
-      const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRe.test(email)) this.formErrors.email = this.translate.instant('MENU.EMAIL') + ' is invalid';
-    }
+    if (!title) this.formErrors.title = this.translate.instant('components.issues.form.TITLE') + ' is required';
+    if (projectId === null || projectId === undefined || projectId === '') this.formErrors.project_id = this.translate.instant('components.issues.form.PROJECT') + ' is required';
 
     this.safeDetect();
     return Object.keys(this.formErrors).length === 0;
@@ -610,7 +658,7 @@ export class IssuesComponent implements OnInit {
   }
 
   openNewIssue(): void {
-    this.editModel = { email: '', phone: '', first_name: '', last_name: '', middle_name: '', department: null, job_title: '' };
+    this.editModel = { project_id: null, title: '', description: '', assignee_id: null, type_id: 1, priority: 'medium' };
     this.isCreating = true;
     this.displayDialog = true;
   }
@@ -637,13 +685,8 @@ export class IssuesComponent implements OnInit {
 
   openEditIssue(user: User): void {
     if (!user) return;
-    this.editModel = { ...user } as any;
-    const rawDeptId = (user as any).department_id ?? (user as any).departmentId ?? null;
-    if (rawDeptId != null) (this.editModel as any).department = rawDeptId;
-    else if (user.department) {
-      const found = this.departments.find(d => d.label === user.department || String(d.value) === String(user.department));
-      if (found) (this.editModel as any).department = found.value;
-    }
+    // copy issue fields into editModel (assume server returns issue-shaped object)
+    this.editModel = { ...(user as any) } as any;
     this.displayDialog = true;
   }
 
@@ -652,21 +695,13 @@ export class IssuesComponent implements OnInit {
     if (!this.isCreating && (this.editModel.id == null)) return;
     const id = (this.editModel.id != null) ? this.editModel.id : null;
 
-    let departmentId: any = (this.editModel as any).department ?? (this.editModel as any).department_id ?? (this.editModel as any).departmentId ?? null;
-    if (departmentId == null && this.editModel.department) departmentId = this.editModel.department;
-    if (typeof departmentId === 'string' && isNaN(Number(departmentId))) {
-      const found = this.departments.find(d => d.label === departmentId || String(d.value) === departmentId);
-      if (found) departmentId = found.value;
-    }
-
-    const payload: Partial<User> = {
-      email: this.editModel.email,
-      phone: this.editModel.phone,
-      first_name: this.editModel.first_name,
-      last_name: this.editModel.last_name,
-      middle_name: this.editModel.middle_name,
-      department_id: departmentId != null && departmentId !== '' ? Number(departmentId) : null,
-      job_title: this.editModel.job_title
+    const payload: any = {
+      project_id: (this.editModel.project_id != null && this.editModel.project_id !== '') ? Number(this.editModel.project_id) : 0,
+      title: String(this.editModel.title || ''),
+      description: (this.editModel.description != null) ? String(this.editModel.description) : '',
+      assignee_id: (this.editModel.assignee_id != null && this.editModel.assignee_id !== '') ? this.editModel.assignee_id : null,
+      type_id: (this.editModel.type_id != null) ? Number(this.editModel.type_id) : 1,
+      priority: String(this.editModel.priority || 'medium')
     };
 
     if (!this.validateIssueForm()) {
@@ -676,31 +711,38 @@ export class IssuesComponent implements OnInit {
 
     this.loading = true;
     if (this.isCreating) {
-      this.usersService.createUser(payload).subscribe({
+      this.issuesService.createIssue(payload).subscribe({
         next: (created: any) => {
           this.displayDialog = false;
           this.editModel = {};
           this.loading = false;
           this.isCreating = false;
-          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.CREATE_ISSUE') || 'Success', detail: this.translate.instant('MENU.USER_CREATED') || 'Created' }); } catch (e) {}
-          this.loadIssues();
+          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.CREATE_ISSUE') || 'Success', detail: this.translate.instant('components.issues.form.CREATED') || 'Created' }); } catch (e) {}
+          // refresh list
+          if (this.appliedFilters && Object.keys(this.appliedFilters).length) {
+            try { this.applyQuery(true); } catch (e) { this.loadIssues(); }
+          } else {
+            this.loadIssues();
+          }
           this.safeDetect();
         },
-        error: (err) => { console.error('Failed to create issue-like entry', err); this.error = (err && err.message) ? err.message : 'Failed to create'; this.loading = false; this.safeDetect(); }
+        error: (err) => { console.error('Failed to create issue', err); this.error = (err && err.message) ? err.message : 'Failed to create'; this.loading = false; this.safeDetect(); }
       });
-
-    
     } else {
-      this.usersService.updateUser(id as any, payload).subscribe({
+      this.issuesService.updateIssue(id as any, payload).subscribe({
         next: () => {
           this.displayDialog = false;
           this.editModel = {};
           this.loading = false;
-          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Success', detail: this.translate.instant('MENU.USER_UPDATED') || 'Updated' }); } catch (e) {}
-          this.loadIssues();
+          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Success', detail: this.translate.instant('components.issues.form.UPDATED') || 'Updated' }); } catch (e) {}
+          if (this.appliedFilters && Object.keys(this.appliedFilters).length) {
+            try { this.applyQuery(true); } catch (e) { this.loadIssues(); }
+          } else {
+            this.loadIssues();
+          }
           this.safeDetect();
         },
-        error: (err) => { console.error('Failed to update entry', err); this.error = (err && err.message) ? err.message : 'Failed to update'; this.loading = false; this.safeDetect(); }
+        error: (err) => { console.error('Failed to update issue', err); this.error = (err && err.message) ? err.message : 'Failed to update'; this.loading = false; this.safeDetect(); }
       });
     }
   }
@@ -740,6 +782,27 @@ export class IssuesComponent implements OnInit {
 
   issueAvatarTextColor(user: User | any): string {
     const bg = this.issueAvatarColor(user);
+    const m = bg.match(/hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?\)/);
+    if (!m) return '#fff';
+    const lightness = Number(m[3]);
+    return lightness > 70 ? '#111' : '#fff';
+  }
+
+  // Helpers for select-option avatars (compute from label string)
+  selectAvatarBg(label?: string | null): string {
+    const s = (label || '').toString();
+    let hash = 0;
+    for (let i = 0; i < s.length; i++) {
+      const ch = s.charCodeAt(i);
+      hash = ((hash << 5) - hash) + ch;
+      hash = hash & hash;
+    }
+    const hue = Math.abs(hash) % 360;
+    return `hsl(${hue}, 65%, 45%)`;
+  }
+
+  selectAvatarTextColor(label?: string | null): string {
+    const bg = this.selectAvatarBg(label);
     const m = bg.match(/hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?\)/);
     if (!m) return '#fff';
     const lightness = Number(m[3]);

@@ -1,64 +1,66 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map, catchError, throwError, shareReplay, finalize } from 'rxjs';
+import { Observable, map, catchError, throwError, shareReplay, finalize, tap } from 'rxjs';
+
+export interface LoginPayload {
+  username: string;
+  password: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  // single-flight holder for an ongoing refresh request
-  private refreshInProgress: Observable<boolean> | null = null;
+  private readonly API_BASE = '/api/auth';
+
+  /** Single-flight holder for ongoing refresh request */
+  private refreshInProgress$: Observable<boolean> | null = null;
 
   constructor(private http: HttpClient) {}
 
-  // Attempt to refresh access token using HttpOnly refresh cookie.
-  // Server is expected to set new HttpOnly access (and optionally refresh) cookies.
+  /**
+   * Attempt to refresh access token using HttpOnly refresh cookie.
+   * Server is expected to set new HttpOnly access (and optionally refresh) cookies.
+   * Uses single-flight pattern to prevent concurrent refresh requests.
+   */
   refreshToken(): Observable<boolean> {
-    // If a refresh is already in progress, return the same observable so callers share the single network request.
-    if (this.refreshInProgress) {
-      return this.refreshInProgress;
+    if (this.refreshInProgress$) {
+      return this.refreshInProgress$;
     }
 
-    // mark this request so the interceptor won't try to refresh again for the refresh call
-    const req$ = this.http.post<any>('/api/auth/refresh', {}, { withCredentials: true, headers: { 'x-skip-refresh': '1' } }).pipe(
-      map(_res => true),
-      catchError(err => {
-        // propagate the error to subscribers; caller (interceptor/guard) will handle navigation/cleanup
-        return throwError(() => err);
-      }),
-      finalize(() => {
-        // clear the in-progress marker when finished (success or error)
-        this.refreshInProgress = null;
-      }),
-      // share the single HTTP call among concurrent subscribers
-      shareReplay(1)
-    );
-
-    this.refreshInProgress = req$;
-    return req$;
-  }
-
-  // Convenience: call /me to get current user (with credentials)
-  me(): Observable<any> {
-    return this.http.get<any>('/api/auth/me', { withCredentials: true });
-  }
-
-  logout(): Observable<any> {
-    // server should clear refresh/access cookies
-    return this.http.post<any>('/api/auth/logout', {}, { withCredentials: true }).pipe(
-      map(res => {
-        try { sessionStorage.removeItem('currentUser'); } catch (e) { console.warn('sessionStorage.removeItem failed', e); }
-        return res;
+    this.refreshInProgress$ = this.http
+      .post<any>(`${this.API_BASE}/refresh`, {}, {
+        withCredentials: true,
+        headers: { 'x-skip-refresh': '1' }
       })
-    );
+      .pipe(
+        map(() => true),
+        catchError((err) => throwError(() => err)),
+        finalize(() => (this.refreshInProgress$ = null)),
+        shareReplay(1)
+      );
+
+    return this.refreshInProgress$;
   }
 
-  // Perform login (server expected to set HttpOnly cookies)
-  login(payload: { username: string; password: string }): Observable<any> {
-    return this.http.post<any>('/api/auth/login', payload, { withCredentials: true });
+  /** Get current authenticated user */
+  me(): Observable<any> {
+    return this.http.get<any>(`${this.API_BASE}/me`, { withCredentials: true });
   }
 
-  // Request password reset email
+  /** Perform login (server expected to set HttpOnly cookies) */
+  login(payload: LoginPayload): Observable<any> {
+    return this.http.post<any>(`${this.API_BASE}/login`, payload, { withCredentials: true });
+  }
+
+  /** Logout and clear session */
+  logout(): Observable<any> {
+    return this.http
+      .post<any>(`${this.API_BASE}/logout`, {}, { withCredentials: true })
+      .pipe(tap(() => sessionStorage.removeItem('currentUser')));
+  }
+
+  /** Request password reset email */
   requestPasswordReset(email: string): Observable<any> {
-    return this.http.post<any>('/api/auth/request_password_reset', { email });
+    return this.http.post<any>(`${this.API_BASE}/request_password_reset`, { email });
   }
 }
 

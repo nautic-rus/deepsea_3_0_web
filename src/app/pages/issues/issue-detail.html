@@ -1,0 +1,179 @@
+
+<div class="page-administration">
+  <div class="admin-grid">
+    <aside class="admin-menu card">
+      <div class="admin-menu-header"></div>
+        <div class="flex flex-col gap-2 pb-4">
+          <div class="font-semibold text-xl text-surface-900 dark:text-surface-0 leading-tight">Issue #{{ issue?.id ?? issueId }}</div>
+            <div class="text-surface-500 dark:text-surface-300 text-base leading-tight">{{ issue?.title ?? '-' }}</div>
+            
+            </div>
+
+                <div class="flex flex-col gap-4">
+                    <div class="border-t border-surface-200 dark:border-surface-700"></div>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex items-center gap-4 flex-1">
+                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">Status</div>
+                                <div class="flex-1">
+                                    <p-tag [value]="issue?.status_name " severity="warn"></p-tag>
+                                </div>
+                        </div>
+                        
+                        
+                    </div>
+                    <div class="border-t border-surface-200 dark:border-surface-700"></div>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex items-center gap-4 flex-1">
+                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">Priority</div>
+                                <div class="flex-1">
+                                    <p-tag [value]="issue?.priority_text " severity="warn"></p-tag>
+                                </div>
+                        </div>
+                        
+                        
+                    </div>
+                    <div class="border-t border-surface-200 dark:border-surface-700"></div>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex items-center gap-4 flex-1">
+                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">Type</div>
+                            <div class="flex-1 text-surface-900 dark:text-surface-0 text-base leading-tight">{{ issue?.type_name || issue?.type || '-' }}</div>
+                        </div>
+                        
+                    </div>
+
+                    <div class="border-t border-surface-200 dark:border-surface-700"></div>
+
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex items-center gap-4 flex-1">
+                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">Project</div>
+                            <div class="flex-1 text-surface-900 dark:text-surface-0 text-base leading-tight">{{ issue?.project_name || '-' }}</div>
+                        </div>
+                        
+                    </div>
+
+                    <div class="border-t border-surface-200 dark:border-surface-700"></div>
+
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex items-center gap-4 flex-1">
+                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">Author</div>
+                            <div class="flex-1 flex items-center gap-3">
+                                <p-avatar [image]="issue?.author_avatar_url" [label]="personInitials(issue?.author_name)" styleClass="mr-2"></p-avatar>
+                                <div class="text-surface-900 dark:text-surface-0 text-base leading-tight">{{ issue?.author_name }}</div>
+                            </div>
+                        </div>
+                        
+                    </div>
+
+                    <div class="border-t border-surface-200 dark:border-surface-700"></div>
+
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex items-start gap-4 flex-1">
+                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">Assigne To</div>
+                            <div class="flex-1 text-surface-900 dark:text-surface-0 text-base leading-normal"> {{issue?.assignee_name}}</div>
+                        </div>
+                        
+                    </div>
+                    <div class="border-t border-surface-200 dark:border-surface-700"></div>
+
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex items-start gap-4 flex-1">
+                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">Due date</div>
+                            <div class="flex-1 text-surface-900 dark:text-surface-0 text-base leading-normal"> {{issue?.due_date | date:'medium'}}</div>
+                        </div>
+                        
+                    </div>
+
+                    <div class="border-t border-surface-200 dark:border-surface-700"></div>
+                                        <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex items-center gap-4 flex-1">
+                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">Tags</div>
+                            <div class="flex-1 flex flex-wrap gap-2">
+                                <p-tag value="Crime" severity="info"></p-tag>
+                                <p-tag value="Drama" severity="info"></p-tag>
+                                <p-tag value="Thriller" severity="info"></p-tag>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <div class="border-t border-surface-200 dark:border-surface-700"></div>
+
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex items-start gap-4 flex-1">
+                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">Estimated hours</div>
+                            <div class="flex-1 text-surface-900 dark:text-surface-0 text-base leading-normal"> {{issue?.estimated_hours}}</div>
+                        </div>
+                        
+                    </div>
+                    <div class="border-t border-surface-200 dark:border-surface-700"></div>
+
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex items-start gap-4 flex-1">
+                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight"> Timesheeting</div>
+                            <div class="flex-1 text-surface-900 dark:text-surface-0 text-base leading-normal"> ???</div>
+                        </div>
+                        
+                    </div>
+                    <div class="border-t border-surface-200 dark:border-surface-700"></div>
+
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex items-start gap-4 flex-1">
+                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">Created At</div>
+                            <div class="flex-1 text-surface-900 dark:text-surface-0 text-base leading-normal"> {{issue?.created_at | date:'medium'}}</div>
+                        </div>
+                        
+                    </div>
+                    <div class="border-t border-surface-200 dark:border-surface-700"></div>
+
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex items-start gap-4 flex-1">
+                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">Updated At</div>
+                            <div class="flex-1 text-surface-900 dark:text-surface-0 text-base leading-normal"> {{issue?.Updated}}</div>
+                        </div>
+                        
+                    </div>
+
+                </div>
+            
+    </aside>
+<section class="admin-content-wrapper">
+    <section class="admin-subpage-tools card">
+                <p-toolbar>
+                    <p-toast></p-toast>
+                    <ng-template #start>
+                        <!-- Status change split button: always shown but disabled when no allowed statuses -->
+                        <p-splitButton
+                          icon="pi pi-exchange"
+                          severity="secondary"
+                          [label]="issue?.status_name "
+                          class="ml-2"
+                          [model]="statusMenuItems"
+                          [disabled]="statusSaving || !(statusMenuItems && statusMenuItems.length > 0)">
+                        </p-splitButton>
+
+                    </ng-template>
+
+                    <ng-template #end>
+                        
+                        <!-- Copy issue -->
+                        <p-button severity="secondary" icon="pi pi-copy" class="ml-2"  (click)="$event"></p-button>
+
+                        <!-- Timesheet / Log time -->
+                        <p-button severity="secondary" icon="pi pi-clock" class="ml-2"  (click)="$event"></p-button>
+
+                        <!-- Delete issue -->
+                        <p-button severity="danger" icon="pi pi-trash" class="ml-2"   (click)="$event"></p-button>
+                    </ng-template>
+                </p-toolbar>
+    </section>
+    <div class="grid grid-cols-2 gap-4">
+
+    <div>
+        <app-issue-detail-description [issue]="issue"></app-issue-detail-description>
+        <app-issue-detail-attach [issue]="issue"></app-issue-detail-attach>
+    </div>
+    
+    <div>
+    <app-issue-detail-chat [issue]="issue"></app-issue-detail-chat>
+    </div>
+
+    </div>

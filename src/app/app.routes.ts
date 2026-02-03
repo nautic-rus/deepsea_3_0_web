@@ -12,6 +12,14 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/password-reset/password-reset').then(m => m.PasswordResetComponent)
   },
   {
+    path: 'access',
+    loadComponent: () => import('./pages/auth/access').then(m => m.AccessComponent)
+  },
+  {
+    path: 'error',
+    loadComponent: () => import('./pages/error/error').then(m => m.ErrorComponent)
+  },
+  {
     path: '',
     loadComponent: () => import('./layout/layout').then(m => m.LayoutComponent),
     children: [
@@ -42,8 +50,11 @@ export const routes: Routes = [
       },
       {
         path: 'issues',
-        loadComponent: () => import('./pages/issues/issues').then(m => m.IssuesComponent),
-        canActivate: [AuthGuard]
+        canActivate: [AuthGuard],
+        children: [
+          { path: '', pathMatch: 'full', loadComponent: () => import('./pages/issues/issues').then(m => m.IssuesComponent) },
+          { path: ':id', loadComponent: () => import('./pages/issues/issue-detail').then(m => m.IssueDetailComponent) }
+        ]
       },
       {
         path: 'documents',
@@ -93,4 +104,9 @@ export const routes: Routes = [
       }
     ]
   }
+  ,
+  { path: '**', redirectTo: 'error' }
 ];
+
+// Redirect unknown routes to the error page
+// Keep this as the last route so it doesn't intercept other valid routes

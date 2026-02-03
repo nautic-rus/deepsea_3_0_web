@@ -76,6 +76,27 @@
   line-height: 32px;
 }
 
+/* small avatar used inside select option templates */
+.select-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: inline-block;
+}
+
+/* initials variant for select when no avatar image available */
+.select-avatar-initials {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
 .issue-query-grid{
   display:grid;
   grid-template-columns: 1fr 1fr;
@@ -91,5 +112,17 @@
 /* Ensure avatar + text alignment doesn't force nowrap */
 .issues-table .flex.items-center {
   white-space: normal !important;
+}
+
+/* Make table body rows appear clickable */
+.issues-table tbody tr {
+  cursor: pointer;
+}
+
+.p-fileupload-advanced {
+    border: 0px solid var(--p-fileupload-border-color);
+    border-radius: var(--p-fileupload-border-radius);
+    background: var(--p-fileupload-background);
+    color: var(--p-fileupload-color);
 }
 

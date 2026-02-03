@@ -50,4 +50,33 @@ export class IssuesService {
 
     return this.http.get('/api/issues', { params });
   }
+
+  createIssue(payload: any): Observable<any> {
+    return this.http.post('/api/issues', payload);
+  }
+
+  updateIssue(id: any, payload: any): Observable<any> {
+    // use PUT for updating an issue (replace resource) per API contract
+    return this.http.put(`/api/issues/${id}`, payload);
+  }
+
+  postMessage(id: any, payload: any): Observable<any> {
+    // POST a message for a given issue. Expected body: { content: string }
+    return this.http.post(`/api/issues/${id}/messages`, payload);
+  }
+
+  getMessages(id: any): Observable<any> {
+    // Retrieve messages for an issue
+    return this.http.get(`/api/issues/${id}/messages`);
+  }
+
+  getHistory(id: any): Observable<any> {
+    // Retrieve history entries for an issue (audit log, status changes, etc.)
+    return this.http.get(`/api/issues/${id}/history`);
+  }
+
+  getIssue(id: any): Observable<any> {
+    if (id === null || id === undefined) return this.http.get('/api/issues/0');
+    return this.http.get(`/api/issues/${id}`);
+  }
 }

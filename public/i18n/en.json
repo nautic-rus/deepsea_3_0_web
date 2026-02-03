@@ -77,6 +77,7 @@
     "ID": "ID",
     "CREATE_ISSUE": "Create issue",
     "EDIT_ISSUE": "Edit issue",
+  "BULK_EDIT": "Bulk edit",
     "QUERY": "Query",
     "APPLY": "Apply",
     "RESET": "Reset"
@@ -131,6 +132,24 @@
       "SIGN_IN": "Sign In",
       "SUBTITLE": "Sign in to continue",
       "WELCOME": "Welcome to DeepSea v.3!"
+    },
+    "access": {
+      "TITLE": "Access Denied",
+      "MESSAGE": "You do not have the necessary permissions. Please contact admins.",
+      "GO_DASHBOARD": "Go to Dashboard"
+    },
+    "error": {
+      "PRE_TITLE": "Oops!",
+      "CODE": "404",
+      "TITLE": "Not Found",
+      "MESSAGE": "Requested resource is not available.",
+      "FAQ_TITLE": "Frequently Asked Questions",
+      "FAQ_SUB": "Ultricies mi quis hendrerit dolor.",
+      "SOLUTION_TITLE": "Solution Center",
+      "SOLUTION_SUB": "Phasellus faucibus scelerisque eleifend.",
+      "PERMISSION_TITLE": "Permission Manager",
+      "PERMISSION_SUB": "Accumsan in nisl nisi scelerisque",
+      "GO_DASHBOARD": "Go to Dashboard"
     },
     "menu": {
       "ACTIONS": "Actions",
@@ -381,7 +400,30 @@
         "SELECT_AUTHORS": "Select authors",
         "SELECT_PRIORITIES": "Select priorities"
       },
-      "table": {
+      "form": {
+        "PROJECT": "Project",
+        "TITLE": "Title",
+        "DESCRIPTION": "Description",
+        "ASSIGNEE": "Assignee",
+        "TYPE": "Type",
+        "PRIORITY": "Priority",
+  "CREATED": "Created",
+  "UPDATED": "Updated",
+        "CREATED_AT": "Created at",
+        "UPDATED_AT": "Updated at",
+        "CREATED_MESSAGE": "Issue created",
+        "UPDATED_MESSAGE": "Issue updated"
+      },
+      "bulk": {
+        "SELECTED": "selected",
+        "STATUS": "Status",
+        "ASSIGNEE": "Assignee",
+        "SUCCESS": "Bulk update applied",
+        "ERROR": "Bulk update failed",
+        "NO_SELECTION": "No issues selected",
+        "NO_IDS": "No valid issue ids selected"
+      },
+    "table": {
           "SEARCH": "Search...",
           "PROJECT": "Project",
           "TITLE": "Title",
@@ -401,6 +443,34 @@
         "HIGH": "High",
         "MEDIUM": "Medium",
         "LOW": "Low"
+      },
+      "detail": {
+        "DESCRIPTION": "Description",
+        "ATTACHMENTS": "Attachments"
+      },
+      "CHANGE_STATUS": "Change status",
+      "chat": {
+        "TITLE": "Chat",
+        "PLACEHOLDER": "Write a message..."
+      },
+      "attach": {
+        "DRAG_DROP": "Drag and drop files here to upload."
+      },
+      "messages": {
+        "SUCCESS": "Success",
+        "UPLOADED": "Uploaded",
+        "UPLOADED_COUNT": "{{count}} file(s) uploaded",
+        "UPLOAD_FAILED": "Upload failed",
+        "ERROR": "Error",
+        "STATUS_UPDATED": "Status updated",
+        "STATUS_UPDATE_FAILED": "Failed to update status",
+        "SAVED": "Saved",
+        "SAVED_LOCAL": "Saved locally (no id)",
+        "DESCRIPTION_SAVE_FAILED": "Failed to save description"
+      },
+      "errors": {
+        "ISSUE_ID_MISSING": "Issue id is missing",
+        "FAILED_LOAD": "Failed to load issue"
       }
     }
   }
