@@ -35,9 +35,9 @@ export class IssueDetailChatComponent implements OnChanges, AfterViewInit {
   loadingMessages = false;
 
   // Editor height management
-  editorHeight = 50;
-  private readonly minEditorHeight = 50;
-  private readonly maxEditorHeight = 120;
+  editorHeight = 70;
+  private readonly minEditorHeight = 70;
+  private readonly maxEditorHeight = 150;
 
   @ViewChild('messagesContainer') messagesContainer?: ElementRef<HTMLDivElement>;
   @ViewChild('pEditorEl', { read: ElementRef }) pEditorEl?: ElementRef;
@@ -169,7 +169,13 @@ export class IssueDetailChatComponent implements OnChanges, AfterViewInit {
     setTimeout(() => {
       const ql = this.pEditorEl?.nativeElement?.querySelector('.ql-editor') as HTMLElement | null;
       if (ql) {
-        const h = Math.max(this.minEditorHeight, Math.min(this.maxEditorHeight, ql.scrollHeight));
+        // Temporarily reset height to auto to get true content height
+        const originalHeight = ql.style.height;
+        ql.style.height = 'auto';
+        const contentHeight = ql.scrollHeight;
+        ql.style.height = originalHeight;
+        
+        const h = Math.max(this.minEditorHeight, Math.min(this.maxEditorHeight, contentHeight));
         if (h !== this.editorHeight) {
           this.editorHeight = h;
           this.cdr.detectChanges();

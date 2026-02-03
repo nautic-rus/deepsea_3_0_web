@@ -39,6 +39,7 @@
   height: 100%;
 }
 
-.chat-editor ::ng-deep .p-editor-content {
-  overflow-y: auto;
+.chat-editor ::ng-deep .p-editor-content,
+.chat-editor ::ng-deep .ql-editor {
+  overflow-y: hidden; /* no internal scroll - height adjusts instead */
 }
