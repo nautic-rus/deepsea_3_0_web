@@ -447,7 +447,21 @@
       },
       "detail": {
         "DESCRIPTION": "Описание",
-        "ATTACHMENTS": "Вложения"
+        "ATTACHMENTS": "Вложения",
+        "ATTACHE": "Вложения",
+        "NO_DESCRIPTIONS": "Описание не указано"
+      },
+      "relations": {
+        "TITLE": "Связи",
+        "NO_RELATIONS": "Связей не найдено",
+        "DOCUMENT": "Документ",
+        "COLUMN_RELATION": "Связь",
+        "COLUMN_TYPE_ID": "#",
+        "COLUMN_NAME": "Наименование",
+        "COLUMN_STATUS": "Статус",
+        "COLUMN_TYPE": "Тип",
+        "DELETE_CONFIRM": "Удалить эту связь?",
+        "ACTION_DELETE": "Удалить"
       },
       "CHANGE_STATUS": "Действия",
       "chat": {
@@ -461,6 +475,11 @@
       },
       "attach": {
         "DRAG_DROP": "Перетащите файлы сюда для загрузки."
+      ,
+        "NO_ATTACHMENTS": "Вложений нет",
+        "CHOOSE": "Выбрать",
+        "UPLOAD": "Загрузить",
+        "CANCEL": "Отменить"
       },
       "messages": {
         "SUCCESS": "Успешно",

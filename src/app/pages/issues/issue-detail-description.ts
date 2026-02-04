@@ -16,7 +16,11 @@ import { IssuesService } from './issues.service';
   imports: [CommonModule, FormsModule, EditorModule, MessageModule, ToastModule, ButtonModule,TranslateModule],
   styles: [
     // increase editor text size and improve readability
-    `:host ::ng-deep .ql-editor { font-size: 1rem; line-height: 1.6; }`
+    `:host ::ng-deep .ql-editor { font-size: 1rem; line-height: 1.6; }
+     :host .card-content { max-height: auto; overflow: auto; word-break: break-word; white-space: pre-wrap; }
+     :host .card-content img { max-width: 100%; height: auto; display: block; }
+     :host .card-content p { margin: 0 0 0.5rem 0; }
+    `
   ],
   template: `
     <p-toast></p-toast>
@@ -26,51 +30,57 @@ import { IssuesService } from './issues.service';
           <p-button severity="secondary" icon="pi pi-pencil" class="mt-0" [outlined]="true" (click)="startEdit()" [style.visibility]="editing ? 'hidden' : 'visible'"></p-button>
         </div>
 
-      <form #exampleForm="ngForm" (ngSubmit)="onSubmit(exampleForm)" class="flex flex-col">
-        <div class="flex flex-col gap-4">
-          <p-editor #contentCtrl="ngModel" [(ngModel)]="text" [readonly]="!editing" name="content" required [style]="{ height: 'flex' }">
-              <ng-template pTemplate="header">
-    <span class="ql-formats">
-      <button type="button" class="ql-bold" aria-label="Bold"></button>
-      <button type="button" class="ql-italic" aria-label="Italic"></button>
-      <button type="button" class="ql-underline" aria-label="Underline"></button>
-      <button type="button" class="ql-strike" aria-label="Strike"></button>
-    </span>
-    <span class="ql-formats">
-        <button type="button" class="ql-blockquote" aria-label="Block Quote"></button>
-        <button type="button" class="ql-code-block" aria-label="Code Block"></button>
-        <button type="button" class="ql-header" value="1" aria-label="Header 1"></button>
-        <button type="button" class="ql-header" value="2" aria-label="Header 2"></button>
-    </span>
+      <!-- View mode: show rendered description when not editing -->
+      <div *ngIf="!editing" class="card-content">
+        <div *ngIf="!descriptionEmpty()" class="text-surface-500" [innerHTML]="text"></div>
+        <div *ngIf="descriptionEmpty()" class="text-surface-500">{{ 'components.issues.detail.NO_DESCRIPTIONS' | translate }}</div>
+      </div>
 
-    <span class="ql-formats">
-        <button type="button" class="ql-color" aria-label="Text Color"></button>
-        <button type="button" class="ql-background" aria-label="Background Color"></button>
-    </span>
-    
-    <span class="ql-formats">
-        <button type="button" class="ql-list" value="ordered" aria-label="Ordered List"></button>
-        <button type="button" class="ql-list" value="bullet" aria-label="Bullet List"></button>
-        <select class="ql-align">
-            <option selected></option>
-            <option value="center"></option>
-            <option value="right"></option>
-            <option value="justify"></option>
-        </select>
-    </span>
-        <span class="ql-formats">
-        <button type="button" class="ql-link" aria-label="Insert Link"></button>
-        <button type="button" class="ql-image" aria-label="Insert Image"></button>
-    </span>
-    <!-- Add more ql-formats spans for other controls like links, images, colors, etc. -->
-  </ng-template>
-          
+      <!-- Edit mode: show editor inside a form -->
+      <form *ngIf="editing" #exampleForm="ngForm" (ngSubmit)="onSubmit(exampleForm)" class="flex flex-col">
+        <div class="flex flex-col gap-4">
+          <p-editor #contentCtrl="ngModel" [(ngModel)]="text" name="content" required [style]="{ height: 'flex' }">
+            <ng-template pTemplate="header">
+              <span class="ql-formats">
+                <button type="button" class="ql-bold" aria-label="Bold"></button>
+                <button type="button" class="ql-italic" aria-label="Italic"></button>
+                <button type="button" class="ql-underline" aria-label="Underline"></button>
+                <button type="button" class="ql-strike" aria-label="Strike"></button>
+              </span>
+              <span class="ql-formats">
+                <button type="button" class="ql-blockquote" aria-label="Block Quote"></button>
+                <button type="button" class="ql-code-block" aria-label="Code Block"></button>
+                <button type="button" class="ql-header" value="1" aria-label="Header 1"></button>
+                <button type="button" class="ql-header" value="2" aria-label="Header 2"></button>
+              </span>
+
+              <span class="ql-formats">
+                <button type="button" class="ql-color" aria-label="Text Color"></button>
+                <button type="button" class="ql-background" aria-label="Background Color"></button>
+              </span>
+
+              <span class="ql-formats">
+                <button type="button" class="ql-list" value="ordered" aria-label="Ordered List"></button>
+                <button type="button" class="ql-list" value="bullet" aria-label="Bullet List"></button>
+                <select class="ql-align">
+                  <option selected></option>
+                  <option value="center"></option>
+                  <option value="right"></option>
+                  <option value="justify"></option>
+                </select>
+              </span>
+
+              <span class="ql-formats">
+                <button type="button" class="ql-link" aria-label="Insert Link"></button>
+                <button type="button" class="ql-image" aria-label="Insert Image"></button>
+              </span>
+            </ng-template>
           </p-editor>
         </div>
 
-        <div class="flex gap-2 mt-4" *ngIf="editing">
-          <p-button severity="primary" type="submit" *ngIf="editing">{{ 'MENU.SAVE' | translate }}</p-button>
-          <p-button severity="secondary" (click)="cancel()" *ngIf="editing">{{ 'MENU.CANCEL' | translate }}</p-button>
+        <div class="flex gap-2 mt-4">
+          <p-button severity="primary" type="submit">{{ 'MENU.SAVE' | translate }}</p-button>
+          <p-button severity="secondary" (click)="cancel()">{{ 'MENU.CANCEL' | translate }}</p-button>
         </div>
       </form>
     </div>
@@ -141,6 +151,17 @@ export class IssueDetailDescriptionComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['issue']) {
       this.text = this.issue && this.issue.description ? this.issue.description : '';
+    }
+  }
+
+  descriptionEmpty(): boolean {
+    try {
+      if (!this.text) return true;
+      // strip HTML tags and whitespace (covers Quill empty: <p><br></p>)
+      const stripped = this.text.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, '');
+      return stripped.trim().length === 0;
+    } catch (e) {
+      return !this.text;
     }
   }
 }

@@ -446,7 +446,22 @@
       },
       "detail": {
         "DESCRIPTION": "Description",
-        "ATTACHMENTS": "Attachments"
+        "ATTACHMENTS": "Attachments",
+        "ATTACHE": "Attachments"
+      ,
+        "NO_DESCRIPTIONS": "No description provided"
+      },
+      "relations": {
+        "TITLE": "Relations",
+        "NO_RELATIONS": "No relations to display",
+        "DOCUMENT": "Document",
+        "COLUMN_RELATION": "Relation",
+        "COLUMN_TYPE_ID": "#",
+        "COLUMN_NAME": "Name",
+        "COLUMN_STATUS": "Status",
+        "COLUMN_TYPE": "Type",
+        "DELETE_CONFIRM": "Delete this relation?",
+        "ACTION_DELETE": "Delete"
       },
       "CHANGE_STATUS": "Change status",
       "chat": {
@@ -460,6 +475,11 @@
       },
       "attach": {
         "DRAG_DROP": "Drag and drop files here to upload."
+      ,
+        "NO_ATTACHMENTS": "No attachments",
+        "CHOOSE": "Choose",
+        "UPLOAD": "Upload",
+        "CANCEL": "Cancel"
       },
       "messages": {
         "SUCCESS": "Success",

@@ -1,4 +1,4 @@
-<div class="chat-history" *ngIf="history?.length">
+<div class="chat-history" *ngIf="history.length">
   <h5 class="history-title">{{ 'components.issues.chat.HISTORY' | translate }}</h5>
   <div *ngFor="let h of history" class="chat-history-item">
     <p-avatar [label]="(h.author || '').slice(0,2).toUpperCase()" styleClass="mr-2"></p-avatar>

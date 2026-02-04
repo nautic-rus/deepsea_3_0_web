@@ -12,6 +12,8 @@ import { ToolbarModule } from 'primeng/toolbar';
 import { IssueDetailChatComponent } from './issue-detail-chat/issue-detail-chat.component';
 import { IssueDetailDescriptionComponent } from './issue-detail-description';
 import { IssueDetailAttachComponent } from './issue-detail-attach';
+import { IssueDetailRelationsComponent } from './issue-detail-relations';
+import { IssueDetailRelationsTableComponent } from './issue-detail-relations-table';
 import { SplitButtonModule } from 'primeng/splitbutton';
 import { ToastModule } from 'primeng/toast';
 import { MessageService, MenuItem } from 'primeng/api';
@@ -22,7 +24,7 @@ import { HttpClient } from '@angular/common/http';
   selector: 'app-issue-detail',
   standalone: true,
   providers: [MessageService],
-  imports: [CommonModule, TranslateModule, RouterModule, ButtonModule, AvatarModule, TagModule, ProgressSpinnerModule, ChipModule, ToolbarModule, IssueDetailChatComponent, IssueDetailDescriptionComponent, IssueDetailAttachComponent, SplitButtonModule, ToastModule],
+  imports: [CommonModule, TranslateModule, RouterModule, ButtonModule, AvatarModule, TagModule, ProgressSpinnerModule, ChipModule, ToolbarModule, IssueDetailChatComponent, IssueDetailDescriptionComponent, IssueDetailAttachComponent, IssueDetailRelationsComponent, IssueDetailRelationsTableComponent, SplitButtonModule, ToastModule],
   templateUrl: './issue-detail.html',
   styleUrls: ['./issue-detail.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -19,22 +19,25 @@ interface UploadEvent {
   template: `
     <section class="admin-subpage-attachments card ">
       <div class="flex items-center justify-between mt-0 mb-2">
-          <h4 class="mb-">{{ 'components.issues.detail.DESCRIPTION' | translate }}</h4>
-          <p-button severity="secondary" icon="pi pi-plus" class="mt-0" [outlined]="true" ></p-button>
+          <h4 class="mb-">{{ 'components.issues.detail.ATTACHE' | translate }}</h4>
         </div>
       <p-toast></p-toast>
 
-      <div *ngIf="!attachments || !attachments.length" class="text-surface-500">{{ '-' }}</div>
+  <div *ngIf="!attachments || !attachments.length" class="text-surface-500">{{ 'components.issues.attach.NO_ATTACHMENTS' | translate }}</div>
 
       <ul *ngIf="attachments && attachments.length" class="list-disc pl-5">
         <li *ngFor="let a of attachments">{{ a.name }} <span class="text-sm text-surface-500">({{ a.size | number }} bytes)</span></li>
       </ul>
 
       <div class="mt-3">
-        <p-fileupload name="files[]" (onUpload)="onUpload($event)" [multiple]="true" accept="*/*" mode="advanced">
-      <ng-template #empty>
-        <div>{{ 'components.issues.attach.DRAG_DROP' | translate }}</div>
-      </ng-template>
+        
+        <p-fileupload name="files[]" (onUpload)="onUpload($event)" [multiple]="true" accept="*/*" mode="advanced"
+          [chooseLabel]="'components.issues.attach.CHOOSE' | translate"
+          [uploadLabel]="'components.issues.attach.UPLOAD' | translate"
+          [cancelLabel]="'components.issues.attach.CANCEL' | translate">
+          <ng-template #empty>
+            <div>{{ 'components.issues.attach.DRAG_DROP' | translate }}</div>
+          </ng-template>
         </p-fileupload>
       </div>
     </section>

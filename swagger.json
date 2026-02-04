@@ -2876,6 +2876,101 @@
       }
     },
     "/api/links": {
+      "get": {
+        "tags": [
+          "links"
+        ],
+        "summary": "Список/поиск связей",
+        "description": "Возвращает список записей из таблицы `entity_links` по указанным фильтрам.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "links.view"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "source_type",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "source_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "target_type",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "target_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "relation_type",
+            "in": "query",
+            "description": "Можно перечислять через запятую для поиска по нескольким значениям",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_by",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "blocks_closure",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список связей",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EntityLink"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - missing permission links.view"
+          }
+        }
+      },
       "post": {
         "tags": [
           "links"

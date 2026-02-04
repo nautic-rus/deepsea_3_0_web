@@ -140,6 +140,7 @@
                 <p-toolbar>
                     <p-toast></p-toast>
                     <ng-template #start>
+                        <p-button  severity="secondary" icon="pi pi-arrow-left" (click)="back()" aria-label="Return to issues"></p-button>
                         <!-- Status change split button: always shown but disabled when no allowed statuses -->
                         <p-splitButton
                           icon="pi pi-exchange"
@@ -165,12 +166,13 @@
                     </ng-template>
                 </p-toolbar>
     </section>
-    <div class="grid grid-cols-2 gap-4">
+    <div class="grid grid-cols-2 gap-4 issue-grid adjustable-columns">
 
-    <div>
+    <div class="issue-left-scroll">
         <app-issue-detail-description [issue]="issue"></app-issue-detail-description>
         <app-issue-detail-attach [issue]="issue"></app-issue-detail-attach>
-        <app-issue-detail-attach [issue]="issue"></app-issue-detail-attach>
+        <app-issue-detail-relations-table [issue]="issue"></app-issue-detail-relations-table>
+        
     </div>
     
     <div>

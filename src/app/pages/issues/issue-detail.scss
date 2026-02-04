@@ -121,6 +121,28 @@
     overflow: auto; /* internal scrolling when content is long */
   }
 
+  /* Left column in issue detail: internal scrolling when content is long */
+  .issue-left-scroll {
+    /* limit height to a reasonable portion of viewport and allow internal scroll */
+    max-height: 80vh;
+    overflow: auto;
+    padding-right: 0.2rem; /* prevent content being hidden under scrollbar */
+    min-height: 0;
+  }
+
+  /* Allow controlling the width of the left column via CSS variable */
+  .issue-grid {
+    /* when used together with Tailwind's "grid" classes this will override the column template */
+    grid-template-columns: var(--issue-left-width, 35%) 1fr;
+    gap: var(--issue-grid-gap, 1rem);
+  }
+
+  /* Optional helper class to make columns visually resizable in future (no JS here) */
+  .adjustable-columns {
+    /* expose a CSS variable for consumers to override */
+    --issue-left-width: 55%;
+  }
+
 }
 
 .heading-compact { margin-bottom: 0.25rem; }
