@@ -192,9 +192,32 @@ export class AdminUsersComponent implements OnInit {
       next: (data) => {
         // assign users and run change detection
         this.users = (data && (data as any).data) ? (data as any).data : (data || []);
-          // derive job titles from users for the job title filter
-          const titles = Array.from(new Set((this.users || []).map((u: any) => u.job_title).filter(Boolean)));
-          this.jobTitles = (titles || []).map((t: any) => ({ label: t, value: t }));
+        // Normalize avatar fields so template can depend on `avatar_url`.
+        try {
+          this.users = (this.users || []).map((u: any) => {
+            if (!u) return u;
+            // prefer explicit URL fields
+            let url: string | null = null;
+            if (u.avatar_url || u.avatar || u.avatarUrl) {
+              url = u.avatar_url || u.avatar || u.avatarUrl || null;
+            } else if (u.avatar_id || u.avatarId) {
+              const aid = u.avatar_id ?? u.avatarId;
+              try {
+                if (typeof aid === 'number' || (typeof aid === 'string' && String(aid).trim())) {
+                  url = `/api/storage/${String(aid).trim()}/download`;
+                }
+              } catch (e) { url = null; }
+            }
+            // ensure canonical field exists
+            (u as any).avatar_url = url;
+            return u;
+          });
+        } catch (e) {
+          console.warn('normalize avatars failed', e);
+        }
+        // derive job titles from users for the job title filter
+        const titles = Array.from(new Set((this.users || []).map((u: any) => u.job_title).filter(Boolean)));
+        this.jobTitles = (titles || []).map((t: any) => ({ label: t, value: t }));
         this.loading = false;
         this.safeDetect();
       },

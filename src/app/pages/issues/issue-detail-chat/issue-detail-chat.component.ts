@@ -31,7 +31,7 @@ export class IssueDetailChatComponent implements OnChanges, AfterViewInit {
     return this._issue;
   }
 
-  messages: Array<{ id?: any; _localId?: string; parent_id?: any; author: string; text: string; time?: any }> = [];
+  messages: Array<{ id?: any; _localId?: string; parent_id?: any; author: string; text: string; time?: any; avatar_url?: string | null }> = [];
   // currently selected message id to reply to
   replyToId: any = null;
   // messages may include `time` (ISO string / timestamp) when available
@@ -56,10 +56,33 @@ export class IssueDetailChatComponent implements OnChanges, AfterViewInit {
       if (!raw) return null;
       const u = JSON.parse(raw);
       if (!u) return null;
-      return u.name || u.user_name || u.username || (u.first_name ? `${u.first_name}${u.last_name ? ' ' + u.last_name : ''}` : null) || null;
+      return (u.last_name + ' ' + u.first_name + ' ' + u.middle_name)
     } catch (e) {
       return null;
     }
+  }
+
+  private currentUserAvatarUrl(): string | null {
+    try {
+      const raw = sessionStorage.getItem('currentUser');
+      if (!raw) return null;
+      const u = JSON.parse(raw);
+      if (!u) return null;
+      const candidates = [
+        'avatarUrl', 'avatar', 'photo', 'image', 'profilePicture', 'picture', 'avatar_url', 'profile_image'
+      ];
+      for (const k of candidates) {
+        const v = u?.[k];
+        if (typeof v === 'string' && v.trim()) return v.trim();
+      }
+      const aid = u?.avatar_id ?? u?.avatarId ?? u?.photo_id ?? u?.photoId ?? null;
+      if (aid) {
+        if (typeof aid === 'number' || (typeof aid === 'string' && String(aid).trim())) {
+          return `/api/storage/${String(aid).trim()}/download`;
+        }
+      }
+      return null;
+    } catch (e) { return null; }
   }
 
   ngAfterViewInit(): void {
@@ -82,13 +105,29 @@ export class IssueDetailChatComponent implements OnChanges, AfterViewInit {
       if (rawMessages.length > 0) {
         this.messages = rawMessages.map((it: any) => {
           const id = it.id || it._id || it.message_id || it.uuid || null;
+          // normalize avatar if present in various shapes
+          let avatarUrl: string | null = null;
+          if (it.user && (it.user.avatar_url || it.user.avatar || it.user.avatarUrl)) {
+            avatarUrl = it.user.avatar_url || it.user.avatar || it.user.avatarUrl || null;
+          } else if (it.avatar_url || it.avatar) {
+            avatarUrl = it.avatar_url || it.avatar || null;
+          } else if (it.user && (it.user.avatar_id || it.user.avatarId) || it.avatar_id || it.avatarId) {
+            const aid = it.user?.avatar_id ?? it.user?.avatarId ?? it.avatar_id ?? it.avatarId;
+            try {
+              if (typeof aid === 'number' || (typeof aid === 'string' && String(aid).trim())) {
+                avatarUrl = `/api/storage/${String(aid).trim()}/download`;
+              }
+            } catch (e) { avatarUrl = null; }
+          }
+
           return {
             id,
             _localId: id ? undefined : `local-${Math.random().toString(36).slice(2,9)}`,
             parent_id: it.parent_id || it.parentId || null,
             author: it.user?.full_name || it.author_name || it.user_name || it.author || this._issue?.author_name || 'Unknown',
             text: it.content || it.text || '',
-            time: it.created_at || it.createdAt || it.created || it.timestamp || it.date || it.time || null
+            time: it.created_at || it.createdAt || it.created || it.timestamp || it.date || it.time || null,
+            avatar_url: avatarUrl
           };
         });
         this.loadingMessages = false;
@@ -107,13 +146,28 @@ export class IssueDetailChatComponent implements OnChanges, AfterViewInit {
           if (Array.isArray(list)) {
             this.messages = list.map((it: any) => {
               const id = it.id || it._id || it.message_id || it.uuid || null;
+              let avatarUrl: string | null = null;
+              if (it.user && (it.user.avatar_url || it.user.avatar || it.user.avatarUrl)) {
+                avatarUrl = it.user.avatar_url || it.user.avatar || it.user.avatarUrl || null;
+              } else if (it.avatar_url || it.avatar) {
+                avatarUrl = it.avatar_url || it.avatar || null;
+              } else if (it.user && (it.user.avatar_id || it.user.avatarId) || it.avatar_id || it.avatarId) {
+                const aid = it.user?.avatar_id ?? it.user?.avatarId ?? it.avatar_id ?? it.avatarId;
+                try {
+                  if (typeof aid === 'number' || (typeof aid === 'string' && String(aid).trim())) {
+                    avatarUrl = `/api/storage/${String(aid).trim()}/download`;
+                  }
+                } catch (e) { avatarUrl = null; }
+              }
+
               return {
                 id,
                 _localId: id ? undefined : `local-${Math.random().toString(36).slice(2,9)}`,
                 parent_id: it.parent_id || it.parentId || null,
                 author: it.user?.full_name || it.author_name || it.user_name || it.author || this._issue?.author_name || 'Unknown',
                 text: it.content || it.text || '',
-                time: it.created_at || it.createdAt || it.created || it.timestamp || it.date || it.time || null
+                time: it.created_at || it.createdAt || it.created || it.timestamp || it.date || it.time || null,
+                avatar_url: avatarUrl
               };
             });
             this.sortMessagesByTime();
@@ -144,7 +198,15 @@ export class IssueDetailChatComponent implements OnChanges, AfterViewInit {
     if (!this.newMessage?.trim()) return;
 
     if (!this._issue?.id) {
-      this.messages.push({ id: null, _localId: `local-${Math.random().toString(36).slice(2,9)}`, parent_id: this.replyToId ?? null, author: (this.currentUserName() || ''), text: this.newMessage, time: new Date().toISOString() });
+      this.messages.push({
+        id: null,
+        _localId: `local-${Math.random().toString(36).slice(2,9)}`,
+        parent_id: this.replyToId ?? null,
+        author: (this.currentUserName() || ''),
+        text: this.newMessage,
+        time: new Date().toISOString(),
+        avatar_url: this.currentUserAvatarUrl()
+      });
       // keep reply state until send completes
       this.sortMessagesByTime();
       this.resetEditor();
@@ -160,12 +222,17 @@ export class IssueDetailChatComponent implements OnChanges, AfterViewInit {
       next: (res: any) => {
         const data = res?.data ?? res;
           const pushed = {
-          id: data?.id || data?._id || data?.message_id || null,
-          parent_id: data?.parent_id ?? data?.parentId ?? (this.replyToId ?? null),
-          author: data?.user?.full_name || data?.author_name || data?.author || this.currentUserName() || '',
-          text: data?.content || data?.message || data?.text || this.newMessage,
-          time: data?.created_at || data?.createdAt || new Date().toISOString()
-        };
+            id: data?.id || data?._id || data?.message_id || null,
+            parent_id: data?.parent_id ?? data?.parentId ?? (this.replyToId ?? null),
+            author: data?.user?.full_name || data?.user?.fullName || data?.author_name || data?.author || this.currentUserName() || '',
+            text: data?.content || data?.message || data?.text || this.newMessage,
+            time: data?.created_at || data?.createdAt || new Date().toISOString(),
+            avatar_url: (
+              data?.user?.avatar_url || data?.user?.avatar || data?.user?.avatarUrl || data?.user?.photo || data?.user?.picture ||
+              (data?.user && (data?.user.avatar_id || data?.user.avatarId) ? `/api/storage/${String(data.user.avatar_id ?? data.user.avatarId).trim()}/download` : null) ||
+              this.currentUserAvatarUrl()
+            )
+          };
   this.messages.push(pushed);
   this.sortMessagesByTime();
         try { this._issue.messages = this._issue.messages || []; this._issue.messages.push(data || pushed); } catch {}
@@ -271,6 +338,15 @@ export class IssueDetailChatComponent implements OnChanges, AfterViewInit {
     if (!parts.length) return '';
     if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
     return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+
+  onMessageAvatarError(msg: any): void {
+    try {
+      if (msg) {
+        msg.avatar_url = null;
+        this.cdr.detectChanges();
+      }
+    } catch (e) {}
   }
 
   private resetEditor(): void {

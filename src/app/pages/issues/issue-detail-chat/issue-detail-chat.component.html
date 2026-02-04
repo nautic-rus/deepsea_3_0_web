@@ -14,7 +14,14 @@
     </div>
 
   <div *ngFor="let m of messages" class="chat-message" [attr.id]="'msg-' + (m.id ?? m._localId)">
-    <p-avatar [label]="initials(m.author)" styleClass="mr-2"></p-avatar>
+    <ng-container *ngIf="m?.avatar_url; else initialsTpl">
+      <div class="p-avatar mr-2">
+        <img [src]="m.avatar_url" alt="avatar" (error)="onMessageAvatarError(m)" />
+      </div>
+    </ng-container>
+    <ng-template #initialsTpl>
+      <div class="p-avatar mr-2">{{ initials(m.author) }}</div>
+    </ng-template>
       <div class="chat-message-body">
         <div class="msg-header">
           <div class="font-medium">{{ m.author }}</div>

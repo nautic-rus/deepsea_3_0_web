@@ -77,6 +77,10 @@
           "username": {
             "type": "string"
           },
+          "avatar_id": {
+            "type": "integer",
+            "nullable": true
+          },
           "email": {
             "type": "string",
             "format": "email"
@@ -231,8 +235,7 @@
           },
           "name": {
             "type": "string"
-          }
-          ,
+          },
           "description": {
             "type": "string",
             "nullable": true
@@ -245,8 +248,14 @@
             "type": "string",
             "nullable": true
           },
-          "created_at": { "type": "string", "format": "date-time" },
-          "updated_at": { "type": "string", "format": "date-time" }
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
         }
       },
       "Role": {
@@ -297,8 +306,7 @@
           "description": {
             "type": "string",
             "nullable": true
-          }
-          ,
+          },
           "created_at": {
             "type": "string",
             "format": "date-time"
@@ -312,13 +320,30 @@
       "AuditLog": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer" },
-          "actor_id": { "type": "integer" },
-          "entity": { "type": "string" },
-          "entity_id": { "type": "integer", "nullable": true },
-          "action": { "type": "string" },
-          "details": { "type": "object", "nullable": true },
-          "created_at": { "type": "string", "format": "date-time" }
+          "id": {
+            "type": "integer"
+          },
+          "actor_id": {
+            "type": "integer"
+          },
+          "entity": {
+            "type": "string"
+          },
+          "entity_id": {
+            "type": "integer",
+            "nullable": true
+          },
+          "action": {
+            "type": "string"
+          },
+          "details": {
+            "type": "object",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
         }
       },
       "Project": {
@@ -345,6 +370,37 @@
           "owner_id": {
             "type": "integer",
             "nullable": true
+          },
+          "owner_full_name": {
+            "type": "string",
+            "description": "ФИО владельца проекта (фамилия имя отчество)"
+          },
+          "participants": {
+            "type": "array",
+            "description": "Список участников проекта",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "full_name": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "phone": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "avatar_id": {
+                  "type": "integer",
+                  "nullable": true
+                }
+              }
+            }
           },
           "created_at": {
             "type": "string",
@@ -415,8 +471,16 @@
             "type": "integer",
             "nullable": true
           },
+          "assignee_avatar_id": {
+            "type": "integer",
+            "nullable": true
+          },
           "author_id": {
             "type": "integer"
+          },
+          "author_avatar_id": {
+            "type": "integer",
+            "nullable": true
           },
           "created_at": {
             "type": "string",
@@ -466,6 +530,10 @@
         "properties": {
           "user_id": {
             "type": "integer"
+          },
+          "full_name": {
+            "type": "string",
+            "description": "ФИО пользователя (фамилия, имя, отчество)"
           },
           "role": {
             "type": "string",
@@ -541,7 +609,9 @@
       },
       "IssueMessageCreate": {
         "type": "object",
-        "required": ["content"],
+        "required": [
+          "content"
+        ],
         "properties": {
           "content": {
             "type": "string",
@@ -552,56 +622,165 @@
       "IssueMessage": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer" },
-          "issue_id": { "type": "integer" },
-          "content": { "type": "string" },
-          "created_by": { "type": "integer" },
-          "created_at": { "type": "string", "format": "date-time" },
-          "author_name": { "type": "string", "nullable": true }
+          "id": {
+            "type": "integer"
+          },
+          "issue_id": {
+            "type": "integer"
+          },
+          "content": {
+            "type": "string"
+          },
+          "created_by": {
+            "type": "integer"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "author_name": {
+            "type": "string",
+            "nullable": true
+          }
         }
       },
       "DocumentMessageCreate": {
         "type": "object",
-        "required": ["content"],
+        "required": [
+          "content"
+        ],
         "properties": {
-          "content": { "type": "string" }
+          "content": {
+            "type": "string"
+          }
         }
       },
       "DocumentMessage": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer" },
-          "document_id": { "type": "integer" },
-          "content": { "type": "string" },
-          "created_by": { "type": "integer" },
-          "created_at": { "type": "string", "format": "date-time" },
-          "author_name": { "type": "string", "nullable": true }
+          "id": {
+            "type": "integer"
+          },
+          "document_id": {
+            "type": "integer"
+          },
+          "content": {
+            "type": "string"
+          },
+          "created_by": {
+            "type": "integer"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "author_name": {
+            "type": "string",
+            "nullable": true
+          }
         }
       },
       "StorageRef": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer" },
-          "filename": { "type": "string" },
-          "url": { "type": "string" },
-          "size": { "type": "integer" },
-          "content_type": { "type": "string" },
-          "created_by": { "type": "integer" },
-          "created_at": { "type": "string", "format": "date-time" }
+          "id": {
+            "type": "integer"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer"
+          },
+          "content_type": {
+            "type": "string"
+          },
+          "created_by": {
+            "type": "integer"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
         }
       },
       "EntityLink": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer" },
-          "source_type": { "type": "string", "example": "issue" },
-          "source_id": { "type": "integer" },
-          "target_type": { "type": "string", "example": "issue" },
-          "target_id": { "type": "integer" },
-          "relation_type": { "type": "string", "example": "blocks" },
-          "blocks_closure": { "type": "boolean", "example": true },
-          "created_by": { "type": "integer", "nullable": true },
-          "created_at": { "type": "string", "format": "date-time" }
+          "id": {
+            "type": "integer"
+          },
+          "source_type": {
+            "type": "string",
+            "example": "issue"
+          },
+          "source_id": {
+            "type": "integer"
+          },
+          "target_type": {
+            "type": "string",
+            "example": "issue"
+          },
+          "target_id": {
+            "type": "integer"
+          },
+          "relation_type": {
+            "type": "string",
+            "example": "blocks"
+          },
+          "blocks_closure": {
+            "type": "boolean",
+            "example": true
+          },
+          "created_by": {
+            "type": "integer",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "IssueType": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "icon": {
+            "type": "string",
+            "nullable": true
+          },
+          "color": {
+            "type": "string",
+            "nullable": true
+          },
+          "order_index": {
+            "type": "integer",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
         }
       }
     }
@@ -613,7 +792,7 @@
           "auth"
         ],
         "summary": "Вход в систему (по username или email)",
-  "description": "Аутентификация пользователя по username или email и паролю; возвращает информацию о пользователе.\n\nПосле успешного входа сервер устанавливает HttpOnly cookies: `access_token` (JWT access token) и `refresh_token` (refresh token). Токены не возвращаются в теле ответа — они доставляются в HttpOnly cookies. Ответ содержит только `expires_at` и `user`.",
+        "description": "Аутентификация пользователя по username или email и паролю; возвращает информацию о пользователе.\n\nПосле успешного входа сервер устанавливает HttpOnly cookies: `access_token` (JWT access token) и `refresh_token` (refresh token). Токены не возвращаются в теле ответа — они доставляются в HttpOnly cookies. Ответ содержит только `expires_at` и `user`.",
         "requestBody": {
           "required": true,
           "content": {
@@ -663,11 +842,21 @@
                     "user": {
                       "type": "object",
                       "properties": {
-                        "id": { "type": "integer" },
-                        "username": { "type": "string" },
-                        "email": { "type": "string" },
-                        "first_name": { "type": "string" },
-                        "last_name": { "type": "string" }
+                        "id": {
+                          "type": "integer"
+                        },
+                        "username": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "type": "string"
+                        },
+                        "first_name": {
+                          "type": "string"
+                        },
+                        "last_name": {
+                          "type": "string"
+                        }
                       }
                     }
                   }
@@ -858,8 +1047,12 @@
         "summary": "Создать нового пользователя",
         "description": "Создание нового пользователя в системе",
         "security": [
-          { "bearerAuth": [] },
-          { "cookieAuth": [] }
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
         ],
         "x-permissions": [
           "users.create"
@@ -895,7 +1088,6 @@
                     "example": "+1234567890",
                     "description": "Номер телефона пользователя"
                   },
-                  
                   "first_name": {
                     "type": "string",
                     "nullable": true,
@@ -1101,14 +1293,22 @@
         ],
         "summary": "Обновить отдел",
         "description": "Обновить существующий отдел. Требуется разрешение departments.update.",
-        "security": [ { "bearerAuth": [] } ],
-        "x-permissions": [ "departments.update" ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "departments.update"
+        ],
         "parameters": [
           {
             "in": "path",
             "name": "id",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": {
+              "type": "integer"
+            }
           }
         ],
         "requestBody": {
@@ -1118,44 +1318,86 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "name": { "type": "string" },
-                  "description": { "type": "string", "nullable": true },
-                  "manager_id": { "type": "integer", "nullable": true }
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "manager_id": {
+                    "type": "integer",
+                    "nullable": true
+                  }
                 }
               },
-              "example": { "name": "New Dept", "description": "...", "manager_id": null }
+              "example": {
+                "name": "New Dept",
+                "description": "...",
+                "manager_id": null
+              }
             }
           }
         },
         "responses": {
-          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Department" } } } },
-          "400": { "description": "Invalid id or payload" },
-          "401": { "description": "Authentication required" },
-          "403": { "description": "Forbidden - missing permission departments.update" }
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Department"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid id or payload"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - missing permission departments.update"
+          }
         }
-      }
-      ,
+      },
       "delete": {
         "tags": [
           "departments"
         ],
         "summary": "Удалить отдел",
         "description": "Удалить (soft-delete) отдел. Требуется разрешение departments.delete.",
-        "security": [ { "bearerAuth": [] } ],
-        "x-permissions": [ "departments.delete" ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "departments.delete"
+        ],
         "parameters": [
           {
             "in": "path",
             "name": "id",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": {
+              "type": "integer"
+            }
           }
         ],
         "responses": {
-          "200": { "description": "OK" },
-          "400": { "description": "Invalid id" },
-          "401": { "description": "Authentication required" },
-          "403": { "description": "Forbidden - missing permission departments.delete" }
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Invalid id"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - missing permission departments.delete"
+          }
         }
       }
     },
@@ -1344,266 +1586,6 @@
           },
           "404": {
             "description": "User not found"
-          }
-        }
-      },
-      "/api/users/{id}/notifications": {
-        "get": {
-          "tags": [
-            "users"
-          ],
-          "summary": "Список уведомлений пользователя (центр уведомлений)",
-          "description": "Возвращает список уведомлений для пользователя. По умолчанию скрытые уведомления не включаются.",
-          "security": [
-            {
-              "bearerAuth": []
-            }
-          ],
-          "parameters": [
-            {
-              "in": "path",
-              "name": "id",
-              "required": true,
-              "schema": {
-                "type": "integer"
-              },
-              "description": "ID пользователя",
-              "example": "{{id}}"
-            },
-            {
-              "in": "query",
-              "name": "limit",
-              "required": false,
-              "schema": {
-                "type": "integer",
-                "default": 50
-              }
-            },
-            {
-              "in": "query",
-              "name": "offset",
-              "required": false,
-              "schema": {
-                "type": "integer",
-                "default": 0
-              }
-            },
-            {
-              "in": "query",
-              "name": "include_hidden",
-              "required": false,
-              "schema": {
-                "type": "boolean"
-              },
-              "description": "Include hidden notifications"
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "List of notifications",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "data": {
-                        "type": "array",
-                        "items": {
-                          "$ref": "#/components/schemas/UserNotification"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "400": {
-              "description": "Invalid user id"
-            },
-            "401": {
-              "description": "Authentication required"
-            },
-            "403": {
-              "description": "Forbidden"
-            }
-          }
-        }
-      },
-      "/api/users/{id}/notifications/unread_count": {
-        "get": {
-          "tags": [
-            "users"
-          ],
-          "summary": "Количество непрочитанных уведомлений",
-          "description": "Возвращает число непрочитанных и не скрытых уведомлений для пользователя.",
-          "security": [
-            {
-              "bearerAuth": []
-            }
-          ],
-          "parameters": [
-            {
-              "in": "path",
-              "name": "id",
-              "required": true,
-              "schema": {
-                "type": "integer"
-              },
-              "description": "ID пользователя"
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Unread count",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "data": {
-                        "type": "object",
-                        "properties": {
-                          "unread_count": {
-                            "type": "integer"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "400": {
-              "description": "Invalid user id"
-            },
-            "401": {
-              "description": "Authentication required"
-            },
-            "403": {
-              "description": "Forbidden"
-            }
-          }
-        }
-      },
-      "/api/users/{id}/notifications/{notificationId}/read": {
-        "post": {
-          "tags": [
-            "users"
-          ],
-          "summary": "Пометить уведомление как прочитанное",
-          "description": "Помечает указанное уведомление как прочитанное для пользователя.",
-          "security": [
-            {
-              "bearerAuth": []
-            }
-          ],
-          "parameters": [
-            {
-              "in": "path",
-              "name": "id",
-              "required": true,
-              "schema": {
-                "type": "integer"
-              }
-            },
-            {
-              "in": "path",
-              "name": "notificationId",
-              "required": true,
-              "schema": {
-                "type": "integer"
-              }
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Notification marked as read",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "data": {
-                        "$ref": "#/components/schemas/UserNotification"
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "400": {
-              "description": "Invalid parameters"
-            },
-            "401": {
-              "description": "Authentication required"
-            },
-            "403": {
-              "description": "Forbidden"
-            },
-            "404": {
-              "description": "Notification not found"
-            }
-          }
-        }
-      },
-      "/api/users/{id}/notifications/{notificationId}/hide": {
-        "post": {
-          "tags": [
-            "users"
-          ],
-          "summary": "Скрыть уведомление",
-          "description": "Помечает уведомление как скрытое (не отображается в списке по умолчанию).",
-          "security": [
-            {
-              "bearerAuth": []
-            }
-          ],
-          "parameters": [
-            {
-              "in": "path",
-              "name": "id",
-              "required": true,
-              "schema": {
-                "type": "integer"
-              }
-            },
-            {
-              "in": "path",
-              "name": "notificationId",
-              "required": true,
-              "schema": {
-                "type": "integer"
-              }
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Notification hidden",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "data": {
-                        "$ref": "#/components/schemas/UserNotification"
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "400": {
-              "description": "Invalid parameters"
-            },
-            "401": {
-              "description": "Authentication required"
-            },
-            "403": {
-              "description": "Forbidden"
-            },
-            "404": {
-              "description": "Notification not found"
-            }
           }
         }
       }
@@ -2055,7 +2037,7 @@
           "auth"
         ],
         "summary": "Обновить access token",
-  "description": "Обновляет access token по refresh token. Refresh token должен быть передан в HttpOnly cookie с именем `refresh_token`.\n\nНовые токены выдаются в HttpOnly cookies; тело ответа содержит только `expires_at` и `user`.",
+        "description": "Обновляет access token по refresh token. Refresh token должен быть передан в HttpOnly cookie с именем `refresh_token`.\n\nНовые токены выдаются в HttpOnly cookies; тело ответа содержит только `expires_at` и `user`.",
         "responses": {
           "200": {
             "description": "Токены обновлены",
@@ -2064,8 +2046,13 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "expires_at": { "type": "string", "format": "date-time" },
-                    "user": { "$ref": "#/components/schemas/User" }
+                    "expires_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
                   }
                 }
               }
@@ -2363,13 +2350,31 @@
     },
     "/api/roles/{id}/permissions": {
       "get": {
-        "tags": ["roles"],
+        "tags": [
+          "roles"
+        ],
         "summary": "Получить разрешения роли",
         "description": "Возвращает список разрешений, привязанных к роли. Требуется разрешение roles.view.",
-        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
-        "x-permissions": ["roles.view"],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "x-permissions": [
+          "roles.view"
+        ],
         "parameters": [
-          { "in": "path", "name": "id", "required": true, "schema": { "type": "integer" } }
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -2379,23 +2384,45 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "data": { "type": "array", "items": { "$ref": "#/components/schemas/Permission" } }
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Permission"
+                      }
+                    }
                   }
                 }
               }
             }
           }
         }
-      }
-      ,
+      },
       "post": {
-        "tags": ["roles"],
+        "tags": [
+          "roles"
+        ],
         "summary": "Assign permission to role",
         "description": "Assign a permission to a role. Requires roles.update.",
-        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
-        "x-permissions": ["roles.update"],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "x-permissions": [
+          "roles.update"
+        ],
         "parameters": [
-          { "in": "path", "name": "id", "required": true, "schema": { "type": "integer" } }
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
         ],
         "requestBody": {
           "required": true,
@@ -2403,12 +2430,24 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["permission_id"],
+                "required": [
+                  "permission_ids"
+                ],
                 "properties": {
-                  "permission_id": { "type": "integer" }
+                  "permission_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  }
                 }
               },
-              "example": { "permission_id": 123 }
+              "example": {
+                "permission_ids": [
+                  123,
+                  124
+                ]
+              }
             }
           }
         },
@@ -2422,7 +2461,29 @@
                   "properties": {
                     "data": {
                       "type": "object",
-                      "properties": { "created": { "type": "boolean" } }
+                      "properties": {
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "permission_id": {
+                                "type": "integer"
+                              },
+                              "created": {
+                                "type": "boolean"
+                              },
+                              "error": {
+                                "type": "string",
+                                "nullable": true
+                              }
+                            }
+                          }
+                        },
+                        "created_count": {
+                          "type": "integer"
+                        }
+                      }
                     }
                   }
                 }
@@ -2434,20 +2495,45 @@
     },
     "/api/roles/permissions": {
       "get": {
-        "tags": ["roles"],
+        "tags": [
+          "roles"
+        ],
         "summary": "Получить разрешения по role_id",
         "description": "Возвращает разрешения для роли по query-параметру role_id (fallback endpoint). Требуется roles.view.",
-        "security": [{ "bearerAuth": [] }],
-        "x-permissions": ["roles.view"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "roles.view"
+        ],
         "parameters": [
-          { "in": "query", "name": "role_id", "schema": { "type": "integer" }, "description": "ID роли" }
+          {
+            "in": "query",
+            "name": "role_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID роли"
+          }
         ],
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "application/json": {
-                "schema": { "type": "object", "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/Permission" } } } }
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Permission"
+                      }
+                    }
+                  }
+                }
               }
             }
           }
@@ -2456,14 +2542,39 @@
     },
     "/api/roles/{id}/permissions/{permission_id}": {
       "delete": {
-        "tags": ["roles"],
+        "tags": [
+          "roles"
+        ],
         "summary": "Remove permission from role",
         "description": "Removes a permission from a role. Requires roles.update.",
-        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
-        "x-permissions": ["roles.update"],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "x-permissions": [
+          "roles.update"
+        ],
         "parameters": [
-          { "in": "path", "name": "id", "required": true, "schema": { "type": "integer" } },
-          { "in": "path", "name": "permission_id", "required": true, "schema": { "type": "integer" } }
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "permission_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -2475,7 +2586,11 @@
                   "properties": {
                     "data": {
                       "type": "object",
-                      "properties": { "removed": { "type": "boolean" } }
+                      "properties": {
+                        "removed": {
+                          "type": "boolean"
+                        }
+                      }
                     }
                   }
                 }
@@ -2487,17 +2602,57 @@
     },
     "/api/audit_logs": {
       "get": {
-        "tags": ["audit"],
+        "tags": [
+          "audit"
+        ],
         "summary": "Список audit логов",
         "description": "Просмотр записей аудита. Требуется соответствующее право доступа.",
-        "security": [ { "bearerAuth": [] } ],
-        "x-permissions": ["audit.view"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "audit.view"
+        ],
         "parameters": [
-          { "in": "query", "name": "actor_id", "schema": { "type": "integer" } },
-          { "in": "query", "name": "entity", "schema": { "type": "string" } },
-          { "in": "query", "name": "entity_id", "schema": { "type": "integer" } },
-          { "in": "query", "name": "limit", "schema": { "type": "integer", "default": 50 } },
-          { "in": "query", "name": "offset", "schema": { "type": "integer", "default": 0 } }
+          {
+            "in": "query",
+            "name": "actor_id",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "entity",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "entity_id",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 50
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -2507,7 +2662,12 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "data": { "type": "array", "items": { "$ref": "#/components/schemas/AuditLog" } }
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AuditLog"
+                      }
+                    }
                   }
                 }
               }
@@ -2556,14 +2716,27 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["code"],
+                "required": [
+                  "code"
+                ],
                 "properties": {
-                  "name": { "type": "string" },
-                  "code": { "type": "string" },
-                  "description": { "type": "string", "nullable": true }
+                  "name": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "nullable": true
+                  }
                 }
               },
-              "example": { "name": "", "code": "", "description": "" }
+              "example": {
+                "name": "",
+                "code": "",
+                "description": ""
+              }
             }
           }
         },
@@ -2573,26 +2746,37 @@
             "description": "Created",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Permission" }
+                "schema": {
+                  "$ref": "#/components/schemas/Permission"
+                }
               }
             }
           }
         }
       }
     },
-
     "/api/permissions/{id}": {
       "put": {
-        "tags": ["permissions"],
+        "tags": [
+          "permissions"
+        ],
         "summary": "Обновить разрешение",
-        "security": [ { "bearerAuth": [] } ],
-        "x-permissions": ["permissions.update"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "permissions.update"
+        ],
         "parameters": [
           {
             "in": "path",
             "name": "id",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": {
+              "type": "integer"
+            }
           }
         ],
         "requestBody": {
@@ -2602,12 +2786,23 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "name": { "type": "string" },
-                  "code": { "type": "string" },
-                  "description": { "type": "string", "nullable": true }
+                  "name": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "nullable": true
+                  }
                 }
               },
-              "example": { "name": "Updated name", "code": "perm.code", "description": "..." }
+              "example": {
+                "name": "Updated name",
+                "code": "perm.code",
+                "description": "..."
+              }
             }
           }
         },
@@ -2616,29 +2811,44 @@
             "description": "OK",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Permission" }
+                "schema": {
+                  "$ref": "#/components/schemas/Permission"
+                }
               }
             }
           }
         }
-      }
-      ,
+      },
       "delete": {
-        "tags": ["permissions"],
+        "tags": [
+          "permissions"
+        ],
         "summary": "Удалить разрешение",
-        "security": [ { "bearerAuth": [] } ],
-        "x-permissions": ["permissions.delete"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "permissions.delete"
+        ],
         "parameters": [
           {
             "in": "path",
             "name": "id",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": {
+              "type": "integer"
+            }
           }
         ],
         "responses": {
-          "200": { "description": "OK" },
-          "404": { "description": "Not found" }
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not found"
+          }
         }
       }
     },
@@ -2667,55 +2877,134 @@
     },
     "/api/links": {
       "post": {
-        "tags": ["links"],
+        "tags": [
+          "links"
+        ],
         "summary": "Создать связь между сущностями",
         "description": "Создаёт отношение между двумя сущностями (задачи, документы и др.). Установите `blocks_closure=true`, чтобы пометить связь, блокирующую закрытие исходной сущности, пока целевая не перейдёт в финальный статус.",
-        "security": [ { "bearerAuth": [] } ],
-        "x-permissions": [ "links.create" ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "links.create"
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["source_type","source_id","target_type","target_id"],
+                "required": [
+                  "source_type",
+                  "source_id",
+                  "target_type",
+                  "target_id"
+                ],
                 "properties": {
-                  "source_type": { "type": "string", "example": "issue" },
-                  "source_id": { "type": "integer", "example": 123 },
-                  "target_type": { "type": "string", "example": "issue" },
-                  "target_id": { "type": "integer", "example": 456 },
-                  "relation_type": { "type": "string", "example": "blocks" },
-                  "blocks_closure": { "type": "boolean", "example": true }
+                  "source_type": {
+                    "type": "string",
+                    "example": "issue"
+                  },
+                  "source_id": {
+                    "type": "integer",
+                    "example": 123
+                  },
+                  "target_type": {
+                    "type": "string",
+                    "example": "issue"
+                  },
+                  "target_id": {
+                    "type": "integer",
+                    "example": 456
+                  },
+                  "relation_type": {
+                    "type": "string",
+                    "example": "blocks"
+                  },
+                  "blocks_closure": {
+                    "type": "boolean",
+                    "example": true
+                  }
                 }
               },
-              "example": { "source_type": "issue", "source_id": 123, "target_type": "issue", "target_id": 456, "relation_type": "blocks", "blocks_closure": true }
+              "example": {
+                "source_type": "issue",
+                "source_id": 123,
+                "target_type": "issue",
+                "target_id": 456,
+                "relation_type": "blocks",
+                "blocks_closure": true
+              }
             }
           }
         },
         "responses": {
-          "201": { "description": "Создано", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EntityLink" } } } },
-          "400": { "description": "Неверный ввод" },
-          "401": { "description": "Требуется аутентификация" },
-          "403": { "description": "Запрещено — отсутствует разрешение links.create" }
+          "201": {
+            "description": "Создано",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityLink"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Неверный ввод"
+          },
+          "401": {
+            "description": "Требуется аутентификация"
+          },
+          "403": {
+            "description": "Запрещено — отсутствует разрешение links.create"
+          }
         }
       }
     },
     "/api/links/{id}": {
       "delete": {
-        "tags": ["links"],
+        "tags": [
+          "links"
+        ],
         "summary": "Удалить связь",
         "description": "Удаляет ранее созданную связь по её ID.",
-        "security": [ { "bearerAuth": [] } ],
-        "x-permissions": [ "links.delete" ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "links.delete"
+        ],
         "parameters": [
-          { "in": "path", "name": "id", "required": true, "schema": { "type": "integer" }, "example": 1 }
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          }
         ],
         "responses": {
-          "200": { "description": "OK" },
-          "400": { "description": "Неверный id" },
-          "401": { "description": "Требуется аутентификация" },
-          "403": { "description": "Запрещено — отсутствует разрешение links.delete" },
-          "404": { "description": "Связь не найдена" }
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Неверный id"
+          },
+          "401": {
+            "description": "Требуется аутентификация"
+          },
+          "403": {
+            "description": "Запрещено — отсутствует разрешение links.delete"
+          },
+          "404": {
+            "description": "Связь не найдена"
+          }
         }
       }
     },
@@ -2799,6 +3088,41 @@
             }
           }
         }
+      }
+    },
+    "/api/my_projects": {
+      "get": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Мои проекты",
+        "description": "Возвращает список проектов, к которым привязан текущий пользователь. Аутентификация требуется, дополнительных разрешений не требуется.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Project"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": []
       }
     },
     "/api/projects/{id}": {
@@ -2953,9 +3277,24 @@
                     "example": 12
                   },
                   "user_id": {
-                    "type": "integer",
-                    "description": "ID пользователя для назначения",
-                    "example": 34
+                    "oneOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "integer"
+                        }
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ],
+                    "description": "ID пользователя для назначения. Может быть целым числом, массивом целых чисел или CSV-строкой (e.g. \"34,55\"). Контроллер поддерживает все три формата.",
+                    "example": [
+                      34
+                    ]
                   },
                   "role_id": {
                     "type": "integer",
@@ -3080,9 +3419,24 @@
                 ],
                 "properties": {
                   "user_id": {
-                    "type": "integer",
-                    "description": "ID пользователя, которого нужно отвязать",
-                    "example": 34
+                    "oneOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "integer"
+                        }
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ],
+                    "description": "ID пользователя, которого нужно отвязать. Может быть целым числом, массивом целых чисел или CSV-строкой (e.g. \"34,55\"). Контроллер поддерживает все три формата.",
+                    "example": [
+                      34
+                    ]
                   },
                   "role_id": {
                     "type": "integer",
@@ -3107,7 +3461,7 @@
         },
         "responses": {
           "200": {
-            "description": "Успешно отвязан пользователь",
+            "description": "Успешно отвязан пользователь(и)",
             "content": {
               "application/json": {
                 "schema": {
@@ -3115,10 +3469,34 @@
                   "properties": {
                     "success": {
                       "type": "boolean"
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "user_id": {
+                            "type": "integer"
+                          },
+                          "removed": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
                     }
                   },
                   "example": {
-                    "success": true
+                    "success": true,
+                    "results": [
+                      {
+                        "user_id": 34,
+                        "removed": true
+                      },
+                      {
+                        "user_id": 55,
+                        "removed": false
+                      }
+                    ]
                   }
                 }
               }
@@ -3753,18 +4131,142 @@
         }
       }
     },
+    "/api/issue_statuses": {
+      "get": {
+        "tags": [
+          "issues"
+        ],
+        "summary": "Список статусов задач",
+        "description": "Возвращает список всех записей из таблицы `issue_status` со всеми атрибутами. Требуется разрешение issues.view.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "issues.view"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/IssueStatus"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": []
+      }
+    },
     "/api/issues/{id}/messages": {
-      "post": {
-        "tags": ["issues"],
-        "summary": "Добавить сообщение к задаче",
-        "security": [ { "bearerAuth": [] } ],
-        "x-permissions": [ "issues.comment" ],
+      "get": {
+        "tags": [
+          "issues"
+        ],
+        "summary": "Список сообщений задачи",
+        "description": "Возвращает список сообщений (комментариев) задачи. Требуется разрешение issues.view.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "issues.view"
+        ],
         "parameters": [
           {
             "in": "path",
             "name": "id",
             "required": true,
-            "schema": { "type": "integer" },
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID задачи"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Limit results",
+            "example": 100
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Pagination offset",
+            "example": 0
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/IssueMessage"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid id"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - missing permission issues.view"
+          },
+          "404": {
+            "description": "Issue not found"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "issues"
+        ],
+        "summary": "Добавить сообщение к задаче",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "issues.comment"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
             "description": "ID задачи"
           }
         ],
@@ -3772,7 +4274,9 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/IssueMessageCreate" }
+              "schema": {
+                "$ref": "#/components/schemas/IssueMessageCreate"
+              }
             }
           }
         },
@@ -3781,29 +4285,49 @@
             "description": "Created",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/IssueMessage" }
+                "schema": {
+                  "$ref": "#/components/schemas/IssueMessage"
+                }
               }
             }
           },
-          "400": { "description": "Invalid input or issue id" },
-          "401": { "description": "Authentication required" },
-          "403": { "description": "Forbidden - missing permission issues.comment" },
-          "404": { "description": "Issue not found" }
+          "400": {
+            "description": "Invalid input or issue id"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - missing permission issues.comment"
+          },
+          "404": {
+            "description": "Issue not found"
+          }
         }
       }
     },
     "/api/issues/{id}/files": {
       "post": {
-        "tags": ["issues"],
+        "tags": [
+          "issues"
+        ],
         "summary": "Прикрепить файл к задаче",
-        "security": [ { "bearerAuth": [] } ],
-        "x-permissions": [ "issues.update" ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "issues.update"
+        ],
         "parameters": [
           {
             "in": "path",
             "name": "id",
             "required": true,
-            "schema": { "type": "integer" },
+            "schema": {
+              "type": "integer"
+            },
             "description": "ID задачи"
           }
         ],
@@ -3813,9 +4337,13 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["storage_id"],
+                "required": [
+                  "storage_id"
+                ],
                 "properties": {
-                  "storage_id": { "type": "integer" }
+                  "storage_id": {
+                    "type": "integer"
+                  }
                 }
               }
             }
@@ -3826,27 +4354,47 @@
             "description": "Attached",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/StorageRef" }
+                "schema": {
+                  "$ref": "#/components/schemas/StorageRef"
+                }
               }
             }
           },
-          "400": { "description": "Invalid input or ids" },
-          "401": { "description": "Authentication required" },
-          "403": { "description": "Forbidden - missing permission issues.update" },
-          "404": { "description": "Issue or storage item not found" }
+          "400": {
+            "description": "Invalid input or ids"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - missing permission issues.update"
+          },
+          "404": {
+            "description": "Issue or storage item not found"
+          }
         }
       },
       "get": {
-        "tags": ["issues"],
+        "tags": [
+          "issues"
+        ],
         "summary": "Список прикреплённых файлов задачи",
-        "security": [ { "bearerAuth": [] } ],
-        "x-permissions": [ "issues.view" ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "issues.view"
+        ],
         "parameters": [
           {
             "in": "path",
             "name": "id",
             "required": true,
-            "schema": { "type": "integer" },
+            "schema": {
+              "type": "integer"
+            },
             "description": "ID задачи"
           }
         ],
@@ -3855,48 +4403,105 @@
             "description": "OK",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/StorageRef" } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StorageRef"
+                  }
+                }
               }
             }
           },
-          "400": { "description": "Invalid issue id" },
-          "401": { "description": "Authentication required" },
-          "403": { "description": "Forbidden - missing permission issues.view" },
-          "404": { "description": "Issue not found" }
+          "400": {
+            "description": "Invalid issue id"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - missing permission issues.view"
+          },
+          "404": {
+            "description": "Issue not found"
+          }
         }
       }
     },
     "/api/issues/{id}/files/{storage_id}": {
       "delete": {
-        "tags": ["issues"],
-        "summary": "Открепить файл от задачи",
-        "security": [ { "bearerAuth": [] } ],
-        "x-permissions": [ "issues.update" ],
-        "parameters": [
-          { "in": "path", "name": "id", "required": true, "schema": { "type": "integer" }, "description": "ID задачи" },
-          { "in": "path", "name": "storage_id", "required": true, "schema": { "type": "integer" }, "description": "ID файла в storage" }
+        "tags": [
+          "issues"
         ],
-        "responses": {
-          "200": { "description": "Detached" },
-          "400": { "description": "Invalid ids" },
-          "401": { "description": "Authentication required" },
-          "403": { "description": "Forbidden - missing permission issues.update" },
-          "404": { "description": "Issue or storage item not found" }
-        }
-      }
-    },
-    "/api/documents/{id}/messages": {
-      "post": {
-        "tags": ["documents"],
-        "summary": "Добавить сообщение к документу",
-        "security": [ { "bearerAuth": [] } ],
-        "x-permissions": [ "documents.comment" ],
+        "summary": "Открепить файл от задачи",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "issues.update"
+        ],
         "parameters": [
           {
             "in": "path",
             "name": "id",
             "required": true,
-            "schema": { "type": "integer" },
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID задачи"
+          },
+          {
+            "in": "path",
+            "name": "storage_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID файла в storage"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detached"
+          },
+          "400": {
+            "description": "Invalid ids"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - missing permission issues.update"
+          },
+          "404": {
+            "description": "Issue or storage item not found"
+          }
+        }
+      }
+    },
+    "/api/documents/{id}/messages": {
+      "post": {
+        "tags": [
+          "documents"
+        ],
+        "summary": "Добавить сообщение к документу",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "documents.comment"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
             "description": "ID документа"
           }
         ],
@@ -3904,7 +4509,9 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/DocumentMessageCreate" }
+              "schema": {
+                "$ref": "#/components/schemas/DocumentMessageCreate"
+              }
             }
           }
         },
@@ -3913,25 +4520,51 @@
             "description": "Created",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/DocumentMessage" }
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentMessage"
+                }
               }
             }
           },
-          "400": { "description": "Invalid input or document id" },
-          "401": { "description": "Authentication required" },
-          "403": { "description": "Forbidden - missing permission documents.comment" },
-          "404": { "description": "Document not found" }
+          "400": {
+            "description": "Invalid input or document id"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - missing permission documents.comment"
+          },
+          "404": {
+            "description": "Document not found"
+          }
         }
       }
     },
     "/api/documents/{id}/files": {
       "post": {
-        "tags": ["documents"],
+        "tags": [
+          "documents"
+        ],
         "summary": "Прикрепить файл к документу",
-        "security": [ { "bearerAuth": [] } ],
-        "x-permissions": [ "documents.update" ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "documents.update"
+        ],
         "parameters": [
-          { "in": "path", "name": "id", "required": true, "schema": { "type": "integer" }, "description": "ID документа" }
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID документа"
+          }
         ],
         "requestBody": {
           "required": true,
@@ -3939,51 +4572,146 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["storage_id"],
-                "properties": { "storage_id": { "type": "integer" } }
+                "required": [
+                  "storage_id"
+                ],
+                "properties": {
+                  "storage_id": {
+                    "type": "integer"
+                  }
+                }
               }
             }
           }
         },
         "responses": {
-          "201": { "description": "Attached", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/StorageRef" } } } },
-          "400": { "description": "Invalid input or ids" },
-          "401": { "description": "Authentication required" },
-          "403": { "description": "Forbidden - missing permission documents.update" },
-          "404": { "description": "Document or storage item not found" }
+          "201": {
+            "description": "Attached",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageRef"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input or ids"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - missing permission documents.update"
+          },
+          "404": {
+            "description": "Document or storage item not found"
+          }
         }
       },
       "get": {
-        "tags": ["documents"],
+        "tags": [
+          "documents"
+        ],
         "summary": "Список прикреплённых файлов документа",
-        "security": [ { "bearerAuth": [] } ],
-        "x-permissions": [ "documents.view" ],
-        "parameters": [ { "in": "path", "name": "id", "required": true, "schema": { "type": "integer" }, "description": "ID документа" } ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "documents.view"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID документа"
+          }
+        ],
         "responses": {
-          "200": { "description": "OK", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/StorageRef" } } } } },
-          "400": { "description": "Invalid document id" },
-          "401": { "description": "Authentication required" },
-          "403": { "description": "Forbidden - missing permission documents.view" },
-          "404": { "description": "Document not found" }
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StorageRef"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid document id"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - missing permission documents.view"
+          },
+          "404": {
+            "description": "Document not found"
+          }
         }
       }
     },
     "/api/documents/{id}/files/{storage_id}": {
       "delete": {
-        "tags": ["documents"],
+        "tags": [
+          "documents"
+        ],
         "summary": "Открепить файл от документа",
-        "security": [ { "bearerAuth": [] } ],
-        "x-permissions": [ "documents.update" ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "documents.update"
+        ],
         "parameters": [
-          { "in": "path", "name": "id", "required": true, "schema": { "type": "integer" }, "description": "ID документа" },
-          { "in": "path", "name": "storage_id", "required": true, "schema": { "type": "integer" }, "description": "ID файла в storage" }
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID документа"
+          },
+          {
+            "in": "path",
+            "name": "storage_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID файла в storage"
+          }
         ],
         "responses": {
-          "200": { "description": "Detached" },
-          "400": { "description": "Invalid ids" },
-          "401": { "description": "Authentication required" },
-          "403": { "description": "Forbidden - missing permission documents.update" },
-          "404": { "description": "Document or storage item not found" }
+          "200": {
+            "description": "Detached"
+          },
+          "400": {
+            "description": "Invalid ids"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - missing permission documents.update"
+          },
+          "404": {
+            "description": "Document or storage item not found"
+          }
         }
       }
     },
@@ -4419,119 +5147,378 @@
     },
     "/api/materials/next_stock_code": {
       "get": {
-        "tags": ["materials"],
+        "tags": [
+          "materials"
+        ],
         "summary": "Получить следующий код склада",
         "description": "Возвращает следующий доступный stock code для материалов.",
-        "security": [{ "bearerAuth": [] }],
-        "x-permissions": ["materials.view"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "materials.view"
+        ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": { "application/json": { "schema": { "type": "object", "properties": { "stock_code": { "type": "string" } } } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "stock_code": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
     },
     "/api/material_kits": {
       "get": {
-        "tags": ["material_kits"],
+        "tags": [
+          "material_kits"
+        ],
         "summary": "Список material kits",
-        "security": [{ "bearerAuth": [] }],
-        "x-permissions": ["material_kits.view"],
-        "responses": { "200": { "description": "OK" } },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "material_kits.view"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
         "parameters": []
       },
       "post": {
-        "tags": ["material_kits"],
+        "tags": [
+          "material_kits"
+        ],
         "summary": "Создать material kit",
-        "security": [{ "bearerAuth": [] }],
-        "x-permissions": ["material_kits.create"],
-        "requestBody": { "content": { "application/json": { "schema": { "type": "object" } } } },
-        "responses": { "201": { "description": "Created" } }
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "material_kits.create"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
       }
     },
     "/api/material_kits/{id}": {
       "get": {
-        "tags": ["material_kits"],
+        "tags": [
+          "material_kits"
+        ],
         "summary": "Получить material kit",
-        "security": [{ "bearerAuth": [] }],
-        "x-permissions": ["material_kits.view"],
-        "parameters": [{ "in": "path", "name": "id", "required": true, "schema": { "type": "integer" } }],
-        "responses": { "200": { "description": "OK" } }
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "material_kits.view"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
       },
       "put": {
-        "tags": ["material_kits"],
+        "tags": [
+          "material_kits"
+        ],
         "summary": "Обновить material kit",
-        "security": [{ "bearerAuth": [] }],
-        "x-permissions": ["material_kits.update"],
-        "parameters": [{ "in": "path", "name": "id", "required": true, "schema": { "type": "integer" } }],
-        "requestBody": { "content": { "application/json": { "schema": { "type": "object" } } } },
-        "responses": { "200": { "description": "OK" } }
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "material_kits.update"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
       },
       "delete": {
-        "tags": ["material_kits"],
+        "tags": [
+          "material_kits"
+        ],
         "summary": "Удалить material kit",
-        "security": [{ "bearerAuth": [] }],
-        "x-permissions": ["material_kits.delete"],
-        "parameters": [{ "in": "path", "name": "id", "required": true, "schema": { "type": "integer" } }],
-        "responses": { "200": { "description": "OK" } }
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "material_kits.delete"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
       }
     },
     "/api/material_kits/{kit_id}/items": {
       "get": {
-        "tags": ["material_kits"],
+        "tags": [
+          "material_kits"
+        ],
         "summary": "Список items в kit",
-        "security": [{ "bearerAuth": [] }],
-        "x-permissions": ["material_kits.view"],
-        "parameters": [{ "in": "path", "name": "kit_id", "required": true, "schema": { "type": "integer" } }],
-        "responses": { "200": { "description": "OK" } }
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "material_kits.view"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kit_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
       },
       "post": {
-        "tags": ["material_kits"],
+        "tags": [
+          "material_kits"
+        ],
         "summary": "Добавить item в kit",
-        "security": [{ "bearerAuth": [] }],
-        "x-permissions": ["material_kits.update"],
-        "parameters": [{ "in": "path", "name": "kit_id", "required": true, "schema": { "type": "integer" } }],
-        "requestBody": { "content": { "application/json": { "schema": { "type": "object" } } } },
-        "responses": { "201": { "description": "Created" } }
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "material_kits.update"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kit_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
       }
     },
     "/api/material_kits/items/{id}": {
       "put": {
-        "tags": ["material_kits"],
+        "tags": [
+          "material_kits"
+        ],
         "summary": "Обновить item",
-        "security": [{ "bearerAuth": [] }],
-        "x-permissions": ["material_kits.update"],
-        "parameters": [{ "in": "path", "name": "id", "required": true, "schema": { "type": "integer" } }],
-        "requestBody": { "content": { "application/json": { "schema": { "type": "object" } } } },
-        "responses": { "200": { "description": "OK" } }
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "material_kits.update"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
       },
       "delete": {
-        "tags": ["material_kits"],
+        "tags": [
+          "material_kits"
+        ],
         "summary": "Удалить item",
-        "security": [{ "bearerAuth": [] }],
-        "x-permissions": ["material_kits.update"],
-        "parameters": [{ "in": "path", "name": "id", "required": true, "schema": { "type": "integer" } }],
-        "responses": { "200": { "description": "OK" } }
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "material_kits.update"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
       }
     },
     "/api/material_kits/{id}/apply": {
       "post": {
-        "tags": ["material_kits"],
+        "tags": [
+          "material_kits"
+        ],
         "summary": "Применить kit к спецификации",
-        "security": [{ "bearerAuth": [] }],
-        "x-permissions": ["material_kits.apply"],
-        "parameters": [{ "in": "path", "name": "id", "required": true, "schema": { "type": "integer" } }],
-        "requestBody": { "content": { "application/json": { "schema": { "type": "object" } } } },
-        "responses": { "200": { "description": "OK" } }
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "material_kits.apply"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
       }
     },
     "/api/storage/local": {
       "post": {
-        "tags": ["storage"],
+        "tags": [
+          "storage"
+        ],
         "summary": "Upload file to local storage",
-        "security": [ { "bearerAuth": [] } ],
-        "x-permissions": [ "storage.create" ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "storage.create"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -4539,10 +5526,18 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "file": { "type": "string", "format": "binary" },
-                  "subdir": { "type": "string", "description": "Optional subdirectory under uploads" }
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "subdir": {
+                    "type": "string",
+                    "description": "Optional subdirectory under uploads"
+                  }
                 },
-                "required": ["file"]
+                "required": [
+                  "file"
+                ]
               }
             }
           }
@@ -4552,22 +5547,38 @@
             "description": "Created",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/StorageRef" }
+                "schema": {
+                  "$ref": "#/components/schemas/StorageRef"
+                }
               }
             }
           },
-          "400": { "description": "Missing file or invalid input" },
-          "401": { "description": "Authentication required" },
-          "403": { "description": "Forbidden - missing permission storage.create" }
+          "400": {
+            "description": "Missing file or invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - missing permission storage.create"
+          }
         }
       }
     },
     "/api/storage/s3": {
       "post": {
-        "tags": ["storage"],
+        "tags": [
+          "storage"
+        ],
         "summary": "Upload file to S3 storage",
-        "security": [ { "bearerAuth": [] } ],
-        "x-permissions": [ "storage.create" ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "storage.create"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -4575,10 +5586,18 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "file": { "type": "string", "format": "binary" },
-                  "bucket_name": { "type": "string", "description": "Optional bucket to override default" }
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "bucket_name": {
+                    "type": "string",
+                    "description": "Optional bucket to override default"
+                  }
                 },
-                "required": ["file"]
+                "required": [
+                  "file"
+                ]
               }
             }
           }
@@ -4588,13 +5607,21 @@
             "description": "Created",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/StorageRef" }
+                "schema": {
+                  "$ref": "#/components/schemas/StorageRef"
+                }
               }
             }
           },
-          "400": { "description": "Missing file or invalid input" },
-          "401": { "description": "Authentication required" },
-          "403": { "description": "Forbidden - missing permission storage.create" }
+          "400": {
+            "description": "Missing file or invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - missing permission storage.create"
+          }
         }
       }
     },
@@ -5286,6 +6313,56 @@
         }
       }
     },
+    "/api/storage/{id}/download": {
+      "get": {
+        "tags": [
+          "storage"
+        ],
+        "summary": "Скачать файл",
+        "description": "Скачать/стримить файл из хранилища. Для локальных файлов будет stream, для S3 будет редирект на URL.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "storage.view"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID файла в таблице storage"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File stream or redirect",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - missing permission storage.view"
+          },
+          "404": {
+            "description": "File not found"
+          }
+        }
+      }
+    },
     "/api/statements": {
       "get": {
         "tags": [
@@ -5379,19 +6456,20 @@
           "users"
         ],
         "summary": "Upload user avatar (local storage)",
-  "description": "Upload avatar for a user. Accepts multipart/form-data with field 'file'. Stores file in local uploads and updates user's avatar_url.",
+        "description": "Upload avatar for a user. Accepts multipart/form-data with field 'file'. Stores file in local uploads and updates user's avatar_id (stores reference to a `storage` record).",
         "security": [
           {
             "bearerAuth": []
           }
         ],
-        
         "parameters": [
           {
             "in": "path",
             "name": "id",
             "required": true,
-            "schema": { "type": "integer" },
+            "schema": {
+              "type": "integer"
+            },
             "description": "ID пользователя",
             "example": "{{id}}"
           }
@@ -5403,9 +6481,14 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "file": { "type": "string", "format": "binary" }
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
                 },
-                "required": ["file"]
+                "required": [
+                  "file"
+                ]
               }
             }
           }
@@ -5418,17 +6501,369 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "user": { "$ref": "#/components/schemas/User" },
-                    "storage": { "$ref": "#/components/schemas/StorageRef" }
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    },
+                    "storage": {
+                      "$ref": "#/components/schemas/StorageRef"
+                    }
                   }
                 }
               }
             }
           },
-          "400": { "description": "Missing file or validation error" },
-          "401": { "description": "Authentication required" },
-          "403": { "description": "Forbidden - missing permission users.update" },
-          "404": { "description": "User not found" }
+          "400": {
+            "description": "Missing file or validation error"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - missing permission users.update"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/api/issue_types": {
+      "get": {
+        "tags": [
+          "issues"
+        ],
+        "summary": "Список типов задач",
+        "description": "Возвращает список всех записей из таблицы `issue_type` со всеми атрибутами. Требуется разрешение issues.view.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "issues.view"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/IssueType"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/api/issue_types/{id}": {
+      "get": {
+        "tags": [
+          "issues"
+        ],
+        "summary": "Получить тип задачи по id",
+        "description": "Возвращает запись из `issue_type` по идентификатору. Требуется разрешение issues.view.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "issues.view"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IssueType"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/api/users/{id}/notifications": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Список уведомлений пользователя (центр уведомлений)",
+        "description": "Возвращает список уведомлений для пользователя. По умолчанию скрытые уведомления не включаются.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID пользователя",
+            "example": "{{id}}"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "include_hidden",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Include hidden notifications"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of notifications",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/UserNotification"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid user id"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/users/{id}/notifications/unread_count": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Количество непрочитанных уведомлений",
+        "description": "Возвращает число непрочитанных и не скрытых уведомлений для пользователя.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID пользователя"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Unread count",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "unread_count": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid user id"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/users/{id}/notifications/{notificationId}/read": {
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Пометить уведомление как прочитанное",
+        "description": "Помечает указанное уведомление как прочитанное для пользователя.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "notificationId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notification marked as read",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/UserNotification"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Notification not found"
+          }
+        }
+      }
+    },
+    "/api/users/{id}/notifications/{notificationId}/hide": {
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Скрыть уведомление",
+        "description": "Помечает уведомление как скрытое (не отображается в списке по умолчанию).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "notificationId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notification hidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/UserNotification"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Notification not found"
+          }
         }
       }
     }
