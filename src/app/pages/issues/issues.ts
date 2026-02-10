@@ -888,6 +888,35 @@ export class IssuesComponent implements OnInit {
     return lightness > 70 ? '#111' : '#fff';
   }
 
+  // Map issue status (code or name) to a PrimeNG tag severity
+  statusSeverity(status: any): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | null {
+    try {
+      if (status === null || status === undefined) return 'secondary';
+      const s = String(status).toLowerCase();
+      if (s === 'resolved' || s === 'done' || s === 'closed' || s === 'fixed') return 'success';
+      if (s.includes('progress') || s.includes('in progress') || s.includes('in_progress') || s.includes('review')) return 'warn';
+      if (s === 'new' || s === 'open' || s === 'todo' || s === 'backlog') return 'info';
+      if (s === 'blocked' || s === 'rejected' || s === 'cancelled' || s === 'canceled' || s === 'failed') return 'danger';
+      return 'secondary';
+    } catch (e) {
+      return 'secondary';
+    }
+  }
+
+  // Map priority value to PrimeNG tag severity
+  prioritySeverity(priority: any): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | null {
+    try {
+      if (priority === null || priority === undefined) return 'secondary';
+      const p = String(priority).toLowerCase();
+      if (p === 'high' || p === 'urgent' || p === 'critical') return 'danger';
+      if (p === 'medium' || p === 'normal') return 'warn';
+      if (p === 'low' || p === 'minor') return 'success';
+      return 'info';
+    } catch (e) {
+      return 'info';
+    }
+  }
+
   // Normalize a list of issues: map avatar id fields to downloadable URLs and keep consistent property names
   private normalizeIssuesList(list: any): any[] {
     const rawList = Array.isArray(list) ? list : (list && list.items ? list.items : []);

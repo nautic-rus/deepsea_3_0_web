@@ -98,12 +98,12 @@
                                                     </div>
                                                 </div>
 
-                                                            <div class="flex flex-col gap-2">
+                                                            <!-- <div class="flex flex-col gap-2">
                                                                 <label class="font-bold">{{ 'components.issues.form.TAGS' | translate }}</label>
                                                                 <p-multiSelect [options]="tagsOptions" [(ngModel)]="editModel.tag_select" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-multiSelect>
                                                                 <small class="text-xs text-surface-500">{{ 'components.issues.form.OR_ADD' | translate }}</small>
                                                                 <p-chips [(ngModel)]="editModel.tags_custom"></p-chips>
-                                                            </div>
+                                                            </div> -->
 
                                     <div class="flex justify-end gap-2 mt-4">
                                         <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="displayDialog=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="loading"></p-button>
@@ -167,7 +167,7 @@
                                                                     <ng-template #authorInitialsTpl>
                                                                         <p-avatar
                                                                             [label]="personInitials(issue?.author_name)"
-                                                                            styleClass="mr-2"
+        
                                                                             shape="circle"
                                                                             [style.background]="issue?.author_id ? issueAvatarColor({ id: issue.author_id, first_name: issue.author_name }) : undefined"
                                                                             [style.color]="issue?.author_id ? issueAvatarTextColor({ id: issue.author_id, first_name: issue.author_name }) : undefined"></p-avatar>
@@ -191,7 +191,6 @@
                                                                 <ng-template #assigneeInitialsTpl>
                                                                     <p-avatar
                                                                         [label]="assigneeInitials()"
-                                                                        styleClass="mr-2"
                                                                         shape="circle"
                                                                         [style.background]="issue?.assignee_id ? issueAvatarColor({ id: issue.assignee_id, first_name: issue.assignee_name }) : undefined"
                                                                         [style.color]="issue?.assignee_id ? issueAvatarTextColor({ id: issue.assignee_id, first_name: issue.assignee_name }) : undefined"></p-avatar>
@@ -211,18 +210,18 @@
                         
                     </div>
 
-                    <div class="border-t border-surface-200 dark:border-surface-700"></div>
+                    <!-- <div class="border-t border-surface-200 dark:border-surface-700"></div>
                                         <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex items-center gap-4 flex-1">
                             <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">{{ 'components.issues.detail.TAGS' | translate }}</div>
                             <div class="flex-1 flex flex-wrap gap-2">
-                                <!-- <p-tag value="Crime" severity="info"></p-tag>
+                                <p-tag value="Crime" severity="info"></p-tag>
                                 <p-tag value="Drama" severity="info"></p-tag>
-                                <p-tag value="Thriller" severity="info"></p-tag> -->
+                                <p-tag value="Thriller" severity="info"></p-tag>
                             </div>
                         </div>
                         
-                    </div>
+                    </div> -->
                     <div class="border-t border-surface-200 dark:border-surface-700"></div>
 
                     <div class="flex flex-col md:flex-row gap-4">
