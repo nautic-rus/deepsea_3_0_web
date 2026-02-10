@@ -4,19 +4,56 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { BadgeModule } from 'primeng/badge';
+import { TagModule } from 'primeng/tag';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
+import { DialogModule } from 'primeng/dialog';
+import { InputTextModule } from 'primeng/inputtext';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-issue-detail-relations-table',
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslateModule, BadgeModule, ButtonModule, TableModule],
+  imports: [CommonModule, RouterModule, TranslateModule, BadgeModule, TagModule, ButtonModule, TableModule, DialogModule, InputTextModule, MultiSelectModule, FormsModule],
   template: `
     <section class="admin-subpage-relations card">
       <div class="flex items-center justify-between mt-0 mb-2">
          <h4 class="mb-">{{ 'components.issues.relations.TITLE' | translate }}</h4>
-          <p-button severity="secondary" icon="pi pi-plus" class="mt-0" [outlined]="true"></p-button>
+          <p-button severity="secondary" icon="pi pi-plus" class="mt-0" [outlined]="true" (click)="openAddDialog()"></p-button>
       </div>
+
+      <p-dialog header="{{ 'components.issues.relations.ADD_RELATION' | translate }}" [(visible)]="addDialogVisible" modal="true" [closable]="true" [style]="{width: '35%'}">
+        <div class="flex flex-col gap-4">
+
+          <!-- Type selector removed per request -->
+
+          <div class="flex flex-col gap-2">
+            <label class="font-bold">{{ 'components.issues.relations.ISSUES' | translate }}</label>
+            <p-multiSelect [options]="issueOptions" [(ngModel)]="linkTargetIssueIds" optionLabel="label" optionValue="value" placeholder="{{ 'components.issues.relations.ISSUES' | translate }}" class="w-full" appendTo="body"></p-multiSelect>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label class="font-bold">{{ 'components.issues.relations.DOCUMENTS' | translate }}</label>
+            <p-multiSelect [options]="documentOptions" [(ngModel)]="linkTargetDocumentIds" optionLabel="label" optionValue="value" placeholder="{{ 'components.issues.relations.DOCUMENTS' | translate }}" class="w-full" appendTo="body"></p-multiSelect>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label class="font-bold">{{ 'components.issues.relations.RELATION_TYPE' | translate }}</label>
+            <input pInputText type="text" [(ngModel)]="relationType" />
+          </div>
+
+          <div *ngIf="(linkTargetIssueIds.length || linkTargetDocumentIds.length)" class="flex flex-col gap-2">
+            <label class="font-bold">{{ 'components.issues.relations.SELECTED' | translate }}</label>
+            <div class="text-sm">Issues: {{ linkTargetIssueIds.length || 0 }}, Documents: {{ linkTargetDocumentIds.length || 0 }}</div>
+          </div>
+
+          <div class="flex justify-end gap-2 mt-4">
+            <p-button label="{{ 'components.issues.relations.CANCEL' | translate }}" (onClick)="addDialogVisible=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="isLinking"></p-button>
+            <p-button label="{{ 'components.issues.relations.CREATE' | translate }}" (onClick)="createLink()" severity="primary" icon="pi pi-check" iconPos="left" [loading]="isLinking" [disabled]="isLinking || !(linkTargetIssueIds.length || linkTargetDocumentIds.length)"></p-button>
+          </div>
+        </div>
+      </p-dialog>
 
       <div *ngIf="!relations || relations.length === 0" class="text-surface-500">{{ 'components.issues.relations.NO_RELATIONS' | translate }}</div>
 
@@ -41,10 +78,10 @@ import { TableModule } from 'primeng/table';
 
             </td>
             <td>
-              <p-badge *ngIf="r.status" [value]="r.status" [severity]="statusSeverity(r.status)"></p-badge>
+              <p-tag *ngIf="r.status || r.status_name" [value]="r.status_name || r.status" [severity]="statusSeverity(r.status_code ?? r.status)"></p-tag>
             </td>
             <td>
-              <p-badge *ngIf="r.raw?.relation_type" [value]="r.raw.relation_type" [severity]="typeSeverity(r.raw.relation_type)"></p-badge>
+              <p-tag *ngIf="r.raw?.relation_type" [value]="r.raw.relation_type" [severity]="typeSeverity(r.raw.relation_type)"></p-tag>
             </td>
             <td class="text-right">
               <p-button icon="pi pi-trash" severity="danger" (click)="removeLink(r)"></p-button>
@@ -65,6 +102,111 @@ export class IssueDetailRelationsTableComponent implements OnChanges {
   relations: Array<any> = [];
 
   constructor(private cdr: ChangeDetectorRef, private http: HttpClient) {}
+
+  // Dialog / linking state
+  addDialogVisible = false;
+  relationType = 'relates';
+  isLinking = false;
+  // Multi-select helpers
+  issueOptions: Array<any> = [];
+  documentOptions: Array<any> = [];
+  linkTargetIssueIds: Array<string> = [];
+  linkTargetDocumentIds: Array<string> = [];
+
+  public openAddDialog(): void {
+    if (!this.issue || (!this.issue.id && !this.issue._id)) {
+      alert('Issue not loaded');
+      return;
+    }
+  this.addDialogVisible = true;
+  this.linkTargetIssueIds = [];
+  this.linkTargetDocumentIds = [];
+  this.relationType = 'relates';
+    // load issue/document lists filtered by project
+    const projectId = this.issue.project_id ?? this.issue.project?.id ?? this.issue.project;
+    this.loadTargetsForProject(projectId);
+  }
+
+  private loadTargetsForProject(projectId: any): void {
+    this.issueOptions = [];
+    this.documentOptions = [];
+    if (!projectId) return;
+    let params = new HttpParams();
+    params = params.set('project_id', String(projectId));
+    // fetch issues
+    this.http.get<any>('/api/issues', { params }).subscribe({
+      next: (res) => {
+        try {
+          const items = Array.isArray(res) ? res : (res && (res.data || res.items) ? (res.data || res.items) : []);
+          this.issueOptions = (items as any[]).map(i => ({ label: (i.title || i.summary || i.name || `#${i.id || i._id}`), value: i.id ?? i._id ?? i.issue_id ?? i }));
+        } catch (e) {
+          this.issueOptions = [];
+        }
+        this.cdr.markForCheck();
+      },
+      error: () => { this.issueOptions = []; }
+    });
+
+    // fetch documents
+    this.http.get<any>('/api/documents', { params }).subscribe({
+      next: (res) => {
+        try {
+          const items = Array.isArray(res) ? res : (res && (res.data || res.items) ? (res.data || res.items) : []);
+          this.documentOptions = (items as any[]).map(d => ({ label: (d.title || d.name || `#${d.id || d._id}`), value: d.id ?? d._id ?? d.file_id ?? d }));
+        } catch (e) {
+          this.documentOptions = [];
+        }
+        this.cdr.markForCheck();
+      },
+      error: () => { this.documentOptions = []; }
+    });
+  }
+
+  // replaced manual-add with server-provided lists
+
+  public createLink(): void {
+    if (!this.issue) return;
+    const sourceId = this.issue.id ?? this.issue._id;
+    const issueTargets = this.linkTargetIssueIds || [];
+    const docTargets = this.linkTargetDocumentIds || [];
+    const total = issueTargets.length + docTargets.length;
+    if (!sourceId || total === 0) return;
+    this.isLinking = true;
+    let pending = total;
+
+    const finishIfDone = () => {
+      pending -= 1;
+      if (pending === 0) {
+        this.isLinking = false;
+        this.addDialogVisible = false;
+        this.loadLinksForIssue(this.issue);
+        this.linkTargetIssueIds = [];
+        this.linkTargetDocumentIds = [];
+      }
+    };
+
+    for (const t of issueTargets) {
+      const payload: any = {
+        source_type: 'issue',
+        source_id: String(sourceId),
+        target_type: 'issue',
+        target_id: String(t),
+        relation_type: this.relationType || 'relates'
+      };
+      this.http.post('/api/links', payload).subscribe({ next: finishIfDone, error: (err) => { console.warn('Failed to create link', t, err); finishIfDone(); } });
+    }
+
+    for (const t of docTargets) {
+      const payload: any = {
+        source_type: 'issue',
+        source_id: String(sourceId),
+        target_type: 'document',
+        target_id: String(t),
+        relation_type: this.relationType || 'relates'
+      };
+      this.http.post('/api/links', payload).subscribe({ next: finishIfDone, error: (err) => { console.warn('Failed to create link', t, err); finishIfDone(); } });
+    }
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['issue']) {
@@ -94,6 +236,8 @@ export class IssueDetailRelationsTableComponent implements OnChanges {
                   try {
                     rel.title = rel.title || res.title || res.summary || res.name || null;
                     (rel as any).status = res.status || res.state || res.status_name || null;
+                    (rel as any).status_name = res.status_name || res.status || null;
+                    (rel as any).status_code = res.status_code ?? res.status_id ?? null;
                   } catch (e) {}
                   this.cdr.markForCheck();
                 },
@@ -105,6 +249,8 @@ export class IssueDetailRelationsTableComponent implements OnChanges {
                   try {
                     rel.title = rel.title || res.title || res.name || null;
                     (rel as any).status = res.status || null;
+                    (rel as any).status_name = res.status || null;
+                    (rel as any).status_code = res.status_code ?? null;
                   } catch (e) {}
                   this.cdr.markForCheck();
                 },
@@ -163,7 +309,7 @@ export class IssueDetailRelationsTableComponent implements OnChanges {
     if (!relType) return 'info';
     const s = String(relType).toLowerCase();
     if (s.includes('block')) return 'danger';
-    if (s.includes('relates')) return 'info';
+    if (s.includes('relates')) return 'secondary';
     return 'info';
   }
 

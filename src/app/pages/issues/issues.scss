@@ -148,6 +148,11 @@
 .issues-table td[data-field="created_at"] {
   min-width: 160px;
 }
+/* Use ::ng-deep so scoped component styles can reach PrimeNG's rendered DOM */
+:host ::ng-deep .issues-table .p-datatable-tbody > tr,
+:host ::ng-deep .issues-table .p-datatable-tbody tr {
+  cursor: pointer !important;
+}
 
 /* Ensure avatar + text alignment doesn't force nowrap */
 .issues-table .flex.items-center {
@@ -156,10 +161,6 @@
 
 
 
-/* PrimeNG datatable body - make rows show pointer cursor when clickable */
-.p-datatable-tbody {
-  cursor: pointer;
-}
 
 .p-fileupload-advanced {
     border: 0px solid var(--p-fileupload-border-color);

@@ -400,6 +400,9 @@
         "SELECT_ASSIGNEES": "Select assignees",
         "SELECT_AUTHORS": "Select authors",
         "SELECT_PRIORITIES": "Select priorities"
+          ,
+          "FILTERS_APPLIED": "Filters applied",
+          "FILTERS_APPLY_ERROR": "Failed to apply filters"
       },
       "form": {
         "PROJECT": "Project",
@@ -469,6 +472,14 @@
       },
       "relations": {
         "TITLE": "Relations",
+        "ADD_RELATION": "Add relation",
+        "TYPE": "Type",
+        "ISSUES": "Issues (project)",
+        "DOCUMENTS": "Documents (project)",
+        "RELATION_TYPE": "Relation type",
+        "SELECTED": "Selected",
+        "CREATE": "Create",
+        "CANCEL": "Cancel",
         "NO_RELATIONS": "No relations to display",
         "DOCUMENT": "Document",
         "COLUMN_RELATION": "Relation",
@@ -493,6 +504,9 @@
         "DRAG_DROP": "Drag and drop files here to upload."
       ,
         "NO_ATTACHMENTS": "No attachments",
+        "COLUMN_NAME": "File name",
+        "COLUMN_SIZE": "Size",
+        "COLUMN_UPLOADED": "Uploaded",
         "CHOOSE": "Choose",
         "UPLOAD": "Upload",
         "CANCEL": "Cancel"
@@ -503,6 +517,8 @@
         "UPLOADED_COUNT": "{{count}} file(s) uploaded",
         "UPLOAD_FAILED": "Upload failed",
         "ERROR": "Error",
+        "WARNING": "Warning",
+        "FILE_TOO_LARGE": "File is too large (max {{size}})",
         "STATUS_UPDATED": "Status updated",
         "STATUS_UPDATE_FAILED": "Failed to update status",
         "SAVED": "Saved",

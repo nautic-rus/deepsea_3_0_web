@@ -401,6 +401,9 @@
         "SELECT_ASSIGNEES": "Выберите исполнителей",
         "SELECT_AUTHORS": "Выберите авторов",
         "SELECT_PRIORITIES": "Выберите приоритеты"
+          ,
+          "FILTERS_APPLIED": "Фильтры применены",
+          "FILTERS_APPLY_ERROR": "Не удалось применить фильтры"
       },
     "table": {
           "SEARCH": "Поиск...",
@@ -470,6 +473,14 @@
       },
       "relations": {
         "TITLE": "Связи",
+        "ADD_RELATION": "Добавить связь",
+        "TYPE": "Тип",
+        "ISSUES": "Задачи (проект)",
+        "DOCUMENTS": "Документы (проект)",
+        "RELATION_TYPE": "Тип связи",
+        "SELECTED": "Выбрано",
+        "CREATE": "Создать",
+        "CANCEL": "Отмена",
         "NO_RELATIONS": "Связей не найдено",
         "DOCUMENT": "Документ",
         "COLUMN_RELATION": "Связь",
@@ -494,6 +505,9 @@
         "DRAG_DROP": "Перетащите файлы сюда для загрузки."
       ,
         "NO_ATTACHMENTS": "Вложений нет",
+        "COLUMN_NAME": "Имя файла",
+        "COLUMN_SIZE": "Размер",
+        "COLUMN_UPLOADED": "Загружено",
         "CHOOSE": "Выбрать",
         "UPLOAD": "Загрузить",
         "CANCEL": "Отменить"
@@ -504,6 +518,8 @@
         "UPLOADED_COUNT": "{{count}} файл(ов) загружено",
         "UPLOAD_FAILED": "Не удалось загрузить",
         "ERROR": "Ошибка",
+        "WARNING": "Внимание",
+        "FILE_TOO_LARGE": "Файл слишком большой (макс {{size}})",
         "STATUS_UPDATED": "Статус обновлён",
         "STATUS_UPDATE_FAILED": "Не удалось обновить статус",
         "SAVED": "Сохранено",

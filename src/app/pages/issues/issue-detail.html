@@ -267,11 +267,11 @@
                 <p-toolbar>
                     <p-toast></p-toast>
                     <ng-template #start>
-                        <p-button  severity="secondary" icon="pi pi-arrow-left" (click)="back()" aria-label="Return to issues"></p-button>
+                        
                         <!-- Status change split button: always shown but disabled when no allowed statuses -->
                         <p-splitButton
                           icon="pi pi-exchange"
-                          severity="secondary"
+                          severity="primary"
                           [label]="issue?.status_name "
                           class="ml-2"
                           [model]="statusMenuItems"
@@ -282,14 +282,15 @@
 
                     <ng-template #end>
                         
+                        <p-button  severity="secondary" icon="pi pi-arrow-left" (click)="back()" aria-label="Return to issues"></p-button>
                         <!-- Copy issue -->
-                        <p-button severity="secondary" icon="pi pi-copy" class="ml-2" [disabled]="true"></p-button>
+                        <p-button severity="secondary" icon="pi pi-copy" class="ml-2" ></p-button>
 
                         <!-- Timesheet / Log time -->
-                        <p-button severity="secondary" icon="pi pi-clock" class="ml-2" [disabled]="true"></p-button>
+                        <p-button severity="secondary" icon="pi pi-clock" class="ml-2" ></p-button>
 
                         <!-- Delete issue -->
-                        <p-button severity="danger" icon="pi pi-trash" class="ml-2" [disabled]="true"></p-button>
+                        <p-button severity="danger" icon="pi pi-trash" class="ml-2" ></p-button>
                     </ng-template>
                 </p-toolbar>
     </section>
