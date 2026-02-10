@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map, catchError, throwError, shareReplay, finalize, tap } from 'rxjs';
+import { Observable, of, map, catchError, shareReplay, finalize, tap } from 'rxjs';
 
 export interface LoginPayload {
   username: string;
@@ -33,7 +33,7 @@ export class AuthService {
       })
       .pipe(
         map(() => true),
-        catchError((err) => throwError(() => err)),
+        catchError(() => of(false)),
         finalize(() => (this.refreshInProgress$ = null)),
         shareReplay(1)
       );

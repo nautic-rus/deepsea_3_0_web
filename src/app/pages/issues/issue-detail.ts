@@ -1,8 +1,16 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
+import { InputTextModule } from 'primeng/inputtext';
+import { EditorModule } from 'primeng/editor';
+import { Select } from 'primeng/select';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { DatePickerModule } from 'primeng/datepicker';
+import { CheckboxModule } from 'primeng/checkbox';
 import { AvatarModule } from 'primeng/avatar';
 import { TagModule } from 'primeng/tag';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
@@ -12,7 +20,6 @@ import { ToolbarModule } from 'primeng/toolbar';
 import { IssueDetailChatComponent } from './issue-detail-chat/issue-detail-chat.component';
 import { IssueDetailDescriptionComponent } from './issue-detail-description';
 import { IssueDetailAttachComponent } from './issue-detail-attach';
-import { IssueDetailRelationsComponent } from './issue-detail-relations';
 import { IssueDetailRelationsTableComponent } from './issue-detail-relations-table';
 import { SplitButtonModule } from 'primeng/splitbutton';
 import { ToastModule } from 'primeng/toast';
@@ -24,7 +31,7 @@ import { HttpClient } from '@angular/common/http';
   selector: 'app-issue-detail',
   standalone: true,
   providers: [MessageService],
-  imports: [CommonModule, TranslateModule, RouterModule, ButtonModule, AvatarModule, TagModule, ProgressSpinnerModule, ChipModule, ToolbarModule, IssueDetailChatComponent, IssueDetailDescriptionComponent, IssueDetailAttachComponent, IssueDetailRelationsComponent, IssueDetailRelationsTableComponent, SplitButtonModule, ToastModule],
+  imports: [CommonModule, TranslateModule, RouterModule, FormsModule, ButtonModule, DialogModule, InputTextModule, EditorModule, Select, MultiSelectModule, DatePickerModule, CheckboxModule, AvatarModule, TagModule, ProgressSpinnerModule, ChipModule, ToolbarModule, IssueDetailChatComponent, IssueDetailDescriptionComponent, IssueDetailAttachComponent, IssueDetailRelationsTableComponent, SplitButtonModule, ToastModule],
   templateUrl: './issue-detail.html',
   styleUrls: ['./issue-detail.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -33,6 +40,16 @@ export class IssueDetailComponent implements OnInit {
   issue: any = null;
   loading = false;
   error: string | null = null;
+  // edit dialog state
+  displayDialog = false;
+  editModel: any = {};
+  isCreating = false;
+  formErrors: any = {};
+  projectOptions: { label: string; value: any; code?: string }[] = [];
+  usersOptions: { label: string; value: any; avatar?: string | null }[] = [];
+  typeOptions: { label: string; value: any }[] = [];
+  priorityOptions: { label: string; value: any }[] = [];
+  tagsOptions: { label: string; value: any }[] = [];
   // keep flexible type because route params are strings but server may return numeric ids
   issueId: any = null;
   statusOptions: { label: string; value: any }[] = [];
@@ -57,7 +74,160 @@ export class IssueDetailComponent implements OnInit {
       return;
     }
     this.loadIssue(this.issueId);
+    // preload select options to populate edit form
+    this.loadProjects();
+    this.loadTypes();
+    this.priorityOptions = [
+      { label: this.translate.instant('components.issues.priority.HIGH') || 'High', value: 'high' },
+      { label: this.translate.instant('components.issues.priority.MEDIUM') || 'Medium', value: 'medium' },
+      { label: this.translate.instant('components.issues.priority.LOW') || 'Low', value: 'low' }
+    ];
   }
+
+  openEditDialog(): void {
+    if (!this.issue) return;
+    this.editModel = { ...(this.issue || {}) };
+    // ensure due_date is a Date object for p-datepicker
+    if (this.editModel.due_date) {
+      try {
+        const d = this.editModel.due_date instanceof Date ? this.editModel.due_date : new Date(this.editModel.due_date);
+        this.editModel.due_date = !isNaN(d.getTime()) ? d : null;
+      } catch (e) { this.editModel.due_date = null; }
+    }
+    // split tags into select and custom inputs
+    this.editModel.tag_select = Array.isArray(this.issue?.tags) ? [...this.issue.tags] : [];
+    this.editModel.tags_custom = [];
+    this.tagsOptions = (this.issue && Array.isArray(this.issue.tags)) ? (this.issue.tags || []).map((t: any) => ({ label: t, value: t })) : [];
+    this.isCreating = false;
+    this.displayDialog = true;
+  }
+
+  loadProjects(): void {
+    this.http.get('/api/my_projects').subscribe({
+      next: (res: any) => {
+        const items = (res && res.data) ? res.data : (res || []);
+        this.projectOptions = (items || []).map((p: any) => ({
+          // show code + title in the label so selected value displays as "[CODE] Title"
+          label: ((p.code || p.key) ? ('[' + (p.code || p.key) + '] ') : '') + (p.name || p.title || String(p.id)),
+          value: p.id,
+          code: p.code || p.key || ''
+        }));
+        // collect participants across projects to populate assignee options
+        const map = new Map<number | string, { label: string; value: any; avatar?: string | null }>();
+        for (const p of (items || [])) {
+          const parts = p.participants || [];
+          for (const part of (parts || [])) {
+            const id = part.id;
+            if (id == null) continue;
+            const label = part.full_name || part.fullName || part.name || part.email || String(id);
+            let avatar: string | null = null;
+            if (part.avatar_url || part.avatar || part.avatarUrl) {
+              avatar = part.avatar_url || part.avatar || part.avatarUrl || null;
+            } else if (part.avatar_id || part.avatarId) {
+              const aid = part.avatar_id ?? part.avatarId;
+              try {
+                if (typeof aid === 'number' || (typeof aid === 'string' && String(aid).trim())) {
+                  avatar = `/api/storage/${String(aid).trim()}/download`;
+                }
+              } catch (e) { avatar = null; }
+            }
+            if (!map.has(id)) map.set(id, { label, value: id, avatar });
+          }
+        }
+        this.usersOptions = Array.from(map.values());
+        this.cdr.markForCheck();
+      },
+      error: (err: any) => { console.warn('Failed to load projects', err); this.projectOptions = []; this.usersOptions = []; this.cdr.markForCheck(); }
+    });
+  }
+
+  loadTypes(): void {
+    this.http.get('/api/issue_types').subscribe({
+      next: (res: any) => {
+        const items = (res && res.data) ? res.data : (res || []);
+        this.typeOptions = (items || []).map((t: any) => ({ label: t.name || t.title || String(t.id), value: t.id }));
+        this.cdr.markForCheck();
+      },
+      error: (err: any) => { console.warn('Failed to load types', err); this.typeOptions = []; this.cdr.markForCheck(); }
+    });
+  }
+
+  // Map issue priority to a PrimeNG tag severity string
+  // high -> danger, medium -> warn, low -> success, default -> info
+  prioritySeverity(priority: any): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | null {
+    try {
+      if (!priority && priority !== 0) return 'info';
+      const p = String(priority).toLowerCase();
+      if (p === 'high' || p === 'urgent' || p === 'critical') return 'danger';
+      if (p === 'medium' || p === 'normal') return 'warn';
+      if (p === 'low' || p === 'minor') return 'success';
+      return 'info';
+    } catch (e) {
+      return 'info';
+    }
+  }
+
+  // Map issue status (code or name) to a PrimeNG tag severity
+  statusSeverity(status: any): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | null {
+    try {
+      if (status === null || status === undefined) return 'secondary';
+      const s = String(status).toLowerCase();
+      // resolved/closed/done -> success (green)
+      if (s === 'resolved' || s === 'done' || s === 'closed' || s === 'fixed') return 'success';
+      // in progress / review -> warn (yellow)
+      if (s.includes('progress') || s.includes('in progress') || s.includes('in_progress') || s.includes('review')) return 'warn';
+      // new/open/todo -> info (blue)
+      if (s === 'new' || s === 'open' || s === 'todo' || s === 'backlog') return 'info';
+      // blocked/rejected/cancelled -> danger (red)
+      if (s === 'blocked' || s === 'rejected' || s === 'cancelled' || s === 'canceled' || s === 'failed') return 'danger';
+      // fallback
+      return 'secondary';
+    } catch (e) {
+      return 'secondary';
+    }
+  }
+
+  validateIssueForm(): boolean {
+    this.formErrors = {};
+    if (!this.editModel || !this.editModel.title || !String(this.editModel.title).trim()) this.formErrors.title = this.translate.instant('components.issues.form.TITLE_REQUIRED') || 'Title is required';
+    if (!this.editModel || (this.editModel.project_id == null || this.editModel.project_id === '')) this.formErrors.project_id = this.translate.instant('components.issues.form.PROJECT_REQUIRED') || 'Project is required';
+    return Object.keys(this.formErrors).length === 0;
+  }
+
+  saveIssue(): void {
+    if (!this.editModel) return;
+    const id = this.editModel.id != null ? this.editModel.id : (this.issue && this.issue.id) || null;
+    // combine selected tags and custom tags (unique)
+    const selected = Array.isArray(this.editModel.tag_select) ? this.editModel.tag_select : [];
+    const custom = Array.isArray(this.editModel.tags_custom) ? this.editModel.tags_custom : [];
+    const combinedTags = Array.from(new Set([...selected, ...custom]));
+
+    const payload: any = {
+      project_id: (this.editModel.project_id != null && this.editModel.project_id !== '') ? Number(this.editModel.project_id) : 0,
+      title: String(this.editModel.title || ''),
+      description: (this.editModel.description != null) ? String(this.editModel.description) : '',
+      assignee_id: (this.editModel.assignee_id != null && this.editModel.assignee_id !== '') ? this.editModel.assignee_id : null,
+      type_id: (this.editModel.type_id != null) ? Number(this.editModel.type_id) : 1,
+      priority: String(this.editModel.priority || 'medium'),
+      due_date: this.editModel.due_date ? (this.editModel.due_date instanceof Date ? this.editModel.due_date.toISOString() : this.editModel.due_date) : null,
+      estimated_hours: (this.editModel.estimated_hours != null && this.editModel.estimated_hours !== '') ? Number(this.editModel.estimated_hours) : null,
+      tags: combinedTags
+    };
+    if (!this.validateIssueForm()) return;
+    this.loading = true;
+    this.issuesService.updateIssue(id as any, payload).subscribe({
+      next: (res: any) => {
+        // refresh issue data from server
+        this.loadIssue(id);
+        this.displayDialog = false;
+        this.loading = false;
+        this.cdr.markForCheck();
+        try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Saved', detail: this.translate.instant('components.issues.form.UPDATED') || 'Updated' }); } catch (e) {}
+      },
+      error: (err: any) => { console.error('Failed to update issue', err); this.loading = false; this.cdr.markForCheck(); try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.SAVE') || 'Save failed', detail: (err && err.message) ? err.message : 'Failed to update' }); } catch (e) {} }
+    });
+  }
+
 
   loadIssue(id: any): void {
     this.loading = true;
@@ -66,7 +236,7 @@ export class IssueDetailComponent implements OnInit {
       next: (res: any) => {
         // server may return { data: { ... } } or the issue directly
         const data = (res && res.data) ? res.data : res;
-        this.issue = data;
+        this.issue = this.normalizeIssue(data);
         this.loading = false;
 
         // Build status menu from issue.allowed_statuses if present.
@@ -183,6 +353,114 @@ export class IssueDetailComponent implements OnInit {
       return (parts[0][0] + parts[1][0]).toUpperCase();
     } catch (e) {
       return '';
+    }
+  }
+
+  issueAvatarColor(user: any): string {
+    const seed = (user && (user.id ?? user.username ?? (user.first_name || '') + (user.last_name || ''))) || '';
+    const s = seed.toString();
+    let hash = 0;
+    for (let i = 0; i < s.length; i++) {
+      const ch = s.charCodeAt(i);
+      hash = ((hash << 5) - hash) + ch;
+      hash = hash & hash;
+    }
+    const hue = Math.abs(hash) % 360;
+    return `hsl(${hue}, 65%, 45%)`;
+  }
+
+  issueAvatarTextColor(user: any): string {
+    const bg = this.issueAvatarColor(user);
+    const m = bg.match(/hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?\)/);
+    if (!m) return '#fff';
+    const lightness = Number(m[3]);
+    return lightness > 70 ? '#111' : '#fff';
+  }
+
+  // derive initials from a single full-name string
+  initialsFromName(name?: string | null): string {
+    if (!name) return '';
+    const parts = String(name).trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return '';
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+
+  // Format surname with initials for given name and patronymic.
+  // Accepts either a user-like object ({ first_name, middle_name, last_name }) or a single full-name string.
+  formatSurnameInitials(item: any): string {
+    if (!item) return '-';
+    try {
+      // object with separate fields (preferred)
+      if (typeof item === 'object') {
+        const last = (item.last_name || item.lastName || '').toString().trim();
+        const first = (item.first_name || item.firstName || '').toString().trim();
+        const middle = (item.middle_name || item.middleName || '').toString().trim();
+        const initials: string[] = [];
+        if (first) initials.push(first[0].toUpperCase() + '.');
+        if (middle) initials.push(middle[0].toUpperCase() + '.');
+        if (last) return last + (initials.length ? ' ' + initials.join('') : '');
+        const fallback = [first, middle].filter(Boolean).join(' ');
+        return fallback || (item.username || '-') ;
+      }
+
+      // string input: assume format "Surname Given Patronymic" and convert given+patronymic to initials
+      if (typeof item === 'string') {
+        const parts = item.trim().split(/\s+/).filter(Boolean);
+        if (!parts.length) return '-';
+        const surname = parts[0];
+        const rest = parts.slice(1);
+        const initials = rest.map(p => (p && p[0]) ? p[0].toUpperCase() + '.' : '').join('');
+        return surname + (initials ? ' ' + initials : '');
+      }
+    } catch (e) {
+      // fall through
+    }
+    return '-';
+  }
+
+  // Helpers for select-option avatars (compute from label string)
+  selectAvatarBg(label?: string | null): string {
+    const s = (label || '').toString();
+    let hash = 0;
+    for (let i = 0; i < s.length; i++) {
+      const ch = s.charCodeAt(i);
+      hash = ((hash << 5) - hash) + ch;
+      hash = hash & hash;
+    }
+    const hue = Math.abs(hash) % 360;
+    return `hsl(${hue}, 65%, 45%)`;
+  }
+
+  selectAvatarTextColor(label?: string | null): string {
+    const bg = this.selectAvatarBg(label);
+    const m = bg.match(/hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?\)/);
+    if (!m) return '#fff';
+    const lightness = Number(m[3]);
+    return lightness > 70 ? '#111' : '#fff';
+  }
+
+  // Normalize a single issue: map avatar id fields to downloadable URLs
+  private normalizeIssue(issue: any): any {
+    if (!issue) return issue;
+    try {
+      const copy: any = { ...(issue || {}) };
+      // assignee avatar
+      const aId = copy.assignee_avatar_id ?? copy.assignee_avatarId ?? copy.assigneeAvatarId ?? copy.assigneeAvatar_id;
+      if (!copy.assignee_avatar && !copy.assignee_avatar_url && aId != null && String(aId).trim() !== '') {
+        copy.assignee_avatar_url = `/api/storage/${String(aId).trim()}/download`;
+      }
+      // author avatar
+      const auId = copy.author_avatar_id ?? copy.author_avatarId ?? copy.authorAvatarId ?? copy.authorAvatar_id;
+      if (!copy.author_avatar && !copy.author_avatar_url && auId != null && String(auId).trim() !== '') {
+        copy.author_avatar_url = `/api/storage/${String(auId).trim()}/download`;
+      }
+      // ensure name fields
+      if (!copy.assignee_name && (copy.assignee || copy.assigneeName)) copy.assignee_name = copy.assignee || copy.assigneeName;
+      if (!copy.author_name && (copy.author || copy.authorName)) copy.author_name = copy.author || copy.authorName;
+      return copy;
+    } catch (e) {
+      return issue;
     }
   }
 }

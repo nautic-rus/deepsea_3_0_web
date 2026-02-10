@@ -82,7 +82,8 @@
     "APPLY": "Применить",
     "RESET": "Сбросить"
     ,
-    "COLUMNS": "Колонки"
+    "COLUMNS": "Колонки",
+    "SELECT": "Выбрать"
   },
   "PERMISSIONS": {
     "CODE": "Код",
@@ -424,6 +425,10 @@
         "ASSIGNEE": "Исполнитель",
         "TYPE": "Тип",
         "PRIORITY": "Приоритет",
+        "DUE_DATE": "Дата завершения",
+        "ESTIMATED_HOURS": "Оценочное время",
+        "TAGS": "Теги",
+        "OR_ADD": "Или добавить новые теги",
         "CREATED": "Создано",
         "UPDATED": "Обновлено",
         "CREATED_AT": "Дата создания",
@@ -446,10 +451,22 @@
         "LOW": "Низкий"
       },
       "detail": {
+        "STATUS": "Статус",
+        "PRIORITY": "Приоритет",
+        "TYPE": "Тип",
+        "PROJECT": "Проект",
+        "AUTHOR": "Автор",
+        "ASSIGNEE": "Исполнитель",
+        "DUE_DATE": "Дата завершения",
+        "TAGS": "Теги",
+        "ESTIMATED_HOURS": "Оценочное время",
+        "TIMESHEETING": "Таймшитинг",
+        "CREATED_AT": "Дата создания",
+        "UPDATED_AT": "Дата обновления",
         "DESCRIPTION": "Описание",
         "ATTACHMENTS": "Вложения",
         "ATTACHE": "Вложения",
-        "NO_DESCRIPTIONS": "Описание не указано"
+        "NO_DESCRIPTIONS": "Описание отсутствует"
       },
       "relations": {
         "TITLE": "Связи",

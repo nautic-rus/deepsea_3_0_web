@@ -15,7 +15,7 @@ import { Accordion } from "primeng/accordion";
   selector: 'app-issue-detail-chat',
   standalone: true,
   providers: [MessageService],
-  imports: [CommonModule, FormsModule, ButtonModule, AvatarModule, TranslateModule, ToastModule, ProgressSpinnerModule, IssueDetailChatHistoryComponent, Accordion],
+  imports: [CommonModule, FormsModule, ButtonModule, AvatarModule, TranslateModule, ToastModule, ProgressSpinnerModule],
   templateUrl: './issue-detail-chat.component.html',
   styleUrls: ['./issue-detail-chat.component.scss']
 })

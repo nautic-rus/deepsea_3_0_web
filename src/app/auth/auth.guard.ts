@@ -9,6 +9,8 @@ import { PagesService } from '../services/pages.service';
 export class AuthGuard implements CanActivate {
   /** Cache allowed paths to avoid repeated API calls within one session */
   private cachedPaths: string[] | null = null;
+  /** User identity for whom cachedPaths was fetched */
+  private cachedUserKey: string | null = null;
 
   constructor(
     private router: Router,
@@ -122,9 +124,15 @@ export class AuthGuard implements CanActivate {
     return allowed ? true : this.router.parseUrl('/access');
   }
 
-  /** Cache user in sessionStorage */
+  /** Cache user in sessionStorage and invalidate paths cache if user changed */
   private cacheUser(user: any): void {
     try {
+      const key = user?.id ?? user?.email ?? JSON.stringify(user);
+      if (this.cachedUserKey && this.cachedUserKey !== key) {
+        // Different user — drop stale page permissions
+        this.cachedPaths = null;
+      }
+      this.cachedUserKey = key;
       sessionStorage.setItem('currentUser', JSON.stringify(user));
     } catch (e) {
       console.warn('Failed to cache user:', e);
@@ -134,5 +142,6 @@ export class AuthGuard implements CanActivate {
   /** Clear cached paths (call on logout or when pages may have changed) */
   clearCache(): void {
     this.cachedPaths = null;
+    this.cachedUserKey = null;
   }
 }

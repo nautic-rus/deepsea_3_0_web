@@ -22,6 +22,7 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { UsersService } from './users.service';
 import { Select } from "primeng/select";
+import { Avatar } from "primeng/avatar";
 
 interface User {
   id: number | string;
@@ -53,8 +54,8 @@ interface User {
     RatingModule,
     RippleModule,
     InputTextModule,
-  InputMaskModule,
-  MultiSelectModule,
+    InputMaskModule,
+    MultiSelectModule,
     DialogModule,
     InputIconModule,
     IconFieldModule,
@@ -63,7 +64,8 @@ interface User {
     Select,
     TagModule,
     ConfirmDialogModule,
-    ToastModule
+    ToastModule,
+    Avatar
 ],
   providers: [ConfirmationService, MessageService],
   templateUrl: './users.html',

@@ -17,6 +17,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { CheckboxModule } from 'primeng/checkbox';
 import { AvatarModule } from 'primeng/avatar';
 import { EditorModule } from 'primeng/editor';
+import { ChipModule } from 'primeng/chip';
 import { DragDropModule } from 'primeng/dragdrop';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
@@ -69,6 +70,7 @@ interface User {
     DragDropModule,
     AvatarModule,
   EditorModule,
+    ChipModule,
     Select,
     TagModule,
     ConfirmDialogModule,
@@ -132,6 +134,7 @@ export class IssuesComponent implements OnInit {
   usersOptions: { label: string; value: any; avatar?: string | null }[] = [];
   // issue type options (select)
   typeOptions: { label: string; value: any }[] = [];
+  tagsOptions: { label: string; value: any }[] = [];
 
   // column toggle support
   columns: { field: string; headerKey: string; visible: boolean }[] = [
@@ -216,6 +219,8 @@ export class IssuesComponent implements OnInit {
       // small timeout to allow other init tasks to settle
       setTimeout(() => this.applyQuery(true), 50);
     }
+
+    
   }
 
   isColumnVisible(field: string): boolean {
@@ -309,7 +314,12 @@ export class IssuesComponent implements OnInit {
     this.http.get('/api/my_projects').subscribe({
       next: (res: any) => {
         const items = (res && res.data) ? res.data : (res || []);
-        this.projectOptions = (items || []).map((p: any) => ({ label: p.name || p.title || String(p.id), value: p.id }));
+        this.projectOptions = (items || []).map((p: any) => ({
+          // show code + title in the label so selected value displays as "[CODE] Title"
+          label: ((p.code || p.key) ? ('[' + (p.code || p.key) + '] ') : '') + (p.name || p.title || String(p.id)),
+          value: p.id,
+          code: p.code || p.key || ''
+        }));
         // collect participants across projects to populate assignee/author options
   const map = new Map<number | string, { label: string; value: any; avatar?: string | null }>();
         for (const p of (items || [])) {
@@ -482,7 +492,7 @@ export class IssuesComponent implements OnInit {
     this.issuesService.getIssues(this.filters).subscribe({
       next: (res: any) => {
         const items = (res && res.data) ? res.data : (res || []);
-        this.issuesItems = Array.isArray(items) ? items : (items.items || []);
+        this.issuesItems = this.normalizeIssuesList(items);
         this.loading = false;
         if (!silent) {
           try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.QUERY') || 'Query', detail: this.translate.instant('components.issues.filters.FILTERS_APPLIED') || 'Filters applied' }); } catch (e) {}
@@ -659,18 +669,30 @@ export class IssuesComponent implements OnInit {
     });
   }
 
-  // intentionally empty the table values — this method keeps the signature but clears items
+  // Load all issues (no filters) from the server
   loadIssues(): void {
-    this.loading = false;
+    this.loading = true;
     this.error = null;
-    // keep empty by design
-    this.issuesItems = [];
-    this.jobTitles = [];
-    this.safeDetect();
+    this.issuesService.getIssues({ page: 1, limit: 25 }).subscribe({
+      next: (res: any) => {
+        const items = (res && res.data) ? res.data : (res || []);
+        // normalize returned issues into expected shape (avatars, name keys)
+        this.issuesItems = this.normalizeIssuesList(items);
+        this.loading = false;
+        this.safeDetect();
+      },
+      error: (err) => {
+        console.error('Failed to load issues', err);
+        this.error = (err && err.message) ? err.message : 'Failed to load issues';
+        this.issuesItems = [];
+        this.loading = false;
+        this.safeDetect();
+      }
+    });
   }
 
   openNewIssue(): void {
-    this.editModel = { project_id: null, title: '', description: '', assignee_id: null, type_id: 1, priority: 'medium' };
+    this.editModel = { project_id: null, title: '', description: '', assignee_id: null, type_id: 1, priority: 'medium', due_date: null, estimated_hours: null, tags: [], tag_select: [], tags_custom: [] };
     this.isCreating = true;
     this.displayDialog = true;
   }
@@ -699,6 +721,10 @@ export class IssuesComponent implements OnInit {
     if (!user) return;
     // copy issue fields into editModel (assume server returns issue-shaped object)
     this.editModel = { ...(user as any) } as any;
+    // prepare tag selection and custom tags
+    this.editModel.tag_select = Array.isArray(user && (user as any).tags) ? [...(user as any).tags] : [];
+    this.editModel.tags_custom = [];
+    this.tagsOptions = Array.isArray((user as any).tags) ? ((user as any).tags || []).map((t: any) => ({ label: t, value: t })) : (this.tagsOptions || []);
     this.displayDialog = true;
   }
 
@@ -707,13 +733,21 @@ export class IssuesComponent implements OnInit {
     if (!this.isCreating && (this.editModel.id == null)) return;
     const id = (this.editModel.id != null) ? this.editModel.id : null;
 
+    // combine selected and custom tags
+    const selected = Array.isArray(this.editModel.tag_select) ? this.editModel.tag_select : [];
+    const custom = Array.isArray(this.editModel.tags_custom) ? this.editModel.tags_custom : [];
+    const combinedTags = Array.from(new Set([...selected, ...custom]));
+
     const payload: any = {
       project_id: (this.editModel.project_id != null && this.editModel.project_id !== '') ? Number(this.editModel.project_id) : 0,
       title: String(this.editModel.title || ''),
       description: (this.editModel.description != null) ? String(this.editModel.description) : '',
       assignee_id: (this.editModel.assignee_id != null && this.editModel.assignee_id !== '') ? this.editModel.assignee_id : null,
       type_id: (this.editModel.type_id != null) ? Number(this.editModel.type_id) : 1,
-      priority: String(this.editModel.priority || 'medium')
+      priority: String(this.editModel.priority || 'medium'),
+      due_date: this.editModel.due_date ? (this.editModel.due_date instanceof Date ? this.editModel.due_date.toISOString() : this.editModel.due_date) : null,
+      estimated_hours: (this.editModel.estimated_hours != null && this.editModel.estimated_hours !== '') ? Number(this.editModel.estimated_hours) : null,
+      tags: combinedTags
     };
 
     if (!this.validateIssueForm()) {
@@ -779,6 +813,39 @@ export class IssuesComponent implements OnInit {
     return (parts[0][0] + parts[1][0]).toUpperCase();
   }
 
+  // Format surname with initials for given name and patronymic.
+  // Accepts either a user-like object ({ first_name, middle_name, last_name }) or a single full-name string.
+  formatSurnameInitials(item: any): string {
+    if (!item) return '-';
+    try {
+      // object with separate fields (preferred)
+      if (typeof item === 'object') {
+        const last = (item.last_name || item.lastName || '').toString().trim();
+        const first = (item.first_name || item.firstName || '').toString().trim();
+        const middle = (item.middle_name || item.middleName || '').toString().trim();
+        const initials: string[] = [];
+        if (first) initials.push(first[0].toUpperCase() + '.');
+        if (middle) initials.push(middle[0].toUpperCase() + '.');
+        if (last) return last + (initials.length ? ' ' + initials.join('') : '');
+        const fallback = [first, middle].filter(Boolean).join(' ');
+        return fallback || (item.username || '-') ;
+      }
+
+      // string input: assume format "Surname Given Patronymic" and convert given+patronymic to initials
+      if (typeof item === 'string') {
+        const parts = item.trim().split(/\s+/).filter(Boolean);
+        if (!parts.length) return '-';
+        const surname = parts[0];
+        const rest = parts.slice(1);
+        const initials = rest.map(p => (p && p[0]) ? p[0].toUpperCase() + '.' : '').join('');
+        return surname + (initials ? ' ' + initials : '');
+      }
+    } catch (e) {
+      // fall through
+    }
+    return '-';
+  }
+
   issueAvatarColor(user: User | any): string {
     const seed = (user && (user.id ?? user.username ?? (user.first_name || '') + (user.last_name || ''))) || '';
     const s = seed.toString();
@@ -821,6 +888,32 @@ export class IssuesComponent implements OnInit {
     return lightness > 70 ? '#111' : '#fff';
   }
 
+  // Normalize a list of issues: map avatar id fields to downloadable URLs and keep consistent property names
+  private normalizeIssuesList(list: any): any[] {
+    const rawList = Array.isArray(list) ? list : (list && list.items ? list.items : []);
+    return (rawList || []).map((it: any) => {
+      try {
+        const copy: any = { ...(it || {}) };
+        // assignee avatar id (support various naming conventions)
+        const aId = copy.assignee_avatar_id ?? copy.assignee_avatarId ?? copy.assigneeAvatarId ?? copy.assigneeAvatar_id;
+        if (!copy.assignee_avatar && !copy.assignee_avatar_url && (aId !== null && aId !== undefined && String(aId).trim() !== '')) {
+          try { copy.assignee_avatar_url = `/api/storage/${String(aId).trim()}/download`; } catch (e) { /* ignore */ }
+        }
+        // author avatar id
+        const auId = copy.author_avatar_id ?? copy.author_avatarId ?? copy.authorAvatarId ?? copy.authorAvatar_id;
+        if (!copy.author_avatar && !copy.author_avatar_url && (auId !== null && auId !== undefined && String(auId).trim() !== '')) {
+          try { copy.author_avatar_url = `/api/storage/${String(auId).trim()}/download`; } catch (e) { /* ignore */ }
+        }
+        // ensure name fields exist in expected keys (prefer provided ones)
+        if (!copy.assignee_name && (copy.assignee || copy.assigneeName)) copy.assignee_name = copy.assignee || copy.assigneeName;
+        if (!copy.author_name && (copy.author || copy.authorName)) copy.author_name = copy.author || copy.authorName;
+        return copy;
+      } catch (e) {
+        return it;
+      }
+    });
+  }
+
   confirmDeleteIssue(user: User): void {
     if (!user) return;
     this.confirmationService.confirm({
@@ -830,18 +923,18 @@ export class IssuesComponent implements OnInit {
     });
   }
 
-  deleteIssue(user: User): void {
-    if (!user) return;
+  deleteIssue(issue: any): void {
+    if (!issue || issue.id == null) return;
     this.loading = true;
-    this.usersService.deleteUser(user.id).subscribe({
+    this.http.delete(`/api/issues/${issue.id}`).subscribe({
       next: () => {
-        this.issuesItems = this.issuesItems.filter(u => u.id !== user.id);
-        this.selectedIssues = this.selectedIssues.filter(s => s.id !== user.id);
+        this.issuesItems = this.issuesItems.filter((u: any) => u.id !== issue.id);
+        this.selectedIssues = this.selectedIssues.filter((s: any) => s.id !== issue.id);
         this.loading = false;
-        try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Success', detail: this.translate.instant('MENU.USER_DELETED') || 'Deleted' }); } catch (e) {}
+        try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Success', detail: this.translate.instant('components.issues.messages.DELETED') || 'Issue deleted' }); } catch (e) {}
         this.safeDetect();
       },
-      error: (err) => { console.error('Failed to delete', err); this.error = (err && err.message) ? err.message : 'Failed to delete'; this.loading = false; this.safeDetect(); }
+      error: (err) => { console.error('Failed to delete issue', err); this.error = (err && err.message) ? err.message : 'Failed to delete'; this.loading = false; this.safeDetect(); }
     });
   }
 }

@@ -109,13 +109,55 @@
   white-space: normal !important;
 }
 
+/* Minimum column widths for issues table to keep layout readable */
+.issues-table th[data-field="id"],
+.issues-table td[data-field="id"] {
+  min-width: 60px;
+}
+.issues-table th[data-field="project_name"],
+.issues-table td[data-field="project_name"] {
+  min-width: 140px;
+}
+.issues-table th[data-field="title"],
+.issues-table td[data-field="title"] {
+  min-width: 320px;
+}
+.issues-table th[data-field="assignee_name"],
+.issues-table td[data-field="assignee_name"],
+.issues-table th[data-field="author_name"],
+.issues-table td[data-field="author_name"] {
+  min-width: 190px;
+}
+.issues-table th[data-field="status_name"],
+.issues-table td[data-field="status_name"] {
+  min-width: 130px;
+}
+.issues-table th[data-field="priority_text"],
+.issues-table td[data-field="priority_text"] {
+  min-width: 150px;
+}
+.issues-table th[data-field="estimated_hours"],
+.issues-table td[data-field="estimated_hours"] {
+  min-width: 130px;
+}
+.issues-table th[data-field="start_date"],
+.issues-table td[data-field="start_date"],
+.issues-table th[data-field="due_date"],
+.issues-table td[data-field="due_date"],
+.issues-table th[data-field="created_at"],
+.issues-table td[data-field="created_at"] {
+  min-width: 160px;
+}
+
 /* Ensure avatar + text alignment doesn't force nowrap */
 .issues-table .flex.items-center {
   white-space: normal !important;
 }
 
-/* Make table body rows appear clickable */
-.issues-table tbody tr {
+
+
+/* PrimeNG datatable body - make rows show pointer cursor when clickable */
+.p-datatable-tbody {
   cursor: pointer;
 }
 

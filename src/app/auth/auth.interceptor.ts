@@ -64,9 +64,11 @@ export class AuthInterceptor implements HttpInterceptor {
     return req.headers.has('x-skip-refresh') || req.url?.includes('/api/auth/refresh');
   }
 
-  /** Check if request is an auth-related call */
+  /** Check if request is an auth-related call (should not trigger refresh on 401) */
   private isAuthRequest(url: string): boolean {
-    return url?.includes('/api/auth/login') || url?.includes('/api/auth/logout');
+    return url?.includes('/api/auth/login')
+      || url?.includes('/api/auth/logout')
+      || url?.includes('/api/auth/me');
   }
 
   /** Handle 401 error with token refresh */

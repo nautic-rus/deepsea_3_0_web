@@ -27,7 +27,7 @@
           <div class="font-medium">{{ m.author }}</div>
           <div class="msg-controls">
             <div class="msg-time text-sm text-surface-500">{{ formatMessageTime(m) }}</div>
-            <p-button severity="secondary" icon="pi pi-reply" class="mt-0"[outlined]="true" (click)="answer(m)"></p-button>
+            <p-button severity="secondary" icon="pi pi-reply" class="mt-0" [outlined]="true" (click)="answer(m)"></p-button>
           </div>
         </div>
           <div class="text-sm text-surface-700" [innerHTML]="m.text"></div>

@@ -82,7 +82,8 @@
     "APPLY": "Apply",
     "RESET": "Reset"
     ,
-    "COLUMNS": "Columns"
+    "COLUMNS": "Columns",
+    "SELECT": "Select"
   },
   "PERMISSIONS": {
     "CODE": "Code",
@@ -445,10 +446,21 @@
         "LOW": "Low"
       },
       "detail": {
+        "STATUS": "Status",
+        "PRIORITY": "Priority",
+        "TYPE": "Type",
+        "PROJECT": "Project",
+        "AUTHOR": "Author",
+        "ASSIGNEE": "Assignee",
+        "DUE_DATE": "Due date",
+        "TAGS": "Tags",
+        "ESTIMATED_HOURS": "Estimated hours",
+        "TIMESHEETING": "Timesheet",
+        "CREATED_AT": "Created at",
+        "UPDATED_AT": "Updated at",
         "DESCRIPTION": "Description",
         "ATTACHMENTS": "Attachments",
-        "ATTACHE": "Attachments"
-      ,
+        "ATTACHE": "Attachments",
         "NO_DESCRIPTIONS": "No description provided"
       },
       "relations": {

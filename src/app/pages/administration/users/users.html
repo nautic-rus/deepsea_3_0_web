@@ -147,7 +147,7 @@
                     <td>
                         <div class="flex items-center gap-2">
                             <ng-container *ngIf="user?.avatar_url; else initialsTpl">
-                                <img [src]="user.avatar_url" alt="avatar" class="user-avatar" />
+                                <p-avatar [image]="user.avatar_url" class="mr-2" shape="circle" />
                             </ng-container>
                             <ng-template #initialsTpl>
                                 <div class="user-avatar user-avatar-initials" [style.background]="avatarColor(user)" [style.color]="avatarTextColor(user)">{{ getInitials(user) }}</div>

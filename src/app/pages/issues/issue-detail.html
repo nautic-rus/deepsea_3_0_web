@@ -3,19 +3,122 @@
   <div class="admin-grid">
     <aside class="admin-menu card">
       <div class="admin-menu-header"></div>
-        <div class="flex flex-col gap-2 pb-4">
-          <div class="font-semibold text-xl text-surface-900 dark:text-surface-0 leading-tight">Issue #{{ issue?.id ?? issueId }}</div>
-            <div class="text-surface-500 dark:text-surface-300 text-base leading-tight">{{ issue?.title ?? '-' }}</div>
-            
-            </div>
+                <div class="flex flex-col gap-2 pb-4">
+                    <div class="flex items-center justify-between">
+                        <div class="font-semibold text-xl text-surface-900 dark:text-surface-0 leading-tight">Issue #{{ issue?.id ?? issueId }}</div>
+                                    <div>
+                                        <p-button severity="secondary" icon="pi pi-pencil" [outlined]="true" (onClick)="openEditDialog()"></p-button>
+                                    </div>
+                    </div>
+                    <div class="text-surface-500 dark:text-surface-300 text-base leading-tight">{{ issue?.title ?? '-' }}</div>
+                </div>
+
+                            <!-- Edit dialog for the issue (inline on detail page) -->
+                            <p-dialog header="{{ 'MENU.EDIT_ISSUE' | translate }}" [(visible)]="displayDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{width: '40%'}" appendTo="body">
+                                <div class="flex flex-col gap-4">
+                                    <div class="flex gap-2">
+                                        <div class="flex-1 flex flex-col gap-2">
+                                            <label class="font-bold">{{ 'components.issues.form.PROJECT' | translate }}</label>
+                                            <p-select [options]="projectOptions" [(ngModel)]="editModel.project_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body">
+                                                <ng-template let-opt pTemplate="item">
+                                                    <div class="flex items-center gap-2">
+                                                        <div>{{ opt.label }}</div>
+                                                    </div>
+                                                </ng-template>
+                                                <ng-template let-opt pTemplate="value">
+                                                    <div class="flex items-center gap-2">
+                                                        <div>{{ opt.label }}</div>
+                                                    </div>
+                                                </ng-template>
+                                            </p-select>
+                                            <small *ngIf="formErrors.project_id" class="text-red-600 block">{{ formErrors.project_id }}</small>
+                                        </div>
+
+                                        <div class="w-60 flex flex-col gap-2">
+                                            <label class="font-bold">{{ 'components.issues.form.TYPE' | translate }}</label>
+                                            <p-select [options]="typeOptions" [(ngModel)]="editModel.type_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex flex-col gap-2">
+                                        <label class="font-bold">{{ 'components.issues.form.TITLE' | translate }}</label>
+                                        <input pInputText type="text" [(ngModel)]="editModel.title" />
+                                        <small *ngIf="formErrors.title" class="text-red-600 block">{{ formErrors.title }}</small>
+                                    </div>
+
+                                    <!-- <div class="flex flex-col gap-2">
+                                        <label class="font-bold">{{ 'components.issues.form.DESCRIPTION' | translate }}</label>
+                                        <p-editor [(ngModel)]="editModel.description" styleClass="w-full" [style]="{ height: '120px' }"></p-editor>
+                                    </div> -->
+
+                                    <div class="flex gap-2">
+                                        <div class="flex-1 flex flex-col gap-2">
+                                            <label class="font-bold">{{ 'components.issues.form.ASSIGNEE' | translate }}</label>
+                                            <p-select [options]="usersOptions" [(ngModel)]="editModel.assignee_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body">
+                                                <ng-template let-opt pTemplate="item">
+                                                    <div class="flex items-center gap-2">
+                                                        <ng-container *ngIf="opt.avatar; else initialsItem">
+                                                            <img [src]="opt.avatar" alt="avatar" class="select-avatar" />
+                                                        </ng-container>
+                                                        <ng-template #initialsItem>
+                                                            <div class="select-avatar-initials" [style.background]="selectAvatarBg(opt.label)" [style.color]="selectAvatarTextColor(opt.label)">{{ initialsFromName(opt.label) }}</div>
+                                                        </ng-template>
+                                                        <div>{{ opt.label }}</div>
+                                                    </div>
+                                                </ng-template>
+                                                <ng-template let-opt pTemplate="value">
+                                                    <div class="flex items-center gap-2">
+                                                        <ng-container *ngIf="opt.avatar; else initialsValue">
+                                                            <img [src]="opt.avatar" alt="avatar" class="select-avatar" />
+                                                        </ng-container>
+                                                        <ng-template #initialsValue>
+                                                            <div class="select-avatar-initials" [style.background]="selectAvatarBg(opt.label)" [style.color]="selectAvatarTextColor(opt.label)">{{ initialsFromName(opt.label) }}</div>
+                                                        </ng-template>
+                                                        <div>{{ opt.label }}</div>
+                                                    </div>
+                                                </ng-template>
+                                            </p-select>
+                                        </div>
+
+                                        <div class="w-60 flex flex-col gap-2">
+                                            <label class="font-bold">{{ 'components.issues.form.PRIORITY' | translate }}</label>
+                                            <p-select [options]="priorityOptions" [(ngModel)]="editModel.priority" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+                                        </div>
+                                    </div>
+
+                                                <div class="flex gap-2">
+                                                    <div class="flex-1 flex flex-col gap-2">
+                                                        <label class="font-bold">{{ 'components.issues.form.DUE_DATE' | translate }}</label>
+                                                        <p-datepicker [(ngModel)]="editModel.due_date" [showIcon]="true"></p-datepicker>
+                                                    </div>
+
+                                                    <div class="w-60 flex flex-col gap-2">
+                                                        <label class="font-bold">{{ 'components.issues.form.ESTIMATED_HOURS' | translate }}</label>
+                                                        <input pInputText type="number" step="5" [(ngModel)]="editModel.estimated_hours" />
+                                                    </div>
+                                                </div>
+
+                                                            <div class="flex flex-col gap-2">
+                                                                <label class="font-bold">{{ 'components.issues.form.TAGS' | translate }}</label>
+                                                                <p-multiSelect [options]="tagsOptions" [(ngModel)]="editModel.tag_select" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-multiSelect>
+                                                                <small class="text-xs text-surface-500">{{ 'components.issues.form.OR_ADD' | translate }}</small>
+                                                                <p-chips [(ngModel)]="editModel.tags_custom"></p-chips>
+                                                            </div>
+
+                                    <div class="flex justify-end gap-2 mt-4">
+                                        <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="displayDialog=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="loading"></p-button>
+                                        <p-button label="{{ 'MENU.SAVE' | translate }}" (onClick)="saveIssue()" severity="primary" icon="pi pi-check" iconPos="left" [loading]="loading" [disabled]="loading"></p-button>
+                                    </div>
+                                </div>
+                            </p-dialog>
 
                 <div class="flex flex-col gap-4">
                     <div class="border-t border-surface-200 dark:border-surface-700"></div>
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex items-center gap-4 flex-1">
-                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">Status</div>
+                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">{{ 'components.issues.detail.STATUS' | translate }}</div>
                                 <div class="flex-1">
-                                    <p-tag [value]="issue?.status_name " severity="warn"></p-tag>
+                                    <p-tag [value]="issue?.status_name" [severity]="statusSeverity(issue?.status_code)"></p-tag>
                                 </div>
                         </div>
                         
@@ -24,9 +127,9 @@
                     <div class="border-t border-surface-200 dark:border-surface-700"></div>
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex items-center gap-4 flex-1">
-                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">Priority</div>
+                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">{{ 'components.issues.detail.PRIORITY' | translate }}</div>
                                 <div class="flex-1">
-                                    <p-tag [value]="issue?.priority_text " severity="warn"></p-tag>
+                                    <p-tag [value]="issue?.priority_text" [severity]="prioritySeverity(issue?.priority)"></p-tag>
                                 </div>
                         </div>
                         
@@ -35,7 +138,7 @@
                     <div class="border-t border-surface-200 dark:border-surface-700"></div>
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex items-center gap-4 flex-1">
-                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">Type</div>
+                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">{{ 'components.issues.detail.TYPE' | translate }}</div>
                             <div class="flex-1 text-surface-900 dark:text-surface-0 text-base leading-tight">{{ issue?.type_name || issue?.type || '-' }}</div>
                         </div>
                         
@@ -45,7 +148,7 @@
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex items-center gap-4 flex-1">
-                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">Project</div>
+                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">{{ 'components.issues.detail.PROJECT' | translate }}</div>
                             <div class="flex-1 text-surface-900 dark:text-surface-0 text-base leading-tight">{{ issue?.project_name || '-' }}</div>
                         </div>
                         
@@ -55,11 +158,22 @@
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex items-center gap-4 flex-1">
-                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">Author</div>
-                            <div class="flex-1 flex items-center gap-3">
-                                <p-avatar [image]="issue?.author_avatar_url" [label]="personInitials(issue?.author_name)" styleClass="mr-2"></p-avatar>
-                                <div class="text-surface-900 dark:text-surface-0 text-base leading-tight">{{ issue?.author_name }}</div>
-                            </div>
+                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">{{ 'components.issues.detail.AUTHOR' | translate }}</div>
+                                                    <div class="flex-1 flex items-center gap-3">
+                                                                    <p-avatar *ngIf="issue?.author_avatar_url || issue?.author_avatar; else authorInitialsTpl"
+                                                                        [image]="issue?.author_avatar_url || issue?.author_avatar"
+                                            
+                                                                        shape="circle"></p-avatar>
+                                                                    <ng-template #authorInitialsTpl>
+                                                                        <p-avatar
+                                                                            [label]="personInitials(issue?.author_name)"
+                                                                            styleClass="mr-2"
+                                                                            shape="circle"
+                                                                            [style.background]="issue?.author_id ? issueAvatarColor({ id: issue.author_id, first_name: issue.author_name }) : undefined"
+                                                                            [style.color]="issue?.author_id ? issueAvatarTextColor({ id: issue.author_id, first_name: issue.author_name }) : undefined"></p-avatar>
+                                                                    </ng-template>
+                                                                    <div class="text-surface-900 dark:text-surface-0 text-base leading-tight">{{ formatSurnameInitials(issue?.author_name || issue) }}</div>
+                                                            </div>
                         </div>
                         
                     </div>
@@ -68,8 +182,22 @@
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex items-start gap-4 flex-1">
-                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">Assigne To</div>
-                            <div class="flex-1 text-surface-900 dark:text-surface-0 text-base leading-normal"> {{issue?.assignee_name}}</div>
+                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">{{ 'components.issues.detail.ASSIGNEE' | translate }}</div>
+                                                        <div class="flex-1 flex items-center gap-3">
+                                                                <p-avatar *ngIf="issue?.assignee_avatar_url || issue?.assignee_avatar; else assigneeInitialsTpl"
+                                                                    [image]="issue?.assignee_avatar_url || issue?.assignee_avatar"
+                                                                    
+                                                                    shape="circle"></p-avatar>
+                                                                <ng-template #assigneeInitialsTpl>
+                                                                    <p-avatar
+                                                                        [label]="assigneeInitials()"
+                                                                        styleClass="mr-2"
+                                                                        shape="circle"
+                                                                        [style.background]="issue?.assignee_id ? issueAvatarColor({ id: issue.assignee_id, first_name: issue.assignee_name }) : undefined"
+                                                                        [style.color]="issue?.assignee_id ? issueAvatarTextColor({ id: issue.assignee_id, first_name: issue.assignee_name }) : undefined"></p-avatar>
+                                                                </ng-template>
+                                                                <div class="text-surface-900 dark:text-surface-0 text-base leading-normal">{{ formatSurnameInitials(issue?.assignee_name || issue) }}</div>
+                                                        </div>
                         </div>
                         
                     </div>
@@ -77,8 +205,8 @@
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex items-start gap-4 flex-1">
-                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">Due date</div>
-                            <div class="flex-1 text-surface-900 dark:text-surface-0 text-base leading-normal"> {{issue?.due_date | date:'medium'}}</div>
+                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">{{ 'components.issues.detail.DUE_DATE' | translate }}</div>
+                            <div class="flex-1 text-surface-900 dark:text-surface-0 text-base leading-normal"> {{issue?.due_date | date:'dd.MM.yyyy'}}</div>
                         </div>
                         
                     </div>
@@ -86,11 +214,11 @@
                     <div class="border-t border-surface-200 dark:border-surface-700"></div>
                                         <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex items-center gap-4 flex-1">
-                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">Tags</div>
+                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">{{ 'components.issues.detail.TAGS' | translate }}</div>
                             <div class="flex-1 flex flex-wrap gap-2">
-                                <p-tag value="Crime" severity="info"></p-tag>
+                                <!-- <p-tag value="Crime" severity="info"></p-tag>
                                 <p-tag value="Drama" severity="info"></p-tag>
-                                <p-tag value="Thriller" severity="info"></p-tag>
+                                <p-tag value="Thriller" severity="info"></p-tag> -->
                             </div>
                         </div>
                         
@@ -99,7 +227,7 @@
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex items-start gap-4 flex-1">
-                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">Estimated hours</div>
+                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">{{ 'components.issues.detail.ESTIMATED_HOURS' | translate }}</div>
                             <div class="flex-1 text-surface-900 dark:text-surface-0 text-base leading-normal"> {{issue?.estimated_hours}}</div>
                         </div>
                         
@@ -108,7 +236,7 @@
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex items-start gap-4 flex-1">
-                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight"> Timesheeting</div>
+                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">{{ 'components.issues.detail.TIMESHEETING' | translate }}</div>
                             <div class="flex-1 text-surface-900 dark:text-surface-0 text-base leading-normal"> ???</div>
                         </div>
                         
@@ -117,8 +245,8 @@
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex items-start gap-4 flex-1">
-                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">Created At</div>
-                            <div class="flex-1 text-surface-900 dark:text-surface-0 text-base leading-normal"> {{issue?.created_at | date:'medium'}}</div>
+                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">{{ 'components.issues.detail.CREATED_AT' | translate }}</div>
+                            <div class="flex-1 text-surface-900 dark:text-surface-0 text-base leading-normal"> {{issue?.created_at | date:'dd.MM.yyyy'}}</div>
                         </div>
                         
                     </div>
@@ -126,8 +254,8 @@
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex items-start gap-4 flex-1">
-                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">Updated At</div>
-                            <div class="flex-1 text-surface-900 dark:text-surface-0 text-base leading-normal"> {{issue?.Updated}}</div>
+                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">{{ 'components.issues.detail.UPDATED_AT' | translate }}</div>
+                            <div class="flex-1 text-surface-900 dark:text-surface-0 text-base leading-normal"> {{issue?.updated_at | date:'dd.MM.yyyy'}}</div>
                         </div>
                         
                     </div>
@@ -156,13 +284,13 @@
                     <ng-template #end>
                         
                         <!-- Copy issue -->
-                        <p-button severity="secondary" icon="pi pi-copy" class="ml-2"  (click)="$event"></p-button>
+                        <p-button severity="secondary" icon="pi pi-copy" class="ml-2" [disabled]="true"></p-button>
 
                         <!-- Timesheet / Log time -->
-                        <p-button severity="secondary" icon="pi pi-clock" class="ml-2"  (click)="$event"></p-button>
+                        <p-button severity="secondary" icon="pi pi-clock" class="ml-2" [disabled]="true"></p-button>
 
                         <!-- Delete issue -->
-                        <p-button severity="danger" icon="pi pi-trash" class="ml-2"   (click)="$event"></p-button>
+                        <p-button severity="danger" icon="pi pi-trash" class="ml-2" [disabled]="true"></p-button>
                     </ng-template>
                 </p-toolbar>
     </section>

@@ -168,22 +168,33 @@
                             <ng-container *ngSwitchCase="'title'">{{ issue.title || '-' }}</ng-container>
                             <ng-container *ngSwitchCase="'assignee_name'">
                                 <div class="flex items-center gap-2">
-                                    <p-avatar [image]="issue.assignee_avatar || issue.assignee_avatar_url"
-                                              [label]="initialsFromName(issue.assignee_name)"
-                                              [style]="{ 'background-color': issue.assignee_id ? issueAvatarColor({ id: issue.assignee_id, first_name: issue.assignee_name }) : undefined, color: issue.assignee_id ? issueAvatarTextColor({ id: issue.assignee_id, first_name: issue.assignee_name }) : undefined }"
-                                              styleClass="mr-2">
-                                    </p-avatar>
-                                    <span>{{ issue.assignee_name || '-' }}</span>
+                                            <ng-container *ngIf="issue.assignee_avatar || issue.assignee_avatar_url; else assigneeInitials">
+                                                <p-avatar [image]="issue.assignee_avatar || issue.assignee_avatar_url" class="mr-2" shape="circle" >
+                                                </p-avatar>
+                                            </ng-container>
+                                            <ng-template #assigneeInitials>
+                                                <div class="user-avatar user-avatar-initials mr-2"
+                                                     [style.background]="issue.assignee_id ? issueAvatarColor({ id: issue.assignee_id, first_name: issue.assignee_name }) : undefined"
+                                                     [style.color]="issue.assignee_id ? issueAvatarTextColor({ id: issue.assignee_id, first_name: issue.assignee_name }) : undefined">
+                                                    {{ initialsFromName(issue.assignee_name) }}
+                                                </div>
+                                            </ng-template>
+                                            <span>{{ formatSurnameInitials(issue.assignee_name || issue) }}</span>
                                 </div>
                             </ng-container>
                             <ng-container *ngSwitchCase="'author_name'">
                                 <div class="flex items-center gap-2">
-                                    <p-avatar [image]="issue.author_avatar || issue.author_avatar_url"
-                                              [label]="initialsFromName(issue.author_name)"
-                                              [style]="{ 'background-color': issue.author_id ? issueAvatarColor({ id: issue.author_id, first_name: issue.author_name }) : undefined, color: issue.author_id ? issueAvatarTextColor({ id: issue.author_id, first_name: issue.author_name }) : undefined }"
-                                              styleClass="mr-2">
-                                    </p-avatar>
-                                    <span>{{ issue.author_name || '-' }}</span>
+                                    <ng-container *ngIf="issue.author_avatar || issue.author_avatar_url; else authorInitials">
+                                        <p-avatar [image]="issue.author_avatar || issue.author_avatar_url" class="mr-2" shape="circle"></p-avatar>
+                                    </ng-container>
+                                    <ng-template #authorInitials>
+                                        <div class="user-avatar user-avatar-initials mr-2"
+                                             [style.background]="issue.author_id ? issueAvatarColor({ id: issue.author_id, first_name: issue.author_name }) : undefined"
+                                             [style.color]="issue.author_id ? issueAvatarTextColor({ id: issue.author_id, first_name: issue.author_name }) : undefined">
+                                            {{ initialsFromName(issue.author_name) }}
+                                        </div>
+                                    </ng-template>
+                                    <span>{{ formatSurnameInitials(issue.author_name || issue) }}</span>
                                 </div>
                             </ng-container>
                             <ng-container *ngSwitchCase="'status_name'">
@@ -191,9 +202,9 @@
                             </ng-container>
                             <ng-container *ngSwitchCase="'priority_text'">{{ issue.priority_text || (issue.priority || '-') }}</ng-container>
                             <ng-container *ngSwitchCase="'estimated_hours'">{{ issue.estimated_hours || '-' }}</ng-container>
-                            <ng-container *ngSwitchCase="'start_date'">{{ issue.start_date ? (issue.start_date | date:'short') : '-' }}</ng-container>
-                            <ng-container *ngSwitchCase="'due_date'">{{ issue.due_date ? (issue.due_date | date:'short') : '-' }}</ng-container>
-                            <ng-container *ngSwitchCase="'created_at'">{{ issue.created_at ? (issue.created_at | date:'short') : '-' }}</ng-container>
+                            <ng-container *ngSwitchCase="'start_date'">{{ issue.start_date ? (issue.start_date | date:'dd.MM.yyyy') : '-' }}</ng-container>
+                            <ng-container *ngSwitchCase="'due_date'">{{ issue.due_date ? (issue.due_date | date:'dd.MM.yyyy') : '-' }}</ng-container>
+                            <ng-container *ngSwitchCase="'created_at'">{{ issue.created_at ? (issue.created_at | date:'dd.MM.yyyy') : '-' }}</ng-container>
                             <ng-container *ngSwitchDefault>{{ issue[col.field] }}</ng-container>
                         </ng-container>
                     </td>
@@ -228,11 +239,22 @@
             <div class="flex gap-2">
                 <div class="flex-1 flex flex-col gap-2">
                     <label for="projectId" class="font-bold">{{ 'components.issues.form.PROJECT' | translate }}</label>
-                    <p-select id="projectId" [options]="projectOptions" [(ngModel)]="editModel.project_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body"></p-select>
+                    <p-select id="projectId" [options]="projectOptions" [(ngModel)]="editModel.project_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body">
+                        <ng-template let-opt pTemplate="item">
+                            <div class="flex items-center gap-2">
+                                <div>{{ opt.label }}</div>
+                            </div>
+                        </ng-template>
+                        <ng-template let-opt pTemplate="value">
+                            <div class="flex items-center gap-2">
+                                <div>{{ opt.label }}</div>
+                            </div>
+                        </ng-template>
+                    </p-select>
                     <small *ngIf="formErrors.project_id" class="text-red-600 block">{{ formErrors.project_id }}</small>
                 </div>
 
-                <div class="w-40 flex flex-col gap-2">
+                <div class="w-60 flex flex-col gap-2">
                     <label for="typeId" class="font-bold">{{ 'components.issues.form.TYPE' | translate }}</label>
                     <p-select id="typeId" [options]="typeOptions" [(ngModel)]="editModel.type_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
                 </div>
@@ -283,6 +305,23 @@
                 <label for="priority" class="font-bold">{{ 'components.issues.form.PRIORITY' | translate }}</label>
                 <p-select id="priority" [options]="priorityOptions" [(ngModel)]="editModel.priority" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
             </div>
+
+                        <div class="flex gap-2 mt-2">
+                            <div class="flex-1 flex flex-col gap-2">
+                                <label class="font-bold">{{ 'components.issues.form.DUE_DATE' | translate }}</label>
+                                <p-datepicker [(ngModel)]="editModel.due_date" [showIcon]="true"></p-datepicker>
+                            </div>
+
+                            <div class="w-60 flex flex-col gap-2">
+                                <label class="font-bold">{{ 'components.issues.form.ESTIMATED_HOURS' | translate }}</label>
+                                <input pInputText type="number" step="0.1" [(ngModel)]="editModel.estimated_hours" />
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-2 mt-2">
+                            <label class="font-bold">{{ 'components.issues.form.TAGS' | translate }}</label>
+                            <p-chips [(ngModel)]="editModel.tags"></p-chips>
+                        </div>
 
         <div class="flex justify-end gap-2 mt-4">
             <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="displayDialog=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="loading"></p-button>
