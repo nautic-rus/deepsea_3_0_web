@@ -380,9 +380,13 @@
     ,
     "issues": {
       "filters": {
-        "IS_CLOSED": "Closed",
+        "IS_CLOSED": "Activity",
         "IS_ACTIVE": "Active",
         "PROJECT_ID": "Project",
+        "IS_CLOSED_OPEN": "Open",
+        "IS_CLOSED_CLOSED": "Closed",
+        "MY_ISSUE": "My issues",
+        "MY_ISSUE_ONLY": "Only mine",
         "STATUS_ID": "Status",
         "ASSIGNEE_ID": "Assignee",
         "AUTHOR_ID": "Author",
@@ -432,9 +436,10 @@
         "NO_IDS": "No valid issue ids selected"
       },
     "table": {
-          "SEARCH": "Search...",
-          "PROJECT": "Project",
-          "TITLE": "Title",
+      "SEARCH": "Search...",
+      "PROJECT": "Project",
+      "TITLE": "Title",
+      "TYPE": "Type",
           "ASSIGNEE": "Assignee",
           "AUTHOR": "Author",
           "STATUS": "Status",
@@ -487,7 +492,15 @@
         "COLUMN_NAME": "Name",
         "COLUMN_STATUS": "Status",
         "COLUMN_TYPE": "Type",
-        "DELETE_CONFIRM": "Delete this relation?",
+        "DELETE_CONFIRM": "Delete relation \"{{name}}\"?",
+        "TYPE_OPTIONS": {
+          "RELATES": "Relates",
+          "BLOCKS": "Blocks"
+        },
+        "TYPE_DESCRIPTIONS": {
+          "RELATES": "Indicates this issue is related to the target (no blocking).",
+          "BLOCKS": "Indicates this issue blocks the target; the target cannot progress until this is resolved."
+        },
         "ACTION_DELETE": "Delete"
       },
       "CHANGE_STATUS": "Change status",
@@ -509,6 +522,7 @@
         "COLUMN_UPLOADED": "Uploaded",
         "CHOOSE": "Choose",
         "UPLOAD": "Upload",
+        "DELETE_CONFIRM": "Delete file \"{{name}}\"?",
         "CANCEL": "Cancel"
       },
       "messages": {

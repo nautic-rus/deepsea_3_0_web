@@ -1,10 +1,10 @@
 <section class="admin-subpage-tools card">
 <p-toolbar >
   <ng-template #start>
-    <p-button [label]="'MENU.CREATE_ISSUE' | translate" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNewIssue()" />
+    <p-button [label]="'MENU.CREATE_ISSUE' | translate" icon="pi pi-plus" severity="primary" class="mr-2" (onClick)="openNewIssue()" />
       <!-- <p-button severity="secondary" [label]="'MENU.DELETE' | translate" icon="pi pi-trash" outlined (onClick)="deleteSelectedIssues()" [disabled]="!selectedIssues || !selectedIssues.length" /> -->
+      <p-button severity="warn" icon="pi pi-filter" class="ml-2" (onClick)="openQueryDialog()" />
       <p-button severity="secondary" icon="pi pi-pencil" class="ml-2" (onClick)="openBulkEditDialog()" [disabled]="!selectedIssues || !selectedIssues.length" />
-      <p-button severity="secondary" icon="pi pi-filter" class="ml-2" (onClick)="openQueryDialog()" />
   </ng-template>
 
   <ng-template #end>
@@ -128,6 +128,21 @@
                                         </ng-template>
                                     </p-columnFilter>
                                 </ng-container>
+                                <ng-container *ngSwitchCase="'type_name'">
+                                    <p-columnFilter field="type_name" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
+                                        <ng-template #filter let-value let-filter="filterCallback">
+                                            <p-multiselect [ngModel]="value"
+                                                           [options]="typeOptions"
+                                                           optionLabel="label"
+                                                           optionValue="label"
+                                                           placeholder="{{ 'MENU.ANY' | translate }}"
+                                                           (onChange)="filter($event.value)"
+                                                           styleClass="w-full"
+                                                           appendTo="body">
+                                            </p-multiselect>
+                                        </ng-template>
+                                    </p-columnFilter>
+                                </ng-container>
                                 <ng-container *ngSwitchCase="'priority_text'">
                                     <p-columnFilter field="priority_text" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
                                         <ng-template #filter let-value let-filter="filterCallback">
@@ -164,8 +179,9 @@
                     <td *ngIf="isColumnVisible(col.field)" [attr.data-field]="col.field">
                         <ng-container [ngSwitch]="col.field">
                             <ng-container *ngSwitchCase="'id'">{{ issue.id }}</ng-container>
-                            <ng-container *ngSwitchCase="'project_name'">{{ issue.project_name || '-' }}</ng-container>
+                            <ng-container *ngSwitchCase="'project_name'">{{ projectCode(issue) || '-' }}</ng-container>
                             <ng-container *ngSwitchCase="'title'">{{ issue.title || '-' }}</ng-container>
+                            <ng-container *ngSwitchCase="'type_name'">{{ issue.type_name || '-' }}</ng-container>
                             <ng-container *ngSwitchCase="'assignee_name'">
                                 <div class="flex items-center gap-2">
                                             <ng-container *ngIf="issue.assignee_avatar || issue.assignee_avatar_url; else assigneeInitials">
@@ -333,17 +349,17 @@
 </p-dialog>
 
 <!-- Query dialog (two-column layout) -->
-<p-dialog header="{{ 'MENU.QUERY' | translate }}" [(visible)]="queryDialogVisible" [modal]="true" [appendTo]="'body'" [resizable]="false" [style]="{ width: '50%' }">
-    <div class="p-fluid card">
-            <div class="grid grid-cols-2 gap-4">
-            <div class="flex items-center gap-3">
-                <p-checkbox inputId="isClosed" [(ngModel)]="filters.is_closed" [binary]="true"></p-checkbox>
-                <label for="isClosed" class="ml-2 font-bold">{{ 'components.issues.filters.IS_CLOSED' | translate }}</label>
+<p-dialog header="{{ 'MENU.QUERY' | translate }}" [(visible)]="queryDialogVisible" [modal]="true" [appendTo]="'body'" [resizable]="false" [style]="{ width: '40%' }">
+    <div class="flex flex-col gap-4">
+        <div class="mb-4">
+                <p-checkbox inputId="myIssue" [binary]="true" [(ngModel)]="myIssueModel"></p-checkbox>
+                <label for="myIssue" class="ml-2 ">{{ 'components.issues.filters.MY_ISSUE' | translate }}</label>
             </div>
-
-            <div class="flex items-center gap-3">
-                <p-checkbox inputId="isActive" [(ngModel)]="filters.is_active" [binary]="true"></p-checkbox>
-                <label for="isActive" class="ml-2 font-bold">{{ 'components.issues.filters.IS_ACTIVE' | translate }}</label>
+            <div class="grid grid-cols-2 gap-4">
+            
+            <div class="flex flex-col gap-2">
+                <label class="font-bold" for="isClosed">{{ 'components.issues.filters.IS_CLOSED' | translate }}</label>
+                <p-select id="isClosed" [options]="isClosedOptions" [(ngModel)]="filters.is_closed" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
             </div>
 
             <div class="flex flex-col gap-2">
@@ -420,19 +436,20 @@
     </div>
 </p-dialog>
 
-<!-- Bulk edit dialog -->
+<!-- Bulk edit dialog (styled like create/edit form) -->
 <p-dialog header="{{ 'MENU.BULK_EDIT' | translate }}" [(visible)]="bulkEditDialogVisible" [modal]="true" [appendTo]="'body'" [resizable]="false" [style]="{ width: '40%' }">
-    <div class="p-fluid card">
+    <div class="flex flex-col gap-4">
         <div class="mb-3">
             <strong>{{ selectedIssues.length || 0 }}</strong> {{ 'components.issues.bulk.SELECTED' | translate }}
         </div>
 
-        <div class="flex flex-col gap-3">
-            <div>
+        <div class="grid grid-cols-2 gap-4">
+            <div class="flex flex-col gap-2">
                 <label class="font-bold">{{ 'components.issues.bulk.STATUS' | translate }}</label>
                 <p-select [options]="statusOptions" [(ngModel)]="bulkEditModel.status_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
             </div>
-            <div>
+
+            <div class="flex flex-col gap-2">
                 <label class="font-bold">{{ 'components.issues.bulk.ASSIGNEE' | translate }}</label>
                 <p-select [options]="usersOptions" [(ngModel)]="bulkEditModel.assignee_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body">
                     <ng-template let-opt pTemplate="item">
@@ -448,6 +465,31 @@
                         </div>
                     </ng-template>
                 </p-select>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="font-bold">{{ 'components.issues.form.PROJECT' | translate }}</label>
+                <p-select [options]="projectOptions" [(ngModel)]="bulkEditModel.project_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="font-bold">{{ 'components.issues.form.TYPE' | translate }}</label>
+                <p-select [options]="typeOptions" [(ngModel)]="bulkEditModel.type_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="font-bold">{{ 'components.issues.form.PRIORITY' | translate }}</label>
+                <p-select [options]="priorityOptions" [(ngModel)]="bulkEditModel.priority" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="font-bold">{{ 'components.issues.form.DUE_DATE' | translate }}</label>
+                <p-datepicker [(ngModel)]="bulkEditModel.due_date" [showIcon]="true" appendTo="body"></p-datepicker>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="font-bold">{{ 'components.issues.form.ESTIMATED_HOURS' | translate }}</label>
+                <input pInputText type="number" step="0.1" [(ngModel)]="bulkEditModel.estimated_hours" />
             </div>
         </div>
 

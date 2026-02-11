@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FileUploadModule, FileUpload } from 'primeng/fileupload';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { ConfirmationService } from 'primeng/api';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { HttpEventType } from '@angular/common/http';
 import { FileService } from '../../services/file.service';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 interface UploadEvent {
   originalEvent?: any;
@@ -17,54 +19,67 @@ interface UploadEvent {
 @Component({
   selector: 'app-issue-detail-attach',
   standalone: true,
-  imports: [CommonModule, FileUploadModule, ToastModule, TranslateModule, ButtonModule, TableModule],
-  providers: [MessageService],
+  imports: [CommonModule, FileUploadModule, ToastModule, TranslateModule, ButtonModule, TableModule, ConfirmDialogModule],
+  providers: [MessageService, ConfirmationService],
   template: `
     <section class="admin-subpage-attachments card ">
       <div class="flex items-center justify-between mt-0 mb-2">
           <h4 class="mb-">{{ 'components.issues.detail.ATTACHE' | translate }}</h4>
         </div>
       <p-toast></p-toast>
+  <p-confirmDialog appendTo="body"
+           [style]="{ width: '25%' }"
+           styleClass="project-confirm-dialog"
+           header="{{ 'MENU.CONFIRM' | translate }}"
+           acceptLabel="{{ 'MENU.DELETE' | translate }}"
+           rejectLabel="{{ 'MENU.CANCEL' | translate }}"
+           acceptIcon="pi pi-check"
+           acceptButtonStyleClass="p-button-danger"
+           rejectButtonStyleClass="secondary p-button-text"
+           rejectIcon="pi pi-times">
+  </p-confirmDialog>
 
       <div *ngIf="!attachments || !attachments.length" class="text-surface-500">{{ 'components.issues.attach.NO_ATTACHMENTS' | translate }}</div>
 
       <p-table *ngIf="attachments && attachments.length" [value]="attachments" class="w-full" size="small">
-        <ng-template pTemplate="header">
+        <!-- <ng-template pTemplate="header">
           <tr>
-            <th>{{ 'components.issues.attach.COLUMN_NAME' | translate }}</th>
-            <th>{{ 'components.issues.attach.COLUMN_SIZE' | translate }}</th>
-            <th>{{ 'components.issues.attach.COLUMN_UPLOADED' | translate }}</th>
-            <th></th>
+            <th class="col-w-16rem">{{ 'components.issues.attach.COLUMN_NAME' | translate }}</th>
+            <th class="col-w-6rem">{{ 'components.issues.attach.COLUMN_SIZE' | translate }}</th>
+            <th class="col-w-8rem">{{ 'components.issues.attach.COLUMN_UPLOADED' | translate }}</th>
+            <th class="col-w-6rem"></th>
           </tr>
-        </ng-template>
+        </ng-template> -->
         <ng-template pTemplate="body" let-a>
           <tr>
-            <td>
+            <td class="col-w-18rem">
               <a *ngIf="a.url" [href]="a.url" target="_blank" rel="noopener" class="text-blue-600 dark:text-blue-400 hover:underline">{{ a.name }}</a>
               <span *ngIf="!a.url">{{ a.name }}</span>
             </td>
-            <td>
-              <span class="text-sm text-surface-500">{{ a.size ? (a.size | number) + ' bytes' : '-' }}</span>
+            <td class="col-w-6rem">
+              <span class="text-sm text-surface-500">{{ a.size_mb ? (a.size_mb | number:'1.2-2') + ' MB' : (a.size ? (a.size | number) + ' bytes' : '-') }}</span>
             </td>
-            <td>
+            <td class="col-w-8rem">
               <span class="text-sm text-surface-500">{{ (a.created_at || a.createdAt) ? ((a.created_at || a.createdAt) | date:'short') : '-' }}</span>
             </td>
-            <td class="text-right">
-              <p-button icon="pi pi-download" class="mr-2" (click)="downloadFile(a)"></p-button>
-              <p-button icon="pi pi-trash" severity="danger" (click)="removeFile(a)"></p-button>
+            <td class="text-right col-w-6rem">
+              <p-button icon="pi pi-download" class="mr-2" (click)="downloadFile(a)" [outlined]="true"></p-button>
+            <p-button icon="pi pi-trash" severity="danger" (click)="removeFile(a)" [outlined]="true"></p-button>
             </td>
           </tr>
         </ng-template>
       </p-table>
 
-      <div class="mt-3">
+      <div class="mt-6">
         
   <p-fileupload #fileUpload name="files[]" (uploadHandler)="onUpload($event)" (onSelect)="onSelect($event)" [multiple]="true" [maxFileSize]="maxFileSize" [customUpload]="true" mode="advanced"
           [chooseLabel]="'components.issues.attach.CHOOSE' | translate"
           [uploadLabel]="'components.issues.attach.UPLOAD' | translate"
           [cancelLabel]="'components.issues.attach.CANCEL' | translate">
           <ng-template #empty>
-            <div>{{ 'components.issues.attach.DRAG_DROP' | translate }}</div>
+            <div class="drop-area" tabindex="0" (click)="openFileDialog()" (keydown.enter)="openFileDialog()">
+              {{ 'components.issues.attach.DRAG_DROP' | translate }}
+            </div>
           </ng-template>
         </p-fileupload>
       </div>
@@ -80,6 +95,7 @@ export class IssueDetailAttachComponent implements OnChanges {
   private messageService = inject(MessageService);
   private translate = inject(TranslateService);
   private fileService = inject(FileService);
+  private confirmationService = inject(ConfirmationService);
   uploadedFiles: any[] = [];
   // 100 MB limit
   maxFileSize = 100 * 1024 * 1024;
@@ -157,7 +173,7 @@ export class IssueDetailAttachComponent implements OnChanges {
                   const url = id ? this.fileService.downloadUrlForId(id) : (storage.url ?? storage.download_url ?? storage.path ?? null);
 
                   // add storage ref to attachments locally
-                  this.attachments.push({ name, size, id, url });
+                  // this.attachments.push({ name, size, id, url });
                   if (this.issue) this.issue.attachments = this.attachments;
 
                   const issueId = this.issue && (this.issue.id ?? this.issue._id ?? this.issue.issue_id) ? (this.issue.id ?? this.issue._id ?? this.issue.issue_id) : null;
@@ -227,6 +243,15 @@ export class IssueDetailAttachComponent implements OnChanges {
     }
   }
 
+  /** Open native file chooser by delegating to PrimeNG FileUpload choose() */
+  openFileDialog(): void {
+    try {
+      this.fileUpload?.choose();
+    } catch (e) {
+      // ignore if not available
+    }
+  }
+
   // helper to format bytes if needed elsewhere
   formatBytes(bytes: number): string {
     if (!bytes) return '0 B';
@@ -240,26 +265,33 @@ export class IssueDetailAttachComponent implements OnChanges {
       if (!file) return;
       const storageId = file.id ?? file.storage_id ?? null;
       const issueId = this.issue && (this.issue.id ?? this.issue._id ?? this.issue.issue_id) ? (this.issue.id ?? this.issue._id ?? this.issue.issue_id) : null;
-      if (!storageId || !issueId) {
-        // cannot remove server-side; just remove locally
-        this.attachments = (this.attachments || []).filter(a => a !== file && a.id !== storageId);
-        if (this.issue) this.issue.attachments = this.attachments;
-        return;
-      }
-      if (!confirm(this.translate.instant('components.issues.attach.DELETE_CONFIRM') || 'Delete this file?')) return;
-      this.isLoading = true;
-      this.fileService.deleteIssueFile(issueId, storageId).subscribe({
-        next: () => {
-          try {
-            this.fetchIssueFiles(issueId);
-            try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.issues.messages.SUCCESS'), detail: this.translate.instant('components.issues.messages.SAVED') || 'Deleted' }); } catch (e) {}
-            this.isLoading = false;
-          } catch (e) { console.warn('error refreshing files after delete', e); this.isLoading = false; }
-        },
-        error: (err: any) => {
-          console.warn('Failed to delete attached file', err);
-          this.isLoading = false;
-          try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR'), detail: this.translate.instant('components.issues.messages.UPLOAD_FAILED') || 'Failed' }); } catch (e) {}
+      // Show confirm dialog and proceed with deletion if accepted
+      const fileLabel = file?.name ?? file?.filename ?? file?.title ?? (storageId ? String(storageId) : '');
+      const confirmMessage = this.translate.instant('components.issues.attach.DELETE_CONFIRM', { name: fileLabel }) || `Delete file "${fileLabel}"?`;
+      this.confirmationService.confirm({
+        message: confirmMessage,
+        accept: () => {
+          if (!storageId || !issueId) {
+            // cannot remove server-side; just remove locally
+            this.attachments = (this.attachments || []).filter(a => a !== file && a.id !== storageId);
+            if (this.issue) this.issue.attachments = this.attachments;
+            return;
+          }
+          this.isLoading = true;
+          this.fileService.deleteIssueFile(issueId, storageId).subscribe({
+            next: () => {
+              try {
+                this.fetchIssueFiles(issueId);
+                try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.issues.messages.SUCCESS'), detail: this.translate.instant('components.issues.messages.SAVED') || 'Deleted' }); } catch (e) {}
+                this.isLoading = false;
+              } catch (e) { console.warn('error refreshing files after delete', e); this.isLoading = false; }
+            },
+            error: (err: any) => {
+              console.warn('Failed to delete attached file', err);
+              this.isLoading = false;
+              try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR'), detail: this.translate.instant('components.issues.messages.UPLOAD_FAILED') || 'Failed' }); } catch (e) {}
+            }
+          });
         }
       });
     } catch (e) { console.warn('removeFile error', e); }

@@ -74,8 +74,8 @@
       <td>{{ permission.description || '-' }}</td>
       <td>{{ permission.created_at | date:'short' }}</td>
       <td>
-        <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="openEdit(permission)" />
-        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="confirmDelete(permission)" />
+  <p-button icon="pi pi-pencil" class="mr-2" [outlined]="true" (click)="openEdit(permission)" />
+  <p-button icon="pi pi-trash" severity="danger" [outlined]="true" (click)="confirmDelete(permission)" />
       </td>
     </tr>
   </ng-template>

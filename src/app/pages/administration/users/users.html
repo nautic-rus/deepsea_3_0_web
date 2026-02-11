@@ -163,8 +163,8 @@
               <p-tag [value]="user.is_active ? ('MENU.ACTIVE_YES' | translate) : ('MENU.ACTIVE_NO' | translate)" [severity]="user.is_active ? 'success' : 'danger'"></p-tag>
           </td>
           <td>
-            <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="openEdit(user)" />
-                        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="confirmDelete(user)" />
+            <p-button icon="pi pi-pencil" class="mr-2" [outlined]="true" (click)="openEdit(user)" />
+            <p-button icon="pi pi-trash" severity="danger" [outlined]="true" (click)="confirmDelete(user)" />
           </td>
       </tr>
   </ng-template>

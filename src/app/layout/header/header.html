@@ -19,22 +19,20 @@
         <ng-template #end>
           <div class="flex items-center gap-2">
             <!-- Dark Mode Toggle Button (like Sakai-NG) -->
-            <button pButton pRipple 
-                    [icon]="darkMode ? 'pi pi-moon' : 'pi pi-sun'" 
-                    [rounded]="true" 
-                    [text]="true" 
-                    class="header-icon-button"
-                    (click)="toggleDarkMode()">
-            </button>
+      <button pButton pRipple 
+        [icon]="darkMode ? 'pi pi-moon' : 'pi pi-sun'" 
+        [text]="true" 
+        class="header-icon-button"
+        (click)="toggleDarkMode()">
+      </button>
             <!-- Language toggle -->
             <button pButton pRipple [label]="currentLang.toUpperCase()" class="p-button-text header-lang-button" (click)="toggleLang()"></button>
             
-            <button pButton pRipple 
-                    icon="pi pi-bell" 
-                    [rounded]="true" 
-                    [text]="true" 
-                    class="header-icon-button">
-            </button>
+      <button pButton pRipple 
+        icon="pi pi-bell" 
+        [text]="true" 
+        class="header-icon-button">
+      </button>
             
             <!-- User Avatar with Menu -->
             <p-avatar

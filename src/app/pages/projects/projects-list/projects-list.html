@@ -83,8 +83,8 @@
             <p-tag [value]="p?.status || '—'" [severity]="getSeverity(p?.status)"></p-tag>
           </td>
           <td>
-            <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="openEdit(p)" />
-            <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="confirmDelete(p)" />
+            <p-button icon="pi pi-pencil" class="mr-2" [outlined]="true" (click)="openEdit(p)" />
+            <p-button icon="pi pi-trash" severity="danger" [outlined]="true" (click)="confirmDelete(p)" />
           </td>
         </tr>
       </ng-template>

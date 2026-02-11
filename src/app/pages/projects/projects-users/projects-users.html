@@ -64,7 +64,7 @@
             <td>{{ a?.role_name || a?.role_id || '—' }}</td>
             <td>{{ a?.created_at ? (a.created_at | date:'short') : '—' }}</td>
             <td>
-              <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="confirmDeleteAssignment(a)"></p-button>
+              <p-button icon="pi pi-trash" severity="danger" [outlined]="true" (click)="confirmDeleteAssignment(a)"></p-button>
             </td>
           </tr>
         </ng-template>

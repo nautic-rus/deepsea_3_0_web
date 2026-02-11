@@ -115,7 +115,9 @@
   min-width: 60px;
 }
 .issues-table th[data-field="project_name"],
-.issues-table td[data-field="project_name"] {
+.issues-table td[data-field="project_name"],
+.issues-table th[data-field="type_name"],
+.issues-table td[data-field="type_name"] {
   min-width: 140px;
 }
 .issues-table th[data-field="title"],

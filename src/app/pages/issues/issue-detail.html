@@ -5,7 +5,7 @@
       <div class="admin-menu-header"></div>
                 <div class="flex flex-col gap-2 pb-4">
                     <div class="flex items-center justify-between">
-                        <div class="font-semibold text-xl text-surface-900 dark:text-surface-0 leading-tight">Issue #{{ issue?.id ?? issueId }}</div>
+                        <div class="font-semibold text-xl text-surface-500 dark:text-surface-0 leading-tight">Issue #{{ issue?.id ?? issueId }}</div>
                                     <div>
                                         <p-button severity="secondary" icon="pi pi-pencil" [outlined]="true" (onClick)="openEditDialog()"></p-button>
                                     </div>
@@ -116,7 +116,7 @@
                     <div class="border-t border-surface-200 dark:border-surface-700"></div>
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex items-center gap-4 flex-1">
-                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">{{ 'components.issues.detail.STATUS' | translate }}</div>
+                            <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.issues.detail.STATUS' | translate }}</div>
                                 <div class="flex-1">
                                     <p-tag [value]="issue?.status_name" [severity]="statusSeverity(issue?.status_code)"></p-tag>
                                 </div>
@@ -127,7 +127,7 @@
                     <div class="border-t border-surface-200 dark:border-surface-700"></div>
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex items-center gap-4 flex-1">
-                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">{{ 'components.issues.detail.PRIORITY' | translate }}</div>
+                            <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.issues.detail.PRIORITY' | translate }}</div>
                                 <div class="flex-1">
                                     <p-tag [value]="issue?.priority_text" [severity]="prioritySeverity(issue?.priority)"></p-tag>
                                 </div>
@@ -138,8 +138,8 @@
                     <div class="border-t border-surface-200 dark:border-surface-700"></div>
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex items-center gap-4 flex-1">
-                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">{{ 'components.issues.detail.TYPE' | translate }}</div>
-                            <div class="flex-1 text-surface-900 dark:text-surface-0 text-base leading-tight">{{ issue?.type_name || issue?.type || '-' }}</div>
+                            <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.issues.detail.TYPE' | translate }}</div>
+                            <div class="flex-1 text-surface-500 dark:text-surface-0 text-base leading-tight">{{ issue?.type_name || issue?.type || '-' }}</div>
                         </div>
                         
                     </div>
@@ -148,8 +148,8 @@
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex items-center gap-4 flex-1">
-                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">{{ 'components.issues.detail.PROJECT' | translate }}</div>
-                            <div class="flex-1 text-surface-900 dark:text-surface-0 text-base leading-tight">{{ issue?.project_name || '-' }}</div>
+                            <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.issues.detail.PROJECT' | translate }}</div>
+                            <div class="flex-1 text-surface-500 dark:text-surface-0 text-base leading-tight">{{ issue?.project_name || '-' }}</div>
                         </div>
                         
                     </div>
@@ -158,7 +158,7 @@
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex items-center gap-4 flex-1">
-                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">{{ 'components.issues.detail.AUTHOR' | translate }}</div>
+                            <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.issues.detail.AUTHOR' | translate }}</div>
                                                     <div class="flex-1 flex items-center gap-3">
                                                                     <p-avatar *ngIf="issue?.author_avatar_url || issue?.author_avatar; else authorInitialsTpl"
                                                                         [image]="issue?.author_avatar_url || issue?.author_avatar"
@@ -172,7 +172,7 @@
                                                                             [style.background]="issue?.author_id ? issueAvatarColor({ id: issue.author_id, first_name: issue.author_name }) : undefined"
                                                                             [style.color]="issue?.author_id ? issueAvatarTextColor({ id: issue.author_id, first_name: issue.author_name }) : undefined"></p-avatar>
                                                                     </ng-template>
-                                                                    <div class="text-surface-900 dark:text-surface-0 text-base leading-tight">{{ formatSurnameInitials(issue?.author_name || issue) }}</div>
+                                                                    <div class="text-surface-500 dark:text-surface-0 text-base leading-tight">{{ formatSurnameInitials(issue?.author_name || issue) }}</div>
                                                             </div>
                         </div>
                         
@@ -182,7 +182,7 @@
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex items-start gap-4 flex-1">
-                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">{{ 'components.issues.detail.ASSIGNEE' | translate }}</div>
+                            <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.issues.detail.ASSIGNEE' | translate }}</div>
                                                         <div class="flex-1 flex items-center gap-3">
                                                                 <p-avatar *ngIf="issue?.assignee_avatar_url || issue?.assignee_avatar; else assigneeInitialsTpl"
                                                                     [image]="issue?.assignee_avatar_url || issue?.assignee_avatar"
@@ -195,7 +195,7 @@
                                                                         [style.background]="issue?.assignee_id ? issueAvatarColor({ id: issue.assignee_id, first_name: issue.assignee_name }) : undefined"
                                                                         [style.color]="issue?.assignee_id ? issueAvatarTextColor({ id: issue.assignee_id, first_name: issue.assignee_name }) : undefined"></p-avatar>
                                                                 </ng-template>
-                                                                <div class="text-surface-900 dark:text-surface-0 text-base leading-normal">{{ formatSurnameInitials(issue?.assignee_name || issue) }}</div>
+                                                                <div class="text-surface-500 dark:text-surface-0 text-base leading-normal">{{ formatSurnameInitials(issue?.assignee_name || issue) }}</div>
                                                         </div>
                         </div>
                         
@@ -204,8 +204,8 @@
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex items-start gap-4 flex-1">
-                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">{{ 'components.issues.detail.DUE_DATE' | translate }}</div>
-                            <div class="flex-1 text-surface-900 dark:text-surface-0 text-base leading-normal"> {{issue?.due_date | date:'dd.MM.yyyy'}}</div>
+                            <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.issues.detail.DUE_DATE' | translate }}</div>
+                            <div class="flex-1 text-surface-500 dark:text-surface-0 text-base leading-normal"> {{issue?.due_date | date:'dd.MM.yyyy'}}</div>
                         </div>
                         
                     </div>
@@ -226,8 +226,8 @@
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex items-start gap-4 flex-1">
-                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">{{ 'components.issues.detail.ESTIMATED_HOURS' | translate }}</div>
-                            <div class="flex-1 text-surface-900 dark:text-surface-0 text-base leading-normal"> {{issue?.estimated_hours}}</div>
+                            <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.issues.detail.ESTIMATED_HOURS' | translate }}</div>
+                            <div class="flex-1 text-surface-500 dark:text-surface-0 text-base leading-normal"> {{issue?.estimated_hours}}</div>
                         </div>
                         
                     </div>
@@ -235,8 +235,8 @@
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex items-start gap-4 flex-1">
-                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">{{ 'components.issues.detail.TIMESHEETING' | translate }}</div>
-                            <div class="flex-1 text-surface-900 dark:text-surface-0 text-base leading-normal"> ???</div>
+                            <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.issues.detail.TIMESHEETING' | translate }}</div>
+                            <div class="flex-1 text-surface-500 dark:text-surface-0 text-base leading-normal"> ???</div>
                         </div>
                         
                     </div>
@@ -244,8 +244,8 @@
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex items-start gap-4 flex-1">
-                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">{{ 'components.issues.detail.CREATED_AT' | translate }}</div>
-                            <div class="flex-1 text-surface-900 dark:text-surface-0 text-base leading-normal"> {{issue?.created_at | date:'dd.MM.yyyy'}}</div>
+                            <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.issues.detail.CREATED_AT' | translate }}</div>
+                            <div class="flex-1 text-surface-500 dark:text-surface-0 text-base leading-normal"> {{issue?.created_at | date:'dd.MM.yyyy'}}</div>
                         </div>
                         
                     </div>
@@ -253,8 +253,8 @@
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex items-start gap-4 flex-1">
-                            <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">{{ 'components.issues.detail.UPDATED_AT' | translate }}</div>
-                            <div class="flex-1 text-surface-900 dark:text-surface-0 text-base leading-normal"> {{issue?.updated_at | date:'dd.MM.yyyy'}}</div>
+                            <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.issues.detail.UPDATED_AT' | translate }}</div>
+                            <div class="flex-1 text-surface-500 dark:text-surface-0 text-base leading-normal"> {{issue?.updated_at | date:'dd.MM.yyyy'}}</div>
                         </div>
                         
                     </div>
@@ -284,10 +284,10 @@
                         
                         <p-button  severity="secondary" icon="pi pi-arrow-left" (click)="back()" aria-label="Return to issues"></p-button>
                         <!-- Copy issue -->
-                        <p-button severity="secondary" icon="pi pi-copy" class="ml-2" ></p-button>
+                        <p-button severity="secondary" icon="pi pi-copy" class="ml-2" disabled="true" ></p-button>
 
                         <!-- Timesheet / Log time -->
-                        <p-button severity="secondary" icon="pi pi-clock" class="ml-2" ></p-button>
+                        <p-button severity="secondary" icon="pi pi-clock" class="ml-2" disabled="true"></p-button>
 
                         <!-- Delete issue -->
                         <p-button severity="danger" icon="pi pi-trash" class="ml-2" ></p-button>

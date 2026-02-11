@@ -381,9 +381,13 @@
     ,
     "issues": {
       "filters": {
-        "IS_CLOSED": "Закрыта",
+        "IS_CLOSED": "Активность",
         "IS_ACTIVE": "Активна",
         "PROJECT_ID": "Проект",
+        "IS_CLOSED_OPEN": "Открытые",
+        "IS_CLOSED_CLOSED": "Закрытые",
+        "MY_ISSUE": "Только мои задачи",
+        "MY_ISSUE_ONLY": "Только мои",
         "STATUS_ID": "Статус",
         "ASSIGNEE_ID": "Исполнитель",
         "AUTHOR_ID": "Автор",
@@ -406,9 +410,10 @@
           "FILTERS_APPLY_ERROR": "Не удалось применить фильтры"
       },
     "table": {
-          "SEARCH": "Поиск...",
-          "PROJECT": "Проект",
-          "TITLE": "Название",
+      "SEARCH": "Поиск...",
+      "PROJECT": "Проект",
+      "TITLE": "Название",
+      "TYPE": "Тип",
           "ASSIGNEE": "Исполнитель",
           "AUTHOR": "Автор",
           "STATUS": "Статус",
@@ -488,7 +493,15 @@
         "COLUMN_NAME": "Наименование",
         "COLUMN_STATUS": "Статус",
         "COLUMN_TYPE": "Тип",
-        "DELETE_CONFIRM": "Удалить эту связь?",
+        "DELETE_CONFIRM": "Удалить связь \"{{name}}\"?",
+        "TYPE_OPTIONS": {
+          "RELATES": "Связана",
+          "BLOCKS": "Блокирует"
+        },
+        "TYPE_DESCRIPTIONS": {
+          "RELATES": "Указывает, что эта задача связана с целевой задачей/документом (не блокирует).",
+          "BLOCKS": "Указывает, что эта задача блокирует целевую задачу/документ; целевая задача не может продвигаться, пока эта не будет решена."
+        },
         "ACTION_DELETE": "Удалить"
       },
       "CHANGE_STATUS": "Действия",
@@ -510,6 +523,7 @@
         "COLUMN_UPLOADED": "Загружено",
         "CHOOSE": "Выбрать",
         "UPLOAD": "Загрузить",
+        "DELETE_CONFIRM": "Удалить файл \"{{name}}\"?",
         "CANCEL": "Отменить"
       },
       "messages": {

@@ -5,7 +5,10 @@ import { map, catchError } from 'rxjs/operators';
 
 export interface Attachment {
   name: string;
+  // size in bytes (original) and size_mb (rounded to 2 decimals)
   size: number;
+  size_bytes?: number;
+  size_mb?: number;
   id?: any;
   url?: string | null;
   created_at?: string | null;
@@ -32,16 +35,21 @@ export class FileService {
         if (!Array.isArray(data)) return [];
         return data.map((it: any) => {
           const objectKey: string | undefined = it.object_key || it.objectKey || undefined;
-          let name = it.filename || it.filename_original || it.name || '';
+          // prefer new API fields: file_name and file_size
+          let name = it.file_name || it.filename || it.filename_original || it.name || '';
           if (!name && objectKey) {
             const parts = objectKey.split('/');
             name = parts.length ? parts[parts.length - 1] : objectKey;
           }
           const id = it.id ?? it.storage_id ?? it.file_id ?? null;
           const url = id ? `/api/storage/${id}/download` : (it.url ?? it.download_url ?? null);
+          const sizeBytesRaw = (it.file_size != null) ? (isNaN(Number(it.file_size)) ? parseInt(String(it.file_size), 10) || 0 : Number(it.file_size)) : (it.size != null ? Number(it.size) : 0);
+          const sizeMb = sizeBytesRaw ? Math.round((sizeBytesRaw / (1024 * 1024)) * 100) / 100 : 0;
           return {
             name: name || '',
-            size: it.size != null ? it.size : 0,
+            size: sizeBytesRaw,
+            size_bytes: sizeBytesRaw,
+            size_mb: sizeMb,
             id,
             url,
             created_at: it.created_at ?? it.createdAt ?? null

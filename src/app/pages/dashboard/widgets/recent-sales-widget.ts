@@ -36,7 +36,7 @@ interface Product {
             <td style="width: 35%; min-width: 7rem;">{{ product.name }}</td>
             <td style="width: 35%; min-width: 8rem;">{{ product.price | currency:'USD' }}</td>
             <td style="width: 15%;">
-              <button pButton icon="pi pi-search" type="button" [rounded]="true" [text]="true"></button>
+              <button pButton icon="pi pi-search" type="button" [text]="true"></button>
             </td>
           </tr>
         </ng-template>

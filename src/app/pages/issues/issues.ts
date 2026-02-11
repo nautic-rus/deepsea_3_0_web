@@ -27,6 +27,7 @@ import { MessageService } from 'primeng/api';
 import { UsersService } from '../administration/users/users.service';
 import { IssuesService } from './issues.service';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { lastValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
 import { Select } from 'primeng/select';
 
@@ -100,13 +101,26 @@ export class IssuesComponent implements OnInit {
   formErrors: { title?: string; project_id?: string } = {};
   // query dialog state and filters
   queryDialogVisible = false;
+  // my_issue checkbox backing model (exposed as getter/setter)
+  // not persisted separately; maps to filters.my_issue (true or null)
+  // is_closed select options (All / Open / Closed)
+  isClosedOptions: { label: string; value: any }[] = [];
   // bulk edit dialog state
   bulkEditDialogVisible = false;
-  bulkEditModel: { status_id: any; assignee_id: any } = { status_id: null, assignee_id: null };
+  bulkEditModel: {
+    status_id: any;
+    assignee_id: any;
+    project_id?: any;
+    priority?: any;
+    due_date?: Date | null;
+    estimated_hours?: number | null;
+    type_id?: any;
+  } = { status_id: null, assignee_id: null, project_id: null, priority: null, due_date: null, estimated_hours: null };
   // current form values (bound to dialog inputs)
   filters: any = {
-    is_closed: null as boolean | null,
-    is_active: null as boolean | null,
+    is_closed: false as boolean | null,
+    // default my_issue to true so the 'My issues' checkbox is checked by default
+    my_issue: true as boolean | null,
     project_id: [] as any[],
     status_id: [] as any[],
     assignee_id: [] as any[],
@@ -141,6 +155,7 @@ export class IssuesComponent implements OnInit {
     { field: 'id', headerKey: 'MENU.ID', visible: true },
     { field: 'project_name', headerKey: 'components.issues.table.PROJECT', visible: true },
     { field: 'title', headerKey: 'components.issues.table.TITLE', visible: true },
+  { field: 'type_name', headerKey: 'components.issues.table.TYPE', visible: true },
     { field: 'assignee_name', headerKey: 'components.issues.table.ASSIGNEE', visible: true },
     { field: 'author_name', headerKey: 'components.issues.table.AUTHOR', visible: true },
     { field: 'status_name', headerKey: 'components.issues.table.STATUS', visible: true },
@@ -188,6 +203,29 @@ export class IssuesComponent implements OnInit {
     }
   }
 
+  // Return the project code for an issue. Prefer issue.project_code or issue.project_key if present,
+  // otherwise try to lookup the code from loaded projectOptions using issue.project_id.
+  projectCode(issue: any): string | null {
+    try {
+      if (!issue) return null;
+      const direct = issue.project_code ?? issue.project_key ?? issue.projectCode ?? issue.projectKey;
+      if (direct) return String(direct);
+      const pid = issue.project_id ?? issue.projectId ?? issue.project;
+      if (pid == null) return issue.project_name || null;
+  const found = (this.projectOptions || []).find(p => p && (p.value === pid || String(p.value) === String(pid)));
+  const foundCode = found ? (found as any).code : null;
+  if (foundCode) return foundCode;
+      // fallback: if project_name contains '[CODE] Title' format produced by projectOptions label,
+      // try to extract code in square brackets
+      const pn = issue.project_name || '';
+      const m = pn.match(/^\s*\[([^\]]+)\]\s*/);
+      if (m && m[1]) return m[1];
+      return issue.project_name || null;
+    } catch (e) {
+      return issue && issue.project_name ? String(issue.project_name) : null;
+    }
+  }
+
   private safeDetect(): void {
     try { this.cd.detectChanges(); } catch (e) { console.warn('safeDetect failed', e); }
   }
@@ -200,6 +238,13 @@ export class IssuesComponent implements OnInit {
     this.loadProjects();
     this.loadStatuses();
     this.loadTypes();
+    // init is_closed options: All (-) / Open (false) / Closed (true)
+    this.isClosedOptions = [
+      { label: this.translate.instant('MENU.ANY') || 'All', value: null },
+      { label: this.translate.instant('components.issues.filters.IS_CLOSED_OPEN') || 'Open', value: false },
+      { label: this.translate.instant('components.issues.filters.IS_CLOSED_CLOSED') || 'Closed', value: true }
+    ];
+    // my_issue is represented by a checkbox (true or null) — no options to init
     // initialize localized priority labels
     this.priorityOptions = [
       { label: this.translate.instant('components.issues.priority.HIGH') || 'High', value: 'high' },
@@ -219,8 +264,18 @@ export class IssuesComponent implements OnInit {
       // small timeout to allow other init tasks to settle
       setTimeout(() => this.applyQuery(true), 50);
     }
+    // End of ngOnInit
+  }
 
-    
+  // Add getter/setter mapping for checkbox-backed myIssueModel
+  // maps to filters.my_issue (true or null)
+  public get myIssueModel(): boolean {
+    return this.filters.my_issue === true;
+  }
+
+  public set myIssueModel(v: boolean) {
+    this.filters.my_issue = v ? true : null;
+    this.safeDetect();
   }
 
   isColumnVisible(field: string): boolean {
@@ -405,7 +460,7 @@ export class IssuesComponent implements OnInit {
       return;
     }
     // reset model
-    this.bulkEditModel = { status_id: null, assignee_id: null };
+    this.bulkEditModel = { status_id: null, assignee_id: null, project_id: null, priority: null, due_date: null, estimated_hours: null, type_id: null };
     this.bulkEditDialogVisible = true;
   }
 
@@ -413,7 +468,7 @@ export class IssuesComponent implements OnInit {
     this.bulkEditDialogVisible = false;
   }
 
-  applyBulkEdit(): void {
+  async applyBulkEdit(): Promise<void> {
     if (!this.selectedIssues || !this.selectedIssues.length) {
       try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.issues.bulk.NO_SELECTION') || 'No issues selected' }); } catch (e) {}
       return;
@@ -423,32 +478,45 @@ export class IssuesComponent implements OnInit {
       try { this.messageService.add({ severity: 'warn', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.issues.bulk.NO_IDS') || 'No valid issue ids selected' }); } catch (e) {}
       return;
     }
+    // prepare fields to apply
+    const fields: any = {};
+    if (this.bulkEditModel.status_id !== null && this.bulkEditModel.status_id !== undefined) fields.status_id = this.bulkEditModel.status_id;
+    if (this.bulkEditModel.assignee_id !== null && this.bulkEditModel.assignee_id !== undefined) fields.assignee_id = this.bulkEditModel.assignee_id;
+    if (this.bulkEditModel.project_id !== null && this.bulkEditModel.project_id !== undefined) fields.project_id = this.bulkEditModel.project_id;
+  if (this.bulkEditModel.type_id !== null && this.bulkEditModel.type_id !== undefined) fields.type_id = this.bulkEditModel.type_id;
+    if (this.bulkEditModel.priority !== null && this.bulkEditModel.priority !== undefined) fields.priority = this.bulkEditModel.priority;
+    if (this.bulkEditModel.estimated_hours !== null && this.bulkEditModel.estimated_hours !== undefined) fields.estimated_hours = this.bulkEditModel.estimated_hours;
+    if (this.bulkEditModel.due_date !== null && this.bulkEditModel.due_date !== undefined) {
+      const d = this.bulkEditModel.due_date;
+      fields.due_date = (d instanceof Date) ? d.toISOString() : String(d);
+    }
 
-    const payload: any = { ids };
-    if (this.bulkEditModel.status_id !== null && this.bulkEditModel.status_id !== undefined) payload.status_id = this.bulkEditModel.status_id;
-    if (this.bulkEditModel.assignee_id !== null && this.bulkEditModel.assignee_id !== undefined) payload.assignee_id = this.bulkEditModel.assignee_id;
+    if (!Object.keys(fields).length) {
+      try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.issues.bulk.NOTHING_TO_APPLY') || 'Nothing to apply' }); } catch (e) {}
+      return;
+    }
 
     this.loading = true;
-    this.http.post('/api/issues/bulk_update', payload).subscribe({
-      next: (res: any) => {
-        this.loading = false;
-        this.bulkEditDialogVisible = false;
-        try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.issues.bulk.SUCCESS') || 'Bulk update applied' }); } catch (e) {}
-        // refresh issues list using current filters if present
-        if (this.appliedFilters && Object.keys(this.appliedFilters).length) {
-          try { this.applyQuery(true); } catch (e) { this.loadIssues(); }
-        } else {
-          this.loadIssues();
-        }
-        this.safeDetect();
-      },
-      error: (err: any) => {
-        console.error('Bulk update failed', err);
-        this.loading = false;
-        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.issues.bulk.ERROR') || 'Bulk update failed' }); } catch (e) {}
-        this.safeDetect();
-      }
-    });
+    // call PUT /api/issues/{id} for each id, collect results
+    const promises = ids.map(id => lastValueFrom(this.issuesService.updateIssue(id, fields)));
+    const results = await Promise.allSettled(promises);
+    this.loading = false;
+
+    const failed = results.filter(r => r.status === 'rejected');
+    if (failed.length) {
+      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.issues.bulk.PARTIAL_ERROR')?.replace('{n}', String(failed.length)) || (String(failed.length) + ' updates failed') }); } catch (e) {}
+    } else {
+      try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.issues.bulk.SUCCESS') || 'Bulk update applied' }); } catch (e) {}
+    }
+
+    this.bulkEditDialogVisible = false;
+    // refresh issues list using current filters if present
+    if (this.appliedFilters && Object.keys(this.appliedFilters).length) {
+      try { this.applyQuery(true); } catch (e) { this.loadIssues(); }
+    } else {
+      this.loadIssues();
+    }
+    this.safeDetect();
   }
 
   closeQueryDialog(): void {

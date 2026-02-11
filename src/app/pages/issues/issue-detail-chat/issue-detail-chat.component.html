@@ -30,7 +30,7 @@
             <p-button severity="secondary" icon="pi pi-reply" class="mt-0" [outlined]="true" (click)="answer(m)"></p-button>
           </div>
         </div>
-          <div class="text-sm text-surface-700" [innerHTML]="m.text"></div>
+          <div class="text-surface-500" [innerHTML]="m.text"></div>
           <div *ngIf="m.parent_id" class="in-reply-to text-sm text-surface-500">
             {{ 'components.issues.chat.IN_REPLY_TO' | translate }}
             <a href="#" (click)="scrollToMessage(m.parent_id); $event.preventDefault()">#{{ m.parent_id }}</a>
@@ -43,7 +43,7 @@
   <div class="chat-editor">
     <div class="chat-editor-row">
       <div class="chat-editor-left">
-        <button pButton type="button" class="p-button-text p-button-plain attach-btn" icon="pi pi-paperclip" (click)="onAttachClick()"></button>
+        <p-button icon="pi pi-paperclip" severity="secondary" (click)="onAttachClick()" [disabled]="true" [outlined]="true"></p-button>
       </div>
 
       <div class="chat-editor-center">
@@ -64,7 +64,7 @@
       </div>
 
       <div class="chat-editor-right">
-  <button pButton type="button" class="p-button-plain send-btn" icon="pi pi-send" (click)="send()" [disabled]="!newMessage.trim() || sending"></button>
+        <button pButton type="button" class="p-button-plain send-btn" icon="pi pi-send" (click)="send()" [disabled]="!newMessage.trim() || sending"></button>
       </div>
     </div>
 

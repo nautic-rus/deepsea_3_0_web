@@ -2,20 +2,24 @@ import { Component, Input, OnChanges, SimpleChanges, ChangeDetectorRef } from '@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { BadgeModule } from 'primeng/badge';
 import { TagModule } from 'primeng/tag';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { DialogModule } from 'primeng/dialog';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { MultiSelectModule } from 'primeng/multiselect';
+import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
+import { ConfirmationService, MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-issue-detail-relations-table',
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslateModule, BadgeModule, TagModule, ButtonModule, TableModule, DialogModule, InputTextModule, MultiSelectModule, FormsModule],
+  imports: [CommonModule, RouterModule, TranslateModule, BadgeModule, TagModule, ButtonModule, TableModule, DialogModule, ConfirmDialogModule, InputTextModule, MultiSelectModule, SelectModule, FormsModule],
+  providers: [MessageService, ConfirmationService],
   template: `
     <section class="admin-subpage-relations card">
       <div class="flex items-center justify-between mt-0 mb-2">
@@ -23,7 +27,7 @@ import { FormsModule } from '@angular/forms';
           <p-button severity="secondary" icon="pi pi-plus" class="mt-0" [outlined]="true" (click)="openAddDialog()"></p-button>
       </div>
 
-      <p-dialog header="{{ 'components.issues.relations.ADD_RELATION' | translate }}" [(visible)]="addDialogVisible" modal="true" [closable]="true" [style]="{width: '35%'}">
+  <p-dialog header="{{ 'components.issues.relations.ADD_RELATION' | translate }}" [(visible)]="addDialogVisible" modal="true" [closable]="true" [style]="{width: '35%'}">
         <div class="flex flex-col gap-4">
 
           <!-- Type selector removed per request -->
@@ -40,7 +44,8 @@ import { FormsModule } from '@angular/forms';
 
           <div class="flex flex-col gap-2">
             <label class="font-bold">{{ 'components.issues.relations.RELATION_TYPE' | translate }}</label>
-            <input pInputText type="text" [(ngModel)]="relationType" />
+            <p-select [options]="relationTypeOptions" [(ngModel)]="relationType" optionLabel="label" optionValue="value" placeholder="{{ 'components.issues.relations.RELATION_TYPE' | translate }}" class="w-full"></p-select>
+            <small class="text-sm text-surface-500">{{ getRelationTypeDescription(relationType) }}</small>
           </div>
 
           <div *ngIf="(linkTargetIssueIds.length || linkTargetDocumentIds.length)" class="flex flex-col gap-2">
@@ -55,36 +60,37 @@ import { FormsModule } from '@angular/forms';
         </div>
       </p-dialog>
 
-      <div *ngIf="!relations || relations.length === 0" class="text-surface-500">{{ 'components.issues.relations.NO_RELATIONS' | translate }}</div>
+  <p-confirmDialog appendTo="body" [style]="{ width: '25%' }" styleClass="project-confirm-dialog" header="{{ 'MENU.CONFIRM' | translate }}" acceptLabel="{{ 'MENU.DELETE' | translate }}" rejectLabel="{{ 'MENU.CANCEL' | translate }}" acceptIcon="pi pi-check" acceptButtonStyleClass="p-button-danger" rejectButtonStyleClass="secondary p-button-text" rejectIcon="pi pi-times"></p-confirmDialog>
+  <div *ngIf="!relations || relations.length === 0" class="text-surface-500">{{ 'components.issues.relations.NO_RELATIONS' | translate }}</div>
 
       <p-table *ngIf="relations && relations.length" [value]="relations" class="w-full" size="small">
-        <ng-template pTemplate="header">
+        <!-- <ng-template pTemplate="header">
           <tr>
-            <th>{{ 'components.issues.relations.COLUMN_TYPE_ID' | translate }}</th>
-            <th>{{ 'components.issues.relations.COLUMN_NAME' | translate }}</th>
-            <th>{{ 'components.issues.relations.COLUMN_STATUS' | translate }}</th>
-            <th>{{ 'components.issues.relations.COLUMN_TYPE' | translate }}</th>
-            <th></th>
+            <th class="col-w-8rem">{{ 'components.issues.relations.COLUMN_TYPE_ID' | translate }}</th>
+            <th class="col-w-18rem">{{ 'components.issues.relations.COLUMN_NAME' | translate }}</th>
+            <th class="col-w-8rem">{{ 'components.issues.relations.COLUMN_STATUS' | translate }}</th>
+            <th class="col-w-6rem">{{ 'components.issues.relations.COLUMN_TYPE' | translate }}</th>
+            <th class="col-w-6rem"></th>
           </tr>
-        </ng-template>
+        </ng-template> -->
         <ng-template pTemplate="body" let-r>
           <tr>
-            <td>
+            <td class="col-w-8rem">
               <a *ngIf="r.type === 'Issue'" [routerLink]="['/issues', r.id]" class="text-blue-600 dark:text-blue-400 hover:underline">{{ r.type + ' #' + r.id }}</a>
               <a *ngIf="r.type === 'Document'" [href]="r.url || '#'" target="_blank" rel="noopener" class="text-blue-600 dark:text-blue-400 font-medium hover:underline">{{ r.type + ' #' + r.id }}</a>
             </td>
-            <td>
+            <td class="col-w-18rem">
               <span *ngIf="r.title" >{{r.title}}</span>
 
             </td>
-            <td>
+            <td class="col-w-8rem">
               <p-tag *ngIf="r.status || r.status_name" [value]="r.status_name || r.status" [severity]="statusSeverity(r.status_code ?? r.status)"></p-tag>
             </td>
-            <td>
+            <td class="col-w-6rem">
               <p-tag *ngIf="r.raw?.relation_type" [value]="r.raw.relation_type" [severity]="typeSeverity(r.raw.relation_type)"></p-tag>
             </td>
-            <td class="text-right">
-              <p-button icon="pi pi-trash" severity="danger" (click)="removeLink(r)"></p-button>
+            <td class="align-right col-w-6rem">
+              <p-button icon="pi pi-trash" severity="danger" (click)="removeLink(r)" [outlined]="true" [disabled]="isLinking"></p-button>
             </td>
           </tr>
         </ng-template>
@@ -101,12 +107,14 @@ export class IssueDetailRelationsTableComponent implements OnChanges {
   @Input() issue: any | null = null;
   relations: Array<any> = [];
 
-  constructor(private cdr: ChangeDetectorRef, private http: HttpClient) {}
+  constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private confirmationService: ConfirmationService, private messageService: MessageService, private translate: TranslateService) {}
 
   // Dialog / linking state
   addDialogVisible = false;
   relationType = 'relates';
   isLinking = false;
+  // relation type dropdown options
+  relationTypeOptions: Array<any> = [];
   // Multi-select helpers
   issueOptions: Array<any> = [];
   documentOptions: Array<any> = [];
@@ -122,6 +130,11 @@ export class IssueDetailRelationsTableComponent implements OnChanges {
   this.linkTargetIssueIds = [];
   this.linkTargetDocumentIds = [];
   this.relationType = 'relates';
+    // populate relation type options with localized labels
+    this.relationTypeOptions = [
+      { label: this.translate.instant('components.issues.relations.TYPE_OPTIONS.RELATES'), value: 'relates' , descriptionKey: 'RELATES'},
+      { label: this.translate.instant('components.issues.relations.TYPE_OPTIONS.BLOCKS'), value: 'blocks' , descriptionKey: 'BLOCKS'}
+    ];
     // load issue/document lists filtered by project
     const projectId = this.issue.project_id ?? this.issue.project?.id ?? this.issue.project;
     this.loadTargetsForProject(projectId);
@@ -208,6 +221,13 @@ export class IssueDetailRelationsTableComponent implements OnChanges {
     }
   }
 
+  public getRelationTypeDescription(relType: string | null | undefined): string {
+    try {
+      const key = 'components.issues.relations.TYPE_DESCRIPTIONS.' + ((relType || 'relates').toString().toUpperCase());
+      return this.translate.instant(key) || '';
+    } catch (e) { return ''; }
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['issue']) {
       this.relations = this.extractRelations(this.issue);
@@ -284,14 +304,21 @@ export class IssueDetailRelationsTableComponent implements OnChanges {
     if (!rel || !rel.raw) return;
     const linkId = rel.raw.id ?? rel.raw.link_id ?? rel.raw._id;
     if (!linkId) return;
-    if (!confirm('Delete this relation?')) return;
 
-    this.http.delete(`/api/links/${linkId}`).subscribe({
-      next: () => {
-        this.relations = (this.relations || []).filter(r => r.raw?.id !== linkId && r.raw?.link_id !== linkId && r.raw?._id !== linkId);
-        this.cdr.markForCheck();
-      },
-      error: (err) => console.warn('Failed to delete link', linkId, err)
+    const label = rel.title || rel.name || (rel.id ? `#${rel.id}` : '');
+    const msg = this.translate.instant('components.issues.relations.DELETE_CONFIRM', { name: label }) || 'Delete this relation?';
+    this.confirmationService.confirm({
+      message: msg,
+      accept: () => {
+        this.http.delete(`/api/links/${linkId}`).subscribe({
+          next: () => {
+            this.relations = (this.relations || []).filter(r => r.raw?.id !== linkId && r.raw?.link_id !== linkId && r.raw?._id !== linkId);
+            try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.issues.messages.SUCCESS'), detail: this.translate.instant('components.issues.relations.ACTION_DELETE') || 'Deleted' }); } catch (e) {}
+            this.cdr.markForCheck();
+          },
+          error: (err) => { console.warn('Failed to delete link', linkId, err); try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR'), detail: this.translate.instant('components.issues.messages.UPLOAD_FAILED') || 'Failed' }); } catch (e) {} }
+        });
+      }
     });
   }
 

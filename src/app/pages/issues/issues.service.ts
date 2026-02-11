@@ -8,12 +8,29 @@ export class IssuesService {
 
   getIssues(filters: any): Observable<any> {
     let params = new HttpParams();
+    // keys that should be sent as comma-separated lists when provided as arrays
+    const csvArrayKeys = new Set<string>([
+      'project_id',
+      'status_id',
+      'assignee_id',
+      'author_id',
+      'type_id',
+      'priority'
+    ]);
 
     const pushValue = (key: string, val: any) => {
       if (val === null || val === undefined || val === '') return;
       if (Array.isArray(val)) {
-        for (const v of val) {
-          if (v === null || v === undefined || v === '') continue;
+        // if this key expects CSV, join values into single comma-separated param
+        const filtered = (val || []).filter((v: any) => v !== null && v !== undefined && v !== '');
+        if (!filtered.length) return;
+        if (csvArrayKeys.has(key)) {
+          const csv = filtered.map((v: any) => String(v)).join(',');
+          params = params.append(key, csv);
+          return;
+        }
+        // otherwise append multiple params with same key
+        for (const v of filtered) {
           params = params.append(key, String(v));
         }
         return;
@@ -29,8 +46,24 @@ export class IssuesService {
       params = params.append(key, String(val));
     };
 
-    pushValue('is_closed', filters.is_closed);
-    pushValue('is_active', filters.is_active);
+    // special handling for is_closed: if both true and false are present, skip this filter
+    const isClosedVal = filters.is_closed;
+    if (Array.isArray(isClosedVal)) {
+      const uniq = Array.from(new Set(isClosedVal.map((v: any) => String(v))));
+      const hasTrue = uniq.includes('true');
+      const hasFalse = uniq.includes('false');
+      if (!(hasTrue && hasFalse)) {
+        for (const v of isClosedVal) {
+          if (v === null || v === undefined || v === '') continue;
+          params = params.append('is_closed', String(v));
+        }
+      }
+    } else {
+      pushValue('is_closed', isClosedVal);
+    }
+
+    // use my_issue parameter instead of is_active (true or omitted)
+    pushValue('my_issue', filters.my_issue);
     pushValue('project_id', filters.project_id);
     pushValue('status_id', filters.status_id);
     pushValue('assignee_id', filters.assignee_id);
@@ -44,8 +77,7 @@ export class IssuesService {
     pushValue('start_date_to', filters.start_date_to);
     pushValue('due_date_from', filters.due_date_from);
     pushValue('due_date_to', filters.due_date_to);
-    pushValue('page', filters.page);
-    pushValue('limit', filters.limit);
+  // pagination handled client-side / by server defaults — do not send page/limit here
     if (filters.search) pushValue('search', filters.search);
 
     return this.http.get('/api/issues', { params });
