@@ -1,96 +1,63 @@
-import { Component, Input, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, ChangeDetectorRef, Output, EventEmitter } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { BadgeModule } from 'primeng/badge';
+import { Router } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 import { TagModule } from 'primeng/tag';
+import { BadgeModule } from 'primeng/badge';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
-import { DialogModule } from 'primeng/dialog';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { InputTextModule } from 'primeng/inputtext';
-import { MultiSelectModule } from 'primeng/multiselect';
-import { SelectModule } from 'primeng/select';
-import { FormsModule } from '@angular/forms';
-import { ConfirmationService, MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-issue-detail-relations-table',
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslateModule, BadgeModule, TagModule, ButtonModule, TableModule, DialogModule, ConfirmDialogModule, InputTextModule, MultiSelectModule, SelectModule, FormsModule],
-  providers: [MessageService, ConfirmationService],
+  imports: [CommonModule, TranslateModule, TagModule, BadgeModule, ButtonModule, TableModule],
   template: `
     <section class="admin-subpage-relations card">
       <div class="flex items-center justify-between mt-0 mb-2">
-         <h4 class="mb-">{{ 'components.issues.relations.TITLE' | translate }}</h4>
-          <p-button severity="secondary" icon="pi pi-plus" class="mt-0" [outlined]="true" (click)="openAddDialog()"></p-button>
+         <h4 class="mb-0">{{ 'components.issues.relations.TITLE' | translate }}</h4>
+          <p-button severity="secondary" icon="pi pi-plus" class="mt-0" [outlined]="true" (click)="onAddRelation($event)"></p-button>
       </div>
 
-  <p-dialog header="{{ 'components.issues.relations.ADD_RELATION' | translate }}" [(visible)]="addDialogVisible" modal="true" [closable]="true" [style]="{width: '35%'}">
-        <div class="flex flex-col gap-4">
-
-          <!-- Type selector removed per request -->
-
-          <div class="flex flex-col gap-2">
-            <label class="font-bold">{{ 'components.issues.relations.ISSUES' | translate }}</label>
-            <p-multiSelect [options]="issueOptions" [(ngModel)]="linkTargetIssueIds" optionLabel="label" optionValue="value" placeholder="{{ 'components.issues.relations.ISSUES' | translate }}" class="w-full" appendTo="body"></p-multiSelect>
-          </div>
-
-          <div class="flex flex-col gap-2">
-            <label class="font-bold">{{ 'components.issues.relations.DOCUMENTS' | translate }}</label>
-            <p-multiSelect [options]="documentOptions" [(ngModel)]="linkTargetDocumentIds" optionLabel="label" optionValue="value" placeholder="{{ 'components.issues.relations.DOCUMENTS' | translate }}" class="w-full" appendTo="body"></p-multiSelect>
-          </div>
-
-          <div class="flex flex-col gap-2">
-            <label class="font-bold">{{ 'components.issues.relations.RELATION_TYPE' | translate }}</label>
-            <p-select [options]="relationTypeOptions" [(ngModel)]="relationType" optionLabel="label" optionValue="value" placeholder="{{ 'components.issues.relations.RELATION_TYPE' | translate }}" class="w-full"></p-select>
-            <small class="text-sm text-surface-500">{{ getRelationTypeDescription(relationType) }}</small>
-          </div>
-
-          <div *ngIf="(linkTargetIssueIds.length || linkTargetDocumentIds.length)" class="flex flex-col gap-2">
-            <label class="font-bold">{{ 'components.issues.relations.SELECTED' | translate }}</label>
-            <div class="text-sm">Issues: {{ linkTargetIssueIds.length || 0 }}, Documents: {{ linkTargetDocumentIds.length || 0 }}</div>
-          </div>
-
-          <div class="flex justify-end gap-2 mt-4">
-            <p-button label="{{ 'components.issues.relations.CANCEL' | translate }}" (onClick)="addDialogVisible=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="isLinking"></p-button>
-            <p-button label="{{ 'components.issues.relations.CREATE' | translate }}" (onClick)="createLink()" severity="primary" icon="pi pi-check" iconPos="left" [loading]="isLinking" [disabled]="isLinking || !(linkTargetIssueIds.length || linkTargetDocumentIds.length)"></p-button>
-          </div>
-        </div>
-      </p-dialog>
-
-  <p-confirmDialog appendTo="body" [style]="{ width: '25%' }" styleClass="project-confirm-dialog" header="{{ 'MENU.CONFIRM' | translate }}" acceptLabel="{{ 'MENU.DELETE' | translate }}" rejectLabel="{{ 'MENU.CANCEL' | translate }}" acceptIcon="pi pi-check" acceptButtonStyleClass="p-button-danger" rejectButtonStyleClass="secondary p-button-text" rejectIcon="pi pi-times"></p-confirmDialog>
-  <div *ngIf="!relations || relations.length === 0" class="text-surface-500">{{ 'components.issues.relations.NO_RELATIONS' | translate }}</div>
+      <div *ngIf="!relations || relations.length === 0" class="text-surface-500">{{ 'components.issues.relations.NO_RELATIONS' | translate }}</div>
 
       <p-table *ngIf="relations && relations.length" [value]="relations" class="w-full" size="small">
-        <!-- <ng-template pTemplate="header">
+        <ng-template pTemplate="header">
           <tr>
-            <th class="col-w-8rem">{{ 'components.issues.relations.COLUMN_TYPE_ID' | translate }}</th>
-            <th class="col-w-18rem">{{ 'components.issues.relations.COLUMN_NAME' | translate }}</th>
-            <th class="col-w-8rem">{{ 'components.issues.relations.COLUMN_STATUS' | translate }}</th>
-            <th class="col-w-6rem">{{ 'components.issues.relations.COLUMN_TYPE' | translate }}</th>
-            <th class="col-w-6rem"></th>
+            <th style="width:15%">{{ 'components.issues.relations.COLUMN_TYPE_ID' | translate }}</th>
+            <th style="width:30%">{{ 'components.issues.relations.COLUMN_NAME' | translate }}</th>
+            <th style="width:20%">{{ 'components.issues.relations.COLUMN_STATUS' | translate }}</th>
+            <th style="width:15%">{{ 'components.issues.relations.COLUMN_TYPE' | translate }}</th>
+            <th style="width:20%">
+              {{ 'components.issues.relations.COLUMN_DIRECTION' | translate }}
+            </th>
+            <th style="width:5%"></th>
           </tr>
-        </ng-template> -->
+        </ng-template>
         <ng-template pTemplate="body" let-r>
           <tr>
-            <td class="col-w-8rem">
-              <a *ngIf="r.type === 'Issue'" [routerLink]="['/issues', r.id]" class="text-blue-600 dark:text-blue-400 hover:underline">{{ r.type + ' #' + r.id }}</a>
-              <a *ngIf="r.type === 'Document'" [href]="r.url || '#'" target="_blank" rel="noopener" class="text-blue-600 dark:text-blue-400 font-medium hover:underline">{{ r.type + ' #' + r.id }}</a>
+            <td>
+              <!-- Use explicit open handlers to ensure links open correctly (new tab) even inside table components -->
+              <a *ngIf="r.type === 'Issue'" href="#" (click)="openIssue($event, r)" class="text-blue-600 dark:text-blue-400 hover:underline">{{ r.type + ' #' + r.id }}</a>
+              <a *ngIf="r.type === 'Document'" href="#" (click)="openDocument($event, r)" class="text-blue-600 dark:text-blue-400 font-medium hover:underline">{{ r.type + ' #' + r.id }}</a>
             </td>
-            <td class="col-w-18rem">
+            <td>
               <span *ngIf="r.title" >{{r.title}}</span>
 
             </td>
-            <td class="col-w-8rem">
-              <p-tag *ngIf="r.status || r.status_name" [value]="r.status_name || r.status" [severity]="statusSeverity(r.status_code ?? r.status)"></p-tag>
+            <td>
+              <p-tag *ngIf="r.status" [value]="r.status" [severity]="statusSeverity(r.status)"></p-tag>
             </td>
-            <td class="col-w-6rem">
-              <p-tag *ngIf="r.raw?.relation_type" [value]="r.raw.relation_type" [severity]="typeSeverity(r.raw.relation_type)"></p-tag>
+            <td>
+              <p-badge *ngIf="r.raw?.relation_type" [value]="r.raw.relation_type" [severity]="typeSeverity(r.raw.relation_type)"></p-badge>
             </td>
-            <td class="align-right col-w-6rem">
-              <p-button icon="pi pi-trash" severity="danger" (click)="removeLink(r)" [outlined]="true" [disabled]="isLinking"></p-button>
+            <td>
+              <span *ngIf="r.direction" class="text-surface-500">{{ directionLabelKey(r.direction) | translate }}</span>
+            </td>
+            <td class="text-right">
+              <p-button icon="pi pi-trash" severity="danger" (click)="removeLink(r)" [outlined]="true"></p-button>
             </td>
           </tr>
         </ng-template>
@@ -105,128 +72,10 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 })
 export class IssueDetailRelationsTableComponent implements OnChanges {
   @Input() issue: any | null = null;
+  @Output() addRelation = new EventEmitter<void>();
   relations: Array<any> = [];
 
-  constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private confirmationService: ConfirmationService, private messageService: MessageService, private translate: TranslateService) {}
-
-  // Dialog / linking state
-  addDialogVisible = false;
-  relationType = 'relates';
-  isLinking = false;
-  // relation type dropdown options
-  relationTypeOptions: Array<any> = [];
-  // Multi-select helpers
-  issueOptions: Array<any> = [];
-  documentOptions: Array<any> = [];
-  linkTargetIssueIds: Array<string> = [];
-  linkTargetDocumentIds: Array<string> = [];
-
-  public openAddDialog(): void {
-    if (!this.issue || (!this.issue.id && !this.issue._id)) {
-      alert('Issue not loaded');
-      return;
-    }
-  this.addDialogVisible = true;
-  this.linkTargetIssueIds = [];
-  this.linkTargetDocumentIds = [];
-  this.relationType = 'relates';
-    // populate relation type options with localized labels
-    this.relationTypeOptions = [
-      { label: this.translate.instant('components.issues.relations.TYPE_OPTIONS.RELATES'), value: 'relates' , descriptionKey: 'RELATES'},
-      { label: this.translate.instant('components.issues.relations.TYPE_OPTIONS.BLOCKS'), value: 'blocks' , descriptionKey: 'BLOCKS'}
-    ];
-    // load issue/document lists filtered by project
-    const projectId = this.issue.project_id ?? this.issue.project?.id ?? this.issue.project;
-    this.loadTargetsForProject(projectId);
-  }
-
-  private loadTargetsForProject(projectId: any): void {
-    this.issueOptions = [];
-    this.documentOptions = [];
-    if (!projectId) return;
-    let params = new HttpParams();
-    params = params.set('project_id', String(projectId));
-    // fetch issues
-    this.http.get<any>('/api/issues', { params }).subscribe({
-      next: (res) => {
-        try {
-          const items = Array.isArray(res) ? res : (res && (res.data || res.items) ? (res.data || res.items) : []);
-          this.issueOptions = (items as any[]).map(i => ({ label: (i.title || i.summary || i.name || `#${i.id || i._id}`), value: i.id ?? i._id ?? i.issue_id ?? i }));
-        } catch (e) {
-          this.issueOptions = [];
-        }
-        this.cdr.markForCheck();
-      },
-      error: () => { this.issueOptions = []; }
-    });
-
-    // fetch documents
-    this.http.get<any>('/api/documents', { params }).subscribe({
-      next: (res) => {
-        try {
-          const items = Array.isArray(res) ? res : (res && (res.data || res.items) ? (res.data || res.items) : []);
-          this.documentOptions = (items as any[]).map(d => ({ label: (d.title || d.name || `#${d.id || d._id}`), value: d.id ?? d._id ?? d.file_id ?? d }));
-        } catch (e) {
-          this.documentOptions = [];
-        }
-        this.cdr.markForCheck();
-      },
-      error: () => { this.documentOptions = []; }
-    });
-  }
-
-  // replaced manual-add with server-provided lists
-
-  public createLink(): void {
-    if (!this.issue) return;
-    const sourceId = this.issue.id ?? this.issue._id;
-    const issueTargets = this.linkTargetIssueIds || [];
-    const docTargets = this.linkTargetDocumentIds || [];
-    const total = issueTargets.length + docTargets.length;
-    if (!sourceId || total === 0) return;
-    this.isLinking = true;
-    let pending = total;
-
-    const finishIfDone = () => {
-      pending -= 1;
-      if (pending === 0) {
-        this.isLinking = false;
-        this.addDialogVisible = false;
-        this.loadLinksForIssue(this.issue);
-        this.linkTargetIssueIds = [];
-        this.linkTargetDocumentIds = [];
-      }
-    };
-
-    for (const t of issueTargets) {
-      const payload: any = {
-        source_type: 'issue',
-        source_id: String(sourceId),
-        target_type: 'issue',
-        target_id: String(t),
-        relation_type: this.relationType || 'relates'
-      };
-      this.http.post('/api/links', payload).subscribe({ next: finishIfDone, error: (err) => { console.warn('Failed to create link', t, err); finishIfDone(); } });
-    }
-
-    for (const t of docTargets) {
-      const payload: any = {
-        source_type: 'issue',
-        source_id: String(sourceId),
-        target_type: 'document',
-        target_id: String(t),
-        relation_type: this.relationType || 'relates'
-      };
-      this.http.post('/api/links', payload).subscribe({ next: finishIfDone, error: (err) => { console.warn('Failed to create link', t, err); finishIfDone(); } });
-    }
-  }
-
-  public getRelationTypeDescription(relType: string | null | undefined): string {
-    try {
-      const key = 'components.issues.relations.TYPE_DESCRIPTIONS.' + ((relType || 'relates').toString().toUpperCase());
-      return this.translate.instant(key) || '';
-    } catch (e) { return ''; }
-  }
+  constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['issue']) {
@@ -236,18 +85,42 @@ export class IssueDetailRelationsTableComponent implements OnChanges {
     }
   }
 
+  public onAddRelation(event?: Event) {
+    if (event && typeof event.preventDefault === 'function') event.preventDefault();
+    this.addRelation.emit();
+  }
+
   private loadLinksForIssue(issue: any | null) {
     if (!issue || (!issue.id && !issue._id)) return;
     const id = issue.id ?? issue._id;
-    let params = new HttpParams();
-    params = params.set('source_type', 'issue');
-    params = params.set('source_id', String(id));
 
-    this.http.get<any>('/api/links', { params }).subscribe({
-      next: (res: any) => {
+  // Build params for links where the issue is the active/primary side
+  let paramsSource = new HttpParams();
+  paramsSource = paramsSource.set('active_type', 'issue');
+  paramsSource = paramsSource.set('active_id', String(id));
+
+  // Build params for links where the issue is the passive/other side
+  let paramsTarget = new HttpParams();
+  paramsTarget = paramsTarget.set('passive_type', 'issue');
+  paramsTarget = paramsTarget.set('passive_id', String(id));
+
+    const reqSource = this.http.get<any>('/api/links', { params: paramsSource }).pipe(catchError(() => of([])));
+    const reqTarget = this.http.get<any>('/api/links', { params: paramsTarget }).pipe(catchError(() => of([])));
+
+    forkJoin([reqSource, reqTarget]).subscribe({
+      next: ([resSource, resTarget]: any) => {
         try {
-          const links = Array.isArray(res) ? res : (res && (res.data || res.items) ? (res.data || res.items) : []);
-          const mapped = (links as any[]).map(l => this.mapLinkToRelation(l));
+          const extract = (res: any) => Array.isArray(res) ? res : (res && (res.data || res.items) ? (res.data || res.items) : []);
+          const linksSource = extract(resSource) as any[];
+          const linksTarget = extract(resTarget) as any[];
+
+          // combine results (keep duplicates resolution to relation-level dedupe below)
+          const allLinks = [...(linksSource || []), ...(linksTarget || [])];
+
+          // map links to relations, passing current issue id so we pick the opposite side
+          const mapped = (allLinks as any[])
+            .map(l => this.mapLinkToRelation(l, id))
+            .filter(r => r && (r.id || r.id === 0));
 
           for (const rel of mapped) {
             if (rel.type === 'Issue' && rel.id) {
@@ -256,8 +129,6 @@ export class IssueDetailRelationsTableComponent implements OnChanges {
                   try {
                     rel.title = rel.title || res.title || res.summary || res.name || null;
                     (rel as any).status = res.status || res.state || res.status_name || null;
-                    (rel as any).status_name = res.status_name || res.status || null;
-                    (rel as any).status_code = res.status_code ?? res.status_id ?? null;
                   } catch (e) {}
                   this.cdr.markForCheck();
                 },
@@ -269,8 +140,6 @@ export class IssueDetailRelationsTableComponent implements OnChanges {
                   try {
                     rel.title = rel.title || res.title || res.name || null;
                     (rel as any).status = res.status || null;
-                    (rel as any).status_name = res.status || null;
-                    (rel as any).status_code = res.status_code ?? null;
                   } catch (e) {}
                   this.cdr.markForCheck();
                 },
@@ -293,32 +162,107 @@ export class IssueDetailRelationsTableComponent implements OnChanges {
     });
   }
 
-  private mapLinkToRelation(link: any) {
-    const targetTypeRaw = (link.target_type || '').toLowerCase();
-    const type = targetTypeRaw === 'issue' || targetTypeRaw === 'task' ? 'Issue' : (targetTypeRaw === 'doc' || targetTypeRaw === 'document' ? 'Document' : (link.relation_type || 'Relation'));
-    const id = link.target_id ?? link.targetId ?? link.target ?? link.id;
-    return { type, id, title: link.title || link.name || null, raw: link };
+  /**
+   * Map a raw link object to a relation pointing to the "other" resource relative to currentIssueId.
+   * If currentIssueId matches the source, we show the target; if it matches the target, we show the source.
+   */
+  private mapLinkToRelation(link: any, currentIssueId?: any) {
+    const getVal = (obj: any, ...keys: string[]) => {
+      for (const k of keys) if (obj[k] !== undefined) return obj[k];
+      return null;
+    };
+
+  // Support both legacy (source/target) and new (active/passive) field names
+  const sourceId = getVal(link, 'source_id', 'sourceId', 'source', 'active_id', 'activeId', 'active');
+  const targetId = getVal(link, 'target_id', 'targetId', 'target', 'passive_id', 'passiveId', 'passive');
+  const sourceTypeRaw = String(getVal(link, 'source_type', 'active_type') || '').toLowerCase();
+  const targetTypeRaw = String(getVal(link, 'target_type', 'passive_type') || '').toLowerCase();
+
+    let otherTypeRaw = targetTypeRaw;
+    let otherId = targetId ?? link.id;
+
+    try {
+      if (currentIssueId != null && String(sourceId) === String(currentIssueId)) {
+        // current issue is the active/source -> show passive/target
+        otherTypeRaw = targetTypeRaw;
+        otherId = targetId;
+      } else if (currentIssueId != null && String(targetId) === String(currentIssueId)) {
+        // current issue is the passive/target -> show active/source
+        otherTypeRaw = sourceTypeRaw;
+        otherId = sourceId;
+      } else {
+        // fallback: prefer passive/target if present
+        otherTypeRaw = targetTypeRaw || sourceTypeRaw;
+        otherId = targetId ?? sourceId ?? link.id;
+      }
+    } catch (e) {
+      otherTypeRaw = targetTypeRaw;
+      otherId = targetId ?? sourceId ?? link.id;
+    }
+
+    const type = otherTypeRaw === 'issue' || otherTypeRaw === 'task' ? 'Issue' : (otherTypeRaw === 'doc' || otherTypeRaw === 'document' ? 'Document' : (link.relation_type || 'Relation'));
+    const id = otherId;
+
+    // If relation_type indicates a simple 'relates' relation, show a dash for direction
+    const relTypeRaw = String(link.relation_type || link.type || '').toLowerCase();
+    let direction = (currentIssueId != null && String(sourceId) === String(currentIssueId)) ? 'source' : ((currentIssueId != null && String(targetId) === String(currentIssueId)) ? 'target' : 'unknown');
+    if (relTypeRaw.includes('relates')) {
+      direction = '-';
+    }
+
+    return { type, id, title: link.title || link.name || null, raw: link, direction };
+  }
+
+  public directionLabelKey(direction: any): string {
+    if (!direction && direction !== 0) return '';
+    const d = String(direction).toLowerCase();
+    if (d === '-') return 'components.issues.relations.DIRECTION_LABEL_RELATES';
+    if (d === 'source') return 'components.issues.relations.DIRECTION_LABEL_SOURCE';
+    if (d === 'target') return 'components.issues.relations.DIRECTION_LABEL_TARGET';
+    return 'components.issues.relations.DIRECTION_LABEL_UNKNOWN';
+  }
+
+  /**
+   * Open an issue in a new tab using the router to build an absolute URL.
+   */
+  public openIssue(event: Event, r: any): void {
+    event.preventDefault();
+    if (!r || !r.id) return;
+    try {
+      const tree = this.router.createUrlTree(['/issues', r.id]);
+      const url = window.location.origin + this.router.serializeUrl(tree);
+      window.open(url, '_blank', 'noopener');
+    } catch (e) {
+      const url = window.location.origin + `/issues/${r.id}`;
+      window.open(url, '_blank', 'noopener');
+    }
+  }
+
+  /**
+   * Open a document link (external URL or internal document route) in a new tab.
+   */
+  public openDocument(event: Event, r: any): void {
+    event.preventDefault();
+    if (!r) return;
+    const candidate = r.url || (r.id ? `/documents/${r.id}` : null);
+    if (!candidate) return;
+    const isAbsolute = /^https?:\/\//i.test(candidate);
+    const url = isAbsolute ? candidate : window.location.origin + candidate;
+    window.open(url, '_blank', 'noopener');
   }
 
   public removeLink(rel: any): void {
     if (!rel || !rel.raw) return;
     const linkId = rel.raw.id ?? rel.raw.link_id ?? rel.raw._id;
     if (!linkId) return;
+    if (!confirm('Delete this relation?')) return;
 
-    const label = rel.title || rel.name || (rel.id ? `#${rel.id}` : '');
-    const msg = this.translate.instant('components.issues.relations.DELETE_CONFIRM', { name: label }) || 'Delete this relation?';
-    this.confirmationService.confirm({
-      message: msg,
-      accept: () => {
-        this.http.delete(`/api/links/${linkId}`).subscribe({
-          next: () => {
-            this.relations = (this.relations || []).filter(r => r.raw?.id !== linkId && r.raw?.link_id !== linkId && r.raw?._id !== linkId);
-            try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.issues.messages.SUCCESS'), detail: this.translate.instant('components.issues.relations.ACTION_DELETE') || 'Deleted' }); } catch (e) {}
-            this.cdr.markForCheck();
-          },
-          error: (err) => { console.warn('Failed to delete link', linkId, err); try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR'), detail: this.translate.instant('components.issues.messages.UPLOAD_FAILED') || 'Failed' }); } catch (e) {} }
-        });
-      }
+    this.http.delete(`/api/links/${linkId}`).subscribe({
+      next: () => {
+        this.relations = (this.relations || []).filter(r => r.raw?.id !== linkId && r.raw?.link_id !== linkId && r.raw?._id !== linkId);
+        this.cdr.markForCheck();
+      },
+      error: (err) => console.warn('Failed to delete link', linkId, err)
     });
   }
 
@@ -336,7 +280,7 @@ export class IssueDetailRelationsTableComponent implements OnChanges {
     if (!relType) return 'info';
     const s = String(relType).toLowerCase();
     if (s.includes('block')) return 'danger';
-    if (s.includes('relates')) return 'secondary';
+    if (s.includes('relates')) return 'info';
     return 'info';
   }
 
@@ -346,17 +290,17 @@ export class IssueDetailRelationsTableComponent implements OnChanges {
     try {
       if (Array.isArray(issue.related_issues) && issue.related_issues.length) {
         for (const it of issue.related_issues) {
-          out.push({ type: 'Issue', id: it.id ?? it.issue_id ?? it._id ?? it, title: it.title ?? it.summary ?? it.name ?? '' });
+          out.push({ type: 'Issue', id: it.id ?? it.issue_id ?? it._id ?? it, title: it.title ?? it.summary ?? it.name ?? '', direction: 'source' });
         }
       }
       if (Array.isArray(issue.relations) && issue.relations.length) {
         for (const it of issue.relations) {
-          out.push({ type: it.type || 'Issue', id: it.id ?? it.target_id ?? it.ref, title: it.title ?? it.name ?? it.summary ?? '' });
+          out.push({ type: it.type || 'Issue', id: it.id ?? it.target_id ?? it.ref, title: it.title ?? it.name ?? it.summary ?? '', direction: 'source' });
         }
       }
       if (Array.isArray(issue.attachments) && issue.attachments.length) {
         for (const a of issue.attachments) {
-          out.push({ type: 'Document', id: a.id ?? a.file_id ?? a._id ?? a.name, title: a.name || a.title || '', url: a.url || a.download_url || a.file_url || null });
+          out.push({ type: 'Document', id: a.id ?? a.file_id ?? a._id ?? a.name, title: a.name || a.title || '', url: a.url || a.download_url || a.file_url || null, direction: 'source' });
         }
       }
     } catch (e) { }

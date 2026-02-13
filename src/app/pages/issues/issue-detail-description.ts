@@ -31,7 +31,7 @@ import { IssuesService } from './issues.service';
         </div>
 
       <!-- View mode: show rendered description when not editing -->
-      <div *ngIf="!editing" class="card-content">
+      <div *ngIf="!editing" class="card-content p-2">
         <div *ngIf="!descriptionEmpty()" class="text-surface-500" [innerHTML]="text"></div>
         <div *ngIf="descriptionEmpty()" class="text-surface-500">{{ 'components.issues.detail.NO_DESCRIPTIONS' | translate }}</div>
       </div>

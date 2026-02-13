@@ -44,13 +44,9 @@ html, body {
   --text-color: #334155;
   --text-color-secondary: var(--surface-600);
   --muted-color: var(--surface-500);
-  /* Semantic brand colors (updated) */
-  --primary-color: #3b82f6; /* Primary */
-  --secondary-color: #E2EEF2; /* Secondary */
-  --warn-color: #F2997A; /* Warn */
-  --info-color: #4EC6C1; /* Info */
-  --success-color: #6FCF97; /* Success */
-  --danger-color: #F77548 !important; /* Danger */
+--primary-color: #3b82f6;
+
+
 }
 /* Dark Mode Variables */
 .app-dark {
@@ -211,7 +207,7 @@ html::-webkit-scrollbar-thumb:hover, body::-webkit-scrollbar-thumb:hover, .permi
 }
 
 .logo-color {
-    filter: brightness(0) saturate(100%) invert(14%) sepia(72%) saturate(2156%) hue-rotate(171deg) brightness(94%) contrast(101%);
+    filter: brightness(0) saturate(100%) invert(60%) sepia(58%) saturate(6522%) hue-rotate(202deg) brightness(100%) contrast(94%);
 }
 
 .p-fileupload-advanced {

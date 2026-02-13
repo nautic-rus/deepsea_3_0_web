@@ -478,31 +478,28 @@
       },
       "relations": {
         "TITLE": "Связи",
-        "ADD_RELATION": "Добавить связь",
-        "TYPE": "Тип",
-        "ISSUES": "Задачи (проект)",
-        "DOCUMENTS": "Документы (проект)",
-        "RELATION_TYPE": "Тип связи",
-        "SELECTED": "Выбрано",
-        "CREATE": "Создать",
-        "CANCEL": "Отмена",
         "NO_RELATIONS": "Связей не найдено",
-        "DOCUMENT": "Документ",
-        "COLUMN_RELATION": "Связь",
         "COLUMN_TYPE_ID": "#",
         "COLUMN_NAME": "Наименование",
         "COLUMN_STATUS": "Статус",
         "COLUMN_TYPE": "Тип",
-        "DELETE_CONFIRM": "Удалить связь \"{{name}}\"?",
-        "TYPE_OPTIONS": {
-          "RELATES": "Связана",
-          "BLOCKS": "Блокирует"
-        },
-        "TYPE_DESCRIPTIONS": {
-          "RELATES": "Указывает, что эта задача связана с целевой задачей/документом (не блокирует).",
-          "BLOCKS": "Указывает, что эта задача блокирует целевую задачу/документ; целевая задача не может продвигаться, пока эта не будет решена."
-        },
-        "ACTION_DELETE": "Удалить"
+        "COLUMN_DIRECTION": "Направление",
+        "DIRECTION_LABEL_SOURCE": "Активная",
+        "DIRECTION_LABEL_TARGET": "Пассивная",
+        "DIRECTION_LABEL_RELATES": "-",
+        "DIRECTION_LABEL_UNKNOWN": "Неизвестно",
+        "ADD_TITLE": "Добавить связь",
+        "FORM": {
+          "RELATION_TYPE": "Тип связи",
+          "BLOCKS_DIRECTION": "Направление (blocks)",
+          "ISSUES": "Задачи (проект)",
+          "DOCUMENTS": "Документы (проект)",
+          "TYPE_RELATES": "Связана",
+          "TYPE_BLOCKS": "Блокирует",
+          "BLOCKS_ACTIVE": "Эта задача будет блокировать другую (активная)",
+          "BLOCKS_PASSIVE": "Эта задача будет заблокирована другой (пассивная)",
+          "SAVED": "Связи созданы"
+        }
       },
       "CHANGE_STATUS": "Действия",
       "chat": {
@@ -515,8 +512,7 @@
         "ANSWER": "Ответить"
       },
       "attach": {
-        "DRAG_DROP": "Перетащите файлы сюда для загрузки."
-      ,
+        "DRAG_DROP": "Перетащите файлы сюда для загрузки.",
         "NO_ATTACHMENTS": "Вложений нет",
         "COLUMN_NAME": "Имя файла",
         "COLUMN_SIZE": "Размер",
@@ -531,6 +527,7 @@
         "UPLOADED": "Загружено",
         "UPLOADED_COUNT": "{{count}} файл(ов) загружено",
         "UPLOAD_FAILED": "Не удалось загрузить",
+        "UPLOAD_CANCELLED": "Загрузка отменена",
         "ERROR": "Ошибка",
         "WARNING": "Внимание",
         "FILE_TOO_LARGE": "Файл слишком большой (макс {{size}})",

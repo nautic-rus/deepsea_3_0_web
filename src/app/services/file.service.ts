@@ -18,6 +18,29 @@ export interface Attachment {
 export class FileService {
   constructor(private http: HttpClient) {}
 
+  /**
+   * Attempt to fix "mojibake" — a UTF-8 string that was misinterpreted as Latin-1.
+   * e.g. "ÐºÐ¾Ð¼Ð°Ð½Ð´Ñ.rtf" → "команда.rtf"
+   *
+   * If the string doesn't look broken or decoding fails, the original is returned.
+   */
+  private fixEncoding(str: string): string {
+    if (!str) return str;
+    // Fast check: if every char is already in ASCII + basic Cyrillic, nothing to fix
+    // Mojibake produces chars in the 0x00C0–0x00FF range (Latin Extended-A/B)
+    if (!/[\u00c0-\u00ff]/.test(str)) return str;
+    try {
+      // Encode each char code as a byte, then decode as UTF-8
+      const bytes = new Uint8Array([...str].map(ch => ch.charCodeAt(0)));
+      const decoded = new TextDecoder('utf-8').decode(bytes);
+      // Sanity: if decoding produced replacement chars (U+FFFD), keep original
+      if (decoded.includes('\uFFFD')) return str;
+      return decoded;
+    } catch {
+      return str;
+    }
+  }
+
   uploadFile(file: File): Observable<HttpEvent<any>> {
     const fd = new FormData();
     fd.append('file', file, file.name);
@@ -46,7 +69,7 @@ export class FileService {
           const sizeBytesRaw = (it.file_size != null) ? (isNaN(Number(it.file_size)) ? parseInt(String(it.file_size), 10) || 0 : Number(it.file_size)) : (it.size != null ? Number(it.size) : 0);
           const sizeMb = sizeBytesRaw ? Math.round((sizeBytesRaw / (1024 * 1024)) * 100) / 100 : 0;
           return {
-            name: name || '',
+            name: this.fixEncoding(name || ''),
             size: sizeBytesRaw,
             size_bytes: sizeBytesRaw,
             size_mb: sizeMb,

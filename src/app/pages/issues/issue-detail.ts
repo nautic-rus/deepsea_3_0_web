@@ -25,7 +25,8 @@ import { SplitButtonModule } from 'primeng/splitbutton';
 import { ToastModule } from 'primeng/toast';
 import { MessageService, MenuItem } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-issue-detail',
@@ -43,7 +44,7 @@ export class IssueDetailComponent implements OnInit {
   // edit dialog state
   displayDialog = false;
   editModel: any = {};
-  isCreating = false;
+  isCreating = false; // TODO: remove when create dialog is separated
   formErrors: any = {};
   projectOptions: { label: string; value: any; code?: string }[] = [];
   usersOptions: { label: string; value: any; avatar?: string | null }[] = [];
@@ -55,6 +56,20 @@ export class IssueDetailComponent implements OnInit {
   statusOptions: { label: string; value: any }[] = [];
   statusMenuItems: MenuItem[] = [];
   statusSaving = false;
+  // Add-relation dialog state
+  displayAddRelationDialog = false;
+  relationForm: any = {
+    selectedIssueIds: [],
+    selectedDocumentIds: [],
+    relationType: 'relates',
+    // direction uses 'source' | 'target' to match blocksDirectionOptions values
+    direction: 'source'
+  };
+  relationTypeOptions: { label: string; value: any }[] = [];
+  blocksDirectionOptions: { label: string; value: any }[] = [];
+  availableIssuesOptions: { label: string; value: any }[] = [];
+  availableDocumentsOptions: { label: string; value: any }[] = [];
+  savingRelations = false;
 
   constructor(private route: ActivatedRoute, private router: Router, private issuesService: IssuesService, private http: HttpClient, private messageService: MessageService, private cdr: ChangeDetectorRef, private translate: TranslateService) {
     // read route param synchronously in constructor to avoid ExpressionChangedAfterItHasBeenCheckedError
@@ -81,6 +96,16 @@ export class IssueDetailComponent implements OnInit {
       { label: this.translate.instant('components.issues.priority.HIGH') || 'High', value: 'high' },
       { label: this.translate.instant('components.issues.priority.MEDIUM') || 'Medium', value: 'medium' },
       { label: this.translate.instant('components.issues.priority.LOW') || 'Low', value: 'low' }
+    ];
+
+    // relation-type option labels are translation keys; template will render them using the translate pipe
+    this.relationTypeOptions = [
+      { label: 'components.issues.relations.FORM.TYPE_RELATES', value: 'relates' },
+      { label: 'components.issues.relations.FORM.TYPE_BLOCKS', value: 'blocks' }
+    ];
+    this.blocksDirectionOptions = [
+      { label: 'components.issues.relations.FORM.BLOCKS_ACTIVE', value: 'source' },
+      { label: 'components.issues.relations.FORM.BLOCKS_PASSIVE', value: 'target' }
     ];
   }
 
@@ -261,31 +286,6 @@ export class IssueDetailComponent implements OnInit {
     });
   }
 
-  loadStatuses(): void {
-    // load statuses from server to populate menu
-    this.http.get('/api/issue_statuses').subscribe({
-      next: (res: any) => {
-        // expected res may be { data: [...] } or the array directly
-        const list = (res && res.data) ? res.data : res;
-        if (!Array.isArray(list)) {
-          this.statusOptions = [];
-          this.statusMenuItems = [];
-          this.cdr.markForCheck();
-          return;
-        }
-        this.statusOptions = list.map((s: any) => ({ label: s.name || s.label || String(s.id), value: s.id }));
-        this.statusMenuItems = this.statusOptions.map(o => ({ label: o.label, command: () => this.changeStatus(o.value) }));
-        this.cdr.markForCheck();
-      },
-      error: (err: any) => {
-        console.warn('Failed to load statuses', err);
-        this.statusOptions = [];
-        this.statusMenuItems = [];
-        this.cdr.markForCheck();
-      }
-    });
-  }
-
   changeStatus(statusId: any): void {
     if (!this.issue || !this.issue.id) return;
     this.statusSaving = true;
@@ -330,6 +330,136 @@ export class IssueDetailComponent implements OnInit {
 
   back(): void {
     this.router.navigate(['/issues']);
+  }
+
+  // Open add-relation dialog (triggered from child relations table)
+  openAddRelationDialog(): void {
+    if (!this.issue || !this.issue.project_id) {
+      // try to fall back to issue.project
+      if (!this.issue || !this.issue.project) {
+        this.displayAddRelationDialog = true;
+        this.loadAvailableTargets(null);
+        return;
+      }
+    }
+    this.displayAddRelationDialog = true;
+    const projectId = this.issue.project_id ?? this.issue.project ?? null;
+    this.loadAvailableTargets(projectId);
+  }
+
+  // Load issues and documents belonging to the same project to populate multi-selects
+  private loadAvailableTargets(projectId: any | null): void {
+    // Build params
+    let paramsIssues = new HttpParams();
+    let paramsDocuments = new HttpParams();
+    if (projectId != null) {
+      paramsIssues = paramsIssues.set('project_id', String(projectId));
+      paramsDocuments = paramsDocuments.set('project_id', String(projectId));
+    }
+    // Optional: increase page size to get many items in one call (backend may ignore)
+    paramsIssues = paramsIssues.set('per_page', '200');
+    paramsDocuments = paramsDocuments.set('per_page', '200');
+
+    const reqIssues = this.http.get('/api/issues', { params: paramsIssues }).pipe();
+    const reqDocs = this.http.get('/api/documents', { params: paramsDocuments }).pipe();
+
+    forkJoin([reqIssues, reqDocs]).subscribe({
+      next: ([resIssues, resDocs]: any) => {
+        try {
+          const extract = (r: any) => Array.isArray(r) ? r : (r && (r.data || r.items) ? (r.data || r.items) : []);
+          const issues = extract(resIssues) as any[];
+          const docs = extract(resDocs) as any[];
+          this.availableIssuesOptions = (issues || []).map((it: any) => ({ label: `#${it.id} ${it.title || it.summary || it.name || ''}`.trim(), value: it.id }));
+          this.availableDocumentsOptions = (docs || []).map((d: any) => ({ label: `#${d.id} ${d.title || d.name || ''}`.trim(), value: d.id }));
+        } catch (e) {
+          this.availableIssuesOptions = [];
+          this.availableDocumentsOptions = [];
+        }
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.warn('Failed to load available relation targets', err);
+        this.availableIssuesOptions = [];
+        this.availableDocumentsOptions = [];
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  // Save relations: create link records for each selected target.
+  // New backend contract: POST /api/links accepts
+  // { active_type, active_id, passive_type, passive_id, relation_type }
+  saveRelations(): void {
+    if (!this.issue || !this.issue.id) return;
+    const sourceId = Number(this.issue.id);
+    const tasks: any[] = [];
+    const type = this.relationForm.relationType || 'relates';
+
+    // helper to push a POST observable for a given pair
+    const buildPayload = (srcType: string, srcId: any, tgtType: string, tgtId: any) => ({
+      active_type: srcType,
+      active_id: srcId,
+      passive_type: tgtType,
+      passive_id: tgtId,
+      relation_type: type
+    });
+
+    // For issues selected
+    for (const id of (this.relationForm.selectedIssueIds || [])) {
+      if (!id) continue;
+      if (type === 'blocks') {
+        if (this.relationForm.direction === 'source') {
+          // current issue blocks selected -> current is source
+          tasks.push(this.http.post('/api/links', buildPayload('issue', sourceId, 'issue', id)));
+        } else {
+          // selected blocks current -> selected is source
+          tasks.push(this.http.post('/api/links', buildPayload('issue', id, 'issue', sourceId)));
+        }
+      } else {
+        // relates - directionless; create link with current as source for consistency
+        tasks.push(this.http.post('/api/links', buildPayload('issue', sourceId, 'issue', id)));
+      }
+    }
+
+    // For documents selected
+    for (const id of (this.relationForm.selectedDocumentIds || [])) {
+      if (!id) continue;
+      if (type === 'blocks') {
+        if (this.relationForm.direction === 'source') {
+          // current issue blocks document: current is source, document target
+          tasks.push(this.http.post('/api/links', buildPayload('issue', sourceId, 'document', id)));
+        } else {
+          // document blocks current -> document as source
+          tasks.push(this.http.post('/api/links', buildPayload('document', id, 'issue', sourceId)));
+        }
+      } else {
+        tasks.push(this.http.post('/api/links', buildPayload('issue', sourceId, 'document', id)));
+      }
+    }
+
+    if (!tasks.length) {
+      // nothing to save
+      this.displayAddRelationDialog = false;
+      return;
+    }
+
+    this.savingRelations = true;
+    forkJoin(tasks).subscribe({
+      next: (_res) => {
+        this.savingRelations = false;
+        this.displayAddRelationDialog = false;
+        // refresh the issue to pick up new relations
+        this.loadIssue(this.issue.id);
+        this.cdr.markForCheck();
+        try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Saved', detail: this.translate.instant('components.issues.relations.FORM.SAVED') || 'Relations created' }); } catch (e) {}
+      },
+      error: (err) => {
+        console.error('Failed to save relations', err);
+        this.savingRelations = false;
+        this.cdr.markForCheck();
+        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR'), detail: (err && err.message) ? err.message : this.translate.instant('components.issues.messages.ERROR') }); } catch (e) {}
+      }
+    });
   }
 
   assigneeInitials(): string {

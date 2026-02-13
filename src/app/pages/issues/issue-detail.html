@@ -25,7 +25,7 @@
                                                         <div>{{ opt.label }}</div>
                                                     </div>
                                                 </ng-template>
-                                                <ng-template let-opt pTemplate="value">
+                                                <ng-template let-opt pTemplate="selectedItem">
                                                     <div class="flex items-center gap-2">
                                                         <div>{{ opt.label }}</div>
                                                     </div>
@@ -66,7 +66,7 @@
                                                         <div>{{ opt.label }}</div>
                                                     </div>
                                                 </ng-template>
-                                                <ng-template let-opt pTemplate="value">
+                                                <ng-template let-opt pTemplate="selectedItem">
                                                     <div class="flex items-center gap-2">
                                                         <ng-container *ngIf="opt.avatar; else initialsValue">
                                                             <img [src]="opt.avatar" alt="avatar" class="select-avatar" />
@@ -299,7 +299,51 @@
     <div class="issue-left-scroll">
         <app-issue-detail-description [issue]="issue"></app-issue-detail-description>
         <app-issue-detail-attach [issue]="issue"></app-issue-detail-attach>
-        <app-issue-detail-relations-table [issue]="issue"></app-issue-detail-relations-table>
+        <app-issue-detail-relations-table [issue]="issue" (addRelation)="openAddRelationDialog()"></app-issue-detail-relations-table>
+
+        <!-- Add-relation dialog -->
+        <p-dialog header="{{ 'components.issues.relations.ADD_TITLE' | translate }}" [(visible)]="displayAddRelationDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{width: '40%'}" appendTo="body">
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col gap-2">
+                    <label class="font-bold">{{ 'components.issues.relations.FORM.RELATION_TYPE' | translate }}</label>
+                    <p-select [options]="relationTypeOptions" [(ngModel)]="relationForm.relationType" optionLabel="label" optionValue="value" appendTo="body">
+                        <ng-template let-opt pTemplate="item">
+                            <div>{{ opt.label | translate }}</div>
+                        </ng-template>
+                        <ng-template let-opt pTemplate="selectedItem">
+                            <div>{{ opt.label | translate }}</div>
+                        </ng-template>
+                    </p-select>
+                </div>
+
+                <div *ngIf="relationForm.relationType === 'blocks'" class="flex flex-col gap-2">
+                    <label class="font-bold">{{ 'components.issues.relations.FORM.BLOCKS_DIRECTION' | translate }}</label>
+                    <p-select [options]="blocksDirectionOptions" [(ngModel)]="relationForm.direction" optionLabel="label" optionValue="value" appendTo="body">
+                        <ng-template let-opt pTemplate="item">
+                            <div>{{ opt.label | translate }}</div>
+                        </ng-template>
+                        <ng-template let-opt pTemplate="selectedItem">
+                            <div>{{ opt.label | translate }}</div>
+                        </ng-template>
+                    </p-select>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label class="font-bold">{{ 'components.issues.relations.FORM.ISSUES' | translate }}</label>
+                    <p-multiSelect [options]="availableIssuesOptions" [(ngModel)]="relationForm.selectedIssueIds" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body"></p-multiSelect>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label class="font-bold">{{ 'components.issues.relations.FORM.DOCUMENTS' | translate }}</label>
+                    <p-multiSelect [options]="availableDocumentsOptions" [(ngModel)]="relationForm.selectedDocumentIds" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body"></p-multiSelect>
+                </div>
+
+                <div class="flex justify-end gap-2 mt-4">
+                    <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="displayAddRelationDialog=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="savingRelations"></p-button>
+                    <p-button label="{{ 'MENU.SAVE' | translate }}" (onClick)="saveRelations()" severity="primary" icon="pi pi-check" iconPos="left" [loading]="savingRelations" [disabled]="savingRelations"></p-button>
+                </div>
+            </div>
+        </p-dialog>
         
     </div>
     

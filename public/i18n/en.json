@@ -477,31 +477,28 @@
       },
       "relations": {
         "TITLE": "Relations",
-        "ADD_RELATION": "Add relation",
-        "TYPE": "Type",
-        "ISSUES": "Issues (project)",
-        "DOCUMENTS": "Documents (project)",
-        "RELATION_TYPE": "Relation type",
-        "SELECTED": "Selected",
-        "CREATE": "Create",
-        "CANCEL": "Cancel",
         "NO_RELATIONS": "No relations to display",
-        "DOCUMENT": "Document",
-        "COLUMN_RELATION": "Relation",
         "COLUMN_TYPE_ID": "#",
         "COLUMN_NAME": "Name",
         "COLUMN_STATUS": "Status",
         "COLUMN_TYPE": "Type",
-        "DELETE_CONFIRM": "Delete relation \"{{name}}\"?",
-        "TYPE_OPTIONS": {
-          "RELATES": "Relates",
-          "BLOCKS": "Blocks"
-        },
-        "TYPE_DESCRIPTIONS": {
-          "RELATES": "Indicates this issue is related to the target (no blocking).",
-          "BLOCKS": "Indicates this issue blocks the target; the target cannot progress until this is resolved."
-        },
-        "ACTION_DELETE": "Delete"
+        "COLUMN_DIRECTION": "Direction",
+        "DIRECTION_LABEL_SOURCE": "Source",
+        "DIRECTION_LABEL_TARGET": "Target",
+        "DIRECTION_LABEL_RELATES": "-",
+        "DIRECTION_LABEL_UNKNOWN": "Unknown",
+        "ADD_TITLE": "Add relation",
+        "FORM": {
+          "RELATION_TYPE": "Relation type",
+          "BLOCKS_DIRECTION": "Blocks direction",
+          "ISSUES": "Issues (project)",
+          "DOCUMENTS": "Documents (project)",
+          "TYPE_RELATES": "Relates",
+          "TYPE_BLOCKS": "Blocks",
+          "BLOCKS_ACTIVE": "This issue blocks the target (active)",
+          "BLOCKS_PASSIVE": "This issue is blocked by the target (passive)",
+          "SAVED": "Relations created"
+        }
       },
       "CHANGE_STATUS": "Change status",
       "chat": {
@@ -514,8 +511,7 @@
         "ANSWER": "Answer"
       },
       "attach": {
-        "DRAG_DROP": "Drag and drop files here to upload."
-      ,
+        "DRAG_DROP": "Drag and drop files here to upload.",
         "NO_ATTACHMENTS": "No attachments",
         "COLUMN_NAME": "File name",
         "COLUMN_SIZE": "Size",
@@ -530,6 +526,7 @@
         "UPLOADED": "Uploaded",
         "UPLOADED_COUNT": "{{count}} file(s) uploaded",
         "UPLOAD_FAILED": "Upload failed",
+        "UPLOAD_CANCELLED": "Upload cancelled",
         "ERROR": "Error",
         "WARNING": "Warning",
         "FILE_TOO_LARGE": "File is too large (max {{size}})",

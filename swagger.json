@@ -713,27 +713,23 @@
           "id": {
             "type": "integer"
           },
-          "source_type": {
+          "active_type": {
             "type": "string",
             "example": "issue"
           },
-          "source_id": {
+          "active_id": {
             "type": "integer"
           },
-          "target_type": {
+          "passive_type": {
             "type": "string",
             "example": "issue"
           },
-          "target_id": {
+          "passive_id": {
             "type": "integer"
           },
           "relation_type": {
             "type": "string",
             "example": "blocks"
-          },
-          "blocks_closure": {
-            "type": "boolean",
-            "example": true
           },
           "created_by": {
             "type": "integer",
@@ -2899,28 +2895,28 @@
             }
           },
           {
-            "name": "source_type",
+            "name": "active_type",
             "in": "query",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "source_id",
+            "name": "active_id",
             "in": "query",
             "schema": {
               "type": "integer"
             }
           },
           {
-            "name": "target_type",
+            "name": "passive_type",
             "in": "query",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "target_id",
+            "name": "passive_id",
             "in": "query",
             "schema": {
               "type": "integer"
@@ -2939,13 +2935,6 @@
             "in": "query",
             "schema": {
               "type": "integer"
-            }
-          },
-          {
-            "name": "blocks_closure",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
             }
           }
         ],
@@ -2976,7 +2965,7 @@
           "links"
         ],
         "summary": "Создать связь между сущностями",
-        "description": "Создаёт отношение между двумя сущностями (задачи, документы и др.). Установите `blocks_closure=true`, чтобы пометить связь, блокирующую закрытие исходной сущности, пока целевая не перейдёт в финальный статус.",
+  "description": "Создаёт отношение между двумя сущностями (задачи, документы и др.).",
         "security": [
           {
             "bearerAuth": []
@@ -2992,45 +2981,40 @@
               "schema": {
                 "type": "object",
                 "required": [
-                  "source_type",
-                  "source_id",
-                  "target_type",
-                  "target_id"
+                  "active_type",
+                  "active_id",
+                  "passive_type",
+                  "passive_id"
                 ],
                 "properties": {
-                  "source_type": {
+                  "active_type": {
                     "type": "string",
                     "example": "issue"
                   },
-                  "source_id": {
+                  "active_id": {
                     "type": "integer",
                     "example": 123
                   },
-                  "target_type": {
+                  "passive_type": {
                     "type": "string",
                     "example": "issue"
                   },
-                  "target_id": {
+                  "passive_id": {
                     "type": "integer",
                     "example": 456
                   },
                   "relation_type": {
                     "type": "string",
                     "example": "blocks"
-                  },
-                  "blocks_closure": {
-                    "type": "boolean",
-                    "example": true
                   }
                 }
               },
               "example": {
-                "source_type": "issue",
-                "source_id": 123,
-                "target_type": "issue",
-                "target_id": 456,
-                "relation_type": "blocks",
-                "blocks_closure": true
+                "active_type": "issue",
+                "active_id": 123,
+                "passive_type": "issue",
+                "passive_id": 456,
+                "relation_type": "blocks"
               }
             }
           }
@@ -3665,65 +3649,88 @@
             "example": false
           },
           {
-            "name": "is_active",
-            "in": "query",
-            "description": "Фильтр по активности задачи (true = активные, false = неактивные)",
-            "schema": {
-              "type": "boolean"
-            },
-            "example": true
-          },
-          {
             "name": "project_id",
             "in": "query",
+            "description": "ID проекта — можно передать несколько значений (через запятую или повторяя параметр)",
             "schema": {
-              "type": "integer"
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
             },
-            "example": 12
+            "example": [
+              12
+            ]
           },
           {
             "name": "status_id",
             "in": "query",
+            "description": "ID статуса — можно передать несколько значений (через запятую или повторяя параметр)",
             "schema": {
-              "type": "integer"
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
             },
-            "example": 2
+            "example": [
+              2
+            ]
           },
           {
             "name": "assignee_id",
             "in": "query",
-            "description": "ID пользователя, назначенного на задачу",
+            "description": "ID пользователя, назначенного на задачу — можно передать несколько значений",
             "schema": {
-              "type": "integer"
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
             },
-            "example": 5
+            "example": [
+              5
+            ]
           },
           {
             "name": "author_id",
             "in": "query",
-            "description": "ID автора/создателя задачи",
+            "description": "ID автора/создателя задачи — можно передать несколько значений",
             "schema": {
-              "type": "integer"
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
             },
-            "example": 7
+            "example": [
+              7
+            ]
           },
           {
             "name": "type_id",
             "in": "query",
-            "description": "ID типа задачи",
+            "description": "ID типа задачи — можно передать несколько значений",
             "schema": {
-              "type": "integer"
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
             },
-            "example": 1
+            "example": [
+              1
+            ]
           },
           {
             "name": "priority",
             "in": "query",
-            "description": "Приоритет (внутренний код)",
+            "description": "Приоритет (внутренний код) — можно передать несколько значений (например low,medium)",
             "schema": {
-              "type": "integer"
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             },
-            "example": 3
+            "example": [
+              "medium"
+            ]
           },
           {
             "name": "estimated_hours",
@@ -3819,6 +3826,15 @@
               "type": "string"
             },
             "example": "pump"
+          },
+          {
+            "name": "my_issue",
+            "in": "query",
+            "description": "Вернуть только задачи, принадлежащие текущему пользователю (author OR assignee). Значение: true/false",
+            "schema": {
+              "type": "boolean"
+            },
+            "example": true
           }
         ],
         "responses": {

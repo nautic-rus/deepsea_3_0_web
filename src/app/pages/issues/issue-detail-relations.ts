@@ -69,8 +69,9 @@ export class IssueDetailRelationsComponent implements OnChanges {
     if (!issue || (!issue.id && !issue._id)) return;
     const id = issue.id ?? issue._id;
     let params = new HttpParams();
-  params = params.set('source_type', 'issue');
-    params = params.set('source_id', String(id));
+    // Request links where this issue is the active/primary side
+    params = params.set('active_type', 'issue');
+    params = params.set('active_id', String(id));
 
     this.http.get<any>('/api/links', { params }).subscribe({
       next: (res: any) => {
@@ -121,11 +122,10 @@ export class IssueDetailRelationsComponent implements OnChanges {
   }
 
   private mapLinkToRelation(link: any) {
-    // Expected link structure (example provided):
-    // { id, source_type, source_id, target_type, target_id, relation_type, ... }
-    const targetTypeRaw = (link.target_type || '').toLowerCase();
+    // Support both legacy and new shapes. New backend returns active/passive fields.
+    const targetTypeRaw = String(link.target_type || link.passive_type || '').toLowerCase();
     const type = targetTypeRaw === 'issue' || targetTypeRaw === 'task' ? 'Issue' : (targetTypeRaw === 'doc' || targetTypeRaw === 'document' ? 'Document' : (link.relation_type || 'Relation'));
-  const id = link.target_id ?? link.targetId ?? link.target ?? link.id;
+    const id = link.target_id ?? link.targetId ?? link.target ?? link.passive_id ?? link.passiveId ?? link.passive ?? link.id;
     return {
       type,
       id,
