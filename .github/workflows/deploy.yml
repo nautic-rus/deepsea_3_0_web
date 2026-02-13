@@ -1,0 +1,86 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    name: Build and deploy to server
+    runs-on: ubuntu-latest
+    env:
+      # Adjust these or set them as repository secrets (recommended)
+      NODE_VERSION: '18'
+      PROJECT_NAME: 'deepsea3'
+      OUTPUT_DIR: 'dist/deepsea3'
+      # The following should be provided as repository secrets:
+      # SSH_PRIVATE_KEY, SERVER_HOST, SERVER_USER, TARGET_DIR, (optional) SERVER_PORT
+      SERVER_PORT: ${{ secrets.SERVER_PORT }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (production)
+        run: npm run build --if-present
+
+      - name: Verify build output
+        run: |
+          if [ ! -d "${{ env.OUTPUT_DIR }}" ]; then
+            echo "Build output not found at ${{ env.OUTPUT_DIR }}";
+            ls -la || true;
+            exit 1;
+          fi
+
+      - name: Start ssh-agent and add private key
+        uses: webfactory/ssh-agent@v0.8.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add server to known_hosts (safe fallback)
+        run: |
+          mkdir -p ~/.ssh
+          if [ -n "${{ env.SERVER_PORT }}" ]; then
+            ssh-keyscan -p ${{ env.SERVER_PORT }} ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts || true
+          else
+            ssh-keyscan ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts || true
+          fi
+
+      - name: Deploy with rsync over SSH
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          TARGET_DIR: ${{ secrets.TARGET_DIR }}
+          SERVER_PORT: ${{ env.SERVER_PORT }}
+        run: |
+          if [ -z "$SERVER_HOST" ] || [ -z "$SERVER_USER" ] || [ -z "$TARGET_DIR" ]; then
+            echo "Missing SERVER_HOST, SERVER_USER or TARGET_DIR secret(s). Aborting.";
+            exit 1;
+          fi
+
+          # Build SSH command optionally including port
+          if [ -n "$SERVER_PORT" ]; then
+            RSYNC_SSH="ssh -p $SERVER_PORT -o StrictHostKeyChecking=yes"
+          else
+            RSYNC_SSH="ssh -o StrictHostKeyChecking=yes"
+          fi
+
+          echo "Deploying ${{ env.OUTPUT_DIR }} to $SERVER_USER@$SERVER_HOST:$TARGET_DIR"
+
+          # Ensure trailing slash to copy contents of the folder
+          SRC_PATH="${{ env.OUTPUT_DIR }}/"
+
+          rsync -az --delete -e "$RSYNC_SSH" "$SRC_PATH" "$SERVER_USER@$SERVER_HOST:$TARGET_DIR"
+
+      - name: Finished
+        run: echo "Deployment finished"
