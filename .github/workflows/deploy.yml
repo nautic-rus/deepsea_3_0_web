@@ -50,10 +50,10 @@ jobs:
       - name: Add server to known_hosts (safe fallback)
         run: |
           mkdir -p ~/.ssh
-          if [ -n "${{ env.SERVER_PORT }}" ]; then
-            ssh-keyscan -p ${{ env.SERVER_PORT }} ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts || true
+          if [ -n "22" ]; then
+            ssh-keyscan -p 22 test.deep-sea.ru >> ~/.ssh/known_hosts || true
           else
-            ssh-keyscan ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts || true
+            ssh-keyscan test.deep-sea.ru >> ~/.ssh/known_hosts || true
           fi
 
       - name: Deploy with rsync over SSH
