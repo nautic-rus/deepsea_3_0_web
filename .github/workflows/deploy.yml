@@ -45,7 +45,7 @@ jobs:
       - name: Start ssh-agent and add private key
         uses: webfactory/ssh-agent@v0.8.1
         with:
-          ssh-private-key: '5cMYc7BDsU3TjmtLp35YQCkYznoOgGhx22m84OjtWFI'
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Add server to known_hosts (safe fallback)
         run: |
@@ -58,10 +58,10 @@ jobs:
 
       - name: Deploy with rsync over SSH
         env:
-          SERVER_HOST: 'test.deepsea.ru'
-          SERVER_USER: 'spiridovich'
-          TARGET_DIR: '/var/www/html'
-          SERVER_PORT: '22'
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          TARGET_DIR: ${{ secrets.TARGET_DIR }}
+          SERVER_PORT: ${{ env.SERVER_PORT }}
         run: |
           if [ -z "$SERVER_HOST" ] || [ -z "$SERVER_USER" ] || [ -z "$TARGET_DIR" ]; then
             echo "Missing SERVER_HOST, SERVER_USER or TARGET_DIR secret(s). Aborting.";
