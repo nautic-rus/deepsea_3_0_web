@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # Adjust these or set them as repository secrets (recommended)
-      NODE_VERSION: '18'
+      NODE_VERSION: '24.11.1'
       PROJECT_NAME: 'deepsea3'
       OUTPUT_DIR: 'dist/deepsea3'
       # The following should be provided as repository secrets:
