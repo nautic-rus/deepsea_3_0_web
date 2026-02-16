@@ -58,7 +58,7 @@ jobs:
 
       - name: Deploy with rsync over SSH
         env:
-          SERVER_HOST: 'test.deep-sea.ru'
+          SERVER_HOST: 'deploy.deep-sea.ru'
           SERVER_USER: 'spiridovich'
           TARGET_DIR: '/var/www/html'
           SERVER_PORT: '22'
