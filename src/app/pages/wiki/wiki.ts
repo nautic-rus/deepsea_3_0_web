@@ -5,10 +5,10 @@ import { RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 
 @Component({
-  selector: 'app-equipment',
+  selector: 'app-wiki',
   standalone: true,
   imports: [CommonModule, TranslateModule, RouterModule, ButtonModule],
-  templateUrl: './equipment.html',
-  styleUrls: ['./equipment.scss']
+  templateUrl: './wiki.html',
+  styleUrls: ['./wiki.scss']
 })
-export class EquipmentComponent {}
+export class WikiComponent {}

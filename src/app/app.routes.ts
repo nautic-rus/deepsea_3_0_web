@@ -61,11 +61,7 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/documents/documents').then(m => m.DocumentsComponent),
         canActivate: [AuthGuard]
       },
-      {
-        path: 'reports',
-        loadComponent: () => import('./pages/reports/reports').then(m => m.ReportsComponent),
-        canActivate: [AuthGuard]
-      },
+      
       {
         path: 'materials',
         loadComponent: () => import('./pages/materials/materials').then(m => m.MaterialsComponent),
@@ -91,6 +87,13 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/suppliers/suppliers').then(m => m.SuppliersComponent),
         canActivate: [AuthGuard]
       },
+
+      {
+        path: 'wiki',
+        loadComponent: () => import('./pages/wiki/wiki').then(m => m.WikiComponent),
+        canActivate: [AuthGuard]
+      },
+
       {
         path: 'projects',
         loadComponent: () => import('./pages/projects/projects').then(m => m.ProjectsComponent),

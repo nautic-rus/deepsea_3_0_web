@@ -1,20 +1,19 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { StatsWidget } from './widgets/stats-widget';
-import { BestSellingWidget } from './widgets/best-selling-widget';
-import { NotificationsWidget } from './widgets/notifications-widget';
-import { RevenueChartWidget } from './widgets/revenue-chart-widget';
-import { RecentSalesWidget } from './widgets/recent-sales-widget';
-import { MyTasksWidget } from './widgets/my-tasks-widget';
-import { MyDocumentsWidget } from './widgets/my-documents-widget';
-import { MyCalendarWidget } from './widgets/my-calendar-widget';
-import { MyMailWidget } from './widgets/my-mail-widget';
+import { StatsWidget } from './widgets/user-stats-widget';
+import { NotificationsWidget } from './widgets/activity-widget';
+import { RevenueStreamWidget } from './widgets/timesheet-histogram-widget';
+import { RecentSalesWidget } from './widgets/timesheet-calendar-widget';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
     imports: [
-    CommonModule
+    CommonModule,
+    StatsWidget,
+    RevenueStreamWidget,
+    RecentSalesWidget,
+    NotificationsWidget
   ],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.scss']

@@ -1,53 +1,100 @@
 <div class="header-container shadow-sm">
-      <p-menubar [model]="menuItems" styleClass="border-0 bg-transparent header-menubar">
-        <ng-template #start>
-          <div class="flex items-center gap-2 cursor-pointer mr-6" routerLink="/dashboard">
-            <img src="/Deepsea_logo_00.svg" alt="DeepSea" class="h-8 w-auto" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block'" />
-            <!-- Fallback inline SVG shown only if image fails to load -->
-            <span style="display:none;" aria-hidden="true">
-              <svg viewBox="0 0 54 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-10 h-8">
-                <path
-                  fill-rule="evenodd"
-                  clip-rule="evenodd"
-                  d="M17.1637 19.2467C17.1566 19.4033 17.1529 19.561 17.1529 19.7194C17.1529 25.3503 21.7203 29.915 27.3546 29.915C32.9887 29.915 37.5561 25.3503 37.5561 19.7194C37.5561 19.5572 37.5524 19.3959 37.5449 19.2355C38.5617 19.0801 39.5759 18.9013 40.5867 18.6994L40.6926 18.6782C40.7191 19.0218 40.7326 19.369 40.7326 19.7194C40.7326 27.1036 34.743 33.0896 27.3546 33.0896C19.966 33.0896 13.9765 27.1036 13.9765 19.7194C13.9765 19.3652 13.9902 19.0142 14.0172 18.667L14.1231 18.6882C15.134 18.8901 16.1481 19.0689 17.1637 19.2467ZM27.3546 13.5765C22.903 13.5765 19.1492 16.2058 17.4356 19.9544C16.4189 19.7765 15.4037 19.5765 14.3916 19.3541C16.2844 14.0934 21.3817 10.4019 27.3546 10.4019C33.3276 10.4019 38.4249 14.0934 40.3177 19.3541C39.3056 19.5765 38.2904 19.7765 37.2737 19.9544C35.5601 16.2058 31.8063 13.5765 27.3546 13.5765Z"
-                  fill="white"
-                />
-              </svg>
-            </span>
-          </div>
-        </ng-template>
-        <ng-template #end>
-          <div class="flex items-center gap-2">
-            <!-- Dark Mode Toggle Button (like Sakai-NG) -->
-      <!-- <button pButton pRipple 
-        [icon]="darkMode ? 'pi pi-moon' : 'pi pi-sun'" 
-        [text]="true" 
-        class="header-icon-button"
-        (click)="toggleDarkMode()" [disabled]="">
-      </button> -->
-            <!-- Language toggle -->
-            <button pButton pRipple [label]="currentLang.toUpperCase()" class="p-button-text header-lang-button" (click)="toggleLang()"></button>
-            
-      <button pButton pRipple 
-        icon="pi pi-bell" 
-        [text]="true" 
-        class="header-icon-button">
-      </button>
-            
-            <!-- User Avatar with Menu -->
-            <p-avatar
-              [image]="avatarUrl"
-              [label]="avatarLabel"
-              shape="circle"
-              class="cursor-pointer ml-2"
-              (click)="userMenu.toggle($event)">
-              <!-- Custom icon template: show initials as a styled span when image is not set -->
-              <ng-template pTemplate="icon">
-                <span class="avatar-initials">{{ avatarLabel }}</span>
-              </ng-template>
-            </p-avatar>
-            <p-menu #userMenu [model]="userMenuItems" [popup]="true"></p-menu>
-          </div>
-        </ng-template>
-      </p-menubar>
+  <div class="header-topbar">
+    <!-- Logo -->
+    <div class="flex items-center gap-2 cursor-pointer" routerLink="/dashboard">
+      <img src="/Deepsea_logo_00.svg" alt="DeepSea" class="h-8 w-auto" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block'" />
+      <span style="display:none;" aria-hidden="true">
+        <svg viewBox="0 0 54 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-10 h-8">
+          <path fill-rule="evenodd" clip-rule="evenodd"
+            d="M17.1637 19.2467C17.1566 19.4033 17.1529 19.561 17.1529 19.7194C17.1529 25.3503 21.7203 29.915 27.3546 29.915C32.9887 29.915 37.5561 25.3503 37.5561 19.7194C37.5561 19.5572 37.5524 19.3959 37.5449 19.2355C38.5617 19.0801 39.5759 18.9013 40.5867 18.6994L40.6926 18.6782C40.7191 19.0218 40.7326 19.369 40.7326 19.7194C40.7326 27.1036 34.743 33.0896 27.3546 33.0896C19.966 33.0896 13.9765 27.1036 13.9765 19.7194C13.9765 19.3652 13.9902 19.0142 14.0172 18.667L14.1231 18.6882C15.134 18.8901 16.1481 19.0689 17.1637 19.2467ZM27.3546 13.5765C22.903 13.5765 19.1492 16.2058 17.4356 19.9544C16.4189 19.7765 15.4037 19.5765 14.3916 19.3541C16.2844 14.0934 21.3817 10.4019 27.3546 10.4019C33.3276 10.4019 38.4249 14.0934 40.3177 19.3541C39.3056 19.5765 38.2904 19.7765 37.2737 19.9544C35.5601 16.2058 31.8063 13.5765 27.3546 13.5765Z"
+            fill="white" />
+        </svg>
+      </span>
     </div>
+
+    <!-- Horizontal navigation menu (inline after logo) -->
+    <ul class="layout-menu">
+      @for (item of menuItems; track item.label) {
+        <li class="layout-root-menuitem"
+            [class.active-menuitem]="activeRootIndex === $index"
+            (mouseenter)="onRootMenuItemMouseEnter($index)"
+            (mouseleave)="onRootMenuItemMouseLeave()">
+          @if (item.items && item.items.length) {
+            <a tabindex="0" class="layout-root-link" (click)="onRootMenuItemClick($index, $event)">
+              @if (item.icon) {
+                <i class="layout-menuitem-icon" [ngClass]="item.icon"></i>
+              }
+              <span class="layout-menuitem-text">{{ item.label }}</span>
+              <i class="pi pi-fw pi-angle-down layout-submenu-toggler"></i>
+            </a>
+            <ul class="layout-root-submenulist" [@submenu]="activeRootIndex === $index ? 'visible' : 'hidden'">
+              @for (child of item.items; track child.label) {
+                <li [class.active-menuitem]="isChildActive(child)">
+                  @if (child.items && child.items.length) {
+                    <a tabindex="0" class="layout-submenu-link" (click)="child['_expanded'] = !child['_expanded']">
+                      @if (child.icon) {
+                        <i class="layout-menuitem-icon" [ngClass]="child.icon"></i>
+                      }
+                      <span class="layout-menuitem-text">{{ child.label }}</span>
+                      <i class="pi pi-fw pi-angle-down layout-submenu-toggler"></i>
+                    </a>
+                    <ul class="layout-nested-submenu" [class.expanded]="child['_expanded']">
+                      @for (grandchild of child.items; track grandchild.label) {
+                        <li>
+                          <a [routerLink]="grandchild.routerLink" routerLinkActive="active-route" class="layout-submenu-link"
+                             (click)="onMenuItemClick()">
+                            @if (grandchild.icon) {
+                              <i class="layout-menuitem-icon" [ngClass]="grandchild.icon"></i>
+                            }
+                            <span class="layout-menuitem-text">{{ grandchild.label }}</span>
+                          </a>
+                        </li>
+                      }
+                    </ul>
+                  } @else {
+                    @if (child.separator) {
+                      <hr class="layout-menu-separator" />
+                    } @else {
+                      <a [routerLink]="child.routerLink" routerLinkActive="active-route" class="layout-submenu-link"
+                         (click)="onMenuItemClick()" [attr.href]="child.url || null" [attr.target]="child.target || null">
+                        @if (child.icon) {
+                          <i class="layout-menuitem-icon" [ngClass]="child.icon"></i>
+                        }
+                        <span class="layout-menuitem-text">{{ child.label }}</span>
+                      </a>
+                    }
+                  }
+                </li>
+              }
+            </ul>
+          } @else {
+            <a [routerLink]="item.routerLink" routerLinkActive="active-route" class="layout-root-link"
+               (click)="onMenuItemClick()">
+              @if (item.icon) {
+                <i class="layout-menuitem-icon" [ngClass]="item.icon"></i>
+              }
+              <span class="layout-menuitem-text">{{ item.label }}</span>
+            </a>
+          }
+        </li>
+      }
+    </ul>
+
+    <!-- Right-side actions -->
+    <div class="flex items-center gap-2">
+      <button pButton pRipple [label]="currentLang.toUpperCase()" class="p-button-text header-lang-button" (click)="toggleLang()"></button>
+      <button pButton pRipple icon="pi pi-bell" [text]="true" class="header-icon-button"></button>
+      <p-avatar
+        [image]="avatarUrl"
+        [label]="avatarLabel"
+        shape="circle"
+        class="cursor-pointer ml-2"
+        (click)="userMenu.toggle($event)">
+        <ng-template pTemplate="icon">
+          <span class="avatar-initials">{{ avatarLabel }}</span>
+        </ng-template>
+      </p-avatar>
+      <p-menu #userMenu [model]="userMenuItems" [popup]="true"></p-menu>
+    </div>
+  </div>
+</div>

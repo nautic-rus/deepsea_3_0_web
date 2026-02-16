@@ -62,5 +62,10 @@ export class AuthService {
   requestPasswordReset(email: string): Observable<any> {
     return this.http.post<any>(`${this.API_BASE}/request_password_reset`, { email });
   }
+
+  /** Reset password using token from email */
+  resetPassword(token: string, password: string): Observable<any> {
+    return this.http.post<any>(`${this.API_BASE}/reset_password`, { token, password });
+  }
 }
 

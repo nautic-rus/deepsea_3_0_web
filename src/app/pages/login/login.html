@@ -13,12 +13,12 @@
           <!-- External logo (uses file in public/) -->
           <!-- Logo: height increased 3x (h-72) and width auto to preserve aspect ratio -->
           <img src="/Deepsea_logo_00.svg" alt="DeepSea logo" class="mb-8 h-20 w-auto mx-auto logo-color" />
-          <div class="text-surface-900 dark:text-surface-0 text-2xl font-medium mb-4">{{ 'components.login.WELCOME' | translate }}</div>
+          <div class="text-surface-500 dark:text-surface-0 text-2xl font-medium mb-4">{{ 'components.login.WELCOME' | translate }}</div>
           <span class="text-muted-color font-medium">{{ 'components.login.SUBTITLE' | translate }}</span>
         </div>
 
         <div>
-          <label for="email1" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">{{ 'components.login.EMAIL_LABEL' | translate }}</label>
+          <label for="email1" class="block text-surface-500 dark:text-surface-0 text-xl font-medium mb-2">{{ 'components.login.EMAIL_LABEL' | translate }}</label>
           <input 
             pInputText 
             id="email1" 
@@ -28,7 +28,7 @@
             [(ngModel)]="email"
           />
 
-          <label for="password1" class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2">{{ 'components.login.PASSWORD_LABEL' | translate }}</label>
+          <label for="password1" class="block text-surface-500 dark:text-surface-0 font-medium text-xl mb-2">{{ 'components.login.PASSWORD_LABEL' | translate }}</label>
           <p-password 
             id="password1" 
             [(ngModel)]="password" 
@@ -42,7 +42,7 @@
           <div class="flex items-center justify-between mt-2 mb-8 gap-8">
             <div class="flex items-center">
               <p-checkbox [(ngModel)]="rememberMe" id="rememberme1" [binary]="true" class="mr-2"></p-checkbox>
-              <label for="rememberme1" class="text-surface-900 dark:text-surface-0">{{ 'components.login.REMEMBER_ME' | translate }}</label>
+              <label for="rememberme1" class="text-surface-500 dark:text-surface-0">{{ 'components.login.REMEMBER_ME' | translate }}</label>
             </div>
             <a class="font-medium no-underline ml-2 text-right text-primary" routerLink="/reset-password">{{ 'components.login.FORGOT_PASSWORD' | translate }}</a>
           </div>

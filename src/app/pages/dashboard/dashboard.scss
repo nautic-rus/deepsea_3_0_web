@@ -1,0 +1,58 @@
+/* Dashboard scrolling and layout helpers */
+.dashboard-root {
+	/* Occupy full viewport height and allow vertical scrolling */
+	height: calc(100vh - var(--header-height, 64px));
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
+	box-sizing: border-box;
+	padding-bottom: 1rem;
+}
+
+/* Ensure grid children respect the scroll container and don't cause overflow */
+.dashboard-root .grid {
+	min-height: 0;
+}
+
+/* Small responsive tweak so widgets fit nicely on narrow screens */
+.dashboard-root .card {
+	overflow: visible;
+}
+
+/* Explicit grid for stats to ensure 4-in-row layout regardless of util classes */
+.stats-grid {
+	display: grid;
+	grid-template-columns: repeat(1, 1fr);
+	gap: 1rem;
+}
+
+/* large screens: 4 columns */
+@media (min-width: 1200px) {
+	.stats-grid {
+		grid-template-columns: repeat(4, 1fr);
+	}
+}
+
+/* medium screens: 2 columns */
+@media (min-width: 768px) and (max-width: 1199px) {
+	.stats-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+.stats-grid .stat-item {
+	min-width: 0;
+}
+
+/* Two-column helper for left dashboard column (revenue + recent sales) */
+.two-col {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 1rem;
+}
+
+@media (min-width: 992px) {
+	.two-col {
+		grid-template-columns: 1fr 1fr;
+	}
+}
+

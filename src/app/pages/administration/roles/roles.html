@@ -2,8 +2,8 @@
 <section class="admin-subpage-tools card">
   <p-toolbar>
     <ng-template #start>
-      <p-button [label]="'MENU.CREATE' | translate" icon="pi pi-plus" severity="secondary" class="mr-2" (click)="openCreateRole()"></p-button>
-      <p-button severity="secondary" [label]="'MENU.DELETE' | translate" icon="pi pi-trash" outlined (click)="deleteSelectedRoles()" [disabled]="!selectedRoles || !selectedRoles.length"></p-button>
+      <p-button [label]="'MENU.CREATE' | translate" icon="pi pi-plus" severity="primary" class="mr-2" (click)="openCreateRole()"></p-button>
+      <p-button severity="secondary" [label]="'MENU.DELETE' | translate" icon="pi pi-trash"  (click)="deleteSelectedRoles()" [disabled]="!selectedRoles || !selectedRoles.length"></p-button>
     </ng-template>
 
     <ng-template #end>

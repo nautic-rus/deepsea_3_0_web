@@ -1,23 +1,12 @@
 <div class="page-documents">
-  <div class="documents-grid">
-    <aside class="documents-menu card">
-      <h2>{{ 'MENU.DOCUMENTS' | translate }}</h2>
-      <p-tieredMenu [model]="menuItems"></p-tieredMenu>
-    </aside>
+  <section class="admin-subpage-content card text-center flex flex-col items-center justify-center" style="height: 90vh;">
 
-    <div class="documents-content-wrapper">
-      <section class="documents-tools card">
-        <p>
-          This is the Documents page. Add documents-related tools and sub-pages here.
-        </p>
-      </section>
-
-      <section class="documents-content card">
-        <h3>Overview</h3>
-        <p>
-          This is the Documents page. Add documents-related tools and sub-pages here.
-        </p>
-      </section>
+    <div class="mb-4">
+      <h1>{{ 'MENU.DOCUMENTS' | translate }}</h1>
     </div>
-  </div>
+
+    <p>Мы работаем над этой страницей — приходите позже или вернитесь на главную.</p>
+
+    <p-button [label]="('components.underDevelopment.GO_HOME' | translate)" routerLink="/" severity="success" class="mt-5"/>
+  </section>
 </div>

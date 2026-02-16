@@ -1,23 +1,11 @@
 <div class="page-materials">
-  <div class="materials-grid">
-    <aside class="materials-menu card">
-      <h2>{{ 'MENU.MATERIALS' | translate }}</h2>
-      <p-tieredMenu [model]="menuItems"></p-tieredMenu>
-    </aside>
-
-    <div class="materials-content-wrapper">
-      <section class="materials-tools card">
-        <p>
-          This is the Materials page. Add materials-related tools and sub-pages here.
-        </p>
-      </section>
-
-      <section class="materials-content card">
-        <h3>Overview</h3>
-        <p>
-          This is the Materials page. Add materials-related tools and sub-pages here.
-        </p>
-      </section>
+  <section class="admin-subpage-content card text-center flex flex-col items-center justify-center" style="height: 90vh;">
+    <div class="mb-4">
+      <h1>{{ 'MENU.MATERIALS' | translate }}</h1>
     </div>
-  </div>
+
+    <p>Мы работаем над этой страницей — приходите позже или вернитесь на главную.</p>
+
+    <p-button [label]="('components.underDevelopment.GO_HOME' | translate)" routerLink="/" severity="success" class="mt-5"/>
+  </section>
 </div>

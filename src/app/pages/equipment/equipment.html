@@ -1,5 +1,11 @@
 <div class="page-equipment">
-  <h1>{{ 'MENU.EQUIPMENT' | translate }}</h1>
+  <section class="admin-subpage-content card text-center flex flex-col items-center justify-center" style="height: 90vh;">
+    <div class="mb-4">
+      <h1>{{ 'MENU.EQUIPMENT' | translate }}</h1>
+    </div>
 
-  <p>Equipment inventory and details go here.</p>
+    <p>Мы работаем над этой страницей — приходите позже или вернитесь на главную.</p>
+
+    <p-button [label]="('components.underDevelopment.GO_HOME' | translate)" routerLink="/" severity="success" class="mt-5"/>
+  </section>
 </div>

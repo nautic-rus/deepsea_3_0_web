@@ -152,6 +152,13 @@
       "PERMISSION_SUB": "Accumsan in nisl nisi scelerisque",
       "GO_DASHBOARD": "Go to Dashboard"
     },
+    "underDevelopment": {
+      "TITLE": "Under development",
+      "MESSAGE": "We're working on this page — please check back later or return to the dashboard.",
+      "DASHBOARD_TITLE": "Dashboard",
+      "DASHBOARD_SUB": "Go to your dashboard",
+      "GO_HOME": "Go home"
+    },
     "menu": {
       "ACTIONS": "Actions",
       "ACTIVE": "Status",
@@ -219,7 +226,20 @@
       "SENDING": "Sending...",
       "SEND_INSTRUCTIONS": "Send instructions",
       "SUBTITLE": "Enter your email and we will send instructions to reset your password.",
-      "TITLE": "Password recovery"
+      "TITLE": "Password recovery",
+  "SET_TITLE": "Set new password",
+  "SET_SUBTITLE": "Enter a new password to finish resetting your account.",
+      "NEW_PASSWORD_LABEL": "New password",
+      "NEW_PASSWORD_PLACEHOLDER": "Enter new password",
+      "CONFIRM_PASSWORD_LABEL": "Confirm password",
+      "CONFIRM_PASSWORD_PLACEHOLDER": "Repeat new password",
+      "SAVING": "Saving...",
+      "SET_NEW_PASSWORD": "Set new password",
+      "ERROR_NO_TOKEN": "Missing token in URL",
+      "ERROR_ENTER_PASSWORD": "Please enter a password",
+      "ERROR_PASSWORDS_MISMATCH": "Passwords do not match",
+      "ERROR_UPDATING": "Failed to update password. Please try again later.",
+      "MSG_PASSWORD_UPDATED": "Password updated successfully"
     },
     "permissions": {
       "CODE": "Code",
@@ -541,6 +561,17 @@
         "FAILED_LOAD": "Failed to load issue"
       }
     }
+  },
+  "DASHBOARD_WIDGETS": {
+    "MY_PROJECTS": "My projects",
+    "MY_TASKS": "My tasks",
+    "MY_DOCUMENTS": "My documents",
+    "MY_QUESTIONS": "My questions"
+  }
+  ,
+  "DASHBOARD_TIMESHEET": {
+    "TITLE": "Timesheet — current month",
+    "HOURS": "Hours"
   }
 }
 

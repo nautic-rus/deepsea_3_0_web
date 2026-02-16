@@ -1,0 +1,22 @@
+<div class="mt">
+	<div class="grid">
+		<!-- Top stats row -->
+			<div class="col-12 mb-4">
+				<!-- Place stats widget directly so its internal 4-column grid spans full page width -->
+				<app-stats-widget></app-stats-widget>
+			</div>
+
+		<!-- Main content: revenue and recent sales on the left, side widgets on the right -->
+		<div class="col-12 lg:col-8">
+			<div class="grid two-col">
+				<div class="col-12 lg:col-6">
+					<app-timesheet-calendar-widget></app-timesheet-calendar-widget>
+				</div>
+				<div class="col-12 lg:col-6">
+					<app-activity-widget></app-activity-widget>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>

@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { Component, OnInit, Inject, ChangeDetectorRef, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
@@ -10,6 +10,7 @@ import { AvatarModule } from 'primeng/avatar';
 import { RippleModule } from 'primeng/ripple';
 import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 import { AuthService } from '../../auth/auth.service';
 import { AuthGuard } from '../../auth/auth.guard';
 import { PagesService } from '../../services/pages.service';
@@ -19,7 +20,15 @@ import { PagesService } from '../../services/pages.service';
   standalone: true,
   imports: [CommonModule, RouterModule, ButtonModule, MenubarModule, BadgeModule, AvatarModule, RippleModule, MenuModule, TranslateModule],
   templateUrl: './header.html',
-  styleUrls: ['./header.scss']
+  styleUrls: ['./header.scss'],
+  animations: [
+    trigger('submenu', [
+      state('hidden', style({ opacity: 0, transform: 'scaleY(0)' })),
+      state('visible', style({ opacity: 1, transform: 'scaleY(1)' })),
+      transition('hidden => visible', animate('200ms cubic-bezier(0.25, 0.8, 0.25, 1)')),
+      transition('visible => hidden', animate('150ms cubic-bezier(0.25, 0.8, 0.25, 1)'))
+    ])
+  ]
 })
 export class HeaderComponent implements OnInit {
   menuItems: MenuItem[] = [];
@@ -34,6 +43,10 @@ export class HeaderComponent implements OnInit {
   title = 'DeepSea';
   langEnLabel = 'EN';
   langRuLabel = 'RU';
+
+  // Horizontal menu state
+  activeRootIndex: number | null = null;
+  private closeTimeout: any = null;
 
   constructor(
     @Inject(DOCUMENT) private document: Document,
@@ -291,6 +304,8 @@ export class HeaderComponent implements OnInit {
 
     const mapItem = (p: any): MenuItem => {
       if (!p) { return {} as MenuItem; }
+      // Honor mainMenu flag: if explicitly false, do not include in main header menu
+      if (p.mainMenu === false) { return null as any; }
       if (p.separator === true) { return { separator: true } as MenuItem; }
       const item: MenuItem = {} as any;
       const label = getLabel(p);
@@ -301,7 +316,10 @@ export class HeaderComponent implements OnInit {
       if (routerLink) { item.routerLink = routerLink; }
       if (p.action === 'logout') { item.command = () => this.logout(); }
       const children = p.children ?? p.items ?? p.pages ?? null;
-      if (Array.isArray(children) && children.length) { item.items = children.map(mapItem); }
+      if (Array.isArray(children) && children.length) {
+        const mappedChildren = children.map(mapItem).filter(Boolean);
+        if (mappedChildren.length) { item.items = mappedChildren; }
+      }
       if (!item.label && item.routerLink) {
         const parts = (item.routerLink as string).split('/').filter(Boolean);
         const rawLabel = parts.length ? parts[parts.length - 1].replace(/-/g, ' ') : item.routerLink as string;
@@ -332,6 +350,49 @@ export class HeaderComponent implements OnInit {
   }
 
   
+
+  // ---- Horizontal menu interaction ----
+  onRootMenuItemClick(index: number, event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.activeRootIndex = this.activeRootIndex === index ? null : index;
+  }
+
+  onRootMenuItemMouseEnter(index: number) {
+    if (this.closeTimeout) {
+      clearTimeout(this.closeTimeout);
+      this.closeTimeout = null;
+    }
+    this.activeRootIndex = index;
+  }
+
+  onRootMenuItemMouseLeave() {
+    this.closeTimeout = setTimeout(() => {
+      this.activeRootIndex = null;
+      this.closeTimeout = null;
+    }, 200);
+  }
+
+  onMenuItemClick() {
+    this.activeRootIndex = null;
+  }
+
+  isChildActive(child: any): boolean {
+    if (!child) return false;
+    if (child.routerLink && this.router.url === child.routerLink) return true;
+    if (child.items) {
+      return child.items.some((c: any) => this.isChildActive(c));
+    }
+    return false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event) {
+    const el = (event.target as HTMLElement);
+    if (!el.closest('.layout-horizontal-menu')) {
+      this.activeRootIndex = null;
+    }
+  }
 
   logout(): void {
     // Clear auth guard cache

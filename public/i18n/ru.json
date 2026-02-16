@@ -152,6 +152,13 @@
       "PERMISSION_SUB": "Accumsan in nisl nisi scelerisque",
       "GO_DASHBOARD": "Перейти на панель"
     },
+    "underDevelopment": {
+      "TITLE": "Страница в разработке",
+      "MESSAGE": "Мы работаем над этой страницей — приходите позже или вернитесь на панель.",
+      "DASHBOARD_TITLE": "Панель",
+      "DASHBOARD_SUB": "Перейти на панель",
+      "GO_HOME": "На главную"
+    },
     "menu": {
       "ACTIONS": "Действия",
       "ACTIVE": "Статус",
@@ -219,7 +226,20 @@
       "SENDING": "Отправка...",
       "SEND_INSTRUCTIONS": "Отправить инструкцию",
       "SUBTITLE": "Введите ваш email, и мы пришлём инструкцию по сбросу пароля.",
-      "TITLE": "Восстановление пароля"
+      "TITLE": "Восстановление пароля",
+  "SET_TITLE": "Установите новый пароль",
+  "SET_SUBTITLE": "Введите новый пароль для завершения сброса пароля.",
+      "NEW_PASSWORD_LABEL": "Новый пароль",
+      "NEW_PASSWORD_PLACEHOLDER": "Введите новый пароль",
+      "CONFIRM_PASSWORD_LABEL": "Повторите пароль",
+      "CONFIRM_PASSWORD_PLACEHOLDER": "Повторите новый пароль",
+      "SAVING": "Сохранение...",
+      "SET_NEW_PASSWORD": "Установить новый пароль",
+      "ERROR_NO_TOKEN": "Отсутствует токен в URL",
+      "ERROR_ENTER_PASSWORD": "Пожалуйста, введите пароль",
+      "ERROR_PASSWORDS_MISMATCH": "Пароли не совпадают",
+      "ERROR_UPDATING": "Не удалось обновить пароль. Пожалуйста, попробуйте позже.",
+      "MSG_PASSWORD_UPDATED": "Пароль успешно обновлён"
     },
     "permissions": {
       "CODE": "Код",
@@ -542,6 +562,17 @@
         "FAILED_LOAD": "Не удалось загрузить задачу"
       }
     }
+  },
+  "DASHBOARD_WIDGETS": {
+    "MY_PROJECTS": "Мои проекты",
+    "MY_TASKS": "Мои задачи",
+    "MY_DOCUMENTS": "Мои документы",
+    "MY_QUESTIONS": "Мои вопросы"
+  }
+  ,
+  "DASHBOARD_TIMESHEET": {
+    "TITLE": "Таймшит — текущий месяц",
+    "HOURS": "Часы"
   }
 }
 
