@@ -1,14 +1,32 @@
 <div class="page-profile">
   <div class="profile-grid">
     <aside class="profile-menu card">
-      <p-menu [model]="menuItems"></p-menu>
+      <ul class="layout-menu">
+        @for (group of menuGroups; track group.label) {
+          <li class="layout-root-menuitem">
+            <div class="layout-menuitem-root-text">{{ group.label }}</div>
+            <ul class="layout-root-submenulist">
+              @for (item of group.items; track item.label) {
+                <li>
+                  <a [routerLink]="item.routerLink"
+                     routerLinkActive="active-route"
+                     [routerLinkActiveOptions]="{ exact: true }"
+                     class="layout-menuitem-link"
+                     pRipple>
+                    <i [class]="item.icon + ' layout-menuitem-icon'"></i>
+                    <span class="layout-menuitem-text">{{ item.label }}</span>
+                  </a>
+                </li>
+              }
+            </ul>
+          </li>
+        }
+      </ul>
     </aside>
 
     <section class="profile-content-wrapper">
       <div class="profile-content card">
-        <h1>Profile</h1>
 
-        <div class="bg-surface-0 dark:bg-surface-950 px-6 py-8 md:px-12 lg:px-20">
           <div class="flex items-center flex-col lg:flex-row lg:justify-between">
             <div class="flex items-start flex-col md:flex-row gap-8">
               <img src="https://fqjltiegiezfetthbags.supabase.co/storage/v1/object/public/block.images/blocks/pageheading/kathryn.png" class="w-[6.42rem] h-[6.42rem]" />
@@ -48,9 +66,15 @@
               </button>
             </div>
           </div>
+
         </div>
-      </div>
-      
+
+
     </section>
+
+          <!-- child pages render here -->
+          <div class="mt-6">
+            <router-outlet></router-outlet>
+          </div>
   </div>
 </div>

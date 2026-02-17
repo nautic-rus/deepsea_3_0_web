@@ -2,7 +2,7 @@
   <p-toolbar>
     <div class="p-toolbar-group-left">
   <p-select [options]="projectOptions" [(ngModel)]="selectedProject" (ngModelChange)="onProjectChange($event)" [checkmark]="true" optionLabel="label" optionValue="value" [showClear]="true" placeholder="{{ 'components.projects.menu.LIST' | translate }}" class="mr-2" style="width: 280px;"></p-select>
-  <p-button label="{{ 'components.projects.users.ASSIGN' | translate }}" icon="pi pi-user-plus" class="mr-2" severity="secondary" (onClick)="openAssignDialog()" [disabled]="!selectedProject"></p-button>
+  <p-button label="{{ 'components.projects.users.ASSIGN' | translate }}" icon="pi pi-user-plus" class="mr-2" severity="primary" (onClick)="openAssignDialog()" [disabled]="!selectedProject"></p-button>
   <p-button label="{{ 'MENU.DELETE' | translate }}" icon="pi pi-trash" severity="secondary" class="mr-2" (onClick)="confirmDeleteSelected()" [disabled]="!selectedProjects || !selectedProjects.length"></p-button>    
 </div>
     <div class="p-toolbar-group-right">

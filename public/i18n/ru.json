@@ -74,6 +74,9 @@
     "USER_UPDATED": "Пользователь обновлён",
     "WIKI": "База знаний"
     ,
+  "SECURITY": "Безопасность",
+  "STORAGE": "Хранилище",
+  "GENERAL": "Общие настройки",
     "ID": "ID",
     "CREATE_ISSUE": "Создать задачу",
     "EDIT_ISSUE": "Редактировать задачу",
@@ -137,26 +140,27 @@
     "access": {
       "TITLE": "Доступ запрещён",
       "MESSAGE": "У вас нет необходимых прав доступа. Свяжитесь с администраторами.",
-      "GO_DASHBOARD": "Перейти на панель"
+      "GO_DASHBOARD": "Перейти на главную",
+      "CONTACT_ADMIN": "Написать администратору"
     },
     "error": {
       "PRE_TITLE": "Упс!",
       "CODE": "404",
-      "TITLE": "Не найдено",
-      "MESSAGE": "Запрошенный ресурс недоступен.",
+      "TITLE": "Страница не найдена",
+      "MESSAGE": "Такой страницы не существует, возможно когда-то будет, но пока нет.",
       "FAQ_TITLE": "Часто задаваемые вопросы",
       "FAQ_SUB": "Ultricies mi quis hendrerit dolor.",
       "SOLUTION_TITLE": "Центр решений",
       "SOLUTION_SUB": "Phasellus faucibus scelerisque eleifend.",
       "PERMISSION_TITLE": "Диспетчер разрешений",
       "PERMISSION_SUB": "Accumsan in nisl nisi scelerisque",
-      "GO_DASHBOARD": "Перейти на панель"
+      "GO_DASHBOARD": "Перейти на главную"
     },
     "underDevelopment": {
       "TITLE": "Страница в разработке",
       "MESSAGE": "Мы работаем над этой страницей — приходите позже или вернитесь на панель.",
       "DASHBOARD_TITLE": "Панель",
-      "DASHBOARD_SUB": "Перейти на панель",
+      "DASHBOARD_SUB": "Перейти на главную",
       "GO_HOME": "На главную"
     },
     "menu": {
@@ -299,6 +303,7 @@
       "menu": {
         "LIST": "Список проектов",
         "USERS": "Пользователи проектов",
+        "TEMPLATES": "Шаблоны",
         "TITLE" : "УПРАВЛЕНИЕ ПРОЕКТАМИ"
 
       },

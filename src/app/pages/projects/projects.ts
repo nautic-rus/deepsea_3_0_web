@@ -2,27 +2,30 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule, TranslateService, LangChangeEvent } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
-import { MenuModule } from 'primeng/menu';
 import { AccordionModule } from 'primeng/accordion';
-import { MenuItem } from 'primeng/api';
+import { RippleModule } from 'primeng/ripple';
 import { RouterModule } from '@angular/router';
+
+export interface ProjectsMenuGroup {
+  label: string;
+  items: { label: string; icon: string; routerLink: string[] }[];
+}
 
 @Component({
 	selector: 'app-projects',
 	standalone: true,
-	imports: [CommonModule, TranslateModule, MenuModule, AccordionModule, RouterModule],
+	imports: [CommonModule, TranslateModule, AccordionModule, RippleModule, RouterModule],
 	templateUrl: './projects.html',
 	styleUrls: ['./projects.scss']
 })
 export class ProjectsComponent implements OnInit, OnDestroy {
-		menuItems: MenuItem[] = [];
+		menuGroups: ProjectsMenuGroup[] = [];
 		private langSub: Subscription | null = null;
 
 		constructor(private translate: TranslateService) {}
 
 		ngOnInit(): void {
 			this.buildMenu();
-			// Rebuild menu when language changes so labels update on the fly
 			this.langSub = this.translate.onLangChange.subscribe((e: LangChangeEvent) => {
 				this.buildMenu();
 			});
@@ -37,13 +40,13 @@ export class ProjectsComponent implements OnInit, OnDestroy {
 
 		private buildMenu(): void {
 			const t = (k: string) => this.translate.instant(k) || k;
-			this.menuItems = [
+			this.menuGroups = [
 				{
 					label: t('components.projects.menu.TITLE'),
 					items: [
-						{ label: t('components.projects.menu.LIST'), icon: 'pi pi-folder', routerLink: ['/projects/projects-list'] },
-						{ label: t('components.projects.menu.USERS'), icon: 'pi pi-users', routerLink: ['/projects/projects-users'] },
-						// { label: t('components.projects.menu.TEMPLATES'), icon: 'pi pi-clone', routerLink: ['/projects/projects-templates'] }
+						{ label: t('components.projects.menu.LIST'), icon: 'pi pi-fw pi-folder', routerLink: ['/projects/projects-list'] },
+						{ label: t('components.projects.menu.USERS'), icon: 'pi pi-fw pi-users', routerLink: ['/projects/projects-users'] },
+						{ label: t('components.projects.menu.TEMPLATES'), icon: 'pi pi-fw pi-clone', routerLink: ['/projects/projects-templates'] }
 					]
 				}
 			];

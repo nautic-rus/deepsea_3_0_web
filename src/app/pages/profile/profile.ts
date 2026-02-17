@@ -1,29 +1,40 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
-import { MenuModule } from 'primeng/menu';
-import { MenuItem } from 'primeng/api';
+import { RippleModule } from 'primeng/ripple';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+
+export interface ProfileMenuGroup {
+  label: string;
+  items: { label: string; icon: string; routerLink: string[] }[];
+}
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, ButtonModule, MenuModule, RouterModule],
+  imports: [CommonModule, ButtonModule, RippleModule, RouterModule, TranslateModule],
   templateUrl: './profile.html',
   styleUrls: ['./profile.scss']
 })
 export class ProfileComponent implements OnInit {
-  menuItems: MenuItem[] = [];
+  menuGroups: ProfileMenuGroup[] = [];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private translate: TranslateService) {}
 
   ngOnInit(): void {
-    this.menuItems = [
-      { label: 'Overview', icon: 'pi pi-fw pi-user', routerLink: ['/profile'] },
-      { label: 'Edit Profile', icon: 'pi pi-fw pi-pencil', routerLink: ['/profile/edit'] },
-      { label: 'Settings', icon: 'pi pi-fw pi-cog', routerLink: ['/profile/settings'] },
-      { label: 'Security', icon: 'pi pi-fw pi-lock', routerLink: ['/profile/security'] }
+    const t = (k: string) => this.translate.instant(k) || k;
+
+    this.menuGroups = [
+      {
+        label: t('MENU.PROFILE'),
+        items: [
+          { label: t('MENU.PROFILE'), icon: 'pi pi-fw pi-user', routerLink: ['/profile'] },
+          { label: t('MENU.NOTIFICATIONS'), icon: 'pi pi-fw pi-bell', routerLink: ['/profile/notifications'] },
+          { label: t('MENU.SECURITY'), icon: 'pi pi-fw pi-lock', routerLink: ['/profile/security'] }
+        ]
+      }
     ];
 
     // keep active state/update on navigation if needed later

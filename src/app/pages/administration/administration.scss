@@ -1,45 +1,87 @@
 .page-administration {
   padding: 0;
 
-
   .admin-grid {
     display: flex;
     gap: 1rem;
-    align-items: stretch; /* allow children to stretch to same height */
-    min-height: calc(90vh - 0px); /* full viewport height (page padding is 0) */
+    align-items: stretch;
+    min-height: calc(90vh);
   }
 
-
+  /* ── Sakai-style sidebar menu ── */
   .admin-menu {
-    width: 15%;
-    min-width: 200px;
-  }
-  .admin-menu h2 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.05rem;
+    width: 300px;
+    min-width: 300px;
+    padding: 1rem 0.75rem;
+    background: var(--surface-card, #fff);
+    border-radius: var(--border-radius, 12px);
   }
 
-  .admin-menu-list {
+  .layout-menu {
     list-style: none;
     padding: 0;
     margin: 0;
   }
 
-  .admin-menu-list li {
-    margin: 0.35rem 0;
+  .layout-root-menuitem {
+    margin-bottom: 0.75rem;
   }
 
-  .admin-menu-list a {
-    color: var(--text-color, #333);
+  .layout-menuitem-root-text {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--text-color-secondary, #9ca3af);
+    padding: 0.5rem 0.75rem 0.25rem;
+    letter-spacing: 0.06em;
+  }
+
+  .layout-root-submenulist {
+    list-style: none;
+    padding: 0 0 0 0.75rem;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .layout-menuitem-link {
+    display: flex;
+    align-items: center;
+    padding: 0.6rem 0.75rem;
+    border-radius: var(--border-radius, 8px);
+    color: var(--text-color, #334155);
     text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+
+    &:hover {
+      background-color: var(--surface-hover, rgba(0, 0, 0, 0.04));
+    }
+
+    &.active-route {
+      background-color: color-mix(in srgb, var(--primary-color, #3B82F6) 12%, transparent);
+      color: var(--primary-color, #3B82F6);
+      font-weight: 600;
+
+      .layout-menuitem-icon {
+        color: var(--primary-color, #3B82F6);
+      }
+    }
   }
 
-  /* remove border/shadow from PrimeNG Menu inside the admin menu card */
-  .admin-menu p-menu,
-  .admin-menu ::ng-deep .p-menu {
-    border: 0 !important;
-    box-shadow: none !important;
-    background: transparent !important;
+  .layout-menuitem-icon {
+    margin-right: 0.5rem;
+    font-size: 1rem;
+    // color: var(--primary-color, #3B82F6);
+    width: 1.25rem;
+    text-align: center;
+  }
+
+  .layout-menuitem-text {
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1;
   }
 
   .admin-content-wrapper {

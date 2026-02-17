@@ -5,10 +5,10 @@ import { ButtonModule } from 'primeng/button';
 import { RouterModule } from '@angular/router';
 
 @Component({
-  selector: 'app-admin-notifications',
+  selector: 'app-admin-storage',
   standalone: true,
   imports: [CommonModule, TranslateModule, ButtonModule, RouterModule],
-  templateUrl: './notifications.html',
-  styleUrls: ['./notifications.scss']
+  templateUrl: './storage.html',
+  styleUrls: ['./storage.scss']
 })
-export class AdminNotificationsComponent {}
+export class AdminStorageComponent {}

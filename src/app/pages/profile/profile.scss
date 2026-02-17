@@ -9,8 +9,11 @@
   }
 
   .profile-menu {
-    width: 15%;
-    min-width: 200px;
+    width: 300px;
+    min-width: 240px;
+    padding: 1rem 0.75rem;
+    background: var(--surface-card, #fff);
+    border-radius: var(--border-radius, 12px);
   }
 
   /* Remove border/shadow for PrimeNG menu inside the profile card */
@@ -19,6 +22,73 @@
     border: 0 !important;
     box-shadow: none !important;
     background: transparent !important;
+  }
+
+  .layout-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .layout-root-menuitem {
+    margin-bottom: 0.75rem;
+  }
+
+  .layout-menuitem-root-text {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--text-color-secondary, #9ca3af);
+    padding: 0.5rem 0.75rem 0.25rem;
+    letter-spacing: 0.06em;
+  }
+
+  .layout-root-submenulist {
+    list-style: none;
+    padding: 0 0 0 0.75rem;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .layout-menuitem-link {
+    display: flex;
+    align-items: center;
+    padding: 0.6rem 0.75rem;
+    border-radius: var(--border-radius, 8px);
+    color: var(--text-color, #334155);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+
+    &:hover {
+      background-color: var(--surface-hover, rgba(0, 0, 0, 0.04));
+    }
+
+    &.active-route {
+      background-color: color-mix(in srgb, var(--primary-color, #3B82F6) 12%, transparent);
+      color: var(--primary-color, #3B82F6);
+      font-weight: 600;
+
+      .layout-menuitem-icon {
+        color: var(--primary-color, #3B82F6);
+      }
+    }
+  }
+
+  .layout-menuitem-icon {
+    margin-right: 0.5rem;
+    font-size: 1rem;
+    color: var(--primary-color, #3B82F6);
+    width: 1.25rem;
+    text-align: center;
+  }
+
+  .layout-menuitem-text {
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1;
   }
 
   .profile-content-wrapper {

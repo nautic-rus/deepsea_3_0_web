@@ -74,6 +74,9 @@
     "USER_UPDATED": "User updated",
     "WIKI": "WiKi"
     ,
+  "SECURITY": "Security",
+  "STORAGE": "Storage",
+  "GENERAL": "General",
     "ID": "ID",
     "CREATE_ISSUE": "Create issue",
     "EDIT_ISSUE": "Edit issue",
@@ -137,7 +140,8 @@
     "access": {
       "TITLE": "Access Denied",
       "MESSAGE": "You do not have the necessary permissions. Please contact admins.",
-      "GO_DASHBOARD": "Go to Dashboard"
+      "GO_DASHBOARD": "Go to Dashboard",
+      "CONTACT_ADMIN": "Contact administaror"
     },
     "error": {
       "PRE_TITLE": "Oops!",
@@ -150,7 +154,7 @@
       "SOLUTION_SUB": "Phasellus faucibus scelerisque eleifend.",
       "PERMISSION_TITLE": "Permission Manager",
       "PERMISSION_SUB": "Accumsan in nisl nisi scelerisque",
-      "GO_DASHBOARD": "Go to Dashboard"
+      "GO_DASHBOARD": "Go to Main"
     },
     "underDevelopment": {
       "TITLE": "Under development",
@@ -299,6 +303,7 @@
       "menu": {
         "LIST": "Projects List",
         "USERS": "Project Users",
+        "TEMPLATES": "Templates",
         "TITLE": "PROJECT MANAGEMENT"
       },
       "messages": {

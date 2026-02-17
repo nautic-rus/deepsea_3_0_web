@@ -1,53 +1,94 @@
-/* Copied from administration.scss to mirror admin layout for Projects page */
+/* Sakai-style sidebar menu — mirrors administration.scss */
 .page-administration {
   padding: 0;
-
 
   .admin-grid {
     display: flex;
     gap: 1rem;
-    align-items: stretch; /* allow children to stretch to same height */
-    min-height: calc(90vh - 0px); /* full viewport height (page padding is 0) */
+    align-items: stretch;
+    min-height: calc(90vh);
   }
-
 
   .admin-menu {
-    width: 15%;
-    min-width: 200px;
-  }
-  .admin-menu h2 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.05rem;
+    width: 300px;
+    min-width: 300px;
+    padding: 1rem 0.75rem;
+    background: var(--surface-card, #fff);
+    border-radius: var(--border-radius, 12px);
   }
 
-  .admin-menu-list {
+  .layout-menu {
     list-style: none;
     padding: 0;
     margin: 0;
   }
 
-  .admin-menu-list li {
-    margin: 0.35rem 0;
+  .layout-root-menuitem {
+    margin-bottom: 0.75rem;
   }
 
-  .admin-menu-list a {
-    color: var(--text-color, #333);
+  .layout-menuitem-root-text {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--text-color-secondary, #9ca3af);
+    padding: 0.5rem 0.75rem 0.25rem;
+    letter-spacing: 0.06em;
+  }
+
+  .layout-root-submenulist {
+    list-style: none;
+    padding: 0 0 0 0.75rem;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .layout-menuitem-link {
+    display: flex;
+    align-items: center;
+    padding: 0.6rem 0.75rem;
+    border-radius: var(--border-radius, 8px);
+    color: var(--text-color, #334155);
     text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+
+    &:hover {
+      background-color: var(--surface-hover, rgba(0, 0, 0, 0.04));
+    }
+
+    &.active-route {
+      background-color: color-mix(in srgb, var(--primary-color, #3B82F6) 12%, transparent);
+      color: var(--primary-color, #3B82F6);
+      font-weight: 600;
+
+      .layout-menuitem-icon {
+        color: var(--primary-color, #3B82F6);
+      }
+    }
   }
 
-  /* remove border/shadow from PrimeNG Menu inside the admin menu card */
-  .admin-menu p-menu,
-  .admin-menu ::ng-deep .p-menu {
-    border: 0 !important;
-    box-shadow: none !important;
-    background: transparent !important;
+  .layout-menuitem-icon {
+    margin-right: 0.5rem;
+    font-size: 1rem;
+    //color: var(--primary-color, #3B82F6);
+    width: 1.25rem;
+    text-align: center;
+  }
+
+  .layout-menuitem-text {
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1;
   }
 
   .admin-content-wrapper {
     flex: 1 1 70%;
     display: flex;
     flex-direction: column;
-    min-height: 0; /* allow children to shrink correctly inside flex */
+    min-height: 0;
   }
 
   .admin-content {
@@ -55,19 +96,17 @@
     min-height: 0;
   }
 
-  /* make the second content card expand to fill remaining vertical space */
   .admin-content-wrapper .admin-content {
     flex: 1 1 auto;
     display: flex;
     flex-direction: column;
-    overflow: auto; /* internal scrolling when content overflows */
+    overflow: auto;
   }
 
   .admin-content h3 {
     margin: 0 0 1rem 0;
   }
 
-  /* Make block headers bold */
   .admin-menu h2,
   .admin-content h3 {
     font-weight: 700;
@@ -78,47 +117,16 @@
     height: 70px;
   }
 
-  /* Intro/title added above accordion */
-  .admin-section-title {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.125rem;
-    font-weight: 700;
-  }
-
-  .admin-intro {
-    margin-bottom: 1rem;
-    padding: 0.75rem 1rem;
-    background: var(--surface-50, #fafafa);
-    border-radius: 8px;
-    color: var(--text-color, #222);
-  }
-
-  /* Ensure accordion header/title is visible and styled */
-  .admin-accordion-title {
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text-color, #222);
-  }
-
-  /* Slight padding for PrimeNG accordion headers inside admin area */
-  .p-accordion .p-accordionheader {
-    padding: 0.6rem 1rem;
-  }
-
-  /* styles for subpage inner layout: make content area fill remaining height */
   .admin-subpage-tools {
     width: 100%;
-    height: auto; /* match admin-tools toolbar height so content can fill remaining space */
+    height: auto;
   }
 
   .admin-subpage-content {
-    /* allow this block to grow and fill the column within .admin-content-wrapper */
-    flex: 1 1 flex;
+    flex: 1 1 auto;
     display: flex;
     flex-direction: column;
-    min-height: 0; /* enable proper flexbox scrolling behavior */
-    overflow: auto; /* internal scrolling when content is long */
+    min-height: 0;
+    overflow: auto;
   }
-
 }

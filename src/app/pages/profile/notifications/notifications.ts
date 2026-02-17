@@ -1,14 +1,12 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
-import { ButtonModule } from 'primeng/button';
-import { RouterModule } from '@angular/router';
 
 @Component({
-  selector: 'app-admin-notifications',
+  selector: 'app-profile-notifications',
   standalone: true,
-  imports: [CommonModule, TranslateModule, ButtonModule, RouterModule],
+  imports: [CommonModule, TranslateModule],
   templateUrl: './notifications.html',
   styleUrls: ['./notifications.scss']
 })
-export class AdminNotificationsComponent {}
+export class ProfileNotificationsComponent {}

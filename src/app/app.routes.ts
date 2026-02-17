@@ -31,7 +31,12 @@ export const routes: Routes = [
       {
         path: 'profile',
         loadComponent: () => import('./pages/profile/profile').then(m => m.ProfileComponent),
-        canActivate: [AuthGuard]
+        canActivate: [AuthGuard],
+        children: [
+          { path: '', pathMatch: 'full', loadComponent: () => import('./pages/profile/main/main').then(m => m.ProfileMainComponent), canActivate: [AuthGuard] },
+          { path: 'notifications', loadComponent: () => import('./pages/profile/notifications/notifications').then(m => m.ProfileNotificationsComponent), canActivate: [AuthGuard] },
+          { path: 'security', loadComponent: () => import('./pages/profile/security/security').then(m => m.ProfileSecurityComponent), canActivate: [AuthGuard] }
+        ]
       },
       {
         path: 'administration',
@@ -44,6 +49,8 @@ export const routes: Routes = [
           { path: 'permissions', loadComponent: () => import('./pages/administration/permissions/permissions').then(m => m.AdminPermissionsComponent), canActivate: [AuthGuard] },
           { path: 'pages', loadComponent: () => import('./pages/administration/pages/pages').then(m => m.AdminPagesComponent), canActivate: [AuthGuard] },
           { path: 'notifications', loadComponent: () => import('./pages/administration/notifications/notifications').then(m => m.AdminNotificationsComponent), canActivate: [AuthGuard] },
+          { path: 'storage', loadComponent: () => import('./pages/administration/storage/storage').then(m => m.AdminStorageComponent), canActivate: [AuthGuard] },
+          { path: 'general', loadComponent: () => import('./pages/administration/general/general').then(m => m.AdminGeneralComponent), canActivate: [AuthGuard] },
           { path: 'departments', loadComponent: () => import('./pages/administration/departments/departments').then(m => m.AdminDepartmentsComponent), canActivate: [AuthGuard] },
           { path: 'specializations', loadComponent: () => import('./pages/administration/specializations/specializations').then(m => m.AdminSpecializationsComponent), canActivate: [AuthGuard] }
         ]

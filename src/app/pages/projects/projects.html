@@ -1,19 +1,31 @@
-<div class="page-administration" class ="page-administration">
+<div class="page-administration">
 	<div class="admin-grid">
-		<aside class="admin-menu card">
-			<div class="admin-menu-header">
-			</div>
-			<!-- Render each menu group as a separate header + menu to keep headings and items on different levels -->
-			<div *ngFor="let group of menuItems" class="menu-group p-2">
-				<h5 style="padding-bottom: 0.7rem;">{{ group.label }}</h5>
-				<!-- Render a Menu for group.items only -->
-				<p-menu [model]="group.items" ></p-menu>
-			</div>
+		<aside class="admin-menu">
+			<ul class="layout-menu">
+				@for (group of menuGroups; track group.label) {
+					<li class="layout-root-menuitem">
+						<div class="layout-menuitem-root-text">{{ group.label }}</div>
+						<ul class="layout-root-submenulist">
+							@for (item of group.items; track item.label) {
+								<li>
+									<a [routerLink]="item.routerLink"
+									   routerLinkActive="active-route"
+									   [routerLinkActiveOptions]="{ exact: true }"
+									   class="layout-menuitem-link"
+									   pRipple>
+										<i [class]="item.icon + ' layout-menuitem-icon'"></i>
+										<span class="layout-menuitem-text">{{ item.label }}</span>
+									</a>
+								</li>
+							}
+						</ul>
+					</li>
+				}
+			</ul>
 		</aside>
-    
-			<!-- Render child route content here -->
-			<section class="admin-content-wrapper">
-				<router-outlet></router-outlet>
-			</section>
-		</div>
+
+		<section class="admin-content-wrapper">
+			<router-outlet></router-outlet>
+		</section>
 	</div>
+</div>
