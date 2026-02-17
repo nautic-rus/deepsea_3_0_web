@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
     standalone: true,
     selector: 'app-activity-widget',
     imports: [ButtonModule, MenuModule, CommonModule],
-    template: `<div class="card">
+    template: `<div class="card mt-0">
         <div class="flex items-center justify-between mb-6">
             <div class="font-semibold text-xl">Activity</div>
             <div>

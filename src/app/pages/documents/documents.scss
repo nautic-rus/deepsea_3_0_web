@@ -1,11 +1,17 @@
 .page-documents {
 	padding: 0;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	overflow: hidden;
 
 	.documents-grid {
 		display: flex;
 		gap: 1rem;
-		align-items: stretch; /* allow children to stretch to same height */
-		min-height: calc(100vh - 0px);
+		align-items: stretch;
+		height: 100%;
+		min-height: 0;
 	}
 
 	.card {

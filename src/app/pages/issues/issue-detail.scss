@@ -124,7 +124,7 @@
   /* Left column in issue detail: internal scrolling when content is long */
   .issue-left-scroll {
     /* limit height to a reasonable portion of viewport and allow internal scroll */
-    max-height: 80vh;
+    max-height: 83.5vh;
     overflow: auto;
     padding-right: 0.2rem; /* prevent content being hidden under scrollbar */
     min-height: 0;

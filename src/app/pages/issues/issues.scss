@@ -11,10 +11,10 @@
 
 .admin-subpage-content {
   flex: 1 1 auto;
-  /* set height to viewport minus header. Use CSS var --app-header-height to configure (fallback 64px) */
-  height: 80vh;
+  min-height: 0;
   display: flex;
   flex-direction: column;
+  height: 80vh;
 }
 
 .table-responsive {

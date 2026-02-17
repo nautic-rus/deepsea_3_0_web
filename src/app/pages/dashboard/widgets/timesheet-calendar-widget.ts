@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
     standalone: true,
     selector: 'app-timesheet-calendar-widget',
     imports: [CommonModule, TableModule],
-    template: `<div class="card mb-8!">
+    template: `<div class="card mt-0">
         <div class="font-semibold text-xl mb-4">My Timesheet</div>
         <div class="timesheet-calendar">
             <table class="w-full border-collapse">

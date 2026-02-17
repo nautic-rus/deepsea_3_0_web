@@ -1,6 +1,14 @@
 :host { display:flex; flex-direction:column; flex:1 1 auto; min-height:0; }
-.admin-subpage-content { flex:1 1 auto; overflow:auto; min-height:0; }
+.admin-subpage-content { flex:1 1 auto; min-height:0; height:80vh; }
 .admin-subpage-tools { height:auto; }
+
+/* Make child cards inside the grid stretch to fill available height */
+.admin-subpage-content > .card {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	overflow: hidden;
+}
 
 /* Toolbar styles (copied from permissions for consistent appearance) */
 .p-toolbar {
@@ -35,7 +43,8 @@
 
 /* Scrollable container for permissions list on the right-side card */
 .permissions-scroll {
-	height: 700px; /* match left table scroll height */
+	flex: 1 1 auto;
+	min-height: 0;
 	overflow: auto;
 	padding-right: 0.5rem; /* give space for a scrollbar */
 }

@@ -1,4 +1,4 @@
-<section class="admin-subpage-tools card">
+<section class="admin-subpage-tools card mt-0">
   <p-toolbar >
     <ng-template #start>
   <p-button [label]="'components.permissions.form.CREATE_LABEL' | translate" icon="pi pi-plus" severity="primary" class="mr-2" (onClick)="openNew()" />
@@ -18,7 +18,7 @@
     [value]="permissions"
     [loading]="loading"
     [scrollable]="true"
-    scrollHeight="700px"
+    scrollHeight="flex"
     [rows]="10"
     size="small"
     [globalFilterFields]="['id','name','code','description']"

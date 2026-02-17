@@ -10,7 +10,7 @@ import { ButtonModule } from 'primeng/button';
   imports: [CommonModule, TranslateModule, RouterModule, ButtonModule],
   template: `
 <div class="page-wiki">
-  <section class="admin-subpage-content card text-center flex flex-col items-center justify-center" style="height: 90vh;">
+  <section class="admin-subpage-content card text-center flex flex-col items-center justify-center mt-0" style="height: 92vh;">
     <div class="mb-4">
       <h1>{{ 'MENU.WIKI' | translate }}</h1>
     </div>

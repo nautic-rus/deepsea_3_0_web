@@ -6,7 +6,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     standalone: true,
     selector: 'app-timesheet-histogram-widget',
     imports: [ChartModule, TranslateModule],
-    template: `<div class="card mb-8!">
+    template: `<div class="card mt-0">
         <div class="font-semibold text-xl mb-4">{{ 'DASHBOARD_TIMESHEET.TITLE' | translate }}</div>
             <div style="height:40vh; display:flex;">
                 <p-chart type="bar" [data]="chartData()" [options]="chartOptions()" style="flex:1 1 auto; height:100%; display:block;"/>

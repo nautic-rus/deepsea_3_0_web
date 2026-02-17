@@ -20,9 +20,8 @@ import { TranslateModule } from '@ngx-translate/core';
                             <h1 class="text-surface-900 dark:text-surface-0 font-bold text-4xl lg:text-5xl mb-2">{{ 'components.error.TITLE' | translate }}</h1>
                             <span class="text-muted-color mb-8">{{ 'components.error.MESSAGE' | translate }}</span>
                             <img src="/404.png" alt="Error" class="mb-8" width="70%" />
-                            <div class="col-span-12 mt-8 text-center flex gap-4 justify-center">
+                            <div class="col-span-12 mt-8 text-center">
                                 <p-button [label]="('components.error.GO_DASHBOARD' | translate)" routerLink="/" severity="primary" />
-                                <p-button (click)="contactAdmin()" [label]="('components.access.CONTACT_ADMIN' | translate)" severity="warn"></p-button>
                             </div>
                         </div>
                     </div>
@@ -31,10 +30,4 @@ import { TranslateModule } from '@ngx-translate/core';
         </div>
   `
 })
-export class ErrorComponent {
-     contactAdmin() {
-    // Open user's mail client to contact administrator.
-    // Assumption: use a placeholder admin address — update if you have a real one.
-    window.location.href = 'mailto:spiridovich@nautic-rus.ru';
-  }
-}
+export class ErrorComponent {}

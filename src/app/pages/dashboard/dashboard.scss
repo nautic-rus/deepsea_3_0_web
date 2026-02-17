@@ -1,7 +1,13 @@
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
+
 /* Dashboard scrolling and layout helpers */
 .dashboard-root {
-	/* Occupy full viewport height and allow vertical scrolling */
-	height: calc(100vh - var(--header-height, 64px));
+	/* Fill available space from layout (flex child of .layout-main) */
+	height: 100%;
 	overflow-y: auto;
 	-webkit-overflow-scrolling: touch;
 	box-sizing: border-box;

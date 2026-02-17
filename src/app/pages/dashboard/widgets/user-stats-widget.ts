@@ -25,7 +25,7 @@ import { TranslateModule } from '@ngx-translate/core';
         ],
         template: `<div class="stats-grid">
         <div class="stat-item">
-            <div class="card mb-0">
+            <div class="card mb-0 mt-0">
                 <div class="flex justify-between mb-4">
                     <div>
                         <span class="block text-muted-color font-medium mb-4">{{ 'DASHBOARD_WIDGETS.MY_PROJECTS' | translate }}</span>
@@ -40,7 +40,7 @@ import { TranslateModule } from '@ngx-translate/core';
             </div>
         </div>
         <div class="stat-item">
-            <div class="card mb-0">
+            <div class="card mb-0 mt-0">
                 <div class="flex justify-between mb-4">
                     <div>
                         <span class="block text-muted-color font-medium mb-4">{{ 'DASHBOARD_WIDGETS.MY_TASKS' | translate }}</span>
@@ -55,7 +55,7 @@ import { TranslateModule } from '@ngx-translate/core';
             </div>
         </div>
         <div class="stat-item">
-            <div class="card mb-0">
+            <div class="card mb-0 mt-0">
                 <div class="flex justify-between mb-4">
                     <div>
                         <span class="block text-muted-color font-medium mb-4">{{ 'DASHBOARD_WIDGETS.MY_DOCUMENTS' | translate }}</span>
@@ -70,7 +70,7 @@ import { TranslateModule } from '@ngx-translate/core';
             </div>
         </div>
         <div class="stat-item">
-            <div class="card mb-0">
+            <div class="card mb-0 mt-0">
                 <div class="flex justify-between mb-4">
                     <div>
                         <span class="block text-muted-color font-medium mb-4">{{ 'DASHBOARD_WIDGETS.MY_QUESTIONS' | translate }}</span>
