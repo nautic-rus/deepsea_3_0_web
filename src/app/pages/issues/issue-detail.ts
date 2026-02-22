@@ -310,7 +310,7 @@ export class IssueDetailComponent implements OnInit {
 
             this.statusSaving = false;
             this.cdr.markForCheck();
-            try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.issues.messages.SUCCESS'), detail: this.translate.instant('components.issues.messages.STATUS_UPDATED') }); } catch (e) {}
+            try { this.messageService.add({ severity: 'success', summary: this.trOr('components.issues.messages.SUCCESS', 'Success'), detail: this.trOr('components.issues.messages.STATUS_UPDATED', 'Status updated') }); } catch (e) {}
           },
           error: (fetchErr: any) => {
             console.warn('Failed to refresh issue after status change', fetchErr);
@@ -330,6 +330,35 @@ export class IssueDetailComponent implements OnInit {
 
   back(): void {
     this.router.navigate(['/issues']);
+  }
+
+  /**
+   * Copy the current issue URL to clipboard and show a toast notification.
+   * Stops event propagation so surrounding clickable elements won't trigger.
+   */
+  copyIssueLink(event?: Event): void {
+    try {
+      if (event && typeof (event.stopPropagation) === 'function') event.stopPropagation();
+      const id = this.issue?.id ?? this.issueId;
+      if (!id) {
+        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR') || 'Error', detail: this.translate.instant('components.issues.errors.ISSUE_ID_MISSING') || 'Issue id missing' }); } catch (e) {}
+        return;
+      }
+      const url = `${window.location.origin}/issues/${id}`;
+      if (navigator && (navigator as any).clipboard && typeof (navigator as any).clipboard.writeText === 'function') {
+        (navigator as any).clipboard.writeText(url).then(() => {
+          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.issues.messages.COPY_LINK') || 'Copied', detail: this.translate.instant('components.issues.messages.LINK_COPIED') || 'Link copied to clipboard' }); } catch (e) {}
+        }).catch((_err: any) => {
+          try { window.prompt(this.translate.instant('components.issues.messages.COPY_PROMPT') || 'Copy link', url); } catch (e) {}
+        });
+      } else {
+        try { window.prompt(this.translate.instant('components.issues.messages.COPY_PROMPT') || 'Copy link', url); } catch (e) {}
+      }
+    } catch (e) {
+      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR') || 'Error', detail: String(e) }); } catch (er) {}
+    } finally {
+      try { this.cdr.markForCheck(); } catch (e) {}
+    }
   }
 
   // Open add-relation dialog (triggered from child relations table)
@@ -592,5 +621,15 @@ export class IssueDetailComponent implements OnInit {
     } catch (e) {
       return issue;
     }
+  }
+
+  // Safe translate helper: when ngx-translate hasn't loaded a key it returns the key string itself,
+  // so detect that and return a provided fallback instead.
+  private trOr(key: string, fallback: string): string {
+    try {
+      const v = this.translate.instant(key);
+      if (!v || v === key) return fallback;
+      return v;
+    } catch (e) { return fallback; }
   }
 }

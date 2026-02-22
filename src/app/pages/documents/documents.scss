@@ -1,4 +1,5 @@
-.page-documents {
+/* Sakai-style sidebar menu — mirrors administration.scss */
+.page-administration {
 	padding: 0;
 	height: 100%;
 	display: flex;
@@ -6,64 +7,267 @@
 	min-height: 0;
 	overflow: hidden;
 
-	.documents-grid {
+	.admin-grid {
 		display: flex;
 		gap: 1rem;
 		align-items: stretch;
 		height: 100%;
 		min-height: 0;
+		/* allow children to shrink properly in flex layout */
+		min-width: 0;
 	}
 
-	.card {
-		background: var(--surface, #fff);
-		border: 0px solid rgba(0,0,0,0.08);
-		border-radius: 8px;
-		padding: 1rem;
-		box-shadow: 0 0px 0px rgba(0,0,0,0.04);
+	.admin-menu {
+		width: 300px;
+		min-width: 300px;
+		padding: 1rem 0.75rem;
+		background: var(--surface-card, #fff);
+		border-radius: var(--border-radius, 12px);
+		overflow-y: auto;
+		min-height: 0;
 	}
 
-	.documents-menu {
-		width: 15%;
-		min-width: 200px;
-	}
-	.documents-menu h2 {
-		margin: 0 0 0.5rem 0;
-		font-size: 1.05rem;
-	}
-
-	.documents-menu-list {
+	.layout-menu {
 		list-style: none;
 		padding: 0;
 		margin: 0;
 	}
 
-	.documents-menu-list li { margin: 0.35rem 0; }
-
-	.documents-menu-list a { color: var(--text-color, #333); text-decoration: none; }
-
-	/* remove border/shadow from PrimeNG TieredMenu inside the documents menu card */
-	.documents-menu p-tieredMenu,
-	.documents-menu ::ng-deep .p-tieredmenu {
-		border: 0 !important;
-		box-shadow: none !important;
-		background: transparent !important;
+	.layout-root-menuitem {
+		margin-bottom: 0.75rem;
 	}
 
-	.documents-content-wrapper {
+	.layout-menuitem-root-text {
+		font-size: 0.8rem;
+		text-transform: uppercase;
+		font-weight: 700;
+		color: var(--text-color-secondary, #9ca3af);
+		padding: 0.5rem 0.75rem 0.25rem;
+		letter-spacing: 0.06em;
+	}
+
+	.layout-root-submenulist {
+		list-style: none;
+		padding: 0 0 0 0.75rem;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.layout-menuitem-link {
+		display: flex;
+		align-items: center;
+		padding: 0.6rem 0.75rem;
+		border-radius: var(--border-radius, 8px);
+		color: var(--text-color, #334155);
+		text-decoration: none;
+		cursor: pointer;
+		transition: background-color 0.15s, color 0.15s;
+
+		&:hover {
+			background-color: var(--surface-hover, rgba(0, 0, 0, 0.04));
+		}
+
+		&.active-route {
+			background-color: color-mix(in srgb, var(--primary-color, #3B82F6) 12%, transparent);
+			color: var(--primary-color, #3B82F6);
+			font-weight: 600;
+
+			.layout-menuitem-icon {
+				color: var(--primary-color, #3B82F6);
+			}
+		}
+	}
+
+	.layout-menuitem-icon {
+		margin-right: 0.5rem;
+		font-size: 1rem;
+		//color: var(--primary-color, #3B82F6);
+		width: 1.25rem;
+		text-align: center;
+	}
+
+	.layout-menuitem-text {
+		font-size: 0.95rem;
+		font-weight: 500;
+		line-height: 1;
+	}
+
+	.admin-content-wrapper {
 		flex: 1 1 70%;
 		display: flex;
 		flex-direction: column;
 		min-height: 0;
+		/* allow inner content to shrink rather than forcing horizontal scroll */
+		min-width: 0;
 	}
 
-	.documents-content { width: 100%; min-height: 0; }
+	.admin-content {
+		width: 100%;
+		min-height: 0;
+		min-width: 0;
+	}
 
-	.documents-content-wrapper .documents-content { flex: 1 1 auto; display: flex; flex-direction: column; overflow: auto; }
+	/* Make the inner content card expand and scroll like in administration */
+	.admin-content-wrapper .admin-content {
+		flex: 1 1 auto;
+		display: flex;
+		flex-direction: column;
+		overflow: auto; /* internal scrolling when content overflows */
+	}
 
-	.documents-content h3 { margin: 0 0 1rem 0; }
+	.admin-content h3 {
+		margin: 0 0 1rem 0;
+	}
 
-	.documents-menu h2,
-	.documents-content h3 { font-weight: 700; }
+	.admin-menu h2,
+	.admin-content h3 {
+		font-weight: 700;
+	}
 
-	.documents-tools { width: 100%; height: 70px; }
+	.admin-tools {
+		width: 100%;
+		height: 70px;
+	}
+
+	.admin-subpage-tools {
+		width: 100%;
+		height: auto;
+		/* match other admin pages toolbar spacing */
+		padding: 1rem;
+	}
+
+/* Toolbar visual rules copied from other admin pages to keep consistent look */
+.p-toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	padding: 0;
+	background: var(--p-toolbar-background);
+	border: 0px solid var(--p-toolbar-border-color);
+	color: var(--p-toolbar-color);
+	border-radius: var(--p-toolbar-border-radius);
+	gap: var(--p-toolbar-gap);
+}
+
+/* Prevent horizontal overflow at page level */
+.page-administration {
+	overflow-x: hidden;
+}
+
+/* Ensure content area never forces page width */
+.admin-content-wrapper,
+.admin-content,
+.admin-subpage-content,
+.table-responsive {
+	overflow-x: hidden;
+	min-width: 0;
+}
+
+/* PrimeNG table internal fixes: make scrollable body constrain and allow internal scroll */
+.issues-table .p-datatable-scrollable-view,
+.issues-table .p-datatable-scrollable-body,
+.issues-table .p-datatable-wrapper {
+	max-width: 100%;
+	overflow-x: auto;
+}
+
+/* Force table layout fixed so long columns wrap instead of expanding container */
+.issues-table table,
+.issues-table .p-datatable-table {
+	table-layout: fixed;
+	width: 100% !important;
+}
+
+/* Allow cells to wrap inside fixed layout */
+.issues-table th,
+.issues-table td {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* When space is tight, allow wrapping for content-heavy columns */
+@media (max-width: 900px) {
+	.issues-table th,
+	.issues-table td {
+		white-space: normal !important;
+	}
+}
+
+	.admin-subpage-content {
+		/* mirror administration layout: allow this block to grow and scroll internally */
+		flex: 1 1 auto; /* fill remaining vertical space */
+		display: flex;
+		flex-direction: column;
+		min-height: 0; /* enable proper flexbox scrolling behavior */
+		overflow: auto; /* internal scrolling when content is long */
+		min-width: 0;
+	}
+
+/* Make the table area horizontally scrollable on small screens */
+.table-responsive {
+	/* make the table area fill available space and scroll internally */
+	flex: 1 1 auto;
+	width: 100%;
+	overflow: auto;
+	min-width: 0; /* ensure it can shrink inside flex */
+	display: block;
+}
+
+/* Ensure the issues table doesn't force the page width; allow internal scrolling */
+.issues-table {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Minimum column widths (same as issues page) to keep layout readable */
+.issues-table th[data-field="id"],
+.issues-table td[data-field="id"] {
+	min-width: 60px;
+}
+.issues-table th[data-field="project_name"],
+.issues-table td[data-field="project_name"],
+.issues-table th[data-field="type_name"],
+.issues-table td[data-field="type_name"] {
+	min-width: 140px;
+}
+.issues-table th[data-field="title"],
+.issues-table td[data-field="title"] {
+	min-width: 320px;
+}
+.issues-table th[data-field="assignee_name"],
+.issues-table td[data-field="assignee_name"],
+.issues-table th[data-field="author_name"],
+.issues-table td[data-field="author_name"] {
+	min-width: 190px;
+}
+.issues-table th[data-field="status_name"],
+.issues-table td[data-field="status_name"] {
+	min-width: 140px;
+}
+.issues-table th[data-field="priority_text"],
+.issues-table td[data-field="priority_text"] {
+	min-width: 150px;
+}
+.issues-table th[data-field="estimated_hours"],
+.issues-table td[data-field="estimated_hours"] {
+	min-width: 130px;
+}
+.issues-table th[data-field="start_date"],
+.issues-table td[data-field="start_date"],
+.issues-table th[data-field="due_date"],
+.issues-table td[data-field="due_date"],
+.issues-table th[data-field="created_at"],
+.issues-table td[data-field="created_at"],
+.issues-table th[data-field="stage_date"],
+.issues-table td[data-field="stage_date"] {
+	min-width: 160px;
+}
+
+.p-tree {
+	padding: 0;
+}
 }

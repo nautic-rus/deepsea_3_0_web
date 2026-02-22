@@ -13,6 +13,8 @@ export class AuthService {
 
   /** Single-flight holder for ongoing refresh request */
   private refreshInProgress$: Observable<boolean> | null = null;
+  /** Cached current user observable to avoid duplicate /me requests */
+  private meCache$: Observable<any> | null = null;
 
   constructor(private http: HttpClient) {}
 
@@ -43,7 +45,17 @@ export class AuthService {
 
   /** Get current authenticated user */
   me(): Observable<any> {
-    return this.http.get<any>(`${this.API_BASE}/me`, { withCredentials: true });
+    // Single-flight + cache: reuse ongoing observable and replay last value to new subscribers.
+    if (this.meCache$) {
+      return this.meCache$;
+    }
+
+    this.meCache$ = this.http.get<any>(`${this.API_BASE}/me`, { withCredentials: true }).pipe(
+      // cache the most recent value for subsequent subscribers
+      shareReplay(1)
+    );
+
+    return this.meCache$;
   }
 
   /** Perform login (server expected to set HttpOnly cookies) */
@@ -55,7 +67,11 @@ export class AuthService {
   logout(): Observable<any> {
     return this.http
       .post<any>(`${this.API_BASE}/logout`, {}, { withCredentials: true })
-      .pipe(tap(() => sessionStorage.removeItem('currentUser')));
+      .pipe(tap(() => {
+        sessionStorage.removeItem('currentUser');
+        // clear cached /me so next authenticated session refetches
+        this.meCache$ = null;
+      }));
   }
 
   /** Request password reset email */

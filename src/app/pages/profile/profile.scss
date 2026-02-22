@@ -114,4 +114,26 @@
     font-size: 24px;
     color: #2c3e50;
   }
+
+  /* Avatar should stretch to the height of the left block in the profile header */
+  .profile-content {
+    .full-avatar {
+      /* allow avatar to stretch vertically inside the flex row */
+      height: 100%;
+      min-width: 6.42rem; /* keep reasonable minimum */
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    /* PrimeNG p-avatar renders an <img> with class .p-avatar-image; target it so the image fills the avatar container */
+    .full-avatar img,
+    .full-avatar .p-avatar-image {
+      width: auto;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 9999px;
+      display: block;
+    }
+  }
 }

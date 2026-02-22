@@ -1,0 +1,182 @@
+/* Copied from administration.scss to mirror admin layout for Projects page */
+.page-administration {
+  padding: 0;
+
+
+  .admin-grid {
+    display: flex;
+    gap: 1rem;
+    align-items: stretch; /* allow children to stretch to same height */
+    min-height: calc(90vh - 0px); /* full viewport height (page padding is 0) */
+  }
+
+
+  .admin-menu {
+    width: 25%;
+    min-width: 200px;
+  }
+  .admin-menu h2 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.05rem;
+  }
+
+  .admin-menu-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .admin-menu-list li {
+    margin: 0.35rem 0;
+  }
+
+  .admin-menu-list a {
+    color: var(--text-color, #333);
+    text-decoration: none;
+  }
+
+  /* remove border/shadow from PrimeNG Menu inside the admin menu card */
+  .admin-menu p-menu,
+  .admin-menu ::ng-deep .p-menu {
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  .admin-content-wrapper {
+    flex: 1 1 70%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* allow children to shrink correctly inside flex */
+  }
+
+  .admin-content {
+    width: 100%;
+    min-height: 0;
+  }
+
+  /* make the second content card expand to fill remaining vertical space */
+  .admin-content-wrapper .admin-content {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    overflow: auto; /* internal scrolling when content overflows */
+  }
+
+  .admin-content h3 {
+    margin: 0 0 1rem 0;
+  }
+
+  /* Make block headers bold */
+  .admin-menu h2,
+  .admin-content h3 {
+    font-weight: 700;
+  }
+
+  .admin-tools {
+    width: 100%;
+    height: auto;
+  }
+
+  /* Intro/title added above accordion */
+  .admin-section-title {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.125rem;
+    font-weight: 700;
+  }
+
+  .admin-intro {
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--surface-50, #fafafa);
+    border-radius: 8px;
+    color: var(--text-color, #222);
+  }
+
+  /* Ensure accordion header/title is visible and styled */
+  .admin-accordion-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-color, #222);
+  }
+
+  /* Slight padding for PrimeNG accordion headers inside admin area */
+  .p-accordion .p-accordionheader {
+    padding: 0.6rem 1rem;
+  }
+
+  /* styles for subpage inner layout: make content area fill remaining height */
+  .admin-subpage-tools {
+    width: 100%;
+    height: auto; /* match admin-tools toolbar height so content can fill remaining space */
+  }
+
+  .admin-subpage-content {
+    /* allow this block to grow and fill the column within .admin-content-wrapper */
+    flex: 1 1 flex;
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* enable proper flexbox scrolling behavior */
+    overflow: auto; /* internal scrolling when content is long */
+  }
+
+  /* Left column in issue detail: internal scrolling when content is long */
+  .issue-left-scroll {
+    /* limit height to a reasonable portion of viewport and allow internal scroll */
+    max-height: 83.5vh;
+    overflow: auto;
+    padding-right: 0.2rem; /* prevent content being hidden under scrollbar */
+    min-height: 0;
+  }
+
+  /* Allow controlling the width of the left column via CSS variable */
+  .issue-grid {
+    /* when used together with Tailwind's "grid" classes this will override the column template */
+    grid-template-columns: var(--issue-left-width, 35%) 1fr;
+    gap: var(--issue-grid-gap, 1rem);
+  }
+
+  /* Optional helper class to make columns visually resizable in future (no JS here) */
+  .adjustable-columns {
+    /* expose a CSS variable for consumers to override */
+    --issue-left-width: 55%;
+  }
+
+}
+
+.heading-compact { margin-bottom: 0.25rem; }
+
+.p-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding: 0;
+    background: var(--p-toolbar-background);
+    border: 0px solid var(--p-toolbar-border-color);
+    color: var(--p-toolbar-color);
+    border-radius: var(--p-toolbar-border-radius);
+    gap: var(--p-toolbar-gap);
+}
+
+/* small avatar used inside select option templates */
+.select-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: inline-block;
+}
+
+/* initials variant for select when no avatar image available */
+.select-avatar-initials {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+}

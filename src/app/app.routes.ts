@@ -65,8 +65,11 @@ export const routes: Routes = [
       },
       {
         path: 'documents',
-        loadComponent: () => import('./pages/documents/documents').then(m => m.DocumentsComponent),
-        canActivate: [AuthGuard]
+        canActivate: [AuthGuard],
+        children: [
+          { path: '', pathMatch: 'full', loadComponent: () => import('./pages/documents/documents').then(m => m.DocumentsComponent) },
+          { path: ':id', loadComponent: () => import('./pages/documents/documents-detail').then(m => m.DocumentsDetailComponent) }
+        ]
       },
       
       {

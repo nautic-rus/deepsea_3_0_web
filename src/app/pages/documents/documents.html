@@ -1,12 +1,363 @@
-<div class="page-documents">
-  <section class="admin-subpage-content card text-center flex flex-col items-center justify-center" style="height: 90vh;">
+<div class="page-administration">
+	<div class="admin-grid">
+			<aside class="admin-menu">
+          
+					<!-- Tree and actions on one horizontal row: tree expands, button stays at right -->
+					<div class="flex items-start gap-2">
+						<div class="flex-1">
+							<!-- Expand / Collapse controls above the tree -->
+							<div class="flex flex-wrap gap-2 mb-2">
+								<p-button  severity="secondary" icon="pi pi-plus"  (onClick)="expandAll()"></p-button>
+								<p-button  severity="secondary" icon="pi pi-minus" (onClick)="collapseAll()"></p-button>
+							</div>
+			  <div class="pr-4" id="documents-tree-container">
+							<p-tree #tree [value]="files()" class="w-full" selectionMode="single" [(selection)]="selectedFile" (onNodeSelect)="onDirectorySelect($event.node)" (onNodeContextMenuSelect)="onTreeNodeContextMenu($event)" [contextMenu]="treeCm" [draggableNodes]="true" [droppableNodes]="true" dragdropScope="documents" ></p-tree>
+							<p-contextMenu #treeCm [model]="treeItems"></p-contextMenu>
+			  </div>
+            </div>
+						<div class="flex-none">
+							<button pButton type="button" icon="pi pi-ellipsis-v" aria-label="Actions" class="p-button-rounded p-button-text p-button-plain mt-0" (click)="openMenu($event)"></button>
+							<p-menu #menu [popup]="true" [model]="items"></p-menu>
+						</div>
+					</div>
 
-    <div class="mb-4">
-      <h1>{{ 'MENU.DOCUMENTS' | translate }}</h1>
-    </div>
+					<!-- Create / Edit directory dialog: copied / aligned with Projects dialog layout -->
+					<p-toast></p-toast>
+					<p-dialog [header]="isEditingDir ? ('MENU.EDIT' | translate) : ('MENU.CREATE' | translate)" [(visible)]="displayCreateDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{ width: '25%' }">
+						<div class=" flex flex-col gap-4">
+														<!-- Read-only ID shown only in edit mode -->
+							<div *ngIf="isEditingDir" class="flex flex-col gap-2">
+								<label for="dirId">{{ 'components.documents.form.ID' | translate }}</label>
+								<input pInputText id="dirId" type="text" [value]="editingDirId" name="id" disabled />
+							</div>
+							<div class="flex flex-col gap-2">
+								<label for="dirName">{{ 'components.documents.form.NAME' | translate }}</label>
+								<input pInputText id="dirName" type="text" [(ngModel)]="newDir.name" name="name" />
+							</div>
 
-    <p>Мы работаем над этой страницей — приходите позже или вернитесь на главную.</p>
+							<div class="flex flex-col gap-2" *ngIf="!createDirFromContext || isEditingDir">
+								<label for="dirProject">{{ 'components.documents.form.PROJECT_ID' | translate }}</label>
+								<p-select id="dirProject" [options]="projectOptions" optionLabel="label" optionValue="value" [(ngModel)]="newDir.project_id" name="project_id" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+							</div>
 
-    <p-button [label]="('components.underDevelopment.GO_HOME' | translate)" routerLink="/" severity="success" class="mt-5"/>
-  </section>
+							<div class="flex flex-col gap-2" *ngIf="createDirFromContext && !isEditingDir">
+								<label for="dirParent">{{ 'components.documents.form.PARENT_DIRECTORY' | translate }}</label>
+								<p-select id="dirParent" [options]="directoryOptions" optionLabel="label" optionValue="value" [(ngModel)]="newDir.parent_id" name="parent_id" placeholder="-" appendTo="body"></p-select>
+							</div>
+
+							<div *ngIf="createDirFromContext && isEditingDir" class="flex flex-col gap-2">
+								<label for="dirParentEdit">{{ 'components.documents.form.PARENT_DIRECTORY' | translate }}</label>
+								<p-select id="dirParentEdit" [options]="directoryOptions" optionLabel="label" optionValue="value" [(ngModel)]="newDir.parent_id" name="parent_id" placeholder="-" appendTo="body"></p-select>
+							</div>
+
+							<div *ngIf="isEditingDir" class="flex flex-col gap-2">
+								<label for="dirOrder">{{ 'components.documents.form.ORDER_INDEX' | translate }}</label>
+								<input pInputText id="dirOrder" type="number" [(ngModel)]="newDir.order_index" name="order_index" />
+							</div>
+
+							<div *ngIf="formErrors && formErrors.name" class="text-red-600 block">{{ formErrors.name }}</div>
+
+							<div class="flex justify-end gap-2 mt-4">
+								<p-button label="{{ 'components.projects.form.CANCEL' | translate }}" (onClick)="closeDirectoryDialog()" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="savingDir"></p-button>
+								<p-button label="{{ isEditingDir ? ('components.projects.form.SAVE' | translate) : ('MENU.CREATE' | translate) }}" (onClick)="createDirectory()" class="" severity="primary" icon="pi pi-check" iconPos="left" [loading]="savingDir" [disabled]="!newDir.name || savingDir"></p-button>
+							</div>
+						</div>
+					</p-dialog>
+
+					<!-- Confirm dialog for delete actions -->
+					<p-confirmDialog
+						[style]="{ width: '25%' }"
+						header="{{ 'MENU.CONFIRM' | translate }}"
+						acceptLabel="{{ 'MENU.DELETE' | translate }}"
+						rejectLabel="{{ 'MENU.CANCEL' | translate }}"
+						acceptIcon="pi pi-check"
+						acceptButtonStyleClass="p-button-danger"
+						rejectButtonStyleClass="secondary p-button-text"
+						rejectIcon="pi pi-times"
+					>
+					</p-confirmDialog>
+
+			</aside>
+
+			<section class="admin-content-wrapper">
+				<section class="admin-content">
+					<section class="admin-subpage-tools card mt-0">
+				<p-toolbar>
+					<ng-template #start>
+						<p-button [label]="'MENU.CREATE_DOC' | translate" icon="pi pi-plus" severity="primary" class="mr-2" (onClick)="openNewDocument()"></p-button>
+						<!-- <p-button severity="warn" icon="pi pi-filter" class="ml-2" (onClick)="noop()"></p-button> -->
+						<p-button severity="secondary" icon="pi pi-pencil" class="ml-2" (onClick)="noop()" [disabled]="!selectedDocuments || !selectedDocuments.length"></p-button>
+					</ng-template>
+
+					<ng-template #end>
+						<p-button [label]="'MENU.EXPORT' | translate" icon="pi pi-upload" severity="secondary" (onClick)="noop()"></p-button>
+					</ng-template>
+				</p-toolbar>
+					</section>
+
+				<!-- Create / Edit document dialog (copied/adapted from issues) -->
+				<p-dialog header="{{ isCreating ? ('MENU.CREATE_DOC' | translate) : ('MENU.EDIT' | translate) }}" [(visible)]="displayDialog" [modal]="true" appendTo="body" [resizable]="false" [style]="{ width: '40%' }">
+					<div class="flex flex-col gap-4">
+						<div class="flex flex-col gap-2">
+							<label class="font-bold">{{ 'components.documents.form.TITLE' | translate }}</label>
+							<input pInputText type="text" [(ngModel)]="editModel.title" />
+							<small *ngIf="formErrors.title" class="text-red-600 block">{{ formErrors.title }}</small>
+						</div>
+
+						<div class="flex flex-col gap-2">
+							<label class="font-bold">{{ 'components.documents.form.DESCRIPTION' | translate }}</label>
+							<p-editor [(ngModel)]="editModel.description" styleClass="w-full" [style]="{ height: '180px' }"></p-editor>
+						</div>
+
+						<div class="grid grid-cols-3 gap-4">
+							<div class="flex flex-col gap-2">
+								<label class="font-bold">{{ 'components.documents.form.PROJECT_ID' | translate }}</label>
+								<p-select [options]="projectOptions" optionLabel="label" optionValue="value" [(ngModel)]="editModel.project_id" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+							</div>
+							<div class="flex flex-col gap-2">
+								<label class="font-bold">{{ 'components.documents.form.ASSIGNEE' | translate }}</label>
+								<p-select [options]="usersOptions" optionLabel="label" optionValue="value" [(ngModel)]="editModel.assigne_to" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+							</div>
+							<div class="flex flex-col gap-2">
+								<label class="font-bold">{{ 'components.documents.form.DIRECTORY' | translate }}</label>
+								<p-select [options]="directoryOptions" optionLabel="label" optionValue="value" [(ngModel)]="editModel.directory_id" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+							</div>
+						</div>
+
+						<div class="grid grid-cols-2 gap-4 mt-2">
+							<div class="flex flex-col gap-2">
+								<label class="font-bold">{{ 'components.documents.form.STAGE_DATE' | translate }}</label>
+								<p-datepicker [(ngModel)]="editModel.stage_date" [showIcon]="true" inputId="stageDate" appendTo="body"></p-datepicker>
+							</div>
+						</div>
+
+						<div class="flex justify-end gap-2 mt-4">
+							<p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="displayDialog=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="loading"></p-button>
+							<p-button label="{{ 'MENU.SAVE' | translate }}" (onClick)="saveDocument()" severity="primary" icon="pi pi-check" iconPos="left" [loading]="loading" [disabled]="loading"></p-button>
+						</div>
+					</div>
+				</p-dialog>
+
+					<section class="admin-subpage-content card">
+				<div class="table-responsive" #tableContainer>
+					<p-table
+						#dt
+						[value]="documentsItems"
+						[loading]="loading"
+						styleClass="issues-table"
+						[reorderableColumns]="true"
+						(onColReorder)="onColumnsReordered($event)"
+						(onColResize)="onColumnResized($event)"
+						[scrollable]="true"
+						scrollWidth="100%"
+						[resizableColumns]="true"
+						columnResizeMode="expand"
+						scrollHeight="flex"
+						[rows]="10"
+						size="small"
+						[globalFilterFields]="['id','title','project_name','assignee_name','author_name','status_name','type_name','priority_text']"
+						[(selection)]="selectedDocuments"
+						[rowHover]="true"
+						dataKey="id"
+						currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+						[showCurrentPageReport]="true"
+						[rowsPerPageOptions]="[10, 20, 30]"
+					>
+
+						<ng-template #caption>
+							<div class="flex justify-between mb-2 items-center">
+								<h3>{{ 'MENU.DOCUMENTS' | translate }}</h3>
+								<div class="flex items-center gap-2">
+									<p-multiSelect [options]="columnsOptions" [(ngModel)]="selectedColumns" (onChange)="onColumnsChange()" placeholder="{{ 'MENU.COLUMNS' | translate }}" appendTo="body" styleClass="mr-2"></p-multiSelect>
+									<p-iconfield>
+										<p-inputicon styleClass="pi pi-search"></p-inputicon>
+										<input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="{{ 'components.issues.table.SEARCH' | translate }}" />
+									</p-iconfield>
+								</div>
+							</div>
+						</ng-template>
+
+						<ng-template pTemplate="header">
+							<tr>
+								<th style="width: 3rem" pResizableColumn>
+									<p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+								</th>
+
+								<ng-container *ngFor="let col of columns">
+									<th *ngIf="isColumnVisible(col.field)" [attr.data-field]="col.field" pReorderableColumn [pSortableColumn]="col.field" pResizableColumn>
+										<div class="flex justify-between items-center">
+											<div class="flex items-center gap-2">
+												<span>{{ (col.headerKey | translate) }}</span>
+												<p-sortIcon [field]="col.field"></p-sortIcon>
+											</div>
+
+											<ng-container [ngSwitch]="col.field">
+												<ng-container *ngSwitchCase="'project_name'">
+													<p-columnFilter field="project_name" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
+														<ng-template #filter let-value let-filter="filterCallback">
+															<p-multiselect [ngModel]="value"
+																[options]="projectOptions"
+																optionLabel="label"
+																optionValue="label"
+																placeholder="{{ 'MENU.ANY' | translate }}"
+																(onChange)="filter($event.value)"
+																styleClass="w-full"
+																appendTo="body">
+															</p-multiselect>
+														</ng-template>
+													</p-columnFilter>
+												</ng-container>
+												<ng-container *ngSwitchCase="'assignee_name'">
+													<p-columnFilter field="assignee_name" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
+														<ng-template #filter let-value let-filter="filterCallback">
+															<p-multiselect [ngModel]="value"
+																			[options]="usersOptions"
+																			optionLabel="label"
+																			optionValue="label"
+																			placeholder="{{ 'MENU.ANY' | translate }}"
+																			(onChange)="filter($event.value)"
+																			styleClass="w-full"
+																			appendTo="body">
+															</p-multiselect>
+														</ng-template>
+													</p-columnFilter>
+												</ng-container>
+												<ng-container *ngSwitchCase="'author_name'">
+													<p-columnFilter field="author_name" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
+														<ng-template #filter let-value let-filter="filterCallback">
+															<p-multiselect [ngModel]="value"
+																			[options]="usersOptions"
+																			optionLabel="label"
+																			optionValue="label"
+																			placeholder="{{ 'MENU.ANY' | translate }}"
+																			(onChange)="filter($event.value)"
+																			styleClass="w-full"
+																			appendTo="body">
+															</p-multiselect>
+														</ng-template>
+													</p-columnFilter>
+												</ng-container>
+												<ng-container *ngSwitchCase="'status_name'">
+													<p-columnFilter field="status_name" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
+														<ng-template #filter let-value let-filter="filterCallback">
+															<p-multiselect [ngModel]="value"
+																			[options]="statusOptions"
+																			optionLabel="label"
+																			optionValue="label"
+																			placeholder="{{ 'MENU.ANY' | translate }}"
+																			(onChange)="filter($event.value)"
+																			styleClass="w-full"
+																			appendTo="body">
+															</p-multiselect>
+														</ng-template>
+													</p-columnFilter>
+												</ng-container>
+												<ng-container *ngSwitchCase="'type_name'">
+													<p-columnFilter field="type_name" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
+														<ng-template #filter let-value let-filter="filterCallback">
+															<p-multiselect [ngModel]="value"
+																			[options]="typeOptions"
+																			optionLabel="label"
+																			optionValue="label"
+																			placeholder="{{ 'MENU.ANY' | translate }}"
+																			(onChange)="filter($event.value)"
+																			styleClass="w-full"
+																			appendTo="body">
+															</p-multiselect>
+														</ng-template>
+													</p-columnFilter>
+												</ng-container>
+												<ng-container *ngSwitchCase="'priority_text'">
+													<p-columnFilter field="priority_text" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
+														<ng-template #filter let-value let-filter="filterCallback">
+															<p-multiselect [ngModel]="value"
+																			[options]="priorityOptions"
+																			optionLabel="label"
+																			optionValue="label"
+																			placeholder="{{ 'MENU.ANY' | translate }}"
+																			(onChange)="filter($event.value)"
+																			styleClass="w-full"
+																			appendTo="body">
+															</p-multiselect>
+														</ng-template>
+													</p-columnFilter>
+												</ng-container>
+												<ng-container *ngSwitchDefault></ng-container>
+											</ng-container>
+										</div>
+									</th>
+								</ng-container>
+
+								<th pResizableColumn></th>
+							</tr>
+						</ng-template>
+
+						<ng-template pTemplate="body" let-issue>
+							<tr (click)="onRowClick(issue, $event)">
+								<td>
+									<p-tableCheckbox [value]="issue"></p-tableCheckbox>
+								</td>
+
+								<ng-container *ngFor="let col of columns">
+									<td *ngIf="isColumnVisible(col.field)" [attr.data-field]="col.field">
+										<ng-container [ngSwitch]="col.field">
+											<ng-container *ngSwitchCase="'id'">{{ issue.id }}</ng-container>
+											<ng-container *ngSwitchCase="'project_name'">{{ issue.project_name || '-' }}</ng-container>
+											<ng-container *ngSwitchCase="'title'">{{ issue.title || '-' }}</ng-container>
+											<ng-container *ngSwitchCase="'type_name'">{{ issue.type_name || '-' }}</ng-container>
+											<ng-container *ngSwitchCase="'assignee_name'">
+												<div class="flex items-center gap-2">
+													<ng-container *ngIf="issue.assignee_avatar || issue.assignee_avatar_url; else assigneeInitials">
+														<p-avatar [image]="issue.assignee_avatar || issue.assignee_avatar_url" class="mr-2" shape="circle"></p-avatar>
+													</ng-container>
+													<ng-template #assigneeInitials>
+														<div class="user-avatar user-avatar-initials mr-2"
+															[style.background]="issue.assignee_id ? issueAvatarColor({ id: issue.assignee_id, first_name: issue.assignee_name }) : undefined"
+															[style.color]="issue.assignee_id ? issueAvatarTextColor({ id: issue.assignee_id, first_name: issue.assignee_name }) : undefined">
+															{{ initialsFromName(issue.assignee_name) }}
+														</div>
+													</ng-template>
+													<span>{{ formatSurnameInitials(issue.assignee_name || issue) }}</span>
+												</div>
+											</ng-container>
+											<ng-container *ngSwitchCase="'author_name'">
+												<div class="flex items-center gap-2">
+													<ng-container *ngIf="issue.author_avatar || issue.author_avatar_url; else authorInitials">
+														<p-avatar [image]="issue.author_avatar || issue.author_avatar_url" class="mr-2" shape="circle"></p-avatar>
+													</ng-container>
+													<ng-template #authorInitials>
+														<div class="user-avatar user-avatar-initials mr-2"
+															[style.background]="issue.author_id ? issueAvatarColor({ id: issue.author_id, first_name: issue.author_name }) : undefined"
+															[style.color]="issue.author_id ? issueAvatarTextColor({ id: issue.author_id, first_name: issue.author_name }) : undefined">
+															{{ initialsFromName(issue.author_name) }}
+														</div>
+													</ng-template>
+													<span>{{ formatSurnameInitials(issue.author_name || issue) }}</span>
+												</div>
+											</ng-container>
+											<ng-container *ngSwitchCase="'status_name'">
+												<p-tag [value]="issue.status_name || '-'" [severity]="statusSeverity(issue.status_code)"></p-tag>
+											</ng-container>
+											<ng-container *ngSwitchCase="'priority_text'">
+												<p-tag [value]="issue.priority_text || (issue.priority || '-')" [severity]="prioritySeverity(issue.priority)"></p-tag>
+											</ng-container>
+											<ng-container *ngSwitchCase="'estimated_hours'">{{ issue.estimated_hours || '-' }}</ng-container>
+											<ng-container *ngSwitchCase="'start_date'">{{ issue.start_date ? (issue.start_date | date:'dd.MM.yyyy') : '-' }}</ng-container>
+											<ng-container *ngSwitchCase="'due_date'">{{ issue.due_date ? (issue.due_date | date:'dd.MM.yyyy') : '-' }}</ng-container>
+											<ng-container *ngSwitchCase="'stage_date'">{{ issue.stage_date ? (issue.stage_date | date:'dd.MM.yyyy') : '-' }}</ng-container>
+											<ng-container *ngSwitchCase="'created_at'">{{ issue.created_at ? (issue.created_at | date:'dd.MM.yyyy') : '-' }}</ng-container>
+											<ng-container *ngSwitchDefault>{{ issue[col.field] }}</ng-container>
+										</ng-container>
+									</td>
+								</ng-container>
+
+								<td></td>
+							</tr>
+						</ng-template>
+					</p-table>
+				</div>
+					</section>
+				</section>
+			</section>
+	</div>
 </div>

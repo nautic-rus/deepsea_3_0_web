@@ -1,6 +1,6 @@
 <div class="page-profile">
   <div class="profile-grid">
-    <aside class="profile-menu card">
+    <aside class="profile-menu card mt-0">
       <ul class="layout-menu">
         @for (group of menuGroups; track group.label) {
           <li class="layout-root-menuitem">
@@ -25,56 +25,66 @@
     </aside>
 
     <section class="profile-content-wrapper">
-      <div class="profile-content card">
+      <div class="profile-content card mt-0">
 
-          <div class="flex items-center flex-col lg:flex-row lg:justify-between">
-            <div class="flex items-start flex-col md:flex-row gap-8">
-              <img src="https://fqjltiegiezfetthbags.supabase.co/storage/v1/object/public/block.images/blocks/pageheading/kathryn.png" class="w-[6.42rem] h-[6.42rem]" />
+          <div class="flex items-start flex-col lg:flex-row lg:justify-between">
+            <div class="flex items-stretch flex-col md:flex-row gap-8">
+              <p-avatar *ngIf="user && (user?.avatar_url || user?.avatar || user?.profile_image || user?.photo || user?.avatar_id) ; else avatarInitialsTpl"
+                        [image]="avatarUrl()"
+                        shape="circle" styleClass="full-avatar self-stretch"></p-avatar>
+              <ng-template #avatarInitialsTpl>
+                <p-avatar [label]="personInitials(user?.name || user?.first_name || user?.firstName)"
+                          shape="circle"
+                          [style.background]="user?.id ? issueAvatarColor({ id: user.id, first_name: user.first_name }) : undefined"
+                          [style.color]="user?.id ? issueAvatarTextColor({ id: user.id, first_name: user.first_name }) : undefined"
+                          styleClass="full-avatar self-stretch"></p-avatar>
+              </ng-template>
               <div class="flex flex-col gap-4">
                 <div class="flex items-center">
-                  <span class="text-surface-900 dark:text-surface-0 font-bold text-3xl">Kathryn Murphy</span>
+                  <span class="text-surface-900 dark:text-surface-0 font-bold text-3xl">{{ userName() || ('MENU.PROFILE' | translate) }}</span>
                 </div>
                 <div class="flex items-center flex-wrap gap-8">
                   <div>
-                    <span class="text-surface-500 dark:text-surface-300">Followers</span>
-                    <div class="text-surface-700 dark:text-surface-100 mt-1 text-sm font-semibold">333</div>
+                    <span class="text-surface-500 dark:text-surface-300">{{ 'MENU.EMAIL' | translate }}</span>
+                    <div class="text-surface-700 dark:text-surface-100 mt-1 text-sm font-semibold">{{ user?.email || '-' }}</div>
+                  </div>
+                  <!-- Username removed as requested -->
+                  <div>
+                    <span class="text-surface-500 dark:text-surface-300">{{ 'MENU.PHONE' | translate }}</span>
+                    <div class="text-surface-700 dark:text-surface-100 mt-1 text-sm font-semibold">{{ user?.phone || '-' }}</div>
                   </div>
                   <div>
-                    <span class="text-surface-500 dark:text-surface-300">Projects</span>
-                    <div class="text-surface-700 dark:text-surface-100 mt-1 text-sm font-semibold">26</div>
+                    <span class="text-surface-500 dark:text-surface-300">{{ 'MENU.DEPARTMENT' | translate }}</span>
+                    <div class="text-surface-700 dark:text-surface-100 mt-1 text-sm font-semibold">{{ user?.department || '-' }}</div>
                   </div>
                   <div>
-                    <span class="text-surface-500 dark:text-surface-300">Collections</span>
-                    <div class="text-surface-700 dark:text-surface-100 mt-1 text-sm font-semibold">17</div>
-                  </div>
-                  <div>
-                    <span class="text-surface-500 dark:text-surface-300">Shots</span>
-                    <div class="text-surface-700 dark:text-surface-100 mt-1 text-sm font-semibold">130</div>
+                    <span class="text-surface-500 dark:text-surface-300">{{ 'MENU.JOB_TITLE' | translate }}</span>
+                    <div class="text-surface-700 dark:text-surface-100 mt-1 text-sm font-semibold">{{ user?.job_title || '-' }}</div>
                   </div>
                 </div>
               </div>
             </div>
-            <div class="mt-6 lg:mt-0 flex items-center gap-4">
-              <button pButton [severity]="'secondary'">
-                <i pButtonIcon class="pi pi-bookmark"></i>
+            <div class="mt-2 lg:mt-0 flex items-start gap-3">
+              <!-- Edit profile -->
+              <button pButton type="button" class="p-button-rounded p-button-text" aria-label="{{ 'MENU.EDIT_PROFILE' | translate }}" title="{{ 'MENU.EDIT_PROFILE' | translate }}" (click)="onEditProfile()">
+                <i class="pi pi-pencil"></i>
               </button>
-              <button pButton [severity]="'secondary'">
-                <i pButtonIcon class="pi pi-heart"></i>
+
+              <!-- Reset password / security -->
+              <button pButton type="button" class="p-button-rounded p-button-text" aria-label="{{ 'MENU.RESET_PASSWORD' | translate }}" title="{{ 'MENU.RESET_PASSWORD' | translate }}" (click)="onResetPassword()">
+                <i class="pi pi-key"></i>
               </button>
-              <button pButton [severity]="'secondary'">
-                <i pButtonIcon class="pi pi-list"></i>
+
+              <!-- Share rights -->
+              <button pButton type="button" class="p-button-rounded p-button-text" aria-label="{{ 'MENU.SHARE_RIGHTS' | translate }}" title="{{ 'MENU.SHARE_RIGHTS' | translate }}" (click)="onShareRights()">
+                <i class="pi pi-users"></i>
               </button>
             </div>
           </div>
 
         </div>
 
-
+        <router-outlet></router-outlet>
     </section>
-
-          <!-- child pages render here -->
-          <div class="mt-6">
-            <router-outlet></router-outlet>
-          </div>
   </div>
 </div>

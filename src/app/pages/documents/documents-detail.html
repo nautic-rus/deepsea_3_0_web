@@ -1,0 +1,391 @@
+<div class="page-administration">
+  <div class="admin-grid">
+  <aside class="admin-menu card mt-0">
+    <div class="admin-menu-header"></div>
+        <div class="flex flex-col gap-2 pb-4">
+            <div class="flex items-center justify-between">
+            <div class="font-semibold text-xl text-primary underline leading-tight cursor-pointer"
+                 (click)="copyDocumentLink($event)"
+                 title="{{ 'components.documents.messages.COPY_LINK' | translate }}">
+               {{ 'MENU.DOCUMENT' | translate }} #{{ document?.id ?? documentId }}</div>
+                  <div>
+                    <p-button severity="secondary" icon="pi pi-pencil" [outlined]="true" (onClick)="openEditDialog()"></p-button>
+                  </div>
+          </div>
+          <div class="text-surface-500 dark:text-surface-300 text-base leading-tight">{{ document?.title ?? '-' }}</div>
+        </div>
+
+              <!-- Edit dialog for the issue (inline on detail page) -->
+              <p-dialog header="{{ 'MENU.EDIT_DOCUMENT' | translate }}" [(visible)]="displayDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{width: '40%'}" appendTo="body">
+                <div class="flex flex-col gap-4">
+                  <div class="flex flex-col gap-2">
+                    <label class="font-bold">{{ 'components.documents.form.DIRECTORY' | translate }}</label>
+                    <!-- Use TreeNode objects as the model value (remove optionValue) so selected node label/path displays correctly -->
+                    <p-treeSelect [options]="directoryTree" [(ngModel)]="editModel.directory_id" [placeholder]="directoryPlaceholder || ('MENU.ANY' | translate)" (ngModelChange)="onDirectoryNgModelChange($event)" appendTo="body"></p-treeSelect>
+                    <small *ngIf="directoryPlaceholder" class="text-primary text-xs block mt-1 pl-2 font-bold">{{ directoryPlaceholder }}</small>
+                  </div>
+
+                  <div class="flex gap-2">
+                    
+                    <div class="flex-1 flex flex-col gap-2">
+                      <label class="font-bold">{{ 'components.documents.form.PROJECT' | translate }}</label>
+                      <p-select [options]="projectOptions" [(ngModel)]="editModel.project_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body">
+                        <ng-template let-opt pTemplate="item">
+                          <div class="flex items-center gap-2">
+                            <div>{{ opt.label }}</div>
+                          </div>
+                        </ng-template>
+                        <ng-template let-opt pTemplate="selectedItem">
+                          <div class="flex items-center gap-2">
+                            <div>{{ opt.label }}</div>
+                          </div>
+                        </ng-template>
+                      </p-select>
+                      <small *ngIf="formErrors.project_id" class="text-red-600 block">{{ formErrors.project_id }}</small>
+                    </div>
+
+                    <div class="w-60 flex flex-col gap-2">
+                      <label class="font-bold">{{ 'components.documents.form.TYPE' | translate }}</label>
+                      <p-select [options]="typeOptions" [(ngModel)]="editModel.type_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+                    </div>
+                  </div>
+
+
+                  <!-- ID field removed from edit form per UX request -->
+
+                  <div class="flex gap-2">
+                    <div class="w-60 flex flex-col gap-2">
+                      <label class="font-bold">{{ 'components.documents.detail.DOCUMENT_NUMBER' | translate }}</label>
+                      <input pInputText type="text" [(ngModel)]="editModel.code" />
+                    </div>
+                    <div class="flex-1 flex flex-col gap-2">
+                      <label class="font-bold">{{ 'components.documents.form.TITLE' | translate }}</label>
+                      <input pInputText type="text" [(ngModel)]="editModel.title" />
+                      <small *ngIf="formErrors.title" class="text-red-600 block">{{ formErrors.title }}</small>
+                    </div>
+                  </div>
+
+                   <!-- <div class="flex flex-col gap-2">
+                    <label class="font-bold">{{ 'components.documents.form.DESCRIPTION' | translate }}</label>
+                    <p-editor [(ngModel)]="editModel.description" styleClass="w-full" [style]="{ height: '120px' }"></p-editor>
+                  </div> -->
+
+                  <div class="flex gap-2">
+                    <div class="flex-1 flex flex-col gap-2">
+                      <label class="font-bold">{{ 'components.documents.form.ASSIGNEE' | translate }}</label>
+                      <p-select [options]="usersOptions" [(ngModel)]="editModel.assignee_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body">
+                        <ng-template let-opt pTemplate="item">
+                          <div class="flex items-center gap-2">
+                            <ng-container *ngIf="opt.avatar; else initialsItem">
+                              <img [src]="opt.avatar" alt="avatar" class="select-avatar" />
+                            </ng-container>
+                            <ng-template #initialsItem>
+                              <div class="select-avatar-initials" [style.background]="selectAvatarBg(opt.label)" [style.color]="selectAvatarTextColor(opt.label)">{{ initialsFromName(opt.label) }}</div>
+                            </ng-template>
+                            <div>{{ opt.label }}</div>
+                          </div>
+                        </ng-template>
+                        <ng-template let-opt pTemplate="selectedItem">
+                          <div class="flex items-center gap-2">
+                            <ng-container *ngIf="opt.avatar; else initialsValue">
+                              <img [src]="opt.avatar" alt="avatar" class="select-avatar" />
+                            </ng-container>
+                            <ng-template #initialsValue>
+                              <div class="select-avatar-initials" [style.background]="selectAvatarBg(opt.label)" [style.color]="selectAvatarTextColor(opt.label)">{{ initialsFromName(opt.label) }}</div>
+                            </ng-template>
+                            <div>{{ opt.label }}</div>
+                          </div>
+                        </ng-template>
+                      </p-select>
+                    </div>
+
+                    <div class="w-60 flex flex-col gap-2">
+                      <label class="font-bold">{{ 'components.documents.form.PRIORITY' | translate }}</label>
+                      <p-select [options]="priorityOptions" [(ngModel)]="editModel.priority" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+                    </div>
+                  </div>
+
+                        <div class="flex gap-2">
+                          <div class="flex-1 flex flex-col gap-2">
+                            <label class="font-bold">{{ 'components.documents.form.DUE_DATE' | translate }}</label>
+                            <p-datepicker [(ngModel)]="editModel.due_date" [showIcon]="true"></p-datepicker>
+                          </div>
+
+                          <div class="w-60 flex flex-col gap-2">
+                            <label class="font-bold">{{ 'components.documents.form.ESTIMATED_HOURS' | translate }}</label>
+                            <input pInputText type="number" step="8" [(ngModel)]="editModel.estimated_hours" />
+                          </div>
+                        </div>
+
+                              <!-- <div class="flex flex-col gap-2">
+                                <label class="font-bold">{{ 'components.documents.form.TAGS' | translate }}</label>
+                                <p-multiSelect [options]="tagsOptions" [(ngModel)]="editModel.tag_select" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-multiSelect>
+                                <small class="text-xs text-surface-500">{{ 'components.issues.form.OR_ADD' | translate }}</small>
+                                <p-chips [(ngModel)]="editModel.tags_custom"></p-chips>
+                              </div> -->
+
+                  <div class="flex justify-end gap-2 mt-4">
+                    <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="displayDialog=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="loading"></p-button>
+                    <p-button label="{{ 'MENU.SAVE' | translate }}" (onClick)="saveDocument()" severity="primary" icon="pi pi-check" iconPos="left" [loading]="loading" [disabled]="loading"></p-button>
+                  </div>
+                </div>
+              </p-dialog>
+
+        <div class="flex flex-col gap-4">
+          <div class="border-t border-surface-200 dark:border-surface-700"></div>
+          <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex items-center gap-4 flex-1">
+              <!-- Document code (added before status) -->
+        <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.documents.detail.CODE' | translate }}</div>
+        <div class="flex-1 flex items-center justify-between">
+          <div class="text-surface-500 dark:text-surface-0 text-base leading-tight font-bold">{{ document?.code || '-' }}</div>
+          
+        </div>
+
+            </div>
+          </div>
+          <div class="border-t border-surface-200 dark:border-surface-700"></div>
+          <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex items-center gap-4 flex-1">
+              <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.documents.detail.STATUS' | translate }}</div>
+                <div class="flex-1">
+                  <p-tag [value]="document?.status_name" [severity]="statusSeverity(document?.status_code)"></p-tag>
+                </div>
+            </div>
+                        
+                        
+          </div>
+          <div class="border-t border-surface-200 dark:border-surface-700"></div>
+          <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex items-center gap-4 flex-1">
+              <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.documents.detail.PRIORITY' | translate }}</div>
+                <div class="flex-1">
+                  <p-tag [value]="document?.priority_text || (document?.priority || '-')" [severity]="prioritySeverity(document?.priority)"></p-tag>
+                </div>
+            </div>
+                        
+                        
+          </div>
+          <div class="border-t border-surface-200 dark:border-surface-700"></div>
+          <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex items-center gap-4 flex-1">
+              <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.documents.detail.TYPE' | translate }}</div>
+              <div class="flex-1 text-surface-500 dark:text-surface-0 text-base leading-tight">{{ document?.type_name || document?.type || '-' }}</div>
+            </div>
+                        
+          </div>
+
+          <div class="border-t border-surface-200 dark:border-surface-700"></div>
+
+          <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex items-center gap-4 flex-1">
+              <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.documents.detail.PROJECT' | translate }}</div>
+              <div class="flex-1 text-surface-500 dark:text-surface-0 text-base leading-tight">{{ document?.project_code || '-' }}</div>
+            </div>
+                        
+          </div>
+
+          <div class="border-t border-surface-200 dark:border-surface-700"></div>
+
+          <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex items-center gap-4 flex-1">
+              <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.documents.detail.AUTHOR' | translate }}</div>
+                          <div class="flex-1 flex items-center gap-3">
+                                  <p-avatar *ngIf="document?.author_avatar_url || document?.author_avatar; else authorInitialsTpl"
+                                    [image]="document?.author_avatar_url || document?.author_avatar"
+                                            
+                                    shape="circle"></p-avatar>
+                                  <ng-template #authorInitialsTpl>
+                                    <p-avatar
+                                      [label]="personInitials(document?.author_name)"
+        
+                                      shape="circle"
+                                      [style.background]="document?.author_id ? issueAvatarColor({ id: document.author_id, first_name: document.author_name }) : undefined"
+                                      [style.color]="document?.author_id ? issueAvatarTextColor({ id: document.author_id, first_name: document.author_name }) : undefined"></p-avatar>
+                                  </ng-template>
+                                    <div class="text-surface-500 dark:text-surface-0 text-base leading-tight">{{ formatSurnameInitials(document?.author_name || document) }}</div>
+                              </div>
+            </div>
+                        
+          </div>
+
+          <div class="border-t border-surface-200 dark:border-surface-700"></div>
+
+          <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex items-start gap-4 flex-1">
+              <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.documents.detail.ASSIGNEE' | translate }}</div>
+                            <div class="flex-1 flex items-center gap-3">
+                                <p-avatar *ngIf="document?.assignee_avatar_url || document?.assignee_avatar; else assigneeInitialsTpl"
+                                  [image]="document?.assignee_avatar_url || document?.assignee_avatar"
+                                                                    
+                                  shape="circle"></p-avatar>
+                                <ng-template #assigneeInitialsTpl>
+                                  <p-avatar
+                                    [label]="assigneeInitials()"
+                                    shape="circle"
+                                    [style.background]="document?.assignee_id ? issueAvatarColor({ id: document.assignee_id, first_name: document.assignee_name }) : undefined"
+                                    [style.color]="document?.assignee_id ? issueAvatarTextColor({ id: document.assignee_id, first_name: document.assignee_name }) : undefined"></p-avatar>
+                                </ng-template>
+                                <div class="text-surface-500 dark:text-surface-0 text-base leading-normal">{{ formatSurnameInitials(document?.assignee_name || document) }}</div>
+                            </div>
+            </div>
+                        
+          </div>
+          <div class="border-t border-surface-200 dark:border-surface-700"></div>
+
+          <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex items-start gap-4 flex-1">
+              <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.documents.detail.DUE_DATE' | translate }}</div>
+              <div class="flex-1 text-surface-500 dark:text-surface-0 text-base leading-normal"> {{ document?.due_date ? (document?.due_date | date:'dd.MM.yyyy') : '-' }}</div>
+            </div>
+                        
+          </div>
+
+          <!-- <div class="border-t border-surface-200 dark:border-surface-700"></div>
+                    <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex items-center gap-4 flex-1">
+              <div class="w-[140px] text-surface-900 dark:text-surface-0 font-medium text-base leading-tight">{{ 'components.issues.detail.TAGS' | translate }}</div>
+              <div class="flex-1 flex flex-wrap gap-2">
+                <p-tag value="Crime" severity="info"></p-tag>
+                <p-tag value="Drama" severity="info"></p-tag>
+                <p-tag value="Thriller" severity="info"></p-tag>
+              </div>
+            </div>
+                        
+          </div> -->
+          <div class="border-t border-surface-200 dark:border-surface-700"></div>
+
+          <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex items-start gap-4 flex-1">
+              <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.documents.detail.ESTIMATED_HOURS' | translate }}</div>
+              <div class="flex-1 text-surface-500 dark:text-surface-0 text-base leading-normal"> {{ document?.estimated_hours != null ? document?.estimated_hours : '-' }}</div>
+            </div>
+                        
+          </div>
+          <div class="border-t border-surface-200 dark:border-surface-700"></div>
+
+          <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex items-start gap-4 flex-1">
+              <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.documents.detail.TIMESHEETING' | translate }}</div>
+              <div class="flex-1 text-surface-500 dark:text-surface-0 text-base leading-normal"> ???</div>
+            </div>
+                        
+          </div>
+          <div class="border-t border-surface-200 dark:border-surface-700"></div>
+
+          <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex items-start gap-4 flex-1">
+              <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.documents.detail.CREATED_AT' | translate }}</div>
+              <div class="flex-1 text-surface-500 dark:text-surface-0 text-base leading-normal"> {{ document?.created_at ? (document?.created_at | date:'dd.MM.yyyy') : '-' }}</div>
+            </div>
+                        
+          </div>
+          <div class="border-t border-surface-200 dark:border-surface-700"></div>
+
+          <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex items-start gap-4 flex-1">
+              <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.documents.detail.UPDATED_AT' | translate }}</div>
+              <div class="flex-1 text-surface-500 dark:text-surface-0 text-base leading-normal"> {{ document?.updated_at ? (document?.updated_at | date:'dd.MM.yyyy') : '-' }}</div>
+            </div>
+                        
+          </div>
+
+        </div>
+            
+  </aside>
+  <section class="admin-content-wrapper">
+  <section class="admin-subpage-tools card mt-0">
+        <p-toolbar>
+          <p-toast></p-toast>
+          <ng-template #start>
+                        
+            <!-- Status change split button: always shown but disabled when no allowed statuses -->
+            <p-splitButton
+              icon="pi pi-exchange"
+              severity="primary"
+              [label]="document?.status_name "
+              class="ml-2"
+              [model]="statusMenuItems"
+              [disabled]="statusSaving || !(statusMenuItems && statusMenuItems.length > 0)">
+            </p-splitButton>
+
+          </ng-template>
+
+          <ng-template #end>
+                        
+            <p-button  severity="secondary" icon="pi pi-arrow-left" (click)="back()" [attr.aria-label]="('components.documents.BACK' | translate)"></p-button>
+            <!-- Copy document (disabled for now) -->
+            <p-button severity="secondary" icon="pi pi-copy" class="ml-2" disabled="true" ></p-button>
+
+            <!-- Timesheet / Log time (placeholder) -->
+            <p-button severity="secondary" icon="pi pi-clock" class="ml-2" disabled="true"></p-button>
+
+            <!-- Delete document (placeholder) -->
+            <p-button severity="danger" icon="pi pi-trash" class="ml-2" ></p-button>
+          </ng-template>
+        </p-toolbar>
+  </section>
+<div class="issue-left-scroll">
+  <!-- Attachments (full width) -->
+  <app-documents-detail-attach [document]="document"></app-documents-detail-attach>
+
+  <div class="grid gap-4 issue-grid adjustable-columns" style="grid-template-columns: 1fr 1fr;">
+
+    <div>
+      <app-documents-detail-relations-table [document]="document" (addRelation)="openAddRelationDialog()"></app-documents-detail-relations-table>
+
+      <!-- Add-relation dialog -->
+      <p-dialog header="{{ 'components.documents.relations.ADD_TITLE' | translate }}" [(visible)]="displayAddRelationDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{width: '40%'}" appendTo="body">
+        <div class="flex flex-col gap-4">
+          <div class="flex flex-col gap-2">
+            <label class="font-bold">{{ 'components.documents.relations.FORM.RELATION_TYPE' | translate }}</label>
+            <p-select [options]="relationTypeOptions" [(ngModel)]="relationForm.relationType" optionLabel="label" optionValue="value" appendTo="body">
+              <ng-template let-opt pTemplate="item">
+                <div>{{ opt.label | translate }}</div>
+              </ng-template>
+              <ng-template let-opt pTemplate="selectedItem">
+                <div>{{ opt.label | translate }}</div>
+              </ng-template>
+            </p-select>
+          </div>
+
+          <div *ngIf="relationForm.relationType === 'blocks'" class="flex flex-col gap-2">
+            <label class="font-bold">{{ 'components.documents.relations.FORM.BLOCKS_DIRECTION' | translate }}</label>
+            <p-select [options]="blocksDirectionOptions" [(ngModel)]="relationForm.direction" optionLabel="label" optionValue="value" appendTo="body">
+              <ng-template let-opt pTemplate="item">
+                <div>{{ opt.label | translate }}</div>
+              </ng-template>
+              <ng-template let-opt pTemplate="selectedItem">
+                <div>{{ opt.label | translate }}</div>
+              </ng-template>
+            </p-select>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label class="font-bold">{{ 'components.issues.relations.FORM.ISSUES' | translate }}</label>
+            <p-multiSelect [options]="availableIssuesOptions" [(ngModel)]="relationForm.selectedIssueIds" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body"></p-multiSelect>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label class="font-bold">{{ 'components.issues.relations.FORM.DOCUMENTS' | translate }}</label>
+            <p-multiSelect [options]="availableDocumentsOptions" [(ngModel)]="relationForm.selectedDocumentIds" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body"></p-multiSelect>
+          </div>
+
+          <div class="flex justify-end gap-2 mt-4">
+            <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="displayAddRelationDialog=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="savingRelations"></p-button>
+            <p-button label="{{ 'MENU.SAVE' | translate }}" (onClick)="saveRelations()" severity="primary" icon="pi pi-check" iconPos="left" [loading]="savingRelations" [disabled]="savingRelations"></p-button>
+          </div>
+        </div>
+      </p-dialog>
+    </div>
+
+    <div>
+      <app-documents-detail-chat [document]="document"></app-documents-detail-chat>
+    </div>
+
+  </div>
+
+  </div>
+  </section>
+  </div>
+</div>

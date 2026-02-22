@@ -5,7 +5,9 @@
       <div class="admin-menu-header"></div>
                 <div class="flex flex-col gap-2 pb-4">
                     <div class="flex items-center justify-between">
-                        <div class="font-semibold text-xl text-surface-500 dark:text-surface-0 leading-tight">Issue #{{ issue?.id ?? issueId }}</div>
+                    <div class="font-semibold text-xl text-primary underline leading-tight cursor-pointer"
+                        (click)="copyIssueLink($event)"
+                        title="{{ 'components.issues.messages.COPY_LINK' | translate }}">{{ 'MENU.ISSUE' | translate }} #{{ issue?.id ?? issueId }}</div>
                                     <div>
                                         <p-button severity="secondary" icon="pi pi-pencil" [outlined]="true" (onClick)="openEditDialog()"></p-button>
                                     </div>
