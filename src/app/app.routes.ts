@@ -33,7 +33,7 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/profile/profile').then(m => m.ProfileComponent),
         canActivate: [AuthGuard],
         children: [
-          { path: '', pathMatch: 'full', loadComponent: () => import('./pages/profile/main/main').then(m => m.ProfileMainComponent), canActivate: [AuthGuard] },
+          { path: '', pathMatch: 'full', redirectTo: 'notifications' },
           { path: 'notifications', loadComponent: () => import('./pages/profile/notifications/notifications').then(m => m.ProfileNotificationsComponent), canActivate: [AuthGuard] },
           { path: 'security', loadComponent: () => import('./pages/profile/security/security').then(m => m.ProfileSecurityComponent), canActivate: [AuthGuard] }
         ]

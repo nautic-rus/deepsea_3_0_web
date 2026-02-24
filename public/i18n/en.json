@@ -365,6 +365,7 @@
     },
     "documents": {
       "TREE_TITLE": "Documents tree",
+      "BACK": "Back",
       "table": {
         "PROJECT": "Project",
         "TITLE": "Title",
@@ -378,6 +379,7 @@
       "form": {
         "TITLE": "Title",
         "DESCRIPTION": "Description",
+        "TAGS": "Tags",
         "PROJECT": "Project",
         "PROJECT_ID": "Project",
         "TYPE": "Type",
@@ -425,7 +427,7 @@
       "attach": {
         "ADD_FILE": "Add file",
         "TYPE": "Type",
-        "REV": "Revision",
+        "REV": "Rev",
         "DRAG_DROP": "Drag and drop files here to upload.",
         "CHOOSE": "Choose",
         "UPLOAD": "Upload",
@@ -438,6 +440,7 @@
         "UPLOADED_BY": "Uploaded by",
         "ARCHIVED_BY": "Archived by",
         "COLUMN_ARCHIVED": "Archived at",
+        "COLUMN_UPLOADED": "Uploaded",
         "STATUS_ARCHIVED": "Archived",
         "STATUS_ACTIVE": "Active",
         "PREVIEW_REV": "Rev",
@@ -447,21 +450,37 @@
         "CANCEL": "Cancel",
         "COLUMN_NAME": "File name",
         "COLUMN_SIZE": "Size",
-        "COLUMN_UPLOADED": "Uploaded",
-        "DELETE_CONFIRM": "Delete file \"{{name}}\"?"
+  "DELETE_CONFIRM": "Move to archive \"{{name}}\"?",
+  "RESTORE_CONFIRM": "Restore file \"{{name}}\"?",
+  "ARCHIVE": "Archive",
+  "RESTORE": "Restore",
+  "MISSING_DOCUMENT_ID": "Missing document id",
+  "VIEW": "View",
+  "VALIDATION_REQUIRED": "TYPE and REV are required"
+        ,
+        "DOWNLOADING": "Preparing download..."
+        ,
+        "NO_ATTACHMENTS": "No attachments",
+        "DOWNLOAD_CANCELLED": "Download cancelled"
       },
       "history": {
         "ACTION_CHANGED": "changed",
         "FIELDS": {
           "project_id": "project",
-          "specialization_id": "Specialization",
+          "specialization_id": "specialization",
           "assigne_to": "assignee",
           "assignee_id": "assignee",
           "created_at": "Created at",
           "directory_id": "directory",
           "created_by": "Created by",
           "description": "description",
-          "title": "title"
+          "title": "title",
+          "code": "number",
+          "status_id": "status",
+          "priority": "priority",
+          "due_date": "due date",
+          "estimated_hours": "estimated hours",
+          "storage_id": "storage"
         }
       },
       "chat": {
@@ -488,11 +507,16 @@
           "BLOCKS_ACTIVE": "Blocks (current -> selected)",
           "BLOCKS_PASSIVE": "Blocked by (selected -> current)",
           "SAVED": "Relations created"
-        }
+        },
+        "DOCUMENT": "Document"
       },
       "messages": {
         "ERROR": "Error",
         "DESCRIPTION_SAVE_FAILED": "Failed to save description",
+        "STATUS_UPDATED": "Status updated",
+        "STATUS_UPDATE_FAILED": "Failed to update status",
+        "SUCCESS": "Success",
+        "WARNING": "Warning",
         "SAVED": "Saved",
         "COPY_LINK": "Copy link",
         "LINK_COPIED": "Link copied to clipboard",
@@ -591,6 +615,8 @@
       "form": {
         "PROJECT": "Project",
         "TITLE": "Title",
+        "PROJECT_REQUIRED": "Project is required",
+        "TITLE_REQUIRED": "Title is required",
         "DESCRIPTION": "Description",
         "ASSIGNEE": "Assignee",
         "TYPE": "Type",
@@ -612,6 +638,8 @@
         "ASSIGNEE": "Assignee",
         "SUCCESS": "Bulk update applied",
         "ERROR": "Bulk update failed",
+        "NOTHING_TO_APPLY": "Nothing to apply",
+        "PARTIAL_ERROR": "Partial error",
         "NO_SELECTION": "No issues selected",
         "NO_IDS": "No valid issue ids selected"
       },
@@ -678,13 +706,15 @@
           "BLOCKS_ACTIVE": "This issue blocks the target (active)",
           "BLOCKS_PASSIVE": "This issue is blocked by the target (passive)",
           "SAVED": "Relations created"
-        }
+        },
+        "DOCUMENT": "Document"
       },
       "CHANGE_STATUS": "Change status",
       "chat": {
         "TITLE": "Activity",
         "PLACEHOLDER": "Write a message...",
         "NO_MESSAGES": "No messages to display",
+        "HISTORY": "History",
         "IN_REPLY_TO": "In reply to",
         "REPLYING_TO": "Replying to",
         "CANCEL_REPLY": "Cancel reply",
@@ -712,6 +742,8 @@
         "FILE_TOO_LARGE": "File is too large (max {{size}})",
         "STATUS_UPDATED": "Status updated",
         "STATUS_UPDATE_FAILED": "Failed to update status",
+        "DELETED": "Deleted",
+        "FAILED_LOAD": "Failed to load",
         "SAVED": "Saved",
         "SAVED_LOCAL": "Saved locally (no id)",
         "DESCRIPTION_SAVE_FAILED": "Failed to save description",

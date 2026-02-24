@@ -1,8 +1,68 @@
-<section class="admin-subpage-tools card">
-  <h3>{{ 'MENU.NOTIFICATIONS' | translate }}</h3>
-  <p>Notifications settings for profile.</p>
-</section>
+
 
 <section class="admin-subpage-content card">
-  <p>Notification preferences will go here.</p>
+  <!-- Simple notifications table for testing (static data) -->
+  <div class="table-responsive">
+    <p-table
+      #dt
+      [value]="[
+        { id: 1, title: 'Password changed', channel: 'email', enabled: true, created_at: '2026-02-01T09:00:00Z' },
+        { id: 2, title: 'New comment on issue', channel: 'in-app', enabled: true, created_at: '2026-02-10T12:30:00Z' },
+        { id: 3, title: 'Weekly summary', channel: 'email', enabled: false, created_at: '2026-02-15T08:00:00Z' }
+      ]"
+      [loading]="false"
+      [scrollable]="true"
+      scrollHeight="flex"
+      [rows]="10"
+      size="small"
+      [globalFilterFields]="['id','title','channel']"
+      [(selection)]="selectedNotifications"
+      [rowHover]="true"
+      dataKey="id"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} items"
+      [showCurrentPageReport]="true"
+      [rowsPerPageOptions]="[10,20,30]"
+    >
+
+      <ng-template #caption>
+        <div class="flex justify-between mb-2">
+          <h3>{{ 'MENU.NOTIFICATIONS' | translate }}</h3>
+          <p-iconfield>
+            <p-inputicon styleClass="pi pi-search" />
+            <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
+          </p-iconfield>
+        </div>
+      </ng-template>
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 3rem">
+            <p-tableHeaderCheckbox />
+          </th>
+          <th>ID</th>
+          <th pSortableColumn="title">Title <p-sortIcon field="title" /></th>
+          <th pSortableColumn="channel">Channel <p-sortIcon field="channel" /></th>
+          <th>Enabled</th>
+          <th pSortableColumn="created_at">Created <p-sortIcon field="created_at" /></th>
+          <th></th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-notif>
+        <tr>
+          <td><p-tableCheckbox [value]="notif" /></td>
+          <td>{{ notif.id }}</td>
+          <td>{{ notif.title }}</td>
+          <td>{{ notif.channel }}</td>
+          <td>{{ notif.enabled ? ('MENU.YES' | translate) : ('MENU.NO' | translate) }}</td>
+          <td>{{ notif.created_at | date:'short' }}</td>
+          <td>
+            <p-button icon="pi pi-pencil" class="mr-2" [outlined]="true" (click)="void(0)" />
+            <p-button icon="pi pi-trash" severity="danger" [outlined]="true" (click)="void(0)" />
+          </td>
+        </tr>
+      </ng-template>
+
+    </p-table>
+  </div>
 </section>

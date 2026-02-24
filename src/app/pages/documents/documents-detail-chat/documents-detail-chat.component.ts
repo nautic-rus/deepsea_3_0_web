@@ -46,14 +46,23 @@ import { ToastModule } from 'primeng/toast';
               </div>
               <div class="flex-1">
                 <div class="text-surface-00 dark:text-surface-0 leading-normal item-header">
-                  <div class="item-header-left">
+                  <div class="item-header-left" style="min-width: 0;">
                     <strong>{{ ev.actor }}</strong>
                     <span class="text-surface-700 dark:text-surface-100"> {{ ev.action }} </span>
                     <span *ngIf="ev.field" class="text-primary font-bold">{{ ev.field }}</span>
                   </div>
-                  <div class="item-header-right text-sm text-muted-color">{{ formatDateRussian(ev.time) }}</div>
+                  <div class="item-header-right text-sm text-muted-color" style="display:flex;align-items:center;gap:0.5rem;">
+                    <span class="msg-time">{{ formatDateRussian(ev.time) }}</span>
+                    <span class="reply-btn" *ngIf="ev.type === 'message' || ev.type === 'history'">
+                      <p-button severity="secondary" icon="pi pi-reply" class="ml-2" [outlined]="true" (click)="answer(ev)" (onClick)="answer(ev)" aria-label="Reply" ></p-button>
+                    </span>
+                  </div>
                 </div>
                 <div *ngIf="ev.type === 'message'" class="text-sm text-surface-700 mt-2" [innerHTML]="ev.text"></div>
+                <div *ngIf="ev.type === 'message' && ev.raw && (ev.raw.parent_id || ev.raw.parentId)" class="in-reply-to text-sm text-surface-500">
+                  {{ 'components.issues.chat.IN_REPLY_TO' | translate }}
+                  <a href="#" (click)="scrollToMessage(ev.raw.parent_id ?? ev.raw.parentId); $event.preventDefault()">#{{ ev.raw.parent_id ?? ev.raw.parentId }}</a>
+                </div>
                 <div *ngIf="ev.type === 'history'" class="text-sm text-surface-700 mt-2">{{ ev.oldValue }} → {{ ev.newValue }}</div>
               </div>
             </li>
@@ -327,8 +336,21 @@ export class DocumentsDetailChatComponent implements OnChanges, AfterViewInit {
     } catch (e) { return '' + t; }
   }
 
+  replyToAuthor: string | null = null;
+
   answer(m: any): void {
-    try { this.replyToId = m?.id ?? m?._localId ?? null; } catch (e) { this.replyToId = null; }
+    try {
+      // m can be combined item (ev) or raw message object
+      const idRaw = m?.id ?? m?._localId ?? m?.raw?.id ?? m?.parent_id ?? m?.parentId ?? null;
+      // store string id for UI so falsy numeric 0 still shows the replying bar
+      this.replyToId = idRaw !== null && idRaw !== undefined ? String(idRaw) : null;
+      try { this.replyToAuthor = m?.actor ?? m?.author ?? (m?.raw && (m.raw.author || m.raw.user?.full_name)) ?? null; } catch (_) { this.replyToAuthor = null; }
+      console.debug('[DocumentsDetailChat] reply to', { id: this.replyToId, author: this.replyToAuthor, src: m });
+      this.cdr.markForCheck();
+    } catch (e) {
+      this.replyToId = null;
+      this.replyToAuthor = null;
+    }
   }
 
   cancelReply(): void { this.replyToId = null; }
@@ -384,7 +406,12 @@ export class DocumentsDetailChatComponent implements OnChanges, AfterViewInit {
     }
 
     this.sending = true;
-    const payload: any = { content: this.newMessage };
+  const payload: any = { content: this.newMessage };
+  if (this.replyToId) {
+    // convert back to number when possible (API might expect numeric id)
+    const n = String(this.replyToId).trim();
+    payload.parent_id = /^\d+$/.test(n) ? Number(n) : this.replyToId;
+  }
     this.documentsService.postMessage(this._document.id, payload).subscribe({
       next: (res: any) => {
         const data = res?.data ?? res;
@@ -407,10 +434,14 @@ export class DocumentsDetailChatComponent implements OnChanges, AfterViewInit {
           time: data?.created_at || data?.createdAt || new Date().toISOString(),
           avatar_url: pushedAvatar
         };
-        // optimistic append then refresh messages+history from server
-        this.messages.push(pushed);
+  // optimistic append then refresh messages+history from server
+  // include parent_id for optimistic message when replying
+  if (this.replyToId) pushed.parent_id = this.replyToId;
+  this.messages.push(pushed);
         try { this._document.messages = this._document.messages || []; this._document.messages.push(data || pushed); } catch {}
         this.newMessage = '';
+  // clear reply state after sending
+  this.replyToId = null;
         // Refresh messages and history from server to ensure consistency
         if (this._document && this._document.id) {
           forkJoin([

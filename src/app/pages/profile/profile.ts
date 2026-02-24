@@ -33,9 +33,7 @@ export class ProfileComponent implements OnInit {
       {
         label: t('MENU.PROFILE'),
         items: [
-          { label: t('MENU.PROFILE'), icon: 'pi pi-fw pi-user', routerLink: ['/profile'] },
-          { label: t('MENU.NOTIFICATIONS'), icon: 'pi pi-fw pi-bell', routerLink: ['/profile/notifications'] },
-          { label: t('MENU.SECURITY'), icon: 'pi pi-fw pi-lock', routerLink: ['/profile/security'] }
+          { label: t('MENU.NOTIFICATIONS'), icon: 'pi pi-fw pi-bell', routerLink: ['/profile/notifications'] }
         ]
       }
     ];
