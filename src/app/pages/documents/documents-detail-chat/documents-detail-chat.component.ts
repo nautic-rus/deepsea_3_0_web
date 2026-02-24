@@ -33,7 +33,7 @@ import { ToastModule } from 'primeng/toast';
 
         <ng-container *ngFor="let group of grouped()">
           <ul *ngIf="group.items && group.items.length" class="documents-history-group p-0 m-0 list-none mb-6">
-            <li *ngFor="let ev of group.items" class="flex items-start py-3" [attr.id]="ev.type === 'message' && ev.id ? ('msg-' + ev.id) : null">
+            <li *ngFor="let ev of group.items" class="flex items-start py-3" [attr.id]="ev.type === 'message' && ev.id ? ('msg-' + ev.id) : null" [class.message-highlight]="ev.type === 'message' && ev.id == highlightedMessageId">
               <div class="w-10 h-10 flex items-center justify-center rounded-full mr-4 shrink-0 avatar-wrap" [ngClass]="colorFor(ev.type)">
                 <ng-container *ngIf="ev?.avatar_url; else initialsTpl">
                   <div class="p-avatar full-avatar">
@@ -53,17 +53,22 @@ import { ToastModule } from 'primeng/toast';
                   </div>
                   <div class="item-header-right text-sm text-muted-color" style="display:flex;align-items:center;gap:0.5rem;">
                     <span class="msg-time">{{ formatDateRussian(ev.time) }}</span>
-                    <span class="reply-btn" *ngIf="ev.type === 'message' || ev.type === 'history'">
-                      <p-button severity="secondary" icon="pi pi-reply" class="ml-2" [outlined]="true" (click)="answer(ev)" (onClick)="answer(ev)" aria-label="Reply" ></p-button>
+                    <span class="reply-btn" (click)="ev.type === 'message' && answer(ev)" style="position:relative; z-index:2;">
+                      <ng-container *ngIf="ev.type === 'message'; else replyPlaceholder">
+                        <p-button severity="secondary" icon="pi pi-reply" class="ml-2" [outlined]="true" (click)="answer(ev)" (onClick)="answer(ev)" aria-label="Reply" [style]="{ 'pointer-events': 'auto' }"></p-button>
+                      </ng-container>
+                      <ng-template #replyPlaceholder>
+                        <span class="reply-btn-placeholder" aria-hidden="true"></span>
+                      </ng-template>
                     </span>
                   </div>
                 </div>
-                <div *ngIf="ev.type === 'message'" class="text-sm text-surface-700 mt-2" [innerHTML]="ev.text"></div>
+                <div *ngIf="ev.type === 'message'" class="text-sm text-surface-700" [innerHTML]="ev.text"></div>
                 <div *ngIf="ev.type === 'message' && ev.raw && (ev.raw.parent_id || ev.raw.parentId)" class="in-reply-to text-sm text-surface-500">
                   {{ 'components.issues.chat.IN_REPLY_TO' | translate }}
                   <a href="#" (click)="scrollToMessage(ev.raw.parent_id ?? ev.raw.parentId); $event.preventDefault()">#{{ ev.raw.parent_id ?? ev.raw.parentId }}</a>
                 </div>
-                <div *ngIf="ev.type === 'history'" class="text-sm text-surface-700 mt-2">{{ ev.oldValue }} → {{ ev.newValue }}</div>
+                <div *ngIf="ev.type === 'history'" class="text-sm text-surface-700">{{ ev.oldValue }} → {{ ev.newValue }}</div>
               </div>
             </li>
           </ul>
@@ -337,6 +342,8 @@ export class DocumentsDetailChatComponent implements OnChanges, AfterViewInit {
   }
 
   replyToAuthor: string | null = null;
+  // store highlighted message id so Angular template can add the class reliably
+  highlightedMessageId: string | null = null;
 
   answer(m: any): void {
     try {
@@ -346,14 +353,31 @@ export class DocumentsDetailChatComponent implements OnChanges, AfterViewInit {
       this.replyToId = idRaw !== null && idRaw !== undefined ? String(idRaw) : null;
       try { this.replyToAuthor = m?.actor ?? m?.author ?? (m?.raw && (m.raw.author || m.raw.user?.full_name)) ?? null; } catch (_) { this.replyToAuthor = null; }
       console.debug('[DocumentsDetailChat] reply to', { id: this.replyToId, author: this.replyToAuthor, src: m });
+      // do not prefill composer with an @mention for privacy/clarity — leave newMessage as-is
+      // ensure UI updates and textarea receives focus
       this.cdr.markForCheck();
+      // visual flash to confirm handler invoked even when devtools is closed
+      try {
+        const container = this.messagesContainer?.nativeElement;
+        if (container) {
+          container.classList.add('reply-flash');
+          setTimeout(() => container.classList.remove('reply-flash'), 600);
+        }
+      } catch (e) {}
+      setTimeout(() => {
+        try {
+          this.onTextareaInput();
+          try { this.textareaRef?.nativeElement.focus(); } catch (e) {}
+        } catch (e) {}
+        this.scrollToBottom();
+      }, 0);
     } catch (e) {
       this.replyToId = null;
       this.replyToAuthor = null;
     }
   }
 
-  cancelReply(): void { this.replyToId = null; }
+  cancelReply(): void { this.replyToId = null; this.replyToAuthor = null; }
 
   onAttachClick(): void { try { this.fileInput?.nativeElement.click(); } catch (e) {} }
 
@@ -374,14 +398,22 @@ export class DocumentsDetailChatComponent implements OnChanges, AfterViewInit {
 
   scrollToMessage(targetId: any): void {
     try {
+      try { console.debug('[DocumentsDetailChat] scrollToMessage called with', targetId); } catch (e) {}
       if (!targetId) return;
       const idStr = String(targetId);
       const selector = '#msg-' + idStr;
       const container: HTMLElement | undefined = this.messagesContainer?.nativeElement;
       let target: HTMLElement | null = null;
       if (container) { target = container.querySelector(selector) as HTMLElement | null; }
+      try { console.debug('[DocumentsDetailChat] container query result:', target); } catch (e) {}
       if (!target) target = document.querySelector(selector) as HTMLElement | null;
-      if (!target) return;
+      try { console.debug('[DocumentsDetailChat] global query result:', target); } catch (e) {}
+      if (!target) {
+        try { console.debug('[DocumentsDetailChat] scrollToMessage: target not found for', selector); } catch (e) {}
+        return;
+      }
+
+      // Scroll the target into view (within container when possible)
       if (container) {
         const containerRect = container.getBoundingClientRect();
         const targetRect = target.getBoundingClientRect();
@@ -390,23 +422,33 @@ export class DocumentsDetailChatComponent implements OnChanges, AfterViewInit {
       } else {
         target.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
-      target.classList.add('message-highlight');
-      setTimeout(() => target.classList.remove('message-highlight'), 2200);
+
+      // Set Angular-bound highlighted id so template can apply class reliably.
+      try {
+        this.highlightedMessageId = idStr;
+        this.cdr.markForCheck();
+      } catch (e) {}
+      setTimeout(() => {
+        try { this.highlightedMessageId = null; this.cdr.markForCheck(); } catch (e) {}
+      }, 2200);
     } catch (e) {}
   }
 
   send(): void {
     if (!this.newMessage?.trim()) return;
+
+    // format message for sending (preserve line breaks as <br/> so backend and [innerHTML] render it)
+    const formattedMessage = this.formatMessageForSend(this.newMessage);
     if (!this._document || !this._document.id) {
       // optimistic local append when no id
-      this.messages.push({ _localId: `local-${Math.random().toString(36).slice(2,9)}`, author: 'You', text: this.newMessage, time: new Date().toISOString(), avatar_url: null });
+      this.messages.push({ _localId: `local-${Math.random().toString(36).slice(2,9)}`, author: 'You', text: formattedMessage, time: new Date().toISOString(), avatar_url: null });
       this.newMessage = '';
       this.scrollToBottom();
       return;
     }
 
     this.sending = true;
-  const payload: any = { content: this.newMessage };
+  const payload: any = { content: formattedMessage };
   if (this.replyToId) {
     // convert back to number when possible (API might expect numeric id)
     const n = String(this.replyToId).trim();
@@ -492,6 +534,14 @@ export class DocumentsDetailChatComponent implements OnChanges, AfterViewInit {
       const d = new Date(n);
       return d.toLocaleString();
     } catch (e) { return ''; }
+  }
+
+  // Convert plain-text composer content into simple HTML-preserving formatting
+  private formatMessageForSend(text: string): string {
+    try {
+      if (text === null || text === undefined) return '';
+      return String(text).replace(/\r\n|\n/g, '<br/>');
+    } catch (e) { return String(text ?? ''); }
   }
 
   formatMessageTime(msg: any): string { return this.formatMessageTimeInner(msg?.time ?? msg); }

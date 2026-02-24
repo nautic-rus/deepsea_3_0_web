@@ -68,14 +68,35 @@
 }
 .msg-controls { display: inline-flex; align-items: center; gap: 0.5rem; }
 .answer-btn { width: 32px; height: 32px; padding: 0; }
+.reply-btn, .reply-btn-placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  margin-left: 0.25rem;
+}
+.reply-btn-placeholder { visibility: hidden; }
 .in-reply-to { margin-top: 0.25rem; color: var(--surface-500, #6b6b6b); }
 .in-reply-to a { color: var(--primary-color, #0b5fff); text-decoration: none; font-weight: 600; }
 .in-reply-to a:hover { text-decoration: underline; }
 .replying-bar { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; padding: 0.25rem 0.5rem; background: rgba(0,0,0,0.02); border-radius: 6px; }
 .replying-label { font-size: 0.9rem; color: var(--surface-700, #333); }
 .cancel-reply { width: 28px; height: 28px; padding: 0; }
-.message-highlight { box-shadow: 0 0 0 3px rgba(0,120,212,0.12); background: rgba(0,120,212,0.02); border-radius: 6px; transition: box-shadow 0.2s ease; }
+.message-highlight {
+  /* simple outer ring + subtle background */
+  box-shadow: 0 0 0 3px rgba(0,120,212,0.14);
+  background: rgba(0,120,212,0.03);
+  border-radius: 6px;
+  transition: box-shadow 0.18s ease, background 0.18s ease;
+}
 
+/* Apply the same simple highlight to the list item wrapper used in documents */
+.documents-history-group li.message-highlight {
+  position: relative;
+  z-index: 2;
+}
 .chat-editor {
   flex: 0 0 auto;
   margin-top: 0.75rem;
