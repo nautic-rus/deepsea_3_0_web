@@ -266,6 +266,7 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
 
   previewVisible = false;
   previewFile: any | null = null;
+  
   // UI state: whether a bulk download is in progress
   downloadingAll = false;
   // Subscription for the ongoing bulk download request (so it can be cancelled)
@@ -355,13 +356,15 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
     if (mime && typeof mime === 'string') {
       const m = mime.toLowerCase();
       if (m.startsWith('image/') || m === 'application/pdf') return true;
+      // treat any DXF-like mime as previewable
+      if (m.includes('dxf') || m.includes('application/x-dxf')) return true;
     }
     // fallback: check file extension
     const name = this.getDisplayFileName(raw) || '';
     const dot = name.lastIndexOf('.');
     if (dot === -1) return false;
     const ext = name.slice(dot + 1).toLowerCase();
-    const previewExts = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg', 'pdf']);
+    const previewExts = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg', 'pdf', 'dxf']);
     return previewExts.has(ext);
   }
 
@@ -417,22 +420,62 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
     const data = rowData._original || rowData;
     if (!data) return;
     const storageId = data.storage_id ?? data.storageId ?? data._original?.storage_id ?? data._original?.storageId ?? null;
+    const fileId = data.id ?? data._original?.id ?? null;
     try {
-      let blob: Blob | null = null;
-      if (storageId) {
-        blob = await firstValueFrom((this.http as any).get(`/api/storage/${storageId}/download`, { responseType: 'blob' as 'json' }) as any);
-      } else if (data.id) {
-        // fallback to nodeService which should return a blob in the same shape as downloadFile
-        blob = await this.nodeService.downloadFile(data.id);
-      } else {
-        throw new Error('No storage id or file id available for preview');
+      // Don't prefetch the blob here; open the viewer page which will fetch the file.
+      const name = this.getDisplayFileName(data) || '';
+      const dot = name.lastIndexOf('.');
+      const ext = (dot === -1) ? '' : name.slice(dot + 1).toLowerCase();
+      const mimeGuess = (data._original?.mime_type ?? data.mime_type ?? data._original?.mimetype ?? data.mimetype ?? '') || '';
+      // allow builtin image/pdf preview and also .dxf by extension or mime hint
+      const canPreview = mimeGuess.toLowerCase().startsWith('image/') || mimeGuess.toLowerCase() === 'application/pdf';
+      const isDxf = ext === 'dxf' || mimeGuess.toLowerCase().includes('dxf');
+
+      if (isDxf) {
+        // Open the app's DXF viewer page (lazy route) in a new tab; prefer storageId when available
+        try {
+          const base = window.location.origin;
+          if (storageId) {
+            const target = `${base}/dxf-viewer?storageId=${encodeURIComponent(String(storageId))}`;
+            const w = window.open(target, '_blank');
+            if (w) { try { w.focus(); } catch(_) {} try { this.messageService.add({ severity: 'info', summary: this.translate.instant('components.documents.attach.PREVIEW_OPENED') || 'Preview opened', detail: this.getDisplayFileName(data) || '' }); } catch(e) {} }
+            else { try { this.messageService.add({ severity: 'warn', summary: this.translate.instant('components.documents.messages.WARNING') || 'Warning', detail: this.translate.instant('components.documents.attach.POPUP_BLOCKED') || 'Popup blocked. Opening preview in current tab.' }); } catch(e) {} window.location.href = target; }
+            return;
+          }
+
+          if (fileId) {
+            const target = `${base}/dxf-viewer?fileId=${encodeURIComponent(String(fileId))}`;
+            const w = window.open(target, '_blank');
+            if (w) { try { w.focus(); } catch(_) {} try { this.messageService.add({ severity: 'info', summary: this.translate.instant('components.documents.attach.PREVIEW_OPENED') || 'Preview opened', detail: this.getDisplayFileName(data) || '' }); } catch(e) {} }
+            else { try { this.messageService.add({ severity: 'warn', summary: this.translate.instant('components.documents.messages.WARNING') || 'Warning', detail: this.translate.instant('components.documents.attach.POPUP_BLOCKED') || 'Popup blocked. Opening preview in current tab.' }); } catch(e) {} window.location.href = target; }
+            return;
+          }
+
+          // fallback: if we don't have an id, try passing direct storage URL as src (may be CORS-protected)
+          if (storageId === null && fileId === null && data.storage) {
+            const direct = String(data.storage);
+            const target = `${base}/dxf-viewer?src=${encodeURIComponent(direct)}`;
+            const w = window.open(target, '_blank');
+            if (w) { try { w.focus(); } catch(_) {} try { this.messageService.add({ severity: 'info', summary: this.translate.instant('components.documents.attach.PREVIEW_OPENED') || 'Preview opened', detail: this.getDisplayFileName(data) || '' }); } catch(e) {} }
+            else { try { this.messageService.add({ severity: 'warn', summary: this.translate.instant('components.documents.messages.WARNING') || 'Warning', detail: this.translate.instant('components.documents.attach.POPUP_BLOCKED') || 'Popup blocked. Opening preview in current tab.' }); } catch(e) {} window.location.href = target; }
+            return;
+          }
+        } catch (e) {
+          console.warn('DXF preview route open failed', e);
+        }
       }
 
-      if (!blob) throw new Error('Empty file data');
-      const mime = blob.type || '';
-      const canPreview = mime.startsWith('image/') || mime === 'application/pdf';
       if (!canPreview) {
-        // For non-previewable types, fallback to download behavior
+        // For non-previewable types, fetch blob and fallback to download behavior
+        let blob: Blob | null = null;
+        if (storageId) {
+          blob = await firstValueFrom((this.http as any).get(`/api/storage/${storageId}/download`, { responseType: 'blob' as 'json' }) as any);
+        } else if (fileId) {
+          blob = await this.nodeService.downloadFile(fileId);
+        } else {
+          throw new Error('No storage id or file id available for download');
+        }
+        if (!blob) throw new Error('Empty file data');
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -444,7 +487,16 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
         return;
       }
 
-      // Previewable: open in new tab using object URL
+      // Previewable (image/pdf): fetch blob and open in new tab using object URL
+      let blob: Blob | null = null;
+      if (storageId) {
+        blob = await firstValueFrom((this.http as any).get(`/api/storage/${storageId}/download`, { responseType: 'blob' as 'json' }) as any);
+      } else if (fileId) {
+        blob = await this.nodeService.downloadFile(fileId);
+      } else {
+        throw new Error('No storage id or file id available for preview');
+      }
+      if (!blob) throw new Error('Empty file data');
       const url = URL.createObjectURL(blob);
       const w = window.open('', '_blank');
       if (w) {
@@ -990,10 +1042,18 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
     try { this._saveExpandedState(this.files); } catch(_) {}
   }
 
+  // preview close: clear preview file and visibility
+  private _clearPreviewState(): void {
+    this.previewFile = null;
+    this.previewVisible = false;
+    try { this.cdr.markForCheck(); } catch(_) {}
+  }
+
   ngOnDestroy() {
     try { this._saveExpandedState(this.files); } catch(_) {}
     try { window.removeEventListener('beforeunload', this._beforeUnloadHandler); } catch(_) {}
     // cancel any pending bulk download
     try { if (this._downloadAllSub) { try { this._downloadAllSub.unsubscribe(); } catch(_) {} this._downloadAllSub = null; } } catch(_) {}
+    // no persistent preview object URL to revoke here (DXF opens in new window)
   }
 }

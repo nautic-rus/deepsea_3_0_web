@@ -33,7 +33,7 @@ import { ToastModule } from 'primeng/toast';
 
         <ng-container *ngFor="let group of grouped()">
           <ul *ngIf="group.items && group.items.length" class="documents-history-group p-0 m-0 list-none mb-6">
-            <li *ngFor="let ev of group.items" class="flex items-start py-3" [attr.id]="ev.type === 'message' && ev.id ? ('msg-' + ev.id) : null" [class.message-highlight]="ev.type === 'message' && ev.id == highlightedMessageId">
+            <li *ngFor="let ev of group.items" class="flex items-start mb-3" [attr.id]="ev.type === 'message' && ev.id ? ('msg-' + ev.id) : null" [class.message-highlight]="ev.type === 'message' && ev.id == highlightedMessageId">
               <div class="w-10 h-10 flex items-center justify-center rounded-full mr-4 shrink-0 avatar-wrap" [ngClass]="colorFor(ev.type)">
                 <ng-container *ngIf="ev?.avatar_url; else initialsTpl">
                   <div class="p-avatar full-avatar">

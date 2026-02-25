@@ -71,6 +71,11 @@ export const routes: Routes = [
           { path: ':id', loadComponent: () => import('./pages/documents/documents-detail').then(m => m.DocumentsDetailComponent) }
         ]
       },
+      {
+        path: 'dxf-viewer',
+        loadComponent: () => import('./pages/dxf-viewer-page/dxf-viewer-page.component').then(m => m.DxfViewerPageComponent),
+        canActivate: [AuthGuard]
+      },
       
       {
         path: 'materials',
