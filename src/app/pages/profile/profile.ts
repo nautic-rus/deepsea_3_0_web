@@ -7,6 +7,7 @@ import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../auth/auth.service';
+import { AvatarService } from '../../services/avatar.service';
 
 export interface ProfileMenuGroup {
   label: string;
@@ -24,7 +25,7 @@ export class ProfileComponent implements OnInit {
   menuGroups: ProfileMenuGroup[] = [];
   user: any | null = null;
 
-  constructor(private router: Router, private translate: TranslateService, private auth: AuthService) {}
+  constructor(private router: Router, private translate: TranslateService, private auth: AuthService, private avatarService: AvatarService) {}
 
   ngOnInit(): void {
     const t = (k: string) => this.translate.instant(k) || k;
@@ -117,43 +118,21 @@ export class ProfileComponent implements OnInit {
   }
 
   initials(): string {
-    const name = this.userName();
-    if (!name) return '';
-    const parts = name.split(/\s+/).filter(Boolean);
-    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-    return (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
+    return this.avatarService.initialsFromName(this.userName());
   }
 
   personInitials(name?: string): string {
     try {
       const candidate = name || (this.user && (this.user.name || '')) || '';
-      const parts = String(candidate).trim().split(/\s+/).filter(Boolean);
-      if (!parts.length) return '';
-      if (parts.length === 1) return parts[0].slice(0,2).toUpperCase();
-      return (parts[0][0] + parts[1][0]).toUpperCase();
-    } catch (e) {
-      return '';
-    }
+      return this.avatarService.initialsFromName(candidate);
+    } catch (e) { return ''; }
   }
 
   issueAvatarColor(user: any): string {
-    const seed = (user && (user.id ?? user.username ?? (user.first_name || '') + (user.last_name || ''))) || '';
-    const s = seed.toString();
-    let hash = 0;
-    for (let i = 0; i < s.length; i++) {
-      const ch = s.charCodeAt(i);
-      hash = ((hash << 5) - hash) + ch;
-      hash = hash & hash;
-    }
-    const hue = Math.abs(hash) % 360;
-    return `hsl(${hue}, 65%, 45%)`;
+    return this.avatarService.issueAvatarColor(user);
   }
 
   issueAvatarTextColor(user: any): string {
-    const bg = this.issueAvatarColor(user);
-    const m = bg.match(/hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?\)/);
-    if (!m) return '#fff';
-    const lightness = Number(m[3]);
-    return lightness > 70 ? '#111' : '#fff';
+    return this.avatarService.issueAvatarTextColor(user);
   }
 }

@@ -23,6 +23,7 @@ import { MessageService } from 'primeng/api';
 import { UsersService } from './users.service';
 import { Select } from "primeng/select";
 import { Avatar } from "primeng/avatar";
+import { AvatarService } from '../../../services/avatar.service';
 
 interface User {
   id: number | string;
@@ -101,6 +102,7 @@ export class AdminUsersComponent implements OnInit {
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
     private translate: TranslateService
+    , private avatarService: AvatarService
   ) {
     // keep component lightweight; initial data will be loaded in ngOnInit
   }
@@ -234,17 +236,7 @@ export class AdminUsersComponent implements OnInit {
 
   // Format as "LastName I.O." using first_name and middle_name for initials
   formatSurnameInitials(user: User | any): string {
-    if (!user) return '-';
-    const last = (user.last_name || user.lastName || '').toString().trim();
-    const first = (user.first_name || user.firstName || '').toString().trim();
-    const middle = (user.middle_name || user.middleName || '').toString().trim();
-    const initials: string[] = [];
-    if (first) initials.push(first[0].toUpperCase() + '.');
-    if (middle) initials.push(middle[0].toUpperCase() + '.');
-    if (last) return last + (initials.length ? ' ' + initials.join('') : '');
-    // fallback to name parts if last name missing
-    const combined = [first, middle].filter(Boolean).join(' ');
-    return combined || (user.username || '-') ;
+    return this.avatarService.formatSurnameInitials(user);
   }
 
   // Open new user dialog (stub)

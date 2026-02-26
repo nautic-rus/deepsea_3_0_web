@@ -1,0 +1,111 @@
+<div class="documents-activity">
+  <p-splitButton severity="warn" icon="pi pi-bolt" label="{{ 'components.documents.activity.BUTTON_LABEL' | translate }}" [model]="menuItems" class="ml-2"></p-splitButton>
+
+  <!-- Assign dialog -->
+  <p-dialog header="Назначить пользователя" [(visible)]="showAssignDialog" [modal]="true" [closable]="true" [resizable]="false" appendTo="body" [style]="{width: '40%'}">
+    <div class="flex flex-col gap-4">
+      <div class="flex gap-2">
+        <div class="flex-1 flex flex-col gap-2">
+          <label class="font-bold">{{ 'components.documents.activity.assign.USER' | translate }} <span class="text-red-600">*</span></label>
+          <p-select [options]="usersOptions" optionLabel="label" optionValue="value" [(ngModel)]="assignModel.user_id" appendTo="body" placeholder="{{ 'components.documents.activity.assign.USER_PLACEHOLDER' | translate }}" [ngClass]="{'p-invalid': assignErrors.userRequired}">
+            <ng-template let-opt pTemplate="item">
+              <div class="flex items-center gap-2">
+                <ng-container *ngIf="opt?.avatar; else initialsTpl">
+                  <p-avatar [image]="opt.avatar" shape="circle" styleClass="mr-2"></p-avatar>
+                </ng-container>
+                <ng-template #initialsTpl>
+                  <p-avatar [label]="initialsFromName(opt?.label)" shape="circle" [style.background]="issueAvatarColor({ first_name: opt?.label })" [style.color]="issueAvatarTextColor({ first_name: opt?.label })" styleClass="mr-2"></p-avatar>
+                </ng-template>
+                <div>{{ opt?.label }}</div>
+              </div>
+            </ng-template>
+            <ng-template let-opt pTemplate="selectedItem">
+              <div class="flex items-center gap-2">
+                <ng-container *ngIf="opt?.avatar; else initialsTplSel">
+                  <p-avatar [image]="opt.avatar" shape="circle" styleClass="mr-2"></p-avatar>
+                </ng-container>
+                <ng-template #initialsTplSel>
+                  <p-avatar [label]="initialsFromName(opt?.label)" shape="circle" [style.background]="issueAvatarColor({ first_name: opt?.label })" [style.color]="issueAvatarTextColor({ first_name: opt?.label })" styleClass="mr-2"></p-avatar>
+                </ng-template>
+                <div>{{ opt?.label }}</div>
+              </div>
+            </ng-template>
+          </p-select>
+          <small *ngIf="assignErrors.userRequired" class="text-red-600">{{ 'components.documents.activity.assign.USER_REQUIRED' | translate }}</small>
+        </div>
+      </div>
+
+
+
+      <div class="flex gap-2">
+        <div class="flex-1 flex flex-col gap-2">
+          <label class="font-bold">{{ 'components.documents.activity.assign.DATE' | translate }}</label>
+          <p-datepicker [(ngModel)]="assignModel.due_date" [showIcon]="true" appendTo="body" dateFormat="dd.mm.yy" placeholder="{{ 'components.documents.activity.assign.DATE_PLACEHOLDER' | translate }}"></p-datepicker>
+        </div>
+        <div class="flex-1 flex flex-col gap-2">
+          <label class="font-bold">{{ 'components.documents.activity.assign.PRIORITY' | translate }}</label>
+          <p-select [options]="priorityOptions" optionLabel="label" optionValue="value" [(ngModel)]="assignModel.priority" appendTo="body" placeholder="{{ 'components.documents.activity.assign.PRIORITY_PLACEHOLDER' | translate }}"></p-select>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="font-bold">{{ 'components.documents.activity.assign.TITLE_FIELD' | translate }} <span class="text-red-600">*</span></label>
+        <input pInputText type="text" [(ngModel)]="assignModel.title" readonly [ngClass]="{'p-invalid': assignErrors.titleRequired}" />
+        <small *ngIf="assignErrors.titleRequired" class="text-red-600">{{ 'components.documents.activity.assign.TITLE_REQUIRED' | translate }}</small>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="font-bold">{{ 'components.documents.activity.assign.DESCRIPTION_FIELD' | translate }}</label>
+        <p-editor [(ngModel)]="assignModel.description" [style]="{'height':'160px'}"></p-editor>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <p-checkbox [(ngModel)]="assignModel.change_status" binary="true" inputId="changeStatus"></p-checkbox>
+        <label for="changeStatus" class="m-0">{{ 'components.documents.activity.assign.CHANGE_STATUS' | translate }}</label>
+      </div>
+
+  <div class="text-sm text-gray-600 mt-2">{{ 'components.documents.activity.assign.DESCRIPTION' | translate }}</div>
+
+      <div class="flex justify-end gap-2 mt-4">
+        <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="showAssignDialog=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left"></p-button>
+        <p-button label="{{ 'MENU.SAVE' | translate }}" (onClick)="saveAssign()" severity="primary" icon="pi pi-check" iconPos="left"></p-button>
+      </div>
+    </div>
+  </p-dialog>
+
+  <!-- Link and annul dialog -->
+  <p-dialog header="{{ 'components.documents.activity.link.TITLE' | translate }}" [(visible)]="showLinkDialog" [modal]="true" [closable]="true" [resizable]="false" appendTo="body" [style]="{width: '40%'}">
+    <div class="flex flex-col gap-4">
+      <div class="flex gap-2">
+        <div class="flex-1 flex flex-col gap-2">
+          <label class="font-bold">{{ 'components.documents.activity.link.DOCUMENTS' | translate }}</label>
+            <p-multiSelect appendTo="body" [options]="documentsOptions || []" optionLabel="label" optionValue="value" [(ngModel)]="linkModel.selected_ids" filter="true" placeholder="{{ 'components.documents.activity.link.DOCUMENTS_PLACEHOLDER' | translate }}">
+            <ng-template let-opt pTemplate="item">
+              <div class="flex items-center gap-2">
+                <div class="font-medium">{{ opt?.label }}</div>
+              </div>
+            </ng-template>
+          </p-multiSelect>
+        </div>
+      </div>
+
+      <div class="flex gap-2">
+        <div class="flex-1 flex flex-col gap-2">
+          <label class="font-bold">{{ 'components.documents.activity.link.REASON' | translate }}</label>
+          <input pInputText type="text" [(ngModel)]="linkModel.reason" />
+        </div>
+      </div>
+
+      <div class="text-sm text-gray-600 mt-2">{{ 'components.documents.activity.link.DESCRIPTION' | translate }}</div>
+
+      <div class="flex justify-end gap-2 mt-4">
+        <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="showLinkDialog=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left"></p-button>
+        <p-button label="{{ 'components.documents.activity.link.ACTION' | translate }}" (onClick)="saveLink()" severity="primary" icon="pi pi-check" iconPos="left"></p-button>
+      </div>
+    </div>
+  </p-dialog>
+
+  
+
+  <p-toast></p-toast>
+</div>

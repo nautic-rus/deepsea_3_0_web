@@ -18,11 +18,38 @@
               <!-- Edit dialog for the issue (inline on detail page) -->
               <p-dialog header="{{ 'MENU.EDIT_DOCUMENT' | translate }}" [(visible)]="displayDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{width: '40%'}" appendTo="body">
                 <div class="flex flex-col gap-4">
-                  <div class="flex flex-col gap-2">
-                    <label class="font-bold">{{ 'components.documents.form.DIRECTORY' | translate }}</label>
-                    <!-- Use TreeNode objects as the model value (remove optionValue) so selected node label/path displays correctly -->
-                    <p-treeSelect [options]="directoryTree" [(ngModel)]="editModel.directory_id" [placeholder]="directoryPlaceholder || ('MENU.ANY' | translate)" (ngModelChange)="onDirectoryNgModelChange($event)" appendTo="body"></p-treeSelect>
-                    <small *ngIf="directoryPlaceholder" class="text-primary text-xs block mt-1 pl-2 font-bold">{{ directoryPlaceholder }}</small>
+                  <div class="flex gap-2">
+                    <div class="flex-1 flex flex-col gap-2">
+                      <label class="font-bold">{{ 'components.documents.form.DIRECTORY' | translate }}</label>
+                      <!-- Use TreeNode objects as the model value (remove optionValue) so selected node label/path displays correctly -->
+                      <p-treeSelect [options]="directoryTree" [(ngModel)]="editModel.directory_id" [placeholder]="directoryPlaceholder || ('MENU.ANY' | translate)" (ngModelChange)="onDirectoryNgModelChange($event)" appendTo="body"></p-treeSelect>
+      
+                    </div>
+
+                    <div class="w-60 flex flex-col gap-2">
+                      <label class="font-bold">{{ 'components.documents.form.SPECIALIZATION' | translate }}</label>
+                      <p-select [options]="specializationsOptions" [(ngModel)]="editModel.specialization_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body">
+                        <ng-template let-opt pTemplate="item">
+                          <div class="flex items-center gap-2">{{ opt.label }}</div>
+                        </ng-template>
+                        <ng-template let-opt pTemplate="selectedItem">
+                          <div class="flex items-center gap-2">{{ opt.label }}</div>
+                        </ng-template>
+                      </p-select>
+                    </div>
+
+                    <div class="w-60 flex flex-col gap-2">
+                      <label class="font-bold">{{ 'components.documents.form.STAGE' | translate }}</label>
+                      <p-select [options]="stagesOptions" [(ngModel)]="editModel.stage_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body">
+                        <ng-template let-opt pTemplate="item">
+                          <div class="flex items-center gap-2">{{ opt.label }}</div>
+                        </ng-template>
+                        <ng-template let-opt pTemplate="selectedItem">
+                          <div class="flex items-center gap-2">{{ opt.label }}</div>
+                        </ng-template>
+                      </p-select>
+                    </div>
+
                   </div>
 
                   <div class="flex gap-2">
@@ -37,11 +64,13 @@
                         </ng-template>
                         <ng-template let-opt pTemplate="selectedItem">
                           <div class="flex items-center gap-2">
-                            <div>{{ opt.label }}</div>
+                                                        <div>{{ opt.label }}</div>
                           </div>
                         </ng-template>
                       </p-select>
-                      <small *ngIf="formErrors.project_id" class="text-red-600 block">{{ formErrors.project_id }}</small>
+                                            <small *ngIf="formErrors.project_id" class="text-red-600 block">{{ formErrors.project_id }}</small>
+                                            
+                      
                     </div>
 
                     <div class="w-60 flex flex-col gap-2">
@@ -70,48 +99,15 @@
                     <p-editor [(ngModel)]="editModel.description" styleClass="w-full" [style]="{ height: '120px' }"></p-editor>
                   </div> -->
 
-                  <div class="flex gap-2">
-                    <div class="flex-1 flex flex-col gap-2">
-                      <label class="font-bold">{{ 'components.documents.form.ASSIGNEE' | translate }}</label>
-                      <p-select [options]="usersOptions" [(ngModel)]="editModel.assignee_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body">
-                        <ng-template let-opt pTemplate="item">
-                          <div class="flex items-center gap-2">
-                            <ng-container *ngIf="opt.avatar; else initialsItem">
-                              <img [src]="opt.avatar" alt="avatar" class="select-avatar" />
-                            </ng-container>
-                            <ng-template #initialsItem>
-                              <div class="select-avatar-initials" [style.background]="selectAvatarBg(opt.label)" [style.color]="selectAvatarTextColor(opt.label)">{{ initialsFromName(opt.label) }}</div>
-                            </ng-template>
-                            <div>{{ opt.label }}</div>
-                          </div>
-                        </ng-template>
-                        <ng-template let-opt pTemplate="selectedItem">
-                          <div class="flex items-center gap-2">
-                            <ng-container *ngIf="opt.avatar; else initialsValue">
-                              <img [src]="opt.avatar" alt="avatar" class="select-avatar" />
-                            </ng-container>
-                            <ng-template #initialsValue>
-                              <div class="select-avatar-initials" [style.background]="selectAvatarBg(opt.label)" [style.color]="selectAvatarTextColor(opt.label)">{{ initialsFromName(opt.label) }}</div>
-                            </ng-template>
-                            <div>{{ opt.label }}</div>
-                          </div>
-                        </ng-template>
-                      </p-select>
-                    </div>
-
-                    <div class="w-60 flex flex-col gap-2">
-                      <label class="font-bold">{{ 'components.documents.form.PRIORITY' | translate }}</label>
-                      <p-select [options]="priorityOptions" [(ngModel)]="editModel.priority" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
-                    </div>
-                  </div>
+                  <!-- Assignee removed from edit form per request -->
 
                         <div class="flex gap-2">
                           <div class="flex-1 flex flex-col gap-2">
-                            <label class="font-bold">{{ 'components.documents.form.DUE_DATE' | translate }}</label>
-                            <p-datepicker [(ngModel)]="editModel.due_date" [showIcon]="true"></p-datepicker>
+                            <label class="font-bold">{{ 'components.documents.form.PRIORITY' | translate }}</label>
+                            <p-select [options]="priorityOptions" [(ngModel)]="editModel.priority" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
                           </div>
 
-                          <div class="w-60 flex flex-col gap-2">
+                          <div class="flex-1 flex flex-col gap-2">
                             <label class="font-bold">{{ 'components.documents.form.ESTIMATED_HOURS' | translate }}</label>
                             <input pInputText type="number" step="8" [(ngModel)]="editModel.estimated_hours" />
                           </div>
@@ -187,6 +183,31 @@
 
           <div class="border-t border-surface-200 dark:border-surface-700"></div>
 
+          <!-- Directory / Specialization / Stage (sidebar display) -->
+          <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex items-center gap-4 flex-1">
+              <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.documents.form.DIRECTORY' | translate }}</div>
+              <div class="flex-1 text-surface-500 dark:text-surface-0 text-base leading-tight">{{ document?.directory_path || document?.directory_name || document?.directory || '-' }}</div>
+            </div>
+          </div>
+          <div class="border-t border-surface-200 dark:border-surface-700"></div>
+
+          <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex items-center gap-4 flex-1">
+              <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.documents.form.SPECIALIZATION' | translate }}</div>
+              <div class="flex-1 text-surface-500 dark:text-surface-0 text-base leading-tight">{{ document?.specialization_name || document?.specialization || '-' }}</div>
+            </div>
+          </div>
+          <div class="border-t border-surface-200 dark:border-surface-700"></div>
+
+          <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex items-center gap-4 flex-1">
+              <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.documents.form.STAGE' | translate }}</div>
+              <div class="flex-1 text-surface-500 dark:text-surface-0 text-base leading-tight">{{ document?.stage_name || document?.stage || '-' }}</div>
+            </div>
+          </div>
+          <div class="border-t border-surface-200 dark:border-surface-700"></div>
+
           <div class="flex flex-col md:flex-row gap-4">
             <div class="flex items-center gap-4 flex-1">
               <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.documents.detail.AUTHOR' | translate }}</div>
@@ -196,12 +217,11 @@
                                             
                                     shape="circle"></p-avatar>
                                   <ng-template #authorInitialsTpl>
-                                    <p-avatar
-                                      [label]="personInitials(document?.author_name)"
-        
-                                      shape="circle"
-                                      [style.background]="document?.author_id ? issueAvatarColor({ id: document.author_id, first_name: document.author_name }) : undefined"
-                                      [style.color]="document?.author_id ? issueAvatarTextColor({ id: document.author_id, first_name: document.author_name }) : undefined"></p-avatar>
+                    <p-avatar
+                      [label]="document?.author_initials"
+                      shape="circle"
+                      [style.background]="document?.author_avatar_bg"
+                      [style.color]="document?.author_avatar_color"></p-avatar>
                                   </ng-template>
                                     <div class="text-surface-500 dark:text-surface-0 text-base leading-tight">{{ formatSurnameInitials(document?.author_name || document) }}</div>
                               </div>
@@ -209,9 +229,9 @@
                         
           </div>
 
-          <div class="border-t border-surface-200 dark:border-surface-700"></div>
+          <!-- <div class="border-t border-surface-200 dark:border-surface-700"></div> -->
 
-          <div class="flex flex-col md:flex-row gap-4">
+          <!-- <div class="flex flex-col md:flex-row gap-4">
             <div class="flex items-start gap-4 flex-1">
               <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.documents.detail.ASSIGNEE' | translate }}</div>
                             <div class="flex-1 flex items-center gap-3">
@@ -221,17 +241,17 @@
                                   shape="circle"></p-avatar>
                                 <ng-template #assigneeInitialsTpl>
                                   <p-avatar
-                                    [label]="assigneeInitials()"
+                                    [label]="document?.assignee_initials"
                                     shape="circle"
-                                    [style.background]="document?.assignee_id ? issueAvatarColor({ id: document.assignee_id, first_name: document.assignee_name }) : undefined"
-                                    [style.color]="document?.assignee_id ? issueAvatarTextColor({ id: document.assignee_id, first_name: document.assignee_name }) : undefined"></p-avatar>
+                                    [style.background]="document?.assignee_avatar_bg"
+                                    [style.color]="document?.assignee_avatar_color"></p-avatar>
                                 </ng-template>
                                 <div class="text-surface-500 dark:text-surface-0 text-base leading-normal">{{ formatSurnameInitials(document?.assignee_name || document) }}</div>
                             </div>
             </div>
                         
-          </div>
-          <div class="border-t border-surface-200 dark:border-surface-700"></div>
+          </div> -->
+          <!-- <div class="border-t border-surface-200 dark:border-surface-700"></div>
 
           <div class="flex flex-col md:flex-row gap-4">
             <div class="flex items-start gap-4 flex-1">
@@ -239,7 +259,7 @@
               <div class="flex-1 text-surface-500 dark:text-surface-0 text-base leading-normal"> {{ document?.due_date ? (document?.due_date | date:'dd.MM.yyyy') : '-' }}</div>
             </div>
                         
-          </div>
+          </div> -->
 
           <!-- <div class="border-t border-surface-200 dark:border-surface-700"></div>
                     <div class="flex flex-col md:flex-row gap-4">
@@ -276,7 +296,7 @@
           <div class="flex flex-col md:flex-row gap-4">
             <div class="flex items-start gap-4 flex-1">
               <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.documents.detail.CREATED_AT' | translate }}</div>
-              <div class="flex-1 text-surface-500 dark:text-surface-0 text-base leading-normal"> {{ document?.created_at ? (document?.created_at | date:'dd.MM.yyyy') : '-' }}</div>
+              <div class="flex-1 text-surface-500 dark:text-surface-0 text-base leading-normal"> {{ document?.created_at ? (document?.created_at | date:'dd.MM.yyyy HH:mm') : '-' }}</div>
             </div>
                         
           </div>
@@ -308,6 +328,9 @@
               [model]="statusMenuItems"
               [disabled]="statusSaving || !(statusMenuItems && statusMenuItems.length > 0)">
             </p-splitButton>
+
+            <!-- Activity split button (separate component) -->
+            <app-documents-activity [documentId]="document?.id" [usersOptions]="usersOptions" [priorityOptions]="priorityOptions"></app-documents-activity>
 
           </ng-template>
 

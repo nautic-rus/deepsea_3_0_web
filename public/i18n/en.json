@@ -84,6 +84,7 @@
   "GENERAL": "General",
   "ID": "ID",
   "EDIT_DOCUMENT": "Edit document",
+  "CREATE_DOC": "Create document",
     "CREATE_ISSUE": "Create issue",
     "EDIT_ISSUE": "Edit issue",
   "BULK_EDIT": "Bulk edit",
@@ -123,7 +124,8 @@
     },
     "header": {
       "LOGOUT": "Logout",
-      "PROFILE": "Profile"
+          "PRIORITY_PLACEHOLDER": "Select priority",
+          "USER_REQUIRED": "User is required"
     },
       "profile": {
         "TITLE": "Profile",
@@ -366,9 +368,50 @@
     "documents": {
       "TREE_TITLE": "Documents tree",
       "BACK": "Back",
+      "bulk": {
+        "SELECTED": "selected",
+        "NO_SELECTION": "No documents selected",
+        "NO_IDS": "No valid document ids selected",
+        "NOTHING_TO_APPLY": "Nothing to apply",
+        "PARTIAL_ERROR": "{n} updates failed",
+        "SUCCESS": "Bulk update applied"
+      },
+      "activity": {
+        "BUTTON_LABEL": "Activity",
+        "assign": {
+          "DESCRIPTION": "Select a user to assign the document development task to.",
+          "CHANGE_STATUS": "Change status this document to \"In progress\"",
+          "USER": "User",
+          "DATE": "Due Date",
+          "PRIORITY": "Priority",
+          "USER_PLACEHOLDER": "Select",
+          "DATE_PLACEHOLDER": "Select",
+          "PRIORITY_PLACEHOLDER": "Select",
+          "USER_REQUIRED": "User is required",
+          "TITLE_FIELD": "Title",
+          "DESCRIPTION_FIELD": "Description",
+          "TITLE_REQUIRED": "Title is required"
+        },
+        "menu": {
+          "ASSIGN": "Assign user",
+          "LINK": "Link and annul",
+          "CORRECTION": "Create correction"
+        },
+        "link": {
+          "TITLE": "Link and annul",
+          "DOCUMENTS": "Documents",
+          "DOCUMENTS_PLACEHOLDER": "Select documents",
+          "REASON": "Reason / Comment",
+          "DESCRIPTION": "This document will be linked to selected documents and annulled. Please select documents to link and provide a reason for annulling."
+        }
+      },
       "table": {
         "PROJECT": "Project",
         "TITLE": "Title",
+          "USER_REQUIRED": "User is required",
+        "SPECIALIZATION": "Specialization",
+        "TYPE": "Type",
+        "PRIORITY": "Priority",
         "CREATED_BY": "Created by",
         "ASSIGNEE": "Assignee",
         "STATUS": "Status",
@@ -392,8 +435,16 @@
         "ORDER_INDEX": "Order index",
         "ASSIGNEE": "Assignee",
         "DIRECTORY": "Directory",
+  "DIRECTORY_SELECT_PROJECT_FIRST": "Please choose a project first",
+        "STAGE": "Stage",
+        "SPECIALIZATION": "Specialization",
         "STAGE_DATE": "Stage date",
         "TITLE_REQUIRED": "Title is required",
+  "PROJECT_REQUIRED": "Project is required",
+  "DIRECTORY_REQUIRED": "Directory is required",
+  "SPECIALIZATION_REQUIRED": "Specialization is required",
+  "TYPE_REQUIRED": "Type is required",
+  "DOCUMENT_NUMBER_REQUIRED": "Document number is required",
         "UPDATED": "Updated"
       },
       "priority": {
@@ -492,20 +543,21 @@
         "COLUMN_TYPE_ID": "#",
         "COLUMN_NAME": "Name",
         "COLUMN_STATUS": "Status",
-  "COLUMN_TYPE": "Type",
+        "COLUMN_TYPE": "Type",
         "COLUMN_DIRECTION": "Direction",
         "DIRECTION_LABEL_RELATES": "-",
-        "DIRECTION_LABEL_SOURCE": "Source",
-        "DIRECTION_LABEL_TARGET": "Target",
+        "DIRECTION_LABEL_SOURCE": "Active",
+        "DIRECTION_LABEL_TARGET": "Passive",
         "DIRECTION_LABEL_UNKNOWN": "Unknown",
         "ADD_TITLE": "Add relation",
+        "DELETE_CONFIRM": "Delete this relation?",
         "FORM": {
           "RELATION_TYPE": "Relation type",
           "BLOCKS_DIRECTION": "Blocks direction",
           "TYPE_RELATES": "Relates",
           "TYPE_BLOCKS": "Blocks",
-          "BLOCKS_ACTIVE": "Blocks (current -> selected)",
-          "BLOCKS_PASSIVE": "Blocked by (selected -> current)",
+          "BLOCKS_ACTIVE": "Blocks (current -> selected) - active",
+          "BLOCKS_PASSIVE": "Blocked by (selected -> current) - passive",
           "SAVED": "Relations created"
         },
         "DOCUMENT": "Document"
@@ -703,8 +755,8 @@
           "DOCUMENTS": "Documents (project)",
           "TYPE_RELATES": "Relates",
           "TYPE_BLOCKS": "Blocks",
-          "BLOCKS_ACTIVE": "This issue blocks the target (active)",
-          "BLOCKS_PASSIVE": "This issue is blocked by the target (passive)",
+          "BLOCKS_ACTIVE": "Blocks (current -> selected) - active",
+          "BLOCKS_PASSIVE": "Blocked by (selected -> current) - passive",
           "SAVED": "Relations created"
         },
         "DOCUMENT": "Document"

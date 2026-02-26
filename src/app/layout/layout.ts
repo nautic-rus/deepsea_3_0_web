@@ -33,7 +33,6 @@ import { HeaderComponent } from './header/header';
     }
     .layout-main {
       flex: 1 1 0;
-      overflow: auto;
       padding: 1rem;
       min-height: 0;
     }

@@ -27,31 +27,32 @@
 						<div class=" flex flex-col gap-4">
 														<!-- Read-only ID shown only in edit mode -->
 							<div *ngIf="isEditingDir" class="flex flex-col gap-2">
-								<label for="dirId">{{ 'components.documents.form.ID' | translate }}</label>
+								<label class="font-bold"  for="dirId">{{ 'components.documents.form.ID' | translate }}</label>
 								<input pInputText id="dirId" type="text" [value]="editingDirId" name="id" disabled />
 							</div>
 							<div class="flex flex-col gap-2">
-								<label for="dirName">{{ 'components.documents.form.NAME' | translate }}</label>
+								<label class="font-bold"  for="dirName">{{ 'components.documents.form.NAME' | translate }} <span class="text-red-600">*</span></label>
 								<input pInputText id="dirName" type="text" [(ngModel)]="newDir.name" name="name" />
 							</div>
 
 							<div class="flex flex-col gap-2" *ngIf="!createDirFromContext || isEditingDir">
-								<label for="dirProject">{{ 'components.documents.form.PROJECT_ID' | translate }}</label>
+								<label class="font-bold" for="dirProject">{{ 'components.documents.form.PROJECT_ID' | translate }} <span class="text-red-600">*</span></label>
 								<p-select id="dirProject" [options]="projectOptions" optionLabel="label" optionValue="value" [(ngModel)]="newDir.project_id" name="project_id" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+								<div *ngIf="formErrors && formErrors.project_id" class="text-red-600 block">{{ formErrors.project_id }}</div>
 							</div>
 
 							<div class="flex flex-col gap-2" *ngIf="createDirFromContext && !isEditingDir">
-								<label for="dirParent">{{ 'components.documents.form.PARENT_DIRECTORY' | translate }}</label>
+								<label class="font-bold"  for="dirParent">{{ 'components.documents.form.PARENT_DIRECTORY' | translate }}</label>
 								<p-select id="dirParent" [options]="directoryOptions" optionLabel="label" optionValue="value" [(ngModel)]="newDir.parent_id" name="parent_id" placeholder="-" appendTo="body"></p-select>
 							</div>
 
 							<div *ngIf="createDirFromContext && isEditingDir" class="flex flex-col gap-2">
-								<label for="dirParentEdit">{{ 'components.documents.form.PARENT_DIRECTORY' | translate }}</label>
+								<label class="font-bold"  for="dirParentEdit">{{ 'components.documents.form.PARENT_DIRECTORY' | translate }}</label>
 								<p-select id="dirParentEdit" [options]="directoryOptions" optionLabel="label" optionValue="value" [(ngModel)]="newDir.parent_id" name="parent_id" placeholder="-" appendTo="body"></p-select>
 							</div>
 
 							<div *ngIf="isEditingDir" class="flex flex-col gap-2">
-								<label for="dirOrder">{{ 'components.documents.form.ORDER_INDEX' | translate }}</label>
+								<label  class="font-bold" for="dirOrder">{{ 'components.documents.form.ORDER_INDEX' | translate }}</label>
 								<input pInputText id="dirOrder" type="number" [(ngModel)]="newDir.order_index" name="order_index" />
 							</div>
 
@@ -59,10 +60,55 @@
 
 							<div class="flex justify-end gap-2 mt-4">
 								<p-button label="{{ 'components.projects.form.CANCEL' | translate }}" (onClick)="closeDirectoryDialog()" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="savingDir"></p-button>
-								<p-button label="{{ isEditingDir ? ('components.projects.form.SAVE' | translate) : ('MENU.CREATE' | translate) }}" (onClick)="createDirectory()" class="" severity="primary" icon="pi pi-check" iconPos="left" [loading]="savingDir" [disabled]="!newDir.name || savingDir"></p-button>
+								<p-button label="{{ isEditingDir ? ('components.projects.form.SAVE' | translate) : ('MENU.CREATE' | translate) }}" (onClick)="createDirectory()" class="" severity="primary" icon="pi pi-check" iconPos="left" [loading]="savingDir" [disabled]="!newDir.name || !newDir.project_id || savingDir"></p-button>
 							</div>
 						</div>
 					</p-dialog>
+
+				<!-- Bulk edit dialog for documents -->
+				<p-dialog header="{{ 'MENU.BULK_EDIT' | translate }}" [(visible)]="bulkEditDialogVisible" [modal]="true" appendTo="body" [resizable]="false" [style]="{ width: '40%' }">
+					<div class="flex flex-col gap-4">
+						<div class="mb-3">
+							<strong>{{ selectedDocuments.length || 0 }}</strong> {{ 'components.documents.bulk.SELECTED' | translate }}
+						</div>
+
+						<div class="grid grid-cols-2 gap-4">
+							<div class="flex flex-col gap-2">
+								<label class="font-bold">{{ 'components.documents.form.PROJECT' | translate }}</label>
+								<p-select [options]="projectOptions" [(ngModel)]="bulkEditModel.project_id" (ngModelChange)="onBulkDialogProjectChange($event)" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+							</div>
+							<div class="flex flex-col gap-2">
+								<label class="font-bold">{{ 'components.documents.form.DIRECTORY' | translate }}</label>
+								<p-treeSelect [options]="directoryTreeFiltered || directoryTree" [(ngModel)]="bulkEditModel.directory_id" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-treeSelect>
+							</div>
+
+							<div class="flex flex-col gap-2">
+								<label class="font-bold">{{ 'components.documents.form.TYPE' | translate }}</label>
+								<p-select [options]="typeOptions" [(ngModel)]="bulkEditModel.type_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+							</div>
+
+							<div class="flex flex-col gap-2">
+								<label class="font-bold">{{ 'components.documents.form.SPECIALIZATION' | translate }}</label>
+								<p-select [options]="specializationsOptions" [(ngModel)]="bulkEditModel.specialization_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+							</div>
+
+							<div class="flex flex-col gap-2">
+								<label class="font-bold">{{ 'components.documents.form.PRIORITY' | translate }}</label>
+								<p-select [options]="priorityOptions" [(ngModel)]="bulkEditModel.priority" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+							</div>
+
+							<div class="flex flex-col gap-2">
+								<label class="font-bold">{{ 'components.documents.form.STAGE' | translate }}</label>
+								<p-select [options]="stagesOptions" [(ngModel)]="bulkEditModel.stage_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+							</div>
+						</div>
+
+						<div class="flex justify-end gap-2 mt-4">
+							<p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="closeBulkEditDialog()" class="p-button-text" severity="secondary"></p-button>
+							<p-button label="{{ 'MENU.APPLY' | translate }}" (onClick)="applyBulkEdit()" severity="primary"></p-button>
+						</div>
+					</div>
+				</p-dialog>
 
 					<!-- Confirm dialog for delete actions -->
 					<p-confirmDialog
@@ -86,7 +132,7 @@
 					<ng-template #start>
 						<p-button [label]="'MENU.CREATE_DOC' | translate" icon="pi pi-plus" severity="primary" class="mr-2" (onClick)="openNewDocument()"></p-button>
 						<!-- <p-button severity="warn" icon="pi pi-filter" class="ml-2" (onClick)="noop()"></p-button> -->
-						<p-button severity="secondary" icon="pi pi-pencil" class="ml-2" (onClick)="noop()" [disabled]="!selectedDocuments || !selectedDocuments.length"></p-button>
+						<p-button severity="secondary" icon="pi pi-pencil" class="ml-2" (onClick)="openBulkEditDialog()" [disabled]="!selectedDocuments || !selectedDocuments.length"></p-button>
 					</ng-template>
 
 					<ng-template #end>
@@ -98,42 +144,91 @@
 				<!-- Create / Edit document dialog (copied/adapted from issues) -->
 				<p-dialog header="{{ isCreating ? ('MENU.CREATE_DOC' | translate) : ('MENU.EDIT' | translate) }}" [(visible)]="displayDialog" [modal]="true" appendTo="body" [resizable]="false" [style]="{ width: '40%' }">
 					<div class="flex flex-col gap-4">
-						<div class="flex flex-col gap-2">
-							<label class="font-bold">{{ 'components.documents.form.TITLE' | translate }}</label>
-							<input pInputText type="text" [(ngModel)]="editModel.title" />
-							<small *ngIf="formErrors.title" class="text-red-600 block">{{ formErrors.title }}</small>
-						</div>
-
-						<div class="flex flex-col gap-2">
-							<label class="font-bold">{{ 'components.documents.form.DESCRIPTION' | translate }}</label>
-							<p-editor [(ngModel)]="editModel.description" styleClass="w-full" [style]="{ height: '180px' }"></p-editor>
-						</div>
-
-						<div class="grid grid-cols-3 gap-4">
-							<div class="flex flex-col gap-2">
-								<label class="font-bold">{{ 'components.documents.form.PROJECT_ID' | translate }}</label>
-								<p-select [options]="projectOptions" optionLabel="label" optionValue="value" [(ngModel)]="editModel.project_id" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+						<div class="flex gap-2">
+							<div class="flex-1 flex flex-col gap-2">
+								<label class="font-bold">{{ 'components.documents.form.PROJECT' | translate }} <span class="text-red-600">*</span></label>
+								<p-select [options]="projectOptions" [(ngModel)]="editModel.project_id" (ngModelChange)="onDialogProjectChange($event)" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body"></p-select>
+								<small *ngIf="formErrors.project_id" class="text-red-600 block">{{ formErrors.project_id }}</small>
 							</div>
-							<div class="flex flex-col gap-2">
-								<label class="font-bold">{{ 'components.documents.form.ASSIGNEE' | translate }}</label>
-								<p-select [options]="usersOptions" optionLabel="label" optionValue="value" [(ngModel)]="editModel.assigne_to" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
-							</div>
-							<div class="flex flex-col gap-2">
-								<label class="font-bold">{{ 'components.documents.form.DIRECTORY' | translate }}</label>
-								<p-select [options]="directoryOptions" optionLabel="label" optionValue="value" [(ngModel)]="editModel.directory_id" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+
+							<div class="flex-1 flex flex-col gap-2">
+								<label class="font-bold">{{ 'components.documents.form.DIRECTORY' | translate }} <span class="text-red-600">*</span></label>
+								<!-- TreeSelect for directory (shows path) - use full directoryTree like documents-detail so selection and labels work consistently -->
+								<p-treeSelect [options]="(isCreating ? (directoryTreeFiltered && directoryTreeFiltered.length ? directoryTreeFiltered : []) : directoryTree)"
+											  [(ngModel)]="editModel.directory_id"
+											  [placeholder]="(isCreating && (!editModel || !editModel.project_id) ? ('components.documents.form.DIRECTORY_SELECT_PROJECT_FIRST' | translate) : (directoryPlaceholder || ('MENU.ANY' | translate)))"
+											  [disabled]="isCreating && (!editModel || !editModel.project_id)"
+											  (ngModelChange)="onDirectoryNgModelChange($event)" appendTo="body"></p-treeSelect>
+								<small *ngIf="formErrors.directory_id" class="text-red-600 block">{{ formErrors.directory_id }}</small>
 							</div>
 						</div>
 
-						<div class="grid grid-cols-2 gap-4 mt-2">
-							<div class="flex flex-col gap-2">
-								<label class="font-bold">{{ 'components.documents.form.STAGE_DATE' | translate }}</label>
-								<p-datepicker [(ngModel)]="editModel.stage_date" [showIcon]="true" inputId="stageDate" appendTo="body"></p-datepicker>
+							<div class="flex gap-2">
+								<div class="flex-1 flex flex-col gap-2">
+									<label class="font-bold">{{ 'components.documents.form.SPECIALIZATION' | translate }} <span class="text-red-600">*</span></label>
+									<p-select [options]="specializationsOptions" [(ngModel)]="editModel.specialization_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body">
+										<ng-template let-opt pTemplate="item">
+											<div class="flex items-center gap-2">{{ opt.label }}</div>
+										</ng-template>
+										<ng-template let-opt pTemplate="selectedItem">
+											<div class="flex items-center gap-2">{{ opt.label }}</div>
+										</ng-template>
+									</p-select>
+									<small *ngIf="formErrors.specialization_id" class="text-red-600 block">{{ formErrors.specialization_id }}</small>
+								</div>
+
+								
+
+								<div class=" flex-1 flex flex-col gap-2">
+									<label class="font-bold">{{ 'components.documents.form.TYPE' | translate }} <span class="text-red-600">*</span></label>
+									<p-select [options]="typeOptions" [(ngModel)]="editModel.type_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+									<small *ngIf="formErrors.type_id" class="text-red-600 block">{{ formErrors.type_id }}</small>
+								</div>
+							</div>
+
+						<div class="flex gap-2">
+							<div class="w-60 flex flex-col gap-2">
+								<label class="font-bold">{{ 'components.documents.detail.DOCUMENT_NUMBER' | translate }} <span class="text-red-600">*</span></label>
+								<input pInputText type="text" [(ngModel)]="editModel.code" />
+								<small *ngIf="formErrors.code" class="text-red-600 block">{{ formErrors.code }}</small>
+							</div>
+							<div class="flex-1 flex flex-col gap-2">
+								<label class="font-bold">{{ 'components.documents.form.TITLE' | translate }} <span class="text-red-600">*</span></label>
+								<input pInputText type="text" [(ngModel)]="editModel.title" />
+								<small *ngIf="formErrors.title" class="text-red-600 block">{{ formErrors.title }}</small>
+							</div>
+						</div>
+
+
+
+						<div class="flex gap-2">
+							<div class="flex-1 flex flex-col gap-2">
+									<label class="font-bold">{{ 'components.documents.form.STAGE' | translate }}</label>
+									<p-select [options]="stagesOptions" [(ngModel)]="editModel.stage_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body">
+										<ng-template let-opt pTemplate="item">
+											<div class="flex items-center gap-2">{{ opt.label }}</div>
+										</ng-template>
+										<ng-template let-opt pTemplate="selectedItem">
+											<div class="flex items-center gap-2">{{ opt.label }}</div>
+										</ng-template>
+									</p-select>
+								</div>
+				
+
+							<div class="flex-1 flex flex-col gap-2">
+								<label class="font-bold">{{ 'components.documents.form.PRIORITY' | translate }}</label>
+								<p-select [options]="priorityOptions" [(ngModel)]="editModel.priority" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+							</div>
+
+							<div class="flex-1 flex flex-col gap-2">
+								<label class="font-bold">{{ 'components.documents.form.ESTIMATED_HOURS' | translate }}</label>
+								<input pInputText type="number" step="8" [(ngModel)]="editModel.estimated_hours" />
 							</div>
 						</div>
 
 						<div class="flex justify-end gap-2 mt-4">
 							<p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="displayDialog=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="loading"></p-button>
-							<p-button label="{{ 'MENU.SAVE' | translate }}" (onClick)="saveDocument()" severity="primary" icon="pi pi-check" iconPos="left" [loading]="loading" [disabled]="loading"></p-button>
+							<p-button label="{{ 'MENU.SAVE' | translate }}" (click)="saveDocument()" severity="primary" icon="pi pi-check" iconPos="left" [loading]="loading" [disabled]="loading"></p-button>
 						</div>
 					</div>
 				</p-dialog>
@@ -155,7 +250,7 @@
 						scrollHeight="flex"
 						[rows]="10"
 						size="small"
-						[globalFilterFields]="['id','title','project_name','assignee_name','author_name','status_name','type_name','priority_text']"
+						[globalFilterFields]="['code','title']"
 						[(selection)]="selectedDocuments"
 						[rowHover]="true"
 						dataKey="id"
@@ -197,6 +292,21 @@
 														<ng-template #filter let-value let-filter="filterCallback">
 															<p-multiselect [ngModel]="value"
 																[options]="projectOptions"
+																optionLabel="label"
+																optionValue="label"
+																placeholder="{{ 'MENU.ANY' | translate }}"
+																(onChange)="filter($event.value)"
+																styleClass="w-full"
+																appendTo="body">
+															</p-multiselect>
+														</ng-template>
+													</p-columnFilter>
+												</ng-container>
+												<ng-container *ngSwitchCase="'specialization_name'">
+													<p-columnFilter field="specialization_name" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
+														<ng-template #filter let-value let-filter="filterCallback">
+															<p-multiselect [ngModel]="value"
+																[options]="specializationsOptions"
 																optionLabel="label"
 																optionValue="label"
 																placeholder="{{ 'MENU.ANY' | translate }}"
@@ -267,6 +377,7 @@
 														</ng-template>
 													</p-columnFilter>
 												</ng-container>
+
 												<ng-container *ngSwitchCase="'priority_text'">
 													<p-columnFilter field="priority_text" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
 														<ng-template #filter let-value let-filter="filterCallback">
@@ -302,8 +413,10 @@
 									<td *ngIf="isColumnVisible(col.field)" [attr.data-field]="col.field">
 										<ng-container [ngSwitch]="col.field">
 											<ng-container *ngSwitchCase="'id'">{{ issue.id }}</ng-container>
-											<ng-container *ngSwitchCase="'project_name'">{{ issue.project_name || '-' }}</ng-container>
+											<ng-container *ngSwitchCase="'code'">{{ issue.code || '-' }}</ng-container>
+											<ng-container *ngSwitchCase="'project_name'">{{ issue.project_code || issue.project_name || '-' }}</ng-container>
 											<ng-container *ngSwitchCase="'title'">{{ issue.title || '-' }}</ng-container>
+											<ng-container *ngSwitchCase="'specialization_name'">{{ issue.specialization_name || '-' }}</ng-container>
 											<ng-container *ngSwitchCase="'type_name'">{{ issue.type_name || '-' }}</ng-container>
 											<ng-container *ngSwitchCase="'assignee_name'">
 												<div class="flex items-center gap-2">

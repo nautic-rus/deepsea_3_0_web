@@ -4,16 +4,17 @@ import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { TagModule } from 'primeng/tag';
 import { BadgeModule } from 'primeng/badge';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-documents-detail-relations-table',
   standalone: true,
-  imports: [CommonModule, TranslateModule, TagModule, BadgeModule, ButtonModule, TableModule],
+  imports: [CommonModule, TranslateModule, TagModule, BadgeModule, ButtonModule, TableModule, TooltipModule],
   template: `
     <section class="admin-subpage-relations card">
       <div class="flex items-center justify-between mt-0 mb-2">
@@ -26,11 +27,11 @@ import { TableModule } from 'primeng/table';
       <p-table *ngIf="relations && relations.length" [value]="relations" class="w-full" size="small">
         <ng-template pTemplate="header">
           <tr>
-            <th style="width:15%">{{ 'components.documents.relations.COLUMN_TYPE_ID' | translate }}</th>
+            <th style="width:20%">{{ 'components.documents.relations.COLUMN_TYPE_ID' | translate }}</th>
             <th style="width:30%">{{ 'components.documents.relations.COLUMN_NAME' | translate }}</th>
-            <th style="width:20%">{{ 'components.documents.relations.COLUMN_STATUS' | translate }}</th>
+            <th style="width:15%">{{ 'components.documents.relations.COLUMN_STATUS' | translate }}</th>
             <th style="width:15%">{{ 'components.documents.relations.COLUMN_TYPE' | translate }}</th>
-            <th style="width:20%">{{ 'components.documents.relations.COLUMN_DIRECTION' | translate }}</th>
+            <th style="width:15%">{{ 'components.documents.relations.COLUMN_DIRECTION' | translate }}</th>
             <th style="width:5%"></th>
           </tr>
         </ng-template>
@@ -41,7 +42,21 @@ import { TableModule } from 'primeng/table';
               <a *ngIf="r.type === 'Document'" href="#" (click)="openDocument($event, r)" class="text-blue-600 dark:text-blue-400 font-medium hover:underline">{{ r.type + ' #' + r.id }}</a>
             </td>
             <td>
-              <span *ngIf="r.title" >{{r.title}}</span>
+              <!-- For documents show code + title, for others just the title -->
+              <span *ngIf="r.type === 'Document'"
+                    [pTooltip]="(r.code ? (r.code + ' ') : '') + (r.title || '')"
+                    tooltipPosition="top"
+                    tooltipAppendTo="body"
+                    [tooltipDisabled]="(((r.code ? (r.code + ' ') : '') + (r.title || '')).length <= 50)">
+                {{ truncate((r.code ? (r.code + ' ') : '') + (r.title || '')) }}
+              </span>
+              <span *ngIf="r.type !== 'Document' && r.title"
+                    [pTooltip]="r.title"
+                    tooltipPosition="top"
+                    tooltipAppendTo="body"
+                    [tooltipDisabled]="((r.title || '').length <= 50)">
+                {{ truncate(r.title) }}
+              </span>
 
             </td>
             <td>
@@ -68,7 +83,7 @@ export class DocumentsDetailRelationsTableComponent implements OnChanges {
   @Output() addRelation = new EventEmitter<void>();
   relations: Array<any> = [];
 
-  constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router) {}
+  constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router, private translate: TranslateService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['document']) {
@@ -127,8 +142,11 @@ export class DocumentsDetailRelationsTableComponent implements OnChanges {
               this.http.get<any>(`/api/documents/${rel.id}`).subscribe({
                 next: (res) => {
                   try {
-                    rel.title = rel.title || res.title || res.name || null;
-                    (rel as any).status = res.status || null;
+                    rel.title = rel.title || res.title || res.name || res.summary || null;
+                    (rel as any).status = res.status || res.state || res.status_name || null;
+                    // populate code/number for documents so we can show "code + title" in the table
+                    const rAny = rel as any;
+                    rAny.code = rAny.code || res.code || res.document_number || res.number || null;
                   } catch (e) {}
                   this.cdr.markForCheck();
                 },
@@ -228,8 +246,9 @@ export class DocumentsDetailRelationsTableComponent implements OnChanges {
   public removeLink(rel: any): void {
     if (!rel || !rel.raw) return;
     const linkId = rel.raw.id ?? rel.raw.link_id ?? rel.raw._id;
-    if (!linkId) return;
-    if (!confirm('Delete this relation?')) return;
+  if (!linkId) return;
+  const confirmMsg = this.translate.instant('components.documents.relations.DELETE_CONFIRM') || 'Delete this relation?';
+  if (!confirm(confirmMsg)) return;
 
     this.http.delete(`/api/links/${linkId}`).subscribe({
       next: () => {
@@ -256,6 +275,14 @@ export class DocumentsDetailRelationsTableComponent implements OnChanges {
     if (s.includes('block')) return 'danger';
     if (s.includes('relates')) return 'info';
     return 'info';
+  }
+
+  /** Truncate text to a maximum length (including ellipsis). */
+  public truncate(text: any, max = 40): string {
+    if (text === null || text === undefined) return '';
+    const s = String(text);
+    if (max <= 0) return '';
+    return s.length > max ? s.slice(0, max - 1) + '…' : s;
   }
 
   private extractRelations(doc: any): Array<any> {

@@ -22,7 +22,7 @@
     </div>
   </div>
 <div class="relative">
-  <p-treetable [value]="files" [scrollable]="true" [tableStyle]="{ 'min-width': '50rem', 'table-layout': 'fixed' }">
+  <p-treetable [value]="files" [scrollable]="true"  [tableStyle]="{ 'min-width': '50rem', 'table-layout': 'fixed' }">
       <ng-template #header>
         <tr>
           <th class="text-left" style="width:40%">{{ 'components.documents.attach.COLUMN_NAME' | translate }}</th>
@@ -31,7 +31,7 @@
           <th class="text-left" style="width:10%">{{ 'components.documents.attach.COLUMN_STATUS' | translate }}</th>
           <th class="text-left" style="width:20%">{{ viewArchived ? ( 'components.documents.attach.ARCHIVED_BY' | translate ) : ( 'components.documents.attach.UPLOADED_BY' | translate ) }}</th>
           <th class="text-left" style="width:15%">{{ viewArchived ? ( 'components.documents.attach.COLUMN_ARCHIVED' | translate ) : ( 'components.documents.attach.COLUMN_UPLOADED' | translate ) }}</th>
-          <th class="text-left" style="width:10%"></th>
+          <th class="text-left" style="width:15%"></th>
         </tr>
       </ng-template>
       <ng-template #body let-rowNode let-rowData="rowData">
@@ -78,7 +78,7 @@
               <span *ngIf="rowData.storage_created_at">{{ rowData.storage_created_at | date:'dd.MM.yyyy HH:mm' }}</span>
             </ng-container>
           </td>
-          <td style="width:10%">
+          <td style="width:15%">
             <!-- Actions: only for leaf file rows (have _original or file_name) -->
             <div *ngIf="rowData._original || rowData.file_name" class="flex items-center gap-2 justify-start">
               <button pButton type="button" icon="pi pi-download" class="p-button-text" (click)="downloadFile(rowData)"></button>

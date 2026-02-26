@@ -25,16 +25,18 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
 import { DocumentsService } from './documents.service';
 import { NodeService } from '../../services/nodeservice';
+import { AvatarService } from '../../services/avatar.service';
 import { DocumentsDetailAttachComponent } from './documents-detail-attach/documents-detail-attach';
 import { DocumentsDetailRelationsTableComponent } from './documents-detail-relations-table';
 import { DocumentsDetailChatComponent } from './documents-detail-chat/documents-detail-chat.component';
+import { DocumentsActivityComponent } from './documents-activity/documents-activity';
 // Description and chat-history components are not used in this template; removed to avoid NG8113 warnings
  
 @Component({
   selector: 'app-documents-detail',
   standalone: true,
   providers: [MessageService],
-  imports: [CommonModule, TranslateModule, RouterModule, FormsModule, ButtonModule, DialogModule, InputTextModule, EditorModule, Select, MultiSelectModule, DatePickerModule, CheckboxModule, AvatarModule, TagModule, ProgressSpinnerModule, ChipModule, ToolbarModule, DocumentsDetailChatComponent, DocumentsDetailAttachComponent, DocumentsDetailRelationsTableComponent, SplitButtonModule, ToastModule, TreeSelectModule],
+  imports: [CommonModule, TranslateModule, RouterModule, FormsModule, ButtonModule, DialogModule, InputTextModule, EditorModule, Select, MultiSelectModule, DatePickerModule, CheckboxModule, AvatarModule, TagModule, ProgressSpinnerModule, ChipModule, ToolbarModule, DocumentsDetailChatComponent, DocumentsDetailAttachComponent, DocumentsDetailRelationsTableComponent, SplitButtonModule, ToastModule, TreeSelectModule, DocumentsActivityComponent],
   templateUrl: './documents-detail.html',
   styleUrls: ['./documents-detail.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -58,6 +60,8 @@ export class DocumentsDetailComponent implements OnInit {
   priorityOptions: { label: string; value: any }[] = [];
   tagsOptions: { label: string; value: any }[] = [];
   directoryOptions: { label: string; value: any }[] = [];
+  stagesOptions: { label: string; value: any }[] = [];
+  specializationsOptions: { label: string; value: any }[] = [];
   directoryTree: any[] = [];
   directoryPlaceholder: string = '';
   private pendingDirectoryKey: string | null = null;
@@ -82,6 +86,7 @@ export class DocumentsDetailComponent implements OnInit {
   private translate = inject(TranslateService);
   private documentsService = inject(DocumentsService);
   private nodeService = inject(NodeService);
+  private avatarService = inject(AvatarService);
 
   constructor() {
     const idStr = this.route.snapshot.paramMap.get('id');
@@ -131,6 +136,25 @@ export class DocumentsDetailComponent implements OnInit {
       error: (err: any) => { console.warn('Failed to load document types', err); this.typeOptions = []; this.cdr.markForCheck(); }
     });
   }
+
+    loadStages(projectId: any): void {
+      try {
+        if (projectId === null || projectId === undefined || projectId === '') {
+          this.stagesOptions = [];
+          this.cdr.markForCheck();
+          return;
+        }
+        const params = new HttpParams().set('project_id', String(projectId));
+        this.http.get('/api/stages', { params }).subscribe({
+          next: (res: any) => {
+            const items = (res && res.data) ? res.data : (res || []);
+            this.stagesOptions = (items || []).map((s: any) => ({ label: s.name || s.title || String(s.id), value: s.id }));
+            this.cdr.markForCheck();
+          },
+          error: (err: any) => { console.warn('Failed to load stages', err); this.stagesOptions = []; this.cdr.markForCheck(); }
+        });
+      } catch (e) { console.warn('Failed to load stages', e); this.stagesOptions = []; this.cdr.markForCheck(); }
+    }
 
   async loadDirectories(): Promise<void> {
     try {
@@ -229,10 +253,11 @@ export class DocumentsDetailComponent implements OnInit {
           }
           return null;
         };
-        const nodeRef = (this.directoryTree || []).map((n: any) => findNodeRef(n)).find(Boolean) || null;
-        this.editModel = this.editModel || {};
-        this.editModel.directory_id = nodeRef || { key: String(idNum), data: { id: idNum }, label: `ID ${String(idNum)}` };
-        try { this.directoryPlaceholder = this.getPathForDirectoryValue(this.editModel.directory_id); } catch (e) { this.directoryPlaceholder = ''; }
+  const nodeRef = (this.directoryTree || []).map((n: any) => findNodeRef(n)).find(Boolean) || null;
+  this.editModel = this.editModel || {};
+  // Set primitive id (number) instead of TreeNode object so backend receives an integer
+  this.editModel.directory_id = idNum;
+  try { this.directoryPlaceholder = this.getPathForDirectoryValue(this.editModel.directory_id); } catch (e) { this.directoryPlaceholder = ''; }
         this.pendingDirectoryKey = null;
         this.cdr.markForCheck();
       }
@@ -241,6 +266,19 @@ export class DocumentsDetailComponent implements OnInit {
       this.directoryOptions = [];
       this.cdr.markForCheck();
     }
+  }
+
+  loadSpecializations(): void {
+    try {
+      this.http.get('/api/specializations').subscribe({
+        next: (res: any) => {
+          const items = (res && res.data) ? res.data : (res || []);
+          this.specializationsOptions = (items || []).map((s: any) => ({ label: s.name || s.title || String(s.id), value: s.id }));
+          this.cdr.markForCheck();
+        },
+        error: (err: any) => { console.warn('Failed to load specializations', err); this.specializationsOptions = []; this.cdr.markForCheck(); }
+      });
+    } catch (e) { console.warn('Failed to load specializations', e); this.specializationsOptions = []; this.cdr.markForCheck(); }
   }
 
   openEditDialog(): void {
@@ -274,11 +312,18 @@ export class DocumentsDetailComponent implements OnInit {
     this.editModel.tags_custom = [];
     this.tagsOptions = (this.document && Array.isArray(this.document.tags)) ? (this.document.tags || []).map((t: any) => ({ label: t, value: t })) : [];
 
-    // Ensure select lists are loaded so the current values display correctly
+  // Ensure select lists are loaded so the current values display correctly
     if (!this.typeOptions || !this.typeOptions.length) this.loadTypes();
     if (!this.directoryTree || !this.directoryTree.length) this.loadDirectories();
     if (!this.projectOptions || !this.projectOptions.length) this.loadProjects();
     if (!this.usersOptions || !this.usersOptions.length) this.loadProjects(); // projects loader also populates usersOptions
+    // Load stages and specializations for the currently selected project so selects show options
+    try {
+      this.loadStages(this.editModel.project_id ?? this.document?.project_id ?? null);
+    } catch (e) {}
+    try {
+      this.loadSpecializations();
+    } catch (e) {}
 
   // Ensure assignee value is taken from server field 'assigne_to' (some responses use this name)
     const assigneeId = this.document?.assigne_to ?? this.document?.assignee_id ?? this.document?.assigneTo ?? null;
@@ -349,11 +394,28 @@ export class DocumentsDetailComponent implements OnInit {
 
   // Called when TreeSelect model changes (user selects a directory). Accepts either a TreeNode object or a primitive key.
   onDirectoryNgModelChange(value: any): void {
+    // Normalize TreeNode -> primitive id and update model so server receives integer id
+    let normalized: any = null;
     try {
-      this.directoryPlaceholder = this.getPathForDirectoryValue(value);
-    } catch (e) {
-      this.directoryPlaceholder = '';
-    }
+      if (value === null || value === undefined || value === '') normalized = null;
+      else if (typeof value === 'object') {
+        if (value.data && (value.data.id !== undefined && value.data.id !== null)) normalized = value.data.id;
+        else if (value.key !== undefined && value.key !== null) normalized = (typeof value.key === 'number' ? value.key : Number(value.key));
+        else normalized = null;
+      } else {
+        normalized = (typeof value === 'number' ? value : (String(value).trim() === '' ? null : Number(value)));
+      }
+    } catch (e) { normalized = null; }
+    try { this.editModel = this.editModel || {}; this.editModel.directory_id = normalized; } catch (e) { /* ignore */ }
+    try { this.directoryPlaceholder = this.getPathForDirectoryValue(normalized); } catch (e) { this.directoryPlaceholder = ''; }
+    this.cdr.markForCheck();
+  }
+
+  // Called when project selection changes in edit form: reload stages for selected project
+  onEditProjectChange(projectId: any): void {
+    try {
+      this.loadStages(projectId);
+    } catch (e) { /* ignore */ }
     this.cdr.markForCheck();
   }
 
@@ -597,29 +659,28 @@ export class DocumentsDetailComponent implements OnInit {
 
   // Helper utilities used by the template (avatar initials, colors, severities)
   initialsFromName(name?: string): string {
-    if (!name) return '';
-    const parts = name.trim().split(/\s+/).filter(Boolean);
-    if (!parts.length) return '';
-    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-    return (parts[0][0] + parts[1][0]).toUpperCase();
+    return this.avatarService.initialsFromName(name);
   }
 
   personInitials(name?: string): string { return this.initialsFromName(name); }
 
   assigneeInitials(): string { return this.initialsFromName(this.editModel?.assignee_name || this.editModel?.assignee || ''); }
 
-  selectAvatarBg(label?: string): string { // deterministic pastel color
-    try {
-      const s = String(label || '').split('').reduce((a, b) => a + b.charCodeAt(0), 0);
-      const h = s % 360;
-      return `hsl(${h}deg 60% 50%)`;
-    } catch (e) { return '#999'; }
+  selectAvatarBg(label?: string): string {
+    return this.avatarService.selectAvatarBg(label);
   }
 
-  selectAvatarTextColor(_label?: string): string { return '#fff'; }
+  selectAvatarTextColor(label?: string): string {
+    return this.avatarService.selectAvatarTextColor(label);
+  }
 
-  issueAvatarColor(_user?: any): string | undefined { return undefined; }
-  issueAvatarTextColor(_user?: any): string | undefined { return undefined; }
+  issueAvatarColor(user?: any): string | undefined {
+    try { return this.avatarService.issueAvatarColor(user); } catch (e) { return undefined; }
+  }
+
+  issueAvatarTextColor(user?: any): string | undefined {
+    try { return this.avatarService.issueAvatarTextColor(user); } catch (e) { return '#fff'; }
+  }
 
   
 
@@ -691,6 +752,25 @@ export class DocumentsDetailComponent implements OnInit {
           if (this.document.directory_id === undefined && this.document.directory && (this.document.directory.id !== undefined)) {
             this.document.directory_id = this.document.directory.id;
           }
+          // Precompute initials and avatar colors so templates (sidebar/admin menu) show them immediately
+          try {
+            this.document.author_initials = this.initialsFromName(this.document?.author_name);
+            this.document.assignee_initials = this.initialsFromName(this.document?.assignee_name);
+            if (this.document.author_id) {
+              this.document.author_avatar_bg = this.issueAvatarColor({ id: this.document.author_id, first_name: this.document.author_name });
+              this.document.author_avatar_color = this.issueAvatarTextColor({ id: this.document.author_id, first_name: this.document.author_name });
+            } else {
+              this.document.author_avatar_bg = undefined;
+              this.document.author_avatar_color = undefined;
+            }
+            if (this.document.assignee_id) {
+              this.document.assignee_avatar_bg = this.issueAvatarColor({ id: this.document.assignee_id, first_name: this.document.assignee_name });
+              this.document.assignee_avatar_color = this.issueAvatarTextColor({ id: this.document.assignee_id, first_name: this.document.assignee_name });
+            } else {
+              this.document.assignee_avatar_bg = undefined;
+              this.document.assignee_avatar_color = undefined;
+            }
+          } catch (e) { /* ignore avatar precompute errors */ }
           // Ensure priority_text is present for templates that display a human readable priority
           try {
             if ((this.document.priority_text === undefined || this.document.priority_text === null) && (this.document.priority !== undefined)) {
@@ -840,8 +920,8 @@ export class DocumentsDetailComponent implements OnInit {
           const extract = (r: any) => Array.isArray(r) ? r : (r && (r.data || r.items) ? (r.data || r.items) : []);
           const issues = extract(resIssues) as any[];
           const docs = extract(resDocs) as any[];
-          this.availableIssuesOptions = (issues || []).map((it: any) => ({ label: `#${it.id} ${it.title || it.summary || it.name || ''}`.trim(), value: it.id }));
-          this.availableDocumentsOptions = (docs || []).map((d: any) => ({ label: `#${d.id} ${d.title || d.name || ''}`.trim(), value: d.id }));
+          this.availableIssuesOptions = (issues || []).map((it: any) => ({ label: `#${it.id} - ${it.title || it.summary || it.name || ''}`.trim(), value: it.id }));
+          this.availableDocumentsOptions = (docs || []).map((d: any) => ({ label: `#${d.id} - ${d.code} - ${d.title || d.name || ''}`.trim(), value: d.id }));
         } catch (e) {
           this.availableIssuesOptions = [];
           this.availableDocumentsOptions = [];

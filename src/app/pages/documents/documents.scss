@@ -231,27 +231,52 @@
 .issues-table th[data-field="project_name"],
 .issues-table td[data-field="project_name"],
 .issues-table th[data-field="type_name"],
-.issues-table td[data-field="type_name"] {
+.issues-table td[data-field="type_name"],
+.issues-table th[data-field="type_name"] {
 	min-width: 140px;
 }
 .issues-table th[data-field="title"],
 .issues-table td[data-field="title"] {
 	min-width: 320px;
 }
+
+.issues-table td[data-field="code"],
+.issues-table th[data-field="specialization_name"] {
+	min-width: 200px;
+}
+
+/* Allow multi-line wrapping for Title column so long titles break into multiple lines
+   while other columns keep single-line ellipsis behavior. This keeps table layout
+   stable (table-layout: fixed) but enables readable titles. */
+.issues-table th[data-field="title"],
+.issues-table td[data-field="title"] {
+	white-space: normal; /* allow wrapping */
+	word-break: break-word; /* break long words/URLs */
+	overflow-wrap: anywhere; /* helpful for long unbroken strings */
+}
 .issues-table th[data-field="assignee_name"],
 .issues-table td[data-field="assignee_name"],
 .issues-table th[data-field="author_name"],
-.issues-table td[data-field="author_name"] {
+.issues-table td[data-field="author_name"],
+.issues-table td[data-field="project_code"],
+.issues-table th[data-field="project_code"] {
 	min-width: 190px;
 }
 .issues-table th[data-field="status_name"],
-.issues-table td[data-field="status_name"] {
+.issues-table td[data-field="status_name"],
+.issues-table td[data-field="priority_text"]
+.issues-table th[data-field="priority_text"] {
+ 
 	min-width: 140px;
 }
 .issues-table th[data-field="priority_text"],
 .issues-table td[data-field="priority_text"] {
 	min-width: 150px;
 }
+
+/* Make table rows show pointer cursor on hover (match issues table behaviour)
+   Note: this rule is also added at the top-level below so it compiles correctly
+   outside the nested .page-administration selector. */
 .issues-table th[data-field="estimated_hours"],
 .issues-table td[data-field="estimated_hours"] {
 	min-width: 130px;
@@ -270,4 +295,9 @@
 .p-tree {
 	padding: 0;
 }
+}
+
+:host ::ng-deep .issues-table .p-datatable-tbody > tr,
+:host ::ng-deep .issues-table .p-datatable-tbody tr {
+    cursor: pointer !important;
 }

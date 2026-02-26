@@ -26,7 +26,7 @@ import { TableModule } from 'primeng/table';
       <p-table *ngIf="relations && relations.length" [value]="relations" class="w-full" size="small">
         <ng-template pTemplate="header">
           <tr>
-            <th style="width:15%">{{ 'components.issues.relations.COLUMN_TYPE_ID' | translate }}</th>
+            <th style="width:20%">{{ 'components.issues.relations.COLUMN_TYPE_ID' | translate }}</th>
             <th style="width:30%">{{ 'components.issues.relations.COLUMN_NAME' | translate }}</th>
             <th style="width:20%">{{ 'components.issues.relations.COLUMN_STATUS' | translate }}</th>
             <th style="width:15%">{{ 'components.issues.relations.COLUMN_TYPE' | translate }}</th>

@@ -3,9 +3,11 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { TreeModule } from 'primeng/tree';
+import { TreeSelectModule } from 'primeng/treeselect';
 import { NodeService } from '../../services/nodeservice';
 import { TreeNode, MenuItem } from 'primeng/api';
 import { HttpClient } from '@angular/common/http';
+import { DocumentsService } from './documents.service';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ToolbarModule } from 'primeng/toolbar';
@@ -28,6 +30,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Select } from 'primeng/select';
 import { TranslateService } from '@ngx-translate/core';
+import { AvatarService } from '../../services/avatar.service';
 
 @Component({
 	selector: 'app-documents',
@@ -35,6 +38,7 @@ import { TranslateService } from '@ngx-translate/core';
 	imports: [
 		CommonModule,
 		TreeModule,
+		TreeSelectModule,
 		MenuModule,
 		ContextMenuModule,
 		DialogModule,
@@ -71,8 +75,16 @@ import { TranslateService } from '@ngx-translate/core';
 		private router = inject(Router);
 		private confirmationService = inject(ConfirmationService);
 		private messageService = inject(MessageService);
+		private documentsService = inject(DocumentsService);
+		private avatarService = inject(AvatarService);
 		files = signal<TreeNode[] | undefined>(undefined);
 		selectedFile?: TreeNode;
+
+		// directory tree for TreeSelect and placeholder for display
+		directoryTree: any[] = [];
+		// filtered view of directoryTree according to selected project in dialog
+		directoryTreeFiltered: any[] = [];
+		directoryPlaceholder: string = '';
 		// node that was right-clicked (context menu target). Use this to reliably prefill parent when opening from context menu.
 		contextMenuNode?: TreeNode | null = null;
 
@@ -121,6 +133,21 @@ import { TranslateService } from '@ngx-translate/core';
 	}
 
 	/**
+	 * Called when project is changed inside bulk-edit dialog: refresh stages and specializations
+	 */
+	onBulkDialogProjectChange(projectId: any): void {
+		this.loadStages(projectId);
+		this.loadSpecializations();
+		if (this.bulkEditModel) this.bulkEditModel.stage_id = null;
+		// filter directory tree for bulk dialog as well
+		try {
+			this.directoryTreeFiltered = this.filterDirectoryTree(this.directoryTree, projectId);
+			// clear bulk dialog directory selection when project changes
+			if (this.bulkEditModel) this.bulkEditModel.directory_id = null;
+		} catch (e) { /* ignore */ }
+	}
+
+	/**
 	 * Find a tree node by numeric id (searches node.data.id or node.key)
 	 */
 	private findNodeById(nodes: TreeNode[] | undefined, id: number): TreeNode | undefined {
@@ -149,14 +176,28 @@ import { TranslateService } from '@ngx-translate/core';
 	selectedDocuments: any[] = [];
 	loading = false;
 
+	// bulk edit dialog state
+	bulkEditDialogVisible = false;
+	bulkEditModel: {
+		project_id?: any;
+		directory_id?: any;
+		type_id?: any;
+		specialization_id?: any;
+		priority?: any;
+		stage_id?: any;
+	} = { project_id: null, directory_id: null, type_id: null, specialization_id: null, priority: null, stage_id: null };
+
 	// columns & column toggles — only the columns requested by the API mapping
 	columns: { field: string; headerKey: string; visible: boolean }[] = [
 		{ field: 'id', headerKey: 'MENU.ID', visible: true },
 		{ field: 'project_name', headerKey: 'components.documents.table.PROJECT', visible: true },
+		{ field: 'type_name', headerKey: 'components.documents.table.TYPE', visible: true },
+		{ field: 'code', headerKey: 'components.documents.detail.CODE', visible: true },
 		{ field: 'title', headerKey: 'components.documents.table.TITLE', visible: true },
+		{ field: 'specialization_name', headerKey: 'components.documents.table.SPECIALIZATION', visible: true },
 		{ field: 'author_name', headerKey: 'components.documents.table.CREATED_BY', visible: true },
-		{ field: 'assignee_name', headerKey: 'components.documents.table.ASSIGNEE', visible: true },
 		{ field: 'status_name', headerKey: 'components.documents.table.STATUS', visible: true },
+		{ field: 'priority_text', headerKey: 'components.documents.table.PRIORITY', visible: true },
 		{ field: 'stage_name', headerKey: 'components.documents.table.STAGE', visible: true },
 		{ field: 'stage_date', headerKey: 'components.documents.table.STAGE_DATE', visible: true },
 		{ field: 'created_at', headerKey: 'components.documents.table.CREATED_AT', visible: true }
@@ -171,6 +212,10 @@ import { TranslateService } from '@ngx-translate/core';
 	statusOptions: { label: string; value: any }[] = [];
 	typeOptions: { label: string; value: any }[] = [];
 	priorityOptions: { label: string; value: any }[] = [];
+
+	// additional selects used by the create/edit dialog (populated elsewhere or left empty)
+	specializationsOptions: { label: string; value: any }[] = [];
+	stagesOptions: { label: string; value: any }[] = [];
 
 	/** Flatten tree files into dropdown options for directory selector */
 	get directoryOptions(): { label: string; value: any }[] {
@@ -525,6 +570,10 @@ import { TranslateService } from '@ngx-translate/core';
 		if (!this.newDir || !this.newDir.name || String(this.newDir.name).trim() === '') {
 			this.formErrors.name = 'Name is required';
 		}
+		// Project is required for a directory
+		if (!this.newDir || this.newDir.project_id === null || this.newDir.project_id === undefined) {
+			this.formErrors.project_id = 'Project is required';
+		}
 		return Object.keys(this.formErrors).length === 0;
 	}
 
@@ -544,6 +593,12 @@ import { TranslateService } from '@ngx-translate/core';
 				// normalize backend fields to what the table template expects
 				this.documentsItems = (resp?.data || []).map(d => {
 					const copy: any = { ...(d || {}) };
+						// normalize code (document number) if backend uses different field
+						try { copy.code = copy.code ?? copy.document_number ?? copy.number ?? null; } catch (e) { copy.code = copy.code ?? null; }
+						// normalize project code if available
+						try {
+							copy.project_code = copy.project_code ?? (copy.project && (copy.project.code || copy.project.key)) ?? copy.project_code ?? null;
+						} catch (e) { copy.project_code = copy.project_code ?? null; }
 					// map names and ids
 					copy.author_name = copy.created_name || copy.created_name || copy.author_name;
 					copy.author_id = copy.created_by ?? copy.created_by ?? copy.author_id;
@@ -592,10 +647,85 @@ import { TranslateService } from '@ngx-translate/core';
 		this.menu?.toggle(event);
 	}
 
+	// Bulk edit dialog handlers
+	openBulkEditDialog(): void {
+		if (!this.selectedDocuments || !this.selectedDocuments.length) {
+			try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.documents.bulk.NO_SELECTION') || 'No documents selected' }); } catch (e) {}
+			return;
+		}
+		// attempt to prefill project if all selected documents share same project
+		let sharedProject: any = null;
+		for (const s of (this.selectedDocuments || [])) {
+			const pid = s && (s.project_id ?? s.projectId ?? s.project) ? (s.project_id ?? s.projectId ?? s.project) : null;
+			if (pid == null) { sharedProject = null; break; }
+			if (sharedProject === null) sharedProject = pid;
+			else if (String(sharedProject) !== String(pid)) { sharedProject = null; break; }
+		}
+		this.bulkEditModel = { project_id: sharedProject, directory_id: null, type_id: null, specialization_id: null, priority: null, stage_id: null };
+		// preload selects for bulk dialog
+		this.loadSpecializations();
+		if (sharedProject !== null && sharedProject !== undefined) {
+			this.loadStages(sharedProject);
+			// filter directories according to project
+			try { this.directoryTreeFiltered = this.filterDirectoryTree(this.directoryTree, sharedProject); } catch (e) { /* ignore */ }
+		}
+		this.bulkEditDialogVisible = true;
+	}
+
+	closeBulkEditDialog(): void {
+		this.bulkEditDialogVisible = false;
+	}
+
+	async applyBulkEdit(): Promise<void> {
+		if (!this.selectedDocuments || !this.selectedDocuments.length) {
+			try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.documents.bulk.NO_SELECTION') || 'No documents selected' }); } catch (e) {}
+			return;
+		}
+		const ids = (this.selectedDocuments || []).map((s: any) => s.id).filter(Boolean);
+		if (!ids.length) {
+			try { this.messageService.add({ severity: 'warn', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.documents.bulk.NO_IDS') || 'No valid document ids selected' }); } catch (e) {}
+			return;
+		}
+
+		const fields: any = {};
+		if (this.bulkEditModel.directory_id !== null && this.bulkEditModel.directory_id !== undefined) fields.directory_id = this.bulkEditModel.directory_id;
+		if (this.bulkEditModel.type_id !== null && this.bulkEditModel.type_id !== undefined) fields.type_id = this.bulkEditModel.type_id;
+		if (this.bulkEditModel.specialization_id !== null && this.bulkEditModel.specialization_id !== undefined) fields.specialization_id = this.bulkEditModel.specialization_id;
+		if (this.bulkEditModel.priority !== null && this.bulkEditModel.priority !== undefined) fields.priority = this.bulkEditModel.priority;
+		if (this.bulkEditModel.stage_id !== null && this.bulkEditModel.stage_id !== undefined) fields.stage_id = this.bulkEditModel.stage_id;
+
+		if (!Object.keys(fields).length) {
+			try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.documents.bulk.NOTHING_TO_APPLY') || 'Nothing to apply' }); } catch (e) {}
+			return;
+		}
+
+		this.loading = true;
+		const promises = ids.map(id => firstValueFrom(this.documentsService.updateDocument(id, fields)));
+		const results = await Promise.allSettled(promises);
+		this.loading = false;
+
+		const failed = results.filter(r => r.status === 'rejected');
+		if (failed.length) {
+			try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.documents.bulk.PARTIAL_ERROR')?.replace('{n}', String(failed.length)) || (String(failed.length) + ' updates failed') }); } catch (e) {}
+		} else {
+			try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.documents.bulk.SUCCESS') || 'Bulk update applied' }); } catch (e) {}
+		}
+
+		this.bulkEditDialogVisible = false;
+		// reload documents for current directory selection if present
+		try { if (this.selectedFile) this.onDirectorySelect(this.selectedFile); else this.documentsItems = this.documentsItems; } catch (e) { /* ignore */ }
+	}
+
 	ngOnInit(): void {
 		// init tree
 		this.nodeService.getFiles().then((data) => {
-			this.files.set(this.applyExpansionFromCurrent(data));
+			const tree = this.applyExpansionFromCurrent(data);
+			this.files.set(tree);
+			// keep a copy for TreeSelect usage and placeholder/path lookup
+			this.directoryTree = tree || [];
+			// initialize filtered tree according to current dialog project selection (if any)
+			this.directoryTreeFiltered = this.filterDirectoryTree(this.directoryTree, this.editModel && this.editModel.project_id ? this.editModel.project_id : null);
+			try { this.directoryPlaceholder = this.getPathForDirectoryValue(this.editModel && this.editModel.directory_id ? this.editModel.directory_id : null); } catch (e) { this.directoryPlaceholder = ''; }
 			// restore previously selected directory id from localStorage if present
 			try {
 				const s = localStorage.getItem(this.STORAGE_KEY);
@@ -613,11 +743,19 @@ import { TranslateService } from '@ngx-translate/core';
 			} catch (e) { /* ignore storage errors */ }
 		});
 
-		// init columns options
-		this.columnsOptions = (this.columns || []).map(c => ({ label: c.headerKey, value: c.field }));
+	// init columns options (localized labels)
+	this.columnsOptions = (this.columns || []).map(c => ({ label: this.translate.instant(c.headerKey) || c.headerKey, value: c.field }));
 		this.selectedColumns = (this.columns || []).filter(c => c.visible).map(c => c.field);
 		// preload projects so project selectors have options (same source as issues page)
 		this.loadProjects();
+		// preload types used in the create/edit dialog
+		this.loadTypes();
+		// priority options (localized)
+		this.priorityOptions = [
+			{ label: this.translate.instant('components.documents.priority.HIGH') || 'High', value: 'high' },
+			{ label: this.translate.instant('components.documents.priority.MEDIUM') || 'Medium', value: 'medium' },
+			{ label: this.translate.instant('components.documents.priority.LOW') || 'Low', value: 'low' }
+		];
 	}
 
 
@@ -761,52 +899,158 @@ import { TranslateService } from '@ngx-translate/core';
 	formErrors: any = {};
 
 	openNewDocument(): void {
-		this.editModel = { title: '', description: '', project_id: null, assigne_to: null, stage_id: null, status_id: null, directory_id: (this.selectedFile?.data?.id ?? (this.selectedFile?.key ? Number(this.selectedFile.key) : null)) };
+		this.editModel = {
+			// core fields
+			title: '',
+			description: '',
+			code: '',
+			project_id: null,
+			specialization_id: null,
+			stage_id: null,
+			type_id: null,
+			priority: null,
+			due_date: null,
+			estimated_hours: null,
+			status_id: null,
+			directory_id: (this.selectedFile?.data?.id ?? (this.selectedFile?.key ? Number(this.selectedFile.key) : null))
+		};
 		this.isCreating = true;
-		this.displayDialog = true;
+		// preload selects; do NOT populate directory list until project is chosen
+		this.loadSpecializations();
+		this.loadStages(this.editModel.project_id);
+		// show placeholder instructing user to pick project first and clear any filtered tree
+		try {
+			this.directoryTreeFiltered = [];
+			this.directoryPlaceholder = this.translate.instant('components.documents.form.DIRECTORY_SELECT_PROJECT_FIRST') || 'Please select project first';
+			this.editModel.directory_id = null;
+			this.displayDialog = true;
+			this.cdr.detectChanges();
+		} catch (e) {
+			this.directoryTreeFiltered = [];
+			this.directoryPlaceholder = '';
+			this.displayDialog = true;
+		}
 	}
 
 	openEditDocument(item: any): void {
 		if (!item) return;
-		this.editModel = { ...(item || {}) };
+		// normalize and ensure fields exist with expected types
+		this.editModel = {
+			code: item.code || item.document_number || '',
+			title: item.title || '',
+			description: item.description || item.body || '',
+			project_id: item.project_id ?? item.project_id ?? null,
+			specialization_id: item.specialization_id ?? item.specialization_id ?? null,
+			stage_id: item.stage_id ?? item.stage_id ?? null,
+			type_id: item.type_id ?? item.type_id ?? null,
+			priority: item.priority ?? null,
+			due_date: item.due_date ? new Date(item.due_date) : null,
+			estimated_hours: item.estimated_hours ?? null,
+			status_id: item.status_id ?? null,
+			directory_id: item.directory_id ?? (item.directory && item.directory.id) ?? null,
+			id: item.id
+		};
 		this.isCreating = false;
+		// preload selects and stages for current project
+		this.loadSpecializations();
+		this.loadStages(this.editModel.project_id);
 		this.displayDialog = true;
 	}
 
 	private validateDocumentForm(): boolean {
 		this.formErrors = {};
+		const t = this.translate && typeof this.translate.instant === 'function' ? this.translate.instant.bind(this.translate) : (k: string) => k;
+		// Title
 		if (!this.editModel || !this.editModel.title || String(this.editModel.title).trim() === '') {
-			this.formErrors.title = 'Title is required';
+			this.formErrors.title = (t('components.documents.form.TITLE_REQUIRED') || 'Title is required');
+		}
+		// Project
+		if (!this.editModel || this.editModel.project_id === null || this.editModel.project_id === undefined || String(this.editModel.project_id).trim() === '') {
+			this.formErrors.project_id = (t('components.documents.form.PROJECT_REQUIRED') || 'Project is required');
+		}
+		// Directory
+		if (!this.editModel || this.editModel.directory_id === null || this.editModel.directory_id === undefined || String(this.editModel.directory_id).trim() === '') {
+			this.formErrors.directory_id = (t('components.documents.form.DIRECTORY_REQUIRED') || 'Directory is required');
+		}
+		// Specialization
+		if (!this.editModel || this.editModel.specialization_id === null || this.editModel.specialization_id === undefined || String(this.editModel.specialization_id).trim() === '') {
+			this.formErrors.specialization_id = (t('components.documents.form.SPECIALIZATION_REQUIRED') || 'Specialization is required');
+		}
+		// Type
+		if (!this.editModel || this.editModel.type_id === null || this.editModel.type_id === undefined || String(this.editModel.type_id).trim() === '') {
+			this.formErrors.type_id = (t('components.documents.form.TYPE_REQUIRED') || 'Type is required');
+		}
+		// Document number (code)
+		if (!this.editModel || !this.editModel.code || String(this.editModel.code).trim() === '') {
+			this.formErrors.code = (t('components.documents.form.DOCUMENT_NUMBER_REQUIRED') || 'Document number is required');
 		}
 		return Object.keys(this.formErrors).length === 0;
 	}
 
 	async saveDocument(): Promise<void> {
-		if (!this.editModel) return;
-		if (!this.validateDocumentForm()) return;
+		console.log('documents.saveDocument called', { editModel: this.editModel });
+		if (!this.editModel) {
+			console.warn('saveDocument aborted: no editModel');
+			return;
+		}
+		if (!this.validateDocumentForm()) {
+			console.warn('saveDocument aborted: validation failed', this.formErrors);
+			try { this.cdr.detectChanges(); } catch (e) { /* ignore */ }
+			return;
+		}
 		this.loading = true;
 		try {
-			const payload = {
+			const payload: any = {
 				title: String(this.editModel.title || ''),
 				description: this.editModel.description || '',
+				code: this.editModel.code || null,
 				project_id: this.editModel.project_id || null,
-				assigne_to: this.editModel.assigne_to || null,
+				specialization_id: this.editModel.specialization_id || null,
 				stage_id: this.editModel.stage_id || null,
-				stage_date: (this.editModel && this.editModel.stage_date) ? (this.editModel.stage_date instanceof Date ? this.editModel.stage_date.toISOString() : String(this.editModel.stage_date)) : null,
+				type_id: this.editModel.type_id || null,
+				priority: this.editModel.priority || null,
+				due_date: (this.editModel && this.editModel.due_date) ? (this.editModel.due_date instanceof Date ? this.editModel.due_date.toISOString() : String(this.editModel.due_date)) : null,
+				estimated_hours: this.editModel.estimated_hours != null ? this.editModel.estimated_hours : null,
 				status_id: this.editModel.status_id || null,
-				directory_id: this.editModel.directory_id || (this.selectedFile?.data?.id ?? null)
+				// Ensure directory_id is a primitive integer (TreeSelect may provide node object)
+				directory_id: ((): any => {
+					let d = this.editModel.directory_id != null ? this.editModel.directory_id : (this.selectedFile?.data?.id ?? null);
+					try {
+						if (d && typeof d === 'object') {
+							if (d.data && (d.data.id !== undefined && d.data.id !== null)) return d.data.id;
+							if (d.key !== undefined && d.key !== null) return (typeof d.key === 'number' ? d.key : Number(d.key));
+							return null;
+						}
+						if (d === '' || d === null || d === undefined) return null;
+						return (typeof d === 'number' ? d : Number(d));
+					} catch (e) { return null; }
+				})()
 			};
 			if (this.isCreating) {
-				await firstValueFrom(this.http.post('/api/documents', payload));
+				// Remove empty fields before creating so backend doesn't receive null/empty values
+				const pruned: any = {};
+				for (const k of Object.keys(payload)) {
+					const v = payload[k];
+					if (v === null || v === undefined) continue;
+					if (typeof v === 'string' && v.trim() === '') continue;
+					if (Array.isArray(v) && v.length === 0) continue;
+					if (typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length === 0) continue;
+					pruned[k] = v;
+				}
+				await firstValueFrom(this.http.post('/api/documents', pruned));
+				try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Saved', detail: this.translate.instant('components.documents.form.UPDATED') || 'Created' }); } catch (e) {}
 			} else {
 				const id = this.editModel.id;
 				if (id != null) await firstValueFrom(this.http.put(`/api/documents/${id}`, payload));
+				try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Saved', detail: this.translate.instant('components.documents.form.UPDATED') || 'Updated' }); } catch (e) {}
 			}
 			this.displayDialog = false;
 			// refresh current directory
 			if (this.selectedFile) this.onDirectorySelect(this.selectedFile);
 		} catch (e) {
 			console.error('Failed to save document', e);
+			const errMsg = (e && typeof e === 'object' && 'message' in e) ? (e as any).message : String(e);
+			try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.SAVE') || 'Save failed', detail: errMsg || (this.translate.instant('components.documents.messages.ERROR') || 'Failed to save') }); } catch (er) {}
 		} finally {
 			this.loading = false;
 			try { this.cdr.detectChanges(); } catch (e) { /* ignore */ }
@@ -846,7 +1090,7 @@ import { TranslateService } from '@ngx-translate/core';
 				}
 			}
 			this.columns = newOrder;
-			this.columnsOptions = (this.columns || []).map(c => ({ label: c.headerKey, value: c.field }));
+			this.columnsOptions = (this.columns || []).map(c => ({ label: this.translate.instant(c.headerKey) || c.headerKey, value: c.field }));
 			try { this.cdr.detectChanges(); } catch (e) { /* ignore */ }
 		} catch (e) {
 			console.warn('onColumnsReordered failed', e);
@@ -870,30 +1114,203 @@ import { TranslateService } from '@ngx-translate/core';
 
 	// helpers used in table rendering (simple fallbacks)
 	initialsFromName(name: string | any): string {
-		try {
-			if (!name) return '';
-			const s = String(name).trim();
-			const parts = s.split(/\s+/);
-			if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-			return (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
-		} catch (e) { return '' + name; }
+		return this.avatarService.initialsFromName(name);
 	}
 
 	formatSurnameInitials(nameOrObj: any): string {
-		try {
-			const name = typeof nameOrObj === 'string' ? nameOrObj : (nameOrObj && nameOrObj.name) || '';
-			if (!name) return '-';
-			const parts = String(name).split(/\s+/);
-			if (parts.length === 1) return parts[0];
-			return parts[0] + ' ' + (parts[1] ? parts[1][0] + '.' : '');
-		} catch (e) { return '-'; }
+		return this.avatarService.formatSurnameInitials(nameOrObj);
 	}
 
-	issueAvatarColor(_u: any): string { return '#6b7280'; }
-	issueAvatarTextColor(_u: any): string { return '#fff'; }
+	issueAvatarColor(u: any): string { return this.avatarService.issueAvatarColor(u); }
+	issueAvatarTextColor(u: any): string { return this.avatarService.issueAvatarTextColor(u); }
 
 	statusSeverity(_code: any): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | null { return 'info'; }
-	prioritySeverity(_p: any): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | null { return 'info'; }
+	prioritySeverity(priority: any): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | null {
+		try {
+			if (!priority && priority !== 0) return 'info';
+			const p = String(priority).toLowerCase();
+			if (p === 'high' || p === 'urgent' || p === 'critical') return 'danger';
+			if (p === 'medium' || p === 'normal') return 'warn';
+			if (p === 'low' || p === 'minor') return 'success';
+			return 'info';
+		} catch (e) { return 'info'; }
+	}
 
 	projectCode(_issue: any): string | null { return null; }
+
+	// Called when TreeSelect model changes (user selects a directory)
+	onDirectoryNgModelChange(value: any): void {
+		// Keep TreeSelect value as-is (TreeNode object or primitive) so UI shows selected label.
+		try {
+			this.editModel = this.editModel || {};
+			this.editModel.directory_id = value;
+			this.directoryPlaceholder = this.getPathForDirectoryValue(value);
+		} catch (e) { this.directoryPlaceholder = ''; }
+		try { this.cdr.detectChanges(); } catch (e) { /* ignore */ }
+	}
+
+	// Resolve path (dir/dir/...) for a given TreeSelect value which may be a node or primitive
+	private getPathForDirectoryValue(value: any): string {
+		if (!value) return '';
+		let key: string | null = null;
+		if (typeof value === 'object') {
+			if (value.key !== undefined && value.key !== null) key = String(value.key);
+			else if (value.data && (value.data.id !== undefined && value.data.id !== null)) key = String(value.data.id);
+		} else {
+			key = String(value);
+		}
+		if (!key) return '';
+		// Try flattened options first
+		try {
+			const found = (this.directoryOptions || []).find(d => d && String(d.value) === String(key));
+			if (found && found.label) {
+				const parts = String(found.label).split(' - ');
+				if (parts.length > 1) return parts[1];
+				return String(found.label);
+			}
+		} catch (e) { /* ignore */ }
+		// Traverse tree if needed
+		const findPath = (nodes: any[], targetKey: string, ancestors: string[] = []): string[] | null => {
+			if (!nodes) return null;
+			for (const n of nodes) {
+				const id = n?.data?.id ?? (n?.key ? String(n.key) : null);
+				const name = (n?.data && (n.data.name || n.data.title)) ?? n?.label ?? '';
+				const nextAnc = [...ancestors];
+				if (name) nextAnc.push(String(name));
+				if (String(id) === String(targetKey) || String(n?.key) === String(targetKey)) return nextAnc;
+				if (n.children && Array.isArray(n.children)) {
+					const r = findPath(n.children, targetKey, nextAnc);
+					if (r) return r;
+				}
+			}
+			return null;
+		};
+		const pathParts = findPath(this.directoryTree || [], key) || [];
+		return pathParts.join('/');
+	}
+
+	/**
+	 * Load document types from backend (/api/document_types)
+	 */
+	loadTypes(): void {
+		this.http.get('/api/document_types').subscribe({
+			next: (res: any) => {
+				const items = (res && res.data) ? res.data : (res || []);
+				this.typeOptions = (items || []).map((t: any) => ({ label: t.name || t.title || String(t.id), value: t.id }));
+				try { this.cdr.detectChanges(); } catch (e) { /* ignore */ }
+			},
+			error: (err) => { console.warn('Failed to load document types', err); this.typeOptions = []; try { this.cdr.detectChanges(); } catch (e) { /* ignore */ } }
+		});
+	}
+
+	/**
+	 * Load specializations for the select (GET /api/specializations)
+	 */
+	loadSpecializations(): void {
+		this.http.get('/api/specializations').subscribe({
+			next: (res: any) => {
+				const items = (res && res.data) ? res.data : (res || []);
+				this.specializationsOptions = (items || []).map((s: any) => ({ label: s.name || s.title || String(s.id), value: s.id }));
+				try { this.cdr.detectChanges(); } catch (e) { /* ignore */ }
+			},
+			error: (err) => { console.warn('Failed to load specializations', err); this.specializationsOptions = []; try { this.cdr.detectChanges(); } catch (e) { /* ignore */ } }
+		});
+	}
+
+	/**
+	 * Load stages, optionally filtered by project_id (GET /api/stages?project_id=...)
+	 */
+	loadStages(projectId?: any): void {
+		// If no project is selected, do not load global stages — keep list empty so UI shows only project-scoped stages
+		if (projectId === null || projectId === undefined || projectId === '') {
+			this.stagesOptions = [];
+			try { this.cdr.detectChanges(); } catch (e) { /* ignore */ }
+			return;
+		}
+		const params: any = {};
+		params.project_id = String(projectId);
+		this.http.get('/api/stages', { params }).subscribe({
+			next: (res: any) => {
+				const items = (res && res.data) ? res.data : (res || []);
+				this.stagesOptions = (items || []).map((s: any) => ({ label: s.name || s.title || String(s.id), value: s.id }));
+				try { this.cdr.detectChanges(); } catch (e) { /* ignore */ }
+			},
+			error: (err) => { console.warn('Failed to load stages', err); this.stagesOptions = []; try { this.cdr.detectChanges(); } catch (e) { /* ignore */ } }
+		});
+	}
+
+	/**
+	 * Called when project is changed inside create/edit dialog to refresh stage list
+	 */
+	onDialogProjectChange(projectId: any): void {
+		this.loadStages(projectId);
+		// reset stage selection to avoid stale selection
+		if (this.editModel) this.editModel.stage_id = null;
+		// filter directory tree to show only directories for the selected project or with empty project_id
+		try {
+			// when no project selected, clear filtered tree and placeholder
+			if (projectId === null || projectId === undefined || projectId === '') {
+				this.directoryTreeFiltered = [];
+				if (this.editModel) {
+					this.editModel.directory_id = null;
+					this.directoryPlaceholder = '';
+				}
+				try { this.cdr.detectChanges(); } catch (e) { /* ignore */ }
+				return;
+			}
+			// ensure we have the full tree loaded; if not, fetch it first then apply filter
+			if (!this.directoryTree || !this.directoryTree.length) {
+				this.nodeService.getFiles().then((data) => {
+					this.directoryTree = this.applyExpansionFromCurrent(data);
+					this.files.set(this.directoryTree);
+					this.directoryTreeFiltered = this.filterDirectoryTree(this.directoryTree, projectId);
+					// clear directory selection when project changes
+					if (this.editModel) this.editModel.directory_id = null;
+					try { this.cdr.detectChanges(); } catch (e) { /* ignore */ }
+				}).catch((e) => {
+					console.warn('Failed to load directories on project change', e);
+					this.directoryTreeFiltered = [];
+					if (this.editModel) this.editModel.directory_id = null;
+					try { this.cdr.detectChanges(); } catch (er) { /* ignore */ }
+				});
+			} else {
+				this.directoryTreeFiltered = this.filterDirectoryTree(this.directoryTree, projectId);
+				// always clear directory selection when project changes to avoid stale directory values
+				if (this.editModel) {
+					this.editModel.directory_id = null;
+					this.directoryPlaceholder = '';
+				}
+				try { this.cdr.detectChanges(); } catch (e) { /* ignore */ }
+			}
+		} catch (e) { /* ignore filter errors */ }
+	}
+
+	/**
+	 * Filter a directory tree to only include nodes that belong to given projectId or have no project_id.
+	 * Keeps parent nodes if any child matches.
+	 */
+	private filterDirectoryTree(tree: any[] | undefined, projectId: any): any[] {
+		if (!tree || !tree.length) return [];
+		// if no project selected, show full tree
+		if (projectId === null || projectId === undefined || projectId === '') return tree;
+		const pid = projectId;
+		const filterNode = (n: any): any | null => {
+			if (!n) return null;
+			const dataProj = n?.data?.project_id ?? n?.data?.projectId ?? null;
+			let children: any[] = [];
+			if (n.children && Array.isArray(n.children)) {
+				children = n.children.map((c: any) => filterNode(c)).filter(Boolean);
+			}
+			// match only when node explicitly belongs to the project (do NOT include nodes with empty project_id)
+			const matches = (dataProj !== null && dataProj !== undefined && String(dataProj) !== '') && (String(dataProj) === String(pid));
+			if (matches || (children && children.length)) {
+				const copy: any = { ...n };
+				if (children && children.length) copy.children = children;
+				else delete copy.children;
+				return copy;
+			}
+			return null;
+		};
+		return tree.map(n => filterNode(n)).filter(Boolean);
+	}
 }

@@ -30,6 +30,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
 import { Select } from 'primeng/select';
+import { AvatarService } from '../../services/avatar.service';
 
 interface User {
   id: number | string;
@@ -182,8 +183,9 @@ export class IssuesComponent implements OnInit {
     private messageService: MessageService,
     private translate: TranslateService,
     private http: HttpClient,
-    private issuesService: IssuesService
-    , private router: Router
+    private issuesService: IssuesService,
+    private router: Router,
+    private avatarService: AvatarService
   ) {}
 
   // Navigate to issue detail page when a table row is clicked
@@ -862,98 +864,35 @@ export class IssuesComponent implements OnInit {
   }
 
   getIssueInitials(user: User | any): string {
-    if (!user) return '';
-    const fn = (user.first_name || '').toString().trim();
-    const ln = (user.last_name || '').toString().trim();
-    if (fn && ln) return (fn[0] + ln[0]).toUpperCase();
-    if (fn) return fn.split(' ').map((s: string) => s[0]).filter(Boolean).slice(0,2).join('').toUpperCase();
-    if (ln) return ln[0].toUpperCase();
-    if (user.username) return user.username[0].toUpperCase();
-    return '?';
+    return this.avatarService.getInitialsFromUser(user);
   }
 
   // derive initials from a single full-name string
   initialsFromName(name?: string | null): string {
-    if (!name) return '';
-    const parts = String(name).trim().split(/\s+/).filter(Boolean);
-    if (!parts.length) return '';
-    if (parts.length === 1) return parts[0].slice(0,2).toUpperCase();
-    return (parts[0][0] + parts[1][0]).toUpperCase();
+    return this.avatarService.initialsFromName(name);
   }
 
   // Format surname with initials for given name and patronymic.
   // Accepts either a user-like object ({ first_name, middle_name, last_name }) or a single full-name string.
   formatSurnameInitials(item: any): string {
-    if (!item) return '-';
-    try {
-      // object with separate fields (preferred)
-      if (typeof item === 'object') {
-        const last = (item.last_name || item.lastName || '').toString().trim();
-        const first = (item.first_name || item.firstName || '').toString().trim();
-        const middle = (item.middle_name || item.middleName || '').toString().trim();
-        const initials: string[] = [];
-        if (first) initials.push(first[0].toUpperCase() + '.');
-        if (middle) initials.push(middle[0].toUpperCase() + '.');
-        if (last) return last + (initials.length ? ' ' + initials.join('') : '');
-        const fallback = [first, middle].filter(Boolean).join(' ');
-        return fallback || (item.username || '-') ;
-      }
-
-      // string input: assume format "Surname Given Patronymic" and convert given+patronymic to initials
-      if (typeof item === 'string') {
-        const parts = item.trim().split(/\s+/).filter(Boolean);
-        if (!parts.length) return '-';
-        const surname = parts[0];
-        const rest = parts.slice(1);
-        const initials = rest.map(p => (p && p[0]) ? p[0].toUpperCase() + '.' : '').join('');
-        return surname + (initials ? ' ' + initials : '');
-      }
-    } catch (e) {
-      // fall through
-    }
-    return '-';
+    return this.avatarService.formatSurnameInitials(item);
   }
 
   issueAvatarColor(user: User | any): string {
-    const seed = (user && (user.id ?? user.username ?? (user.first_name || '') + (user.last_name || ''))) || '';
-    const s = seed.toString();
-    let hash = 0;
-    for (let i = 0; i < s.length; i++) {
-      const ch = s.charCodeAt(i);
-      hash = ((hash << 5) - hash) + ch;
-      hash = hash & hash;
-    }
-    const hue = Math.abs(hash) % 360;
-    return `hsl(${hue}, 65%, 45%)`;
+    return this.avatarService.issueAvatarColor(user);
   }
 
   issueAvatarTextColor(user: User | any): string {
-    const bg = this.issueAvatarColor(user);
-    const m = bg.match(/hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?\)/);
-    if (!m) return '#fff';
-    const lightness = Number(m[3]);
-    return lightness > 70 ? '#111' : '#fff';
+    return this.avatarService.issueAvatarTextColor(user);
   }
 
   // Helpers for select-option avatars (compute from label string)
   selectAvatarBg(label?: string | null): string {
-    const s = (label || '').toString();
-    let hash = 0;
-    for (let i = 0; i < s.length; i++) {
-      const ch = s.charCodeAt(i);
-      hash = ((hash << 5) - hash) + ch;
-      hash = hash & hash;
-    }
-    const hue = Math.abs(hash) % 360;
-    return `hsl(${hue}, 65%, 45%)`;
+    return this.avatarService.selectAvatarBg(label);
   }
 
   selectAvatarTextColor(label?: string | null): string {
-    const bg = this.selectAvatarBg(label);
-    const m = bg.match(/hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?\)/);
-    if (!m) return '#fff';
-    const lightness = Number(m[3]);
-    return lightness > 70 ? '#111' : '#fff';
+    return this.avatarService.selectAvatarTextColor(label);
   }
 
   // Map issue status (code or name) to a PrimeNG tag severity

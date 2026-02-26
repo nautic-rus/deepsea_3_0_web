@@ -83,6 +83,7 @@
     "GENERAL": "Общие настройки",
     "ID": "ID",
     "EDIT_DOCUMENT": "Редактировать документ",
+  "CREATE_DOC": "Создать документ",
     "CREATE_ISSUE": "Создать задачу",
     "EDIT_ISSUE": "Редактировать задачу",
     "BULK_EDIT": "Массовое редактирование",
@@ -92,6 +93,7 @@
     "COLUMNS": "Колонки",
     "SELECT": "Выбрать"
   },
+ 
   "TODAY": "Сегодня",
   "YESTERDAY": "Вчера",
   "LAST_WEEK": "На прошлой неделе",
@@ -113,17 +115,7 @@
     "DELETE": "Удалить"
   },
   "components": {
-    "admin": {
-      "INSTRUCTIONS": "Инструкции по администрированию"
-    },
-    "app": {
-      "TITLE": "DeepSea"
-    },
-    "profile": {
-      "TITLE": "Профиль",
-      "ROLE": "Роль",
-      "JOINED": "Зарегистрирован"
-    },
+    
     "header": {
       "LOGOUT": "Выйти",
       "PROFILE": "Профиль"
@@ -363,9 +355,20 @@
     },
     "documents": {
       "TREE_TITLE": "Дерево документов",
+      "bulk": {
+        "SELECTED": "выбрано",
+        "NO_SELECTION": "Нет выбранных документов",
+        "NO_IDS": "Нет корректных id документов",
+        "NOTHING_TO_APPLY": "Нечего применить",
+        "PARTIAL_ERROR": "Не удалось обновить {n} записей",
+        "SUCCESS": "Массовое обновление применено"
+      },
       "table": {
         "PROJECT": "Проект",
         "TITLE": "Название",
+        "SPECIALIZATION": "Специализация",
+        "TYPE": "Тип",
+        "PRIORITY": "Приоритет",
         "CREATED_BY": "Создал",
         "ASSIGNEE": "Исполнитель",
         "STATUS": "Статус",
@@ -388,8 +391,16 @@
         "ORDER_INDEX": "Порядковый индекс",
         "ASSIGNEE": "Исполнитель",
         "DIRECTORY": "Директория",
+          "DIRECTORY_SELECT_PROJECT_FIRST": "Для выбора директории сначала выберите проект",
+        "SPECIALIZATION": "Специализация",
+        "STAGE": "Этап",
         "STAGE_DATE": "Дата этапа",
         "TITLE_REQUIRED": "Требуется заголовок",
+  "PROJECT_REQUIRED": "Требуется проект",
+  "DIRECTORY_REQUIRED": "Требуется директория",
+  "SPECIALIZATION_REQUIRED": "Требуется специализация",
+  "TYPE_REQUIRED": "Требуется тип",
+  "DOCUMENT_NUMBER_REQUIRED": "Требуется номер документа",
         "UPDATED": "Обновлено",
         "TAGS": "Tags"
       },
@@ -519,22 +530,23 @@
           "BLOCKS_DIRECTION": "Направление блокировки",
           "TYPE_RELATES": "Связано",
           "TYPE_BLOCKS": "Блокирует",
-          "BLOCKS_ACTIVE": "Блокирует (текущий -> выбранный)",
-          "BLOCKS_PASSIVE": "Заблокирован (выбранный -> текущий)",
+          "BLOCKS_ACTIVE": "Блокирует (текущий -> выбранный) - активная",
+          "BLOCKS_PASSIVE": "Заблокирован (выбранный -> текущий) - пассивная",
           "SAVED": "Связи сохранены"
         },
-        "TITLE": "Relations",
-        "NO_RELATIONS": "No relations to display",
+        "TITLE": "Связи",
+        "NO_RELATIONS": "Связей не найдено",
         "COLUMN_TYPE_ID": "#",
-        "COLUMN_NAME": "Name",
-        "COLUMN_STATUS": "Status",
-        "COLUMN_TYPE": "Type",
-        "COLUMN_DIRECTION": "Direction",
+        "COLUMN_NAME": "Наименование",
+        "COLUMN_STATUS": "Статус",
+        "COLUMN_TYPE": "Тип",
+        "COLUMN_DIRECTION": "Направление",
         "DIRECTION_LABEL_RELATES": "-",
-        "DIRECTION_LABEL_SOURCE": "Source",
-        "DIRECTION_LABEL_TARGET": "Target",
-        "DIRECTION_LABEL_UNKNOWN": "Unknown",
-        "DOCUMENT": "Document"
+        "DIRECTION_LABEL_SOURCE": "Активная",
+        "DIRECTION_LABEL_TARGET": "Пассивная",
+        "DIRECTION_LABEL_UNKNOWN": "Неизвестно",
+        "DELETE_CONFIRM": "Удалить эту связь?",
+        "DOCUMENT": "Документ"
       },
       "messages": {
         "ERROR": "Ошибка",
@@ -552,7 +564,38 @@
         "DOCUMENT_ID_MISSING": "Отсутствует идентификатор документа",
         "FAILED_LOAD": "Не удалось загрузить документ"
       },
-      "BACK": "Back"
+      "BACK": "Back",
+      "activity": {
+        "BUTTON_LABEL": "Действия",
+        "assign": {
+          "DESCRIPTION": "Для выбранного пользователя будет создана связанная задача с текущим документом.",
+          "CHANGE_STATUS": "Сменить статус текущего документа на \"В работе\"",
+          "USER": "Пользователь",
+          "DATE": "Дата",
+          "PRIORITY": "Приоритет",
+          "USER_PLACEHOLDER": "Выберите",
+          "DATE_PLACEHOLDER": "Выберите",
+          "PRIORITY_PLACEHOLDER": "Выберите",
+          "USER_REQUIRED": "Требуется выбрать пользователя",
+          "TITLE_FIELD": "Заголовок",
+          "DESCRIPTION_FIELD": "Описание",
+          "TITLE_REQUIRED": "Требуется заголовок"
+        }
+        ,
+        "menu": {
+          "ASSIGN": "Назначить пользователя",
+          "LINK": "Связать и анулировать",
+          "CORRECTION": "Создать документ корректировку"
+        },
+        "link": {
+          "TITLE": "Связать и анулировать",
+          "DOCUMENTS": "Документы",
+          "DOCUMENTS_PLACEHOLDER": "Выберите документы",
+          "REASON": "Причина / комментарий",
+          "DESCRIPTION": "Текущий документ будет связан с выбранными и его статус изменится на \"Аннулирован\". Вы можете указать причину аннулирования, которая будет видна в истории документа.",
+          "ACTION": "Связать и анулировать"
+        }
+      }
     },
     "roles": {
       "ASSIGN_DIALOG": {
@@ -740,8 +783,8 @@
           "DOCUMENTS": "Документы (проект)",
           "TYPE_RELATES": "Связана",
           "TYPE_BLOCKS": "Блокирует",
-          "BLOCKS_ACTIVE": "Эта задача будет блокировать другую (активная)",
-          "BLOCKS_PASSIVE": "Эта задача будет заблокирована другой (пассивная)",
+          "BLOCKS_ACTIVE": "Блокирует (текущий -> выбранный) - активная",
+          "BLOCKS_PASSIVE": "Заблокирован (выбранный -> текущий) - пассивная",
           "SAVED": "Связи созданы"
         },
         "DOCUMENT": "Document"

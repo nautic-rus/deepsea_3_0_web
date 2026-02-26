@@ -140,7 +140,7 @@
   /* Optional helper class to make columns visually resizable in future (no JS here) */
   .adjustable-columns {
     /* expose a CSS variable for consumers to override */
-    --issue-left-width: 55%;
+    --issue-left-width: 50%;
   }
 
 }

@@ -21,9 +21,9 @@ html, body {
   /* Disable page scrolling globally (kept from styles.css) */
   overflow: hidden;
   /* Use Inter if available, fall back to Lato/Roboto */
-  font-family: 'loto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   /* reduce base font size for the app (kept from styles.css) */
-  font-size: 0.95rem;
+  font-size: 14px;
 }
 
 /* PrimeNG Surface Variables for Sakai Theme - Light Mode (from styles.css) */

@@ -63,7 +63,7 @@
                                                             <img [src]="opt.avatar" alt="avatar" class="select-avatar" />
                                                         </ng-container>
                                                         <ng-template #initialsItem>
-                                                            <div class="select-avatar-initials" [style.background]="selectAvatarBg(opt.label)" [style.color]="selectAvatarTextColor(opt.label)">{{ initialsFromName(opt.label) }}</div>
+                                                            <div class="select-avatar-initials" [style.background]="selectAvatarBg(opt.value || opt.label)" [style.color]="selectAvatarTextColor(opt.value || opt.label)">{{ initialsFromName(opt.label) }}</div>
                                                         </ng-template>
                                                         <div>{{ opt.label }}</div>
                                                     </div>
@@ -74,7 +74,7 @@
                                                             <img [src]="opt.avatar" alt="avatar" class="select-avatar" />
                                                         </ng-container>
                                                         <ng-template #initialsValue>
-                                                            <div class="select-avatar-initials" [style.background]="selectAvatarBg(opt.label)" [style.color]="selectAvatarTextColor(opt.label)">{{ initialsFromName(opt.label) }}</div>
+                                                            <div class="select-avatar-initials" [style.background]="selectAvatarBg(opt.value || opt.label)" [style.color]="selectAvatarTextColor(opt.value || opt.label)">{{ initialsFromName(opt.label) }}</div>
                                                         </ng-template>
                                                         <div>{{ opt.label }}</div>
                                                     </div>
@@ -91,7 +91,7 @@
                                                 <div class="flex gap-2">
                                                     <div class="flex-1 flex flex-col gap-2">
                                                         <label class="font-bold">{{ 'components.issues.form.DUE_DATE' | translate }}</label>
-                                                        <p-datepicker [(ngModel)]="editModel.due_date" [showIcon]="true"></p-datepicker>
+                                                        <p-datepicker [(ngModel)]="editModel.due_date" [showIcon]="true" appendTo="body" dateFormat="dd.mm.yy"></p-datepicker>
                                                     </div>
 
                                                     <div class="w-60 flex flex-col gap-2">
