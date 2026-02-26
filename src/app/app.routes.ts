@@ -5,19 +5,23 @@ export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   {
     path: 'login',
-    loadComponent: () => import('./pages/login/login').then(m => m.LoginComponent)
+    loadComponent: () => import('./pages/login/login').then(m => m.LoginComponent),
+    data: { titleKey: 'components.login.WELCOME' }
   },
   {
     path: 'reset-password',
-    loadComponent: () => import('./pages/password-reset/password-reset').then(m => m.PasswordResetComponent)
+    loadComponent: () => import('./pages/password-reset/password-reset').then(m => m.PasswordResetComponent),
+    data: { titleKey: 'MENU.RESET_PASSWORD' }
   },
   {
     path: 'access',
-    loadComponent: () => import('./pages/auth/access').then(m => m.AccessComponent)
+    loadComponent: () => import('./pages/auth/access').then(m => m.AccessComponent),
+    data: { titleKey: 'components.access.TITLE' }
   },
   {
     path: 'error',
-    loadComponent: () => import('./pages/error/error').then(m => m.ErrorComponent)
+    loadComponent: () => import('./pages/error/error').then(m => m.ErrorComponent),
+    data: { titleKey: 'components.error.TITLE' }
   },
   {
     path: '',
@@ -26,11 +30,13 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.DashboardComponent),
+        data: { titleKey: 'MENU.DASHBOARD' },
         canActivate: [AuthGuard]
       },
       {
         path: 'profile',
         loadComponent: () => import('./pages/profile/profile').then(m => m.ProfileComponent),
+        data: { titleKey: 'components.profile.TITLE' },
         canActivate: [AuthGuard],
         children: [
           { path: '', pathMatch: 'full', redirectTo: 'notifications' },
@@ -41,6 +47,7 @@ export const routes: Routes = [
       {
         path: 'administration',
         loadComponent: () => import('./pages/administration/administration').then(m => m.AdministrationComponent),
+        data: { titleKey: 'MENU.ADMINISTRATION' },
         canActivate: [AuthGuard],
         children: [
           { path: '', pathMatch: 'full', redirectTo: 'users' },
@@ -58,6 +65,7 @@ export const routes: Routes = [
       {
         path: 'issues',
         canActivate: [AuthGuard],
+        data: { titleKey: 'MENU.ISSUES' },
         children: [
           { path: '', pathMatch: 'full', loadComponent: () => import('./pages/issues/issues').then(m => m.IssuesComponent) },
           { path: ':id', loadComponent: () => import('./pages/issues/issue-detail').then(m => m.IssueDetailComponent) }
@@ -66,6 +74,7 @@ export const routes: Routes = [
       {
         path: 'documents',
         canActivate: [AuthGuard],
+        data: { titleKey: 'MENU.DOCUMENTS' },
         children: [
           { path: '', pathMatch: 'full', loadComponent: () => import('./pages/documents/documents').then(m => m.DocumentsComponent) },
           { path: ':id', loadComponent: () => import('./pages/documents/documents-detail').then(m => m.DocumentsDetailComponent) }
@@ -74,44 +83,52 @@ export const routes: Routes = [
       {
         path: 'dxf-viewer',
         loadComponent: () => import('./pages/dxf-viewer-page/dxf-viewer-page.component').then(m => m.DxfViewerPageComponent),
+        data: { titleKey: 'DOCUMENT' },
         canActivate: [AuthGuard]
       },
       
       {
         path: 'materials',
         loadComponent: () => import('./pages/materials/materials').then(m => m.MaterialsComponent),
+        data: { titleKey: 'MENU.MATERIALS' },
         canActivate: [AuthGuard]
       },
       {
         path: 'specifications',
         loadComponent: () => import('./pages/specifications/specifications').then(m => m.SpecificationsComponent),
+        data: { titleKey: 'MENU.SPECIFICATIONS' },
         canActivate: [AuthGuard]
       },
       {
         path: 'statements',
         loadComponent: () => import('./pages/statements/statements').then(m => m.StatementsComponent),
+        data: { titleKey: 'MENU.STATEMENTS' },
         canActivate: [AuthGuard]
       },
       {
         path: 'equipment',
         loadComponent: () => import('./pages/equipment/equipment').then(m => m.EquipmentComponent),
+        data: { titleKey: 'MENU.EQUIPMENT' },
         canActivate: [AuthGuard]
       },
       {
         path: 'suppliers',
         loadComponent: () => import('./pages/suppliers/suppliers').then(m => m.SuppliersComponent),
+        data: { titleKey: 'MENU.SUPPLIERS' },
         canActivate: [AuthGuard]
       },
 
       {
         path: 'wiki',
         loadComponent: () => import('./pages/wiki/wiki').then(m => m.WikiComponent),
+        data: { titleKey: 'MENU.WIKI' },
         canActivate: [AuthGuard]
       },
 
       {
         path: 'projects',
         loadComponent: () => import('./pages/projects/projects').then(m => m.ProjectsComponent),
+        data: { titleKey: 'MENU.PROJECTS' },
         canActivate: [AuthGuard],
         children: [
           { path: '', pathMatch: 'full', redirectTo: 'projects-list' },

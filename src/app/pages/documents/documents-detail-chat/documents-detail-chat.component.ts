@@ -6,7 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { AvatarModule } from 'primeng/avatar';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { DocumentsService } from '../documents.service';
+import { DocumentsService } from '../../../services/documents.service';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 

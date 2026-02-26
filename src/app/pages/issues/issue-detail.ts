@@ -15,7 +15,7 @@ import { AvatarModule } from 'primeng/avatar';
 import { TagModule } from 'primeng/tag';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ChipModule } from 'primeng/chip';
-import { IssuesService } from './issues.service';
+import { IssuesService } from '../../services/issues.service';
 import { ToolbarModule } from 'primeng/toolbar';
 import { IssueDetailChatComponent } from './issue-detail-chat/issue-detail-chat.component';
 import { IssueDetailDescriptionComponent } from './issue-detail-description';
@@ -71,6 +71,9 @@ export class IssueDetailComponent implements OnInit {
   availableIssuesOptions: { label: string; value: any }[] = [];
   availableDocumentsOptions: { label: string; value: any }[] = [];
   savingRelations = false;
+  // Delete confirmation dialog state
+  displayDeleteDialog = false;
+  deleting = false;
 
   constructor(private route: ActivatedRoute, private router: Router, private issuesService: IssuesService, private http: HttpClient, private messageService: MessageService, private cdr: ChangeDetectorRef, private translate: TranslateService, private avatarService: AvatarService) {
     // read route param synchronously in constructor to avoid ExpressionChangedAfterItHasBeenCheckedError
@@ -362,6 +365,41 @@ export class IssueDetailComponent implements OnInit {
     }
   }
 
+  openDeleteDialog(): void {
+    this.displayDeleteDialog = true;
+    this.cdr.markForCheck();
+  }
+
+  closeDeleteDialog(): void {
+    this.displayDeleteDialog = false;
+    this.cdr.markForCheck();
+  }
+
+  confirmDelete(): void {
+    if (!this.issue || !this.issue.id) {
+      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR') || 'Error', detail: this.translate.instant('components.issues.errors.ISSUE_ID_MISSING') || 'Issue id missing' }); } catch (e) {}
+      return;
+    }
+    this.deleting = true;
+    this.cdr.markForCheck();
+    this.issuesService.deleteIssue(this.issue.id).subscribe({
+      next: (_res: any) => {
+        this.deleting = false;
+        this.displayDeleteDialog = false;
+        this.cdr.markForCheck();
+        try { this.messageService.add({ severity: 'success', summary: this.trOr('components.issues.messages.SUCCESS', 'Success'), detail: this.trOr('components.issues.messages.DELETED', 'Issue deleted') }); } catch (e) {}
+        try { this.router.navigate(['/issues']); } catch (e) {}
+      },
+      error: (err: any) => {
+        console.error('Failed to delete issue', err);
+        this.deleting = false;
+        this.displayDeleteDialog = false;
+        this.cdr.markForCheck();
+        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR') || 'Error', detail: (err && err.message) ? err.message : this.translate.instant('components.issues.messages.DELETE_FAILED') || 'Failed to delete issue' }); } catch (e) {}
+      }
+    });
+  }
+
   // Open add-relation dialog (triggered from child relations table)
   openAddRelationDialog(): void {
     if (!this.issue || !this.issue.project_id) {
@@ -389,6 +427,10 @@ export class IssueDetailComponent implements OnInit {
     // Optional: increase page size to get many items in one call (backend may ignore)
     paramsIssues = paramsIssues.set('per_page', '200');
     paramsDocuments = paramsDocuments.set('per_page', '200');
+
+  // Only active items
+  paramsIssues = paramsIssues.set('is_active', 'true');
+  paramsDocuments = paramsDocuments.set('is_active', 'true');
 
     const reqIssues = this.http.get('/api/issues', { params: paramsIssues }).pipe();
     const reqDocs = this.http.get('/api/documents', { params: paramsDocuments }).pipe();

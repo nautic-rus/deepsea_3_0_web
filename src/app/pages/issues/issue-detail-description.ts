@@ -7,7 +7,7 @@ import { ToastModule } from 'primeng/toast';
 import { ButtonModule } from 'primeng/button';
 import { MessageService } from 'primeng/api';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { IssuesService } from './issues.service';
+import { IssuesService } from '../../services/issues.service';
 
 @Component({
   selector: 'app-issue-detail-description',

@@ -6,8 +6,8 @@ import { TreeModule } from 'primeng/tree';
 import { TreeSelectModule } from 'primeng/treeselect';
 import { NodeService } from '../../services/nodeservice';
 import { TreeNode, MenuItem } from 'primeng/api';
-import { HttpClient } from '@angular/common/http';
-import { DocumentsService } from './documents.service';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { DocumentsService } from '../../services/documents.service';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ToolbarModule } from 'primeng/toolbar';
@@ -588,7 +588,8 @@ import { AvatarService } from '../../services/avatar.service';
 		// persist selected directory id to localStorage
 		try { localStorage.setItem(this.STORAGE_KEY, String(id)); } catch (e) { /* ignore */ }
 		this.loading = true;
-		firstValueFrom(this.http.get<{ data: any[] }>('/api/documents', { params: { directory_id: String(id) } }))
+		const params = new HttpParams().set('directory_id', String(id)).set('is_active', 'true');
+		firstValueFrom(this.http.get<{ data: any[] }>('/api/documents', { params }))
 			.then((resp) => {
 				// normalize backend fields to what the table template expects
 				this.documentsItems = (resp?.data || []).map(d => {

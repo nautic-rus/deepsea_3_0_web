@@ -119,7 +119,9 @@ export class DocumentsActivityComponent {
         let params = new HttpParams().set('limit', '200');
         if (projectId) params = params.set('project_id', String(projectId));
 
-        const res: any = await this.http.get('/api/documents', { params }).toPromise();
+  // Only request active documents
+  params = params.set('is_active', 'true');
+  const res: any = await this.http.get('/api/documents', { params }).toPromise();
         const list = Array.isArray(res) ? res : (res?.data || res?.items || []);
         this.documentsOptions = (list || []).map((d: any) => ({ label: `#${d.id} - ${d.code ? d.code + ' ' : ''}${d.title || d.name || ''}`, value: d.id ?? d._id ?? d.document_id, code: d.code }));
       } catch (e) {

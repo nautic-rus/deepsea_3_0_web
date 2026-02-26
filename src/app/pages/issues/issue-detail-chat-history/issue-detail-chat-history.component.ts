@@ -2,7 +2,7 @@ import { Component, Input, OnChanges, SimpleChanges, ChangeDetectorRef } from '@
 import { CommonModule } from '@angular/common';
 import { AvatarModule } from 'primeng/avatar';
 import { TranslateModule } from '@ngx-translate/core';
-import { IssuesService } from '../issues.service';
+import { IssuesService } from '../../../services/issues.service';
 
 @Component({
   selector: 'app-issue-detail-chat-history',

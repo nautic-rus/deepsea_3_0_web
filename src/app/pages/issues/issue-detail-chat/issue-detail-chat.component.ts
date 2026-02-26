@@ -5,7 +5,7 @@ import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { AvatarModule } from 'primeng/avatar';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { IssuesService } from '../issues.service';
+import { IssuesService } from '../../../services/issues.service';
 import { IssueDetailChatHistoryComponent } from '../issue-detail-chat-history/issue-detail-chat-history.component';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';

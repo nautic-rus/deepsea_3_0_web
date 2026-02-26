@@ -3,7 +3,7 @@
     "INSTRUCTIONS": "Инструкции по администрированию"
   },
   "APP": {
-    "TITLE": "DeepSea"
+    "TITLE": "DeepSea 3.0"
   },
   "HEADER": {
     "LOGOUT": "Выйти",
@@ -26,8 +26,8 @@
     "CONFIRM": "Подтвердите",
     "CREATE": "Создать",
     "CREATE_USER": "Создать",
-    "DASHBOARD": "Панель",
-    "DASHBORD": "Панель",
+    "DASHBOARD": "Главная",
+    "DASHBORD": "Главная",
     "DELETE": "Удалить",
     "DELETE_USER_QUESTION": "Внимание! Вы действительно хотите удалить пользователя",
     "DEPARTMENT": "Отдел",
@@ -162,8 +162,8 @@
     },
     "underDevelopment": {
       "TITLE": "Страница в разработке",
-      "MESSAGE": "Мы работаем над этой страницей — приходите позже или вернитесь на панель.",
-      "DASHBOARD_TITLE": "Панель",
+      "MESSAGE": "Мы работаем над этой страницей — приходите позже или вернитесь на главную.",
+      "DASHBOARD_TITLE": "Главная",
       "DASHBOARD_SUB": "Перейти на главную",
       "GO_HOME": "На главную"
     },
@@ -180,7 +180,7 @@
       "CONFIRM": "Подтвердите",
       "CREATE": "Создание",
       "CREATE_USER": "Создать",
-      "DASHBOARD": "Панель",
+      "DASHBOARD": "Главная",
       "DELETE": "Удалить",
       "DELETE_USER_QUESTION": "Внимание! Вы действительно хотите удалить пользователя",
       "DEPARTMENT": "Отдел",
@@ -559,6 +559,9 @@
         "STATUS_UPDATE_FAILED": "Failed to update status",
         "SUCCESS": "Success",
         "WARNING": "Warning"
+        ,"CONFIRM_DELETE": "Вы уверены, что хотите удалить этот документ?",
+        "DELETED": "Документ удалён",
+        "DELETE_FAILED": "Не удалось удалить документ"
       },
       "errors": {
         "DOCUMENT_ID_MISSING": "Отсутствует идентификатор документа",

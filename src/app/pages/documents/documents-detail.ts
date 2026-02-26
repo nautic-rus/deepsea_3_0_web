@@ -23,7 +23,7 @@ import { MessageService, MenuItem } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
-import { DocumentsService } from './documents.service';
+import { DocumentsService } from '../../services/documents.service';
 import { NodeService } from '../../services/nodeservice';
 import { AvatarService } from '../../services/avatar.service';
 import { DocumentsDetailAttachComponent } from './documents-detail-attach/documents-detail-attach';
@@ -77,6 +77,9 @@ export class DocumentsDetailComponent implements OnInit {
   availableIssuesOptions: { label: string; value: any }[] = [];
   availableDocumentsOptions: { label: string; value: any }[] = [];
   savingRelations = false;
+  // Delete confirmation dialog state
+  displayDeleteDialog = false;
+  deleting = false;
 
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -848,6 +851,42 @@ export class DocumentsDetailComponent implements OnInit {
     });
   }
 
+  openDeleteDialog(): void {
+    this.displayDeleteDialog = true;
+    this.cdr.markForCheck();
+  }
+
+  closeDeleteDialog(): void {
+    this.displayDeleteDialog = false;
+    this.cdr.markForCheck();
+  }
+
+  confirmDelete(): void {
+    if (!this.document || !this.document.id) {
+      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: this.translate.instant('components.documents.errors.DOCUMENT_ID_MISSING') || 'Document id missing' }); } catch (e) {}
+      return;
+    }
+    this.deleting = true;
+    this.cdr.markForCheck();
+    this.documentsService.deleteDocument(this.document.id).subscribe({
+      next: (_res: any) => {
+        this.deleting = false;
+        this.displayDeleteDialog = false;
+        this.cdr.markForCheck();
+        try { this.messageService.add({ severity: 'success', summary: this.trOr('components.documents.messages.SUCCESS', 'Success'), detail: this.trOr('components.documents.messages.DELETED', 'Document deleted') }); } catch (e) {}
+        // Navigate back to documents list
+        try { this.router.navigate(['/documents']); } catch (e) {}
+      },
+      error: (err: any) => {
+        console.error('Failed to delete document', err);
+        this.deleting = false;
+        this.displayDeleteDialog = false;
+        this.cdr.markForCheck();
+        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: (err && err.message) ? err.message : this.translate.instant('components.documents.messages.DELETE_FAILED') || 'Failed to delete document' }); } catch (e) {}
+      }
+    });
+  }
+
   back(): void {
     this.router.navigate(['/documents']);
   }
@@ -910,6 +949,9 @@ export class DocumentsDetailComponent implements OnInit {
     // Optional: increase page size to get many items in one call (backend may ignore)
     paramsIssues = paramsIssues.set('per_page', '200');
     paramsDocuments = paramsDocuments.set('per_page', '200');
+  // Only active items
+  paramsIssues = paramsIssues.set('is_active', 'true');
+  paramsDocuments = paramsDocuments.set('is_active', 'true');
 
     const reqIssues = this.http.get('/api/issues', { params: paramsIssues }).pipe();
     const reqDocs = this.http.get('/api/documents', { params: paramsDocuments }).pipe();

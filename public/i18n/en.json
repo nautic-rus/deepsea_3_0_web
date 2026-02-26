@@ -3,7 +3,7 @@
     "INSTRUCTIONS": "Administration instructions"
   },
   "APP": {
-    "TITLE": "DeepSea"
+    "TITLE": "DeepSea 3.0"
   },
   "HEADER": {
     "LOGOUT": "Logout",
@@ -572,7 +572,10 @@
         "SAVED": "Saved",
         "COPY_LINK": "Copy link",
         "LINK_COPIED": "Link copied to clipboard",
-        "COPY_PROMPT": "Copy link"
+        "COPY_PROMPT": "Copy link",
+        "CONFIRM_DELETE": "Are you sure you want to delete this document?",
+        "DELETED": "Document deleted",
+        "DELETE_FAILED": "Failed to delete document"
       },
       "errors": {
         "DOCUMENT_ID_MISSING": "Document id missing",
@@ -802,6 +805,8 @@
         "COPY_LINK": "Copy link",
         "LINK_COPIED": "Link copied to clipboard",
         "COPY_PROMPT": "Copy link"
+        ,"CONFIRM_DELETE": "Are you sure you want to delete this issue?",
+        "DELETE_FAILED": "Failed to delete issue"
       },
       "errors": {
         "ISSUE_ID_MISSING": "Issue id is missing",
