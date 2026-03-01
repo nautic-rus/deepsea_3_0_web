@@ -70,7 +70,7 @@ export class LoginComponent {
     this.authService.login(payload).subscribe({
       next: (res) => {
         if (res && res.user) {
-          try { sessionStorage.setItem('currentUser', JSON.stringify(res.user)); } catch (e) { console.warn('store currentUser failed', e); }
+          try { sessionStorage.setItem('currentUser', JSON.stringify(res.user)); } catch (e) { }
         }
         this.loading = false;
         this.cdr.detectChanges();
@@ -79,12 +79,10 @@ export class LoginComponent {
       error: (err: HttpErrorResponse) => {
         this.loading = false;
         this.errorMessage = this.getErrorMessage(err) ?? (err.status === 401 ? this.translate.instant('components.login.ERROR_INVALID_CREDENTIALS') : this.translate.instant('components.login.ERROR_LOGIN_FAILED')); // TODO: make reactive (refresh on translate.onLangChange)
-        console.error('Login error', err);
         this.cdr.detectChanges();
       }
     });
   }
-
 
   private getErrorMessage(err: HttpErrorResponse): string | null {
     if (!err || !err.error) { return null; }

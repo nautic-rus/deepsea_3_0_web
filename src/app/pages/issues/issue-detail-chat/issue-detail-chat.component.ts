@@ -100,7 +100,8 @@ export class IssueDetailChatComponent implements OnChanges, AfterViewInit {
         author: this.shortName(it.user?.full_name || it.author_name || it.user_name || it.author || 'Unknown'),
         text: it.content || it.text || '',
         time: it.created_at || it.createdAt || it.created || it.timestamp || null,
-        avatar_url: avatarUrl
+        avatar_url: avatarUrl,
+        user: it.user ?? null
       };
     });
   }
@@ -224,7 +225,7 @@ export class IssueDetailChatComponent implements OnChanges, AfterViewInit {
       if (files && files.length) {
         try { this.messageService.add({ severity: 'info', summary: 'Attachment', detail: `${files.length} file(s) selected` }); } catch (e) {}
       }
-    } catch (e) { console.error(e); }
+    } catch (e) { }
   }
 
   onMessageAvatarError(msg: any): void { try { if (msg) { msg.avatar_url = null; this.cdr.markForCheck(); } } catch (e) {} }
@@ -282,7 +283,8 @@ export class IssueDetailChatComponent implements OnChanges, AfterViewInit {
           author: this.shortName(data?.user?.full_name || data?.user?.fullName || data?.author_name || data?.author || 'You'),
           text: data?.content || data?.message || data?.text || this.newMessage,
           time: data?.created_at || data?.createdAt || new Date().toISOString(),
-          avatar_url: pushedAvatar
+          avatar_url: pushedAvatar,
+          user: data?.user ?? null
         };
         if (this.replyToId) pushed.parent_id = this.replyToId;
         this.messages.push(pushed);

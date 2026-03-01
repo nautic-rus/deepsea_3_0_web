@@ -22,8 +22,7 @@
             </ng-container>
             <ng-template #initialsTpl>
               <p-avatar [label]="initialsFromName(ev.actor)" shape="circle" 
-                [style.background]="avatarColor(ev.raw?.user ?? { first_name: ev.actor })"
-                [style.color]="avatarTextColor(ev.raw?.user ?? { first_name: ev.actor })"></p-avatar>
+                [style]="{ 'background-color': avatarColor(ev.raw?.user ?? { first_name: ev.actor }), color: avatarTextColor(ev.raw?.user ?? { first_name: ev.actor }) }"></p-avatar>
             </ng-template>
           </div>
           <div class="flex-1">

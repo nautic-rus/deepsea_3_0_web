@@ -80,7 +80,7 @@ interface User {
   ],
   providers: [ConfirmationService, MessageService],
   templateUrl: './issues.html',
-  styleUrls: ['./issues.scss']
+  styleUrls: ['../../_quill-snow.scss', './issues.scss']
 })
 export class IssuesComponent implements OnInit {
   // issue-scoped list (kept empty intentionally)
@@ -201,7 +201,6 @@ export class IssuesComponent implements OnInit {
       // navigate to /issues/:id (router will handle route matching)
       this.router.navigate(['/issues', issue.id]);
     } catch (e) {
-      console.warn('onRowClick failed', e);
     }
   }
 
@@ -229,7 +228,7 @@ export class IssuesComponent implements OnInit {
   }
 
   private safeDetect(): void {
-    try { this.cd.detectChanges(); } catch (e) { console.warn('safeDetect failed', e); }
+    try { this.cd.detectChanges(); } catch (e) { }
   }
 
   ngOnInit(): void {
@@ -258,7 +257,7 @@ export class IssuesComponent implements OnInit {
     this.columnsOptions = (this.columns || []).map(c => ({ label: this.translate.instant(c.headerKey) || c.headerKey, value: c.field }));
     this.selectedColumns = (this.columns || []).filter(c => c.visible).map(c => c.field);
   // restore columns visibility/order if present
-  try { this.loadColumnsFromStorage(); } catch (e) { console.warn('loadColumnsFromStorage failed', e); }
+  try { this.loadColumnsFromStorage(); } catch (e) { }
     // restore previously applied filters from localStorage and execute query after reload
     const restored = this.loadFiltersFromStorage();
     if (restored) {
@@ -288,7 +287,7 @@ export class IssuesComponent implements OnInit {
     // keep columns[].visible in sync if needed elsewhere
     for (const c of this.columns) c.visible = this.selectedColumns.includes(c.field);
     this.safeDetect();
-    try { this.saveColumnsToStorage(); } catch (e) { console.warn('saveColumnsToStorage failed', e); }
+    try { this.saveColumnsToStorage(); } catch (e) { }
   }
 
   // called when user reorders columns via drag/drop
@@ -302,7 +301,6 @@ export class IssuesComponent implements OnInit {
       const visible = this.columns.filter(c => this.selectedColumns.includes(c.field));
       if (dragIndex == null || dropIndex == null || dragIndex < 0 || dropIndex < 0 || dragIndex >= visible.length || dropIndex > visible.length) {
         // fallback: try to persist current order (no-op) and exit
-        console.warn('onColumnsReordered: invalid indices', { dragIndex, dropIndex, visibleLength: visible.length });
         this.saveColumnsToStorage();
         return;
       }
@@ -329,7 +327,6 @@ export class IssuesComponent implements OnInit {
       this.saveColumnsToStorage();
       this.safeDetect();
     } catch (e) {
-      console.warn('onColumnsReordered failed', e);
     }
   }
 
@@ -341,7 +338,6 @@ export class IssuesComponent implements OnInit {
         this.saveColumnsToStorage();
       }, 200);
     } catch (e) {
-      console.warn('onColumnResized failed', e);
     }
   }
 
@@ -361,7 +357,6 @@ export class IssuesComponent implements OnInit {
         if (w) widths[f] = w;
       });
     } catch (e) {
-      console.warn('saveColumnSizesFromDOM failed', e);
     }
     return widths;
   }
@@ -557,7 +552,7 @@ export class IssuesComponent implements OnInit {
     this.loading = true;
     this.error = null;
     // persist filters so they survive reloads
-    try { this.saveFiltersToStorage(); } catch (e) { console.warn('Failed to save filters to storage', e); }
+    try { this.saveFiltersToStorage(); } catch (e) { }
 
     this.issuesService.getIssues(this.filters).subscribe({
       next: (res: any) => {
@@ -570,7 +565,6 @@ export class IssuesComponent implements OnInit {
         this.safeDetect();
       },
       error: (err) => {
-        console.error('Failed to fetch issues', err);
         this.error = (err && err.message) ? err.message : 'Failed to fetch issues';
         this.loading = false;
         if (!silent) {
@@ -594,7 +588,6 @@ export class IssuesComponent implements OnInit {
       });
       localStorage.setItem(this.FILTERS_STORAGE_KEY, JSON.stringify(copy));
     } catch (e) {
-      console.warn('saveFiltersToStorage failed', e);
     }
   }
 
@@ -610,7 +603,6 @@ export class IssuesComponent implements OnInit {
       };
       localStorage.setItem(this.COLUMNS_STORAGE_KEY, JSON.stringify(payload));
     } catch (e) {
-      console.warn('saveColumnsToStorage failed', e);
     }
   }
 
@@ -643,7 +635,6 @@ export class IssuesComponent implements OnInit {
       }
       return false;
     } catch (e) {
-      console.warn('loadColumnsFromStorage failed', e);
       return false;
     }
   }
@@ -676,7 +667,6 @@ export class IssuesComponent implements OnInit {
         /* non-critical */
       }
     } catch (e) {
-      console.warn('applyColumnSizesToDOM failed', e);
     }
   }
 
@@ -700,7 +690,6 @@ export class IssuesComponent implements OnInit {
       this.filters = { ...(this.filters || {}), ...(parsed || {}) };
       return true;
     } catch (e) {
-      console.warn('loadFiltersFromStorage failed', e);
       return false;
     }
   }
@@ -712,7 +701,7 @@ export class IssuesComponent implements OnInit {
   // search helper (issue-scoped)
   onGlobalFilterIssue(table: any, event: Event): void {
     const val = (event && (event.target as HTMLInputElement)) ? (event.target as HTMLInputElement).value : '';
-    try { table.filterGlobal(val, 'contains'); } catch (e) { console.warn('onGlobalFilterIssue failed', e); }
+    try { table.filterGlobal(val, 'contains'); } catch (e) { }
   }
 
   validateIssueForm(): boolean {
@@ -752,7 +741,6 @@ export class IssuesComponent implements OnInit {
         this.safeDetect();
       },
       error: (err) => {
-        console.error('Failed to load issues', err);
         this.error = (err && err.message) ? err.message : 'Failed to load issues';
         this.issuesItems = [];
         this.loading = false;
@@ -770,20 +758,19 @@ export class IssuesComponent implements OnInit {
   deleteSelectedIssues(): void {
     try {
       this.messageService.add({ severity: 'info', summary: 'Not implemented', detail: 'Bulk delete (issues) is not implemented yet' });
-    } catch (e) { console.warn('messageService.add failed', e); }
+    } catch (e) { }
   }
 
   exportIssuesCSV(): void {
     try {
       const rows = this.issuesItems || [];
       if (!rows.length) {
-        try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('MENU.ANY') || 'No entries to export' }); } catch (e) { console.warn('messageService.add failed', e); }
+        try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('MENU.ANY') || 'No entries to export' }); } catch (e) { }
         return;
       }
       // export logic (kept similar to users export if later needed)
     } catch (err) {
-      console.error('Export failed', err);
-      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: 'Export failed' }); } catch (e) { console.warn('messageService.add failed', e); }
+      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: 'Export failed' }); } catch (e) { }
     }
   }
 

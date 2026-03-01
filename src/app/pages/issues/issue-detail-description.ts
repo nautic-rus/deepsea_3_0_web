@@ -14,14 +14,7 @@ import { IssuesService } from '../../services/issues.service';
   standalone: true,
   providers: [MessageService],
   imports: [CommonModule, FormsModule, EditorModule, MessageModule, ToastModule, ButtonModule,TranslateModule],
-  styles: [
-    // increase editor text size and improve readability
-    `:host ::ng-deep .ql-editor { font-size: 1rem; line-height: 1.6; }
-     :host .card-content { max-height: auto; overflow: auto; word-break: break-word; white-space: pre-wrap; }
-     :host .card-content img { max-width: 100%; height: auto; display: block; }
-     :host .card-content p { margin: 0 0 0.5rem 0; }
-    `
-  ],
+  styleUrls: ['./issue-detail-description.scss'],
   template: `
     <p-toast></p-toast>
     <div class="card">

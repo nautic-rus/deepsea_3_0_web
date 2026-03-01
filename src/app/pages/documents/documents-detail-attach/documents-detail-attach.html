@@ -63,7 +63,7 @@
                   [image]="getUserAvatarUrl(rowData.user) || undefined" shape="circle" class="mr-2"></p-avatar>
                 <ng-template #userInitialsTpl>
                   <p-avatar [label]="initialsFromName(rowData.user?.full_name || rowData.user?.username)"
-                    shape="circle" class="mr-2" [style.background]="avatarColor(rowData.user)" [style.color]="avatarTextColor(rowData.user)"></p-avatar>
+                    shape="circle" class="mr-2" [style]="{ 'background-color': avatarColor(rowData.user), color: avatarTextColor(rowData.user) }"></p-avatar>
                 </ng-template>
                 <div class="text-surface-500 dark:text-surface-0 text-base leading-normal">{{ formatSurnameInitials(rowData.user?.full_name || rowData.user) }}</div>
               </div>

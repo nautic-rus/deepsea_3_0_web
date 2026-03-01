@@ -135,7 +135,6 @@ export class AuthGuard implements CanActivate {
       this.cachedUserKey = key;
       sessionStorage.setItem('currentUser', JSON.stringify(user));
     } catch (e) {
-      console.warn('Failed to cache user:', e);
     }
   }
 

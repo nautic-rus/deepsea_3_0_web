@@ -90,7 +90,7 @@
         </ng-container>
         <ng-template #initialsTpl>
           <p-avatar [label]="initialsFromName(currentUser?.full_name || currentUser?.first_name || currentUser?.username || currentUser?.email)" shape="circle"
-                    [style.background]="avatarColor(currentUser)" [style.color]="avatarTextColor(currentUser)"></p-avatar>
+                    [style]="{ 'background-color': avatarColor(currentUser), color: avatarTextColor(currentUser) }"></p-avatar>
         </ng-template>
       </div>
       <p-menu #userMenu [model]="userMenuItems" [popup]="true"></p-menu>

@@ -66,7 +66,7 @@
                   <p-avatar [image]="a.avatar_url || undefined" shape="circle" class="mr-2"></p-avatar>
                 </ng-container>
                 <ng-template #initialsTpl>
-                  <p-avatar [label]="initialsFromName(a?.full_name || a?.first_name || getOwnerName(a?.user_id))" shape="circle" [style.background]="avatarColor({ id: a?.user_id, first_name: a?.full_name || a?.first_name })" [style.color]="avatarTextColor({ id: a?.user_id, first_name: a?.full_name || a?.first_name })" class="mr-2"></p-avatar>
+                  <p-avatar [label]="initialsFromName(a?.full_name || a?.first_name || getOwnerName(a?.user_id))" shape="circle" [style]="{ 'background-color': avatarColor({ id: a?.user_id, first_name: a?.full_name || a?.first_name }), color: avatarTextColor({ id: a?.user_id, first_name: a?.full_name || a?.first_name }) }" class="mr-2"></p-avatar>
                 </ng-template>
                 <span>{{ a?.full_name || getOwnerName(a?.user_id) }}</span>
               </div>

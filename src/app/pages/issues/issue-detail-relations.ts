@@ -140,7 +140,6 @@ export class IssueDetailRelationsComponent implements OnChanges {
     if (!rel || !rel.raw) return;
     const linkId = rel.raw.id ?? rel.raw.link_id ?? rel.raw._id;
     if (!linkId) {
-      console.warn('removeLink: no link id found for', rel);
       return;
     }
     if (!confirm('Delete this relation?')) return;
@@ -151,7 +150,6 @@ export class IssueDetailRelationsComponent implements OnChanges {
         this.cdr.markForCheck();
       },
       error: (err) => {
-        console.warn('Failed to delete link', linkId, err);
       }
     });
   }

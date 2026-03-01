@@ -80,7 +80,6 @@ export class FileService {
         });
       }),
       catchError((err: any) => {
-        console.warn('getIssueFiles error', err);
         return of([] as Attachment[]);
       })
     );

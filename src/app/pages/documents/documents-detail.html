@@ -219,8 +219,7 @@
                     <p-avatar
                       [label]="initialsFromName(document?.author_name)"
                       shape="circle"
-                      [style.background]="document?.author_id ? issueAvatarColor({ id: document.author_id, first_name: document.author_name }) : undefined"
-                      [style.color]="document?.author_id ? issueAvatarTextColor({ id: document.author_id, first_name: document.author_name }) : undefined" class="mr-2"></p-avatar>
+                      [style]="{ 'background-color': document?.author_id ? issueAvatarColor({ id: document.author_id, first_name: document.author_name }) : undefined, color: document?.author_id ? issueAvatarTextColor({ id: document.author_id, first_name: document.author_name }) : undefined }" class="mr-2"></p-avatar>
                                   </ng-template>
                                     <div class="text-surface-500 dark:text-surface-0 text-base leading-tight">{{ formatSurnameInitials(document?.author_name || document) }}</div>
                               </div>
@@ -242,8 +241,7 @@
                                   <p-avatar
                                     [label]="document?.assignee_initials"
                                     shape="circle"
-                                    [style.background]="document?.assignee_avatar_bg"
-                                    [style.color]="document?.assignee_avatar_color"></p-avatar>
+                                    [style]="{ 'background-color': document?.assignee_avatar_bg, color: document?.assignee_avatar_color }"></p-avatar>
                                 </ng-template>
                                 <div class="text-surface-500 dark:text-surface-0 text-base leading-normal">{{ formatSurnameInitials(document?.assignee_name || document) }}</div>
                             </div>

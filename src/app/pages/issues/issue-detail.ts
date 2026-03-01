@@ -35,7 +35,7 @@ import { AvatarService } from '../../services/avatar.service';
   providers: [MessageService],
   imports: [CommonModule, TranslateModule, RouterModule, FormsModule, ButtonModule, DialogModule, InputTextModule, EditorModule, Select, MultiSelectModule, DatePickerModule, CheckboxModule, AvatarModule, TagModule, ProgressSpinnerModule, ChipModule, ToolbarModule, IssueDetailChatComponent, IssueDetailDescriptionComponent, IssueDetailAttachComponent, IssueDetailRelationsTableComponent, SplitButtonModule, ToastModule],
   templateUrl: './issue-detail.html',
-  styleUrls: ['./issue-detail.scss'],
+  styleUrls: ['../../_quill-snow.scss', './issue-detail.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class IssueDetailComponent implements OnInit {
@@ -257,7 +257,6 @@ export class IssueDetailComponent implements OnInit {
     });
   }
 
-
   loadIssue(id: any): void {
     this.loading = true;
     this.cdr.markForCheck();
@@ -317,7 +316,6 @@ export class IssueDetailComponent implements OnInit {
             try { this.messageService.add({ severity: 'success', summary: this.trOr('components.issues.messages.SUCCESS', 'Success'), detail: this.trOr('components.issues.messages.STATUS_UPDATED', 'Status updated') }); } catch (e) {}
           },
           error: (fetchErr: any) => {
-            console.warn('Failed to refresh issue after status change', fetchErr);
             this.statusSaving = false;
             this.cdr.markForCheck();
             try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR'), detail: this.translate.instant('components.issues.messages.STATUS_UPDATE_FAILED') }); } catch (e) {}
@@ -391,7 +389,6 @@ export class IssueDetailComponent implements OnInit {
         try { this.router.navigate(['/issues']); } catch (e) {}
       },
       error: (err: any) => {
-        console.error('Failed to delete issue', err);
         this.deleting = false;
         this.displayDeleteDialog = false;
         this.cdr.markForCheck();
@@ -450,7 +447,6 @@ export class IssueDetailComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: (err) => {
-        console.warn('Failed to load available relation targets', err);
         this.availableIssuesOptions = [];
         this.availableDocumentsOptions = [];
         this.cdr.markForCheck();
@@ -526,7 +522,6 @@ export class IssueDetailComponent implements OnInit {
         try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Saved', detail: this.translate.instant('components.issues.relations.FORM.SAVED') || 'Relations created' }); } catch (e) {}
       },
       error: (err) => {
-        console.error('Failed to save relations', err);
         this.savingRelations = false;
         this.cdr.markForCheck();
         try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR'), detail: (err && err.message) ? err.message : this.translate.instant('components.issues.messages.ERROR') }); } catch (e) {}

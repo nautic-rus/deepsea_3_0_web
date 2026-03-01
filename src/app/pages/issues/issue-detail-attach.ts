@@ -199,7 +199,6 @@ export class IssueDetailAttachComponent implements OnChanges, OnDestroy {
         this.cdr.markForCheck();
       }),
       catchError((err: any) => {
-        console.warn('Failed to fetch issue files', err);
         return of([]);
       })
     );
@@ -275,7 +274,6 @@ export class IssueDetailAttachComponent implements OnChanges, OnDestroy {
                   });
                 },
                 error: (err: any) => {
-                  console.warn('attach to issue failed', err);
                   this.isLoading = false;
                   this.cdr.markForCheck();
                   this.messageService.add({
@@ -299,7 +297,6 @@ export class IssueDetailAttachComponent implements OnChanges, OnDestroy {
           }
         },
         error: (err: any) => {
-          console.warn('file upload failed', err);
           if (!this._cancelled) {
             this.messageService.add({
               severity: 'error',
@@ -483,7 +480,6 @@ export class IssueDetailAttachComponent implements OnChanges, OnDestroy {
                   });
                 },
                 error: (err: any) => {
-                  console.warn('attach to issue failed', err);
                   this.isLoading = false;
                   this.cdr.markForCheck();
                   this.messageService.add({
@@ -507,7 +503,6 @@ export class IssueDetailAttachComponent implements OnChanges, OnDestroy {
           }
         },
         error: (err: any) => {
-          console.warn('file upload failed', err);
           if (!this._cancelled) {
             this.messageService.add({
               severity: 'error',
@@ -580,7 +575,6 @@ export class IssueDetailAttachComponent implements OnChanges, OnDestroy {
             });
           },
           error: (err: any) => {
-            console.warn('Failed to delete attached file', err);
             this.isLoading = false;
             this.cdr.markForCheck();
             this.messageService.add({

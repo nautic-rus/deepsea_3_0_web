@@ -81,7 +81,6 @@ export class NodeService {
 			} catch (e) {
 				// On error, clear cache so subsequent attempts can retry
 				this._filesCache = null;
-				console.error('Failed to load document directories', e);
 				return [];
 			}
 		})();
@@ -133,7 +132,6 @@ export class NodeService {
 
 			return roots;
 		} catch (e) {
-			console.error('Failed to load document files', e);
 			return [];
 		}
 	}

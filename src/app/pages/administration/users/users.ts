@@ -123,7 +123,6 @@ export class AdminUsersComponent implements OnInit {
       this.cd.detectChanges();
     } catch (e) {
       // detection may fail at some lifecycle moments — log for diagnostics
-      console.warn('safeDetect failed', e);
     }
   }
 
@@ -138,7 +137,7 @@ export class AdminUsersComponent implements OnInit {
   // global filter helper for p-table caption search
   onGlobalFilter(table: any, event: Event): void {
     const val = (event && (event.target as HTMLInputElement)) ? (event.target as HTMLInputElement).value : '';
-    try { table.filterGlobal(val, 'contains'); } catch (e) { console.warn('onGlobalFilter failed', e); }
+    try { table.filterGlobal(val, 'contains'); } catch (e) { }
   }
 
   // Simple client-side validation
@@ -184,7 +183,6 @@ export class AdminUsersComponent implements OnInit {
         this.safeDetect();
       },
       error: (err) => {
-        console.warn('Failed to load departments', err);
         // set empty departments and detect
         this.departments = [];
         this.safeDetect();
@@ -220,7 +218,6 @@ export class AdminUsersComponent implements OnInit {
             return u;
           });
         } catch (e) {
-          console.warn('normalize avatars failed', e);
         }
         // derive job titles from users for the job title filter
         const titles = Array.from(new Set((this.users || []).map((u: any) => u.job_title).filter(Boolean)));
@@ -229,7 +226,6 @@ export class AdminUsersComponent implements OnInit {
         this.safeDetect();
       },
       error: (err) => {
-        console.error('Failed to load users:', err);
         this.error = (err && err.message) ? err.message : 'Failed to load users';
         this.loading = false;
         this.safeDetect();
@@ -264,7 +260,6 @@ export class AdminUsersComponent implements OnInit {
     try {
       this.messageService.add({ severity: 'info', summary: 'Not implemented', detail: 'Bulk delete is not implemented yet' });
     } catch (e) {
-      console.warn('messageService.add failed', e);
     }
   }
 
@@ -273,7 +268,7 @@ export class AdminUsersComponent implements OnInit {
     try {
       const rows = this.users || [];
       if (!rows.length) {
-    try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('MENU.ANY') || 'No users to export' }); } catch (e) { console.warn('messageService.add failed', e); }
+    try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('MENU.ANY') || 'No users to export' }); } catch (e) { }
         return;
       }
 
@@ -317,10 +312,9 @@ export class AdminUsersComponent implements OnInit {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-  try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('MENU.USER_CREATED') || 'Export completed' }); } catch (e) { console.warn('messageService.add failed', e); }
+  try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('MENU.USER_CREATED') || 'Export completed' }); } catch (e) { }
     } catch (err) {
-      console.error('Export failed', err);
-  try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: 'Export failed' }); } catch (e) { console.warn('messageService.add failed', e); }
+  try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: 'Export failed' }); } catch (e) { }
     }
   }
 
@@ -402,7 +396,6 @@ export class AdminUsersComponent implements OnInit {
           this.safeDetect();
         },
         error: (err) => {
-          console.error('Failed to create user', err);
           this.error = (err && err.message) ? err.message : 'Failed to create user';
           this.loading = false;
           this.safeDetect();
@@ -426,7 +419,6 @@ export class AdminUsersComponent implements OnInit {
           this.safeDetect();
         },
         error: (err) => {
-          console.error('Failed to update user', err);
           this.error = (err && err.message) ? err.message : 'Failed to update user';
           this.loading = false;
           this.safeDetect();
@@ -490,7 +482,6 @@ export class AdminUsersComponent implements OnInit {
         this.safeDetect();
       },
       error: (err) => {
-        console.error('Failed to delete user', err);
         this.error = (err && err.message) ? err.message : 'Failed to delete user';
         this.loading = false;
         this.safeDetect();

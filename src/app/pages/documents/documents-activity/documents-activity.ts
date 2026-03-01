@@ -23,7 +23,7 @@ import { AvatarService } from '../../../services/avatar.service';
   standalone: true,
   imports: [CommonModule, FormsModule, ButtonModule, SplitButtonModule, DialogModule, Select, DatePickerModule, InputTextModule, CheckboxModule, ToastModule, AvatarModule, TranslateModule, EditorModule, MultiSelectModule],
   templateUrl: './documents-activity.html',
-  styleUrls: ['./documents-activity.scss'],
+  styleUrls: ['../../../_quill-snow.scss', './documents-activity.scss'],
   providers: [MessageService]
 })
 export class DocumentsActivityComponent {
@@ -280,6 +280,5 @@ export class DocumentsActivityComponent {
 
   // validation state for assign form
   assignErrors: { userRequired: boolean; titleRequired?: boolean } = { userRequired: false, titleRequired: false };
-
 
 }

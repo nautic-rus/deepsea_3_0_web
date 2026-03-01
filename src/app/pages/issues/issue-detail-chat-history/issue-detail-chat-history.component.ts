@@ -16,7 +16,7 @@ export class IssueDetailChatHistoryComponent implements OnChanges {
   @Input() issueId: any | null = null;
 
   loading = false;
-  history: Array<{ author: string; text: string; time?: any }> = [];
+  history: Array<{ author: string; text: string; time?: any; avatar_url?: string | null; user?: any }> = [];
 
   constructor(private issuesService: IssuesService, private cdr: ChangeDetectorRef, public avatarService: AvatarService) {}
 
@@ -36,11 +36,31 @@ export class IssueDetailChatHistoryComponent implements OnChanges {
       next: (res: any) => {
         const list = res?.data ?? res;
         if (Array.isArray(list) && list.length) {
-          this.history = list.map((it: any) => ({
-            author: it.user_name || it.author_name || it.actor || (it.user?.name) || 'System',
-            text: it.description || it.changes || it.message || it.text || it.content || JSON.stringify(it),
-            time: it.created_at || it.createdAt || it.created || it.timestamp || it.date || it.time || null
-          }));
+          this.history = list.map((it: any) => {
+            // Derive avatar_url following the same pattern as other components:
+            // 1) user.avatar_url / avatar / avatarUrl  2) avatar_id → /api/storage/{id}/download  3) null (fallback to initials)
+            let avatarUrl: string | null = null;
+            const u = it.user ?? null;
+            if (u && (u.avatar_url || u.avatar || u.avatarUrl)) {
+              avatarUrl = u.avatar_url || u.avatar || u.avatarUrl || null;
+            } else if (it.avatar_url || it.avatar) {
+              avatarUrl = it.avatar_url || it.avatar || null;
+            } else {
+              const aid = u?.avatar_id ?? u?.avatarId ?? it.avatar_id ?? it.avatarId ?? null;
+              try {
+                if (aid !== null && (typeof aid === 'number' || (typeof aid === 'string' && String(aid).trim()))) {
+                  avatarUrl = `/api/storage/${String(aid).trim()}/download`;
+                }
+              } catch (e) { avatarUrl = null; }
+            }
+            return {
+              author: it.user_name || it.author_name || it.actor || (it.user?.name) || (it.user?.full_name) || 'System',
+              text: it.description || it.changes || it.message || it.text || it.content || JSON.stringify(it),
+              time: it.created_at || it.createdAt || it.created || it.timestamp || it.date || it.time || null,
+              avatar_url: avatarUrl,
+              user: u
+            };
+          });
           // sort history by time ascending
           this.history.sort((a: any, b: any) => {
             const pa = a?.time ? Date.parse(a.time) : NaN;

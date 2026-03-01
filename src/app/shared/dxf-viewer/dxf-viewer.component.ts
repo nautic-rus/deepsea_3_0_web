@@ -79,7 +79,6 @@ export class DxfViewerComponent implements AfterViewInit, OnDestroy {
 
   // ...existing code...
 
-
   async ngAfterViewInit(): Promise<void> {
     try {
       // install a temporary global error listener to silence known benign errors that
@@ -165,7 +164,7 @@ export class DxfViewerComponent implements AfterViewInit, OnDestroy {
           // instantiate viewer with automatic resize enabled
           const opts: any = { autoResize: true };
           if (this.fonts && Array.isArray(this.fonts) && this.fonts.length) opts.fonts = this.fonts;
-          try { console.debug('[DxfViewer] initializing with fonts:', opts.fonts || null); } catch (_) {}
+          
           this._viewerInstance = new ViewerCtor(this.container.nativeElement, opts);
           // ensure container has a reasonable height so renderer gets correct size
           try {
@@ -243,12 +242,12 @@ export class DxfViewerComponent implements AfterViewInit, OnDestroy {
       try {
         this.ngZone.run(() => {
           this.ready = true;
-          try { console.debug('[DxfViewer] ready -> emitting readyChange'); } catch(_) {}
+          
           try { this.readyChange.emit(true); } catch(_) {}
         });
       } catch (_) {
         this.ready = true;
-        try { console.debug('[DxfViewer] ready -> emitting readyChange (fallback)'); } catch(_) {}
+        try { } catch(_) {}
         try { this.readyChange.emit(true); } catch(_) {}
       }
     } catch (e: any) {

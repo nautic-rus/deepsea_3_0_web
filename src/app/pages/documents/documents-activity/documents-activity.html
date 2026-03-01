@@ -14,7 +14,7 @@
                   <p-avatar [image]="opt.avatar || undefined" shape="circle" styleClass="mr-2"></p-avatar>
                 </ng-container>
                 <ng-template #initialsTpl>
-                  <p-avatar [label]="initialsFromName(opt?.label)" shape="circle" [style.background]="issueAvatarColor({ first_name: opt?.label })" [style.color]="issueAvatarTextColor({ first_name: opt?.label })" styleClass="mr-2"></p-avatar>
+                  <p-avatar [label]="initialsFromName(opt?.label)" shape="circle" [style]="{ 'background-color': issueAvatarColor({ first_name: opt?.label }), color: issueAvatarTextColor({ first_name: opt?.label }) }" styleClass="mr-2"></p-avatar>
                 </ng-template>
                 <div>{{ opt?.label }}</div>
               </div>
@@ -25,7 +25,7 @@
                   <p-avatar [image]="opt.avatar || undefined" shape="circle" styleClass="mr-2"></p-avatar>
                 </ng-container>
                 <ng-template #initialsTplSel>
-                  <p-avatar [label]="initialsFromName(opt?.label)" shape="circle" [style.background]="issueAvatarColor({ first_name: opt?.label })" [style.color]="issueAvatarTextColor({ first_name: opt?.label })" styleClass="mr-2"></p-avatar>
+                  <p-avatar [label]="initialsFromName(opt?.label)" shape="circle" [style]="{ 'background-color': issueAvatarColor({ first_name: opt?.label }), color: issueAvatarTextColor({ first_name: opt?.label }) }" styleClass="mr-2"></p-avatar>
                 </ng-template>
                 <div>{{ opt?.label }}</div>
               </div>

@@ -425,8 +425,7 @@
 														</ng-container>
 														<ng-template #assigneeInitials>
 															<p-avatar [label]="initialsFromName(issue.assignee_name)" shape="circle"
-																[style.background]="issue.assignee_id ? issueAvatarColor({ id: issue.assignee_id, first_name: issue.assignee_name }) : undefined"
-																[style.color]="issue.assignee_id ? issueAvatarTextColor({ id: issue.assignee_id, first_name: issue.assignee_name }) : undefined"
+																[style]="{ 'background-color': issue.assignee_id ? issueAvatarColor({ id: issue.assignee_id, first_name: issue.assignee_name }) : undefined, color: issue.assignee_id ? issueAvatarTextColor({ id: issue.assignee_id, first_name: issue.assignee_name }) : undefined }"
 																styleClass="mr-2"></p-avatar>
 														</ng-template>
 													<span>{{ formatSurnameInitials(issue.assignee_name || issue) }}</span>
@@ -439,8 +438,7 @@
 														</ng-container>
 														<ng-template #authorInitials>
 															<p-avatar [label]="initialsFromName(issue.author_name)" shape="circle"
-																[style.background]="issue.author_id ? issueAvatarColor({ id: issue.author_id, first_name: issue.author_name }) : undefined"
-																[style.color]="issue.author_id ? issueAvatarTextColor({ id: issue.author_id, first_name: issue.author_name }) : undefined"
+																[style]="{ 'background-color': issue.author_id ? issueAvatarColor({ id: issue.author_id, first_name: issue.author_name }) : undefined, color: issue.author_id ? issueAvatarTextColor({ id: issue.author_id, first_name: issue.author_name }) : undefined }"
 																styleClass="mr-2"></p-avatar>
 														</ng-template>
 													<span>{{ formatSurnameInitials(issue.author_name || issue) }}</span>

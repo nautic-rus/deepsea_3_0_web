@@ -41,8 +41,7 @@ import { ToastModule } from 'primeng/toast';
                 </ng-container>
                 <ng-template #initialsTpl>
                   <p-avatar [label]="initialsFromName(ev.actor)" shape="circle" 
-                    [style.background]="avatarColor(ev.raw?.user ?? { first_name: ev.actor })"
-                    [style.color]="avatarTextColor(ev.raw?.user ?? { first_name: ev.actor })"></p-avatar>
+                    [style]="{ 'background-color': avatarColor(ev.raw?.user ?? { first_name: ev.actor }), color: avatarTextColor(ev.raw?.user ?? { first_name: ev.actor }) }"></p-avatar>
                 </ng-template>
               </div>
               <div class="flex-1">
@@ -213,7 +212,8 @@ export class DocumentsDetailChatComponent implements OnChanges, AfterViewInit {
         author: this.shortName(it.user?.full_name || it.author_name || it.user_name || it.author || 'Unknown'),
         text: it.content || it.text || '',
         time: it.created_at || it.createdAt || it.created || it.timestamp || null,
-        avatar_url: avatarUrl
+        avatar_url: avatarUrl,
+        user: it.user ?? null
       };
     });
   }
@@ -354,7 +354,6 @@ export class DocumentsDetailChatComponent implements OnChanges, AfterViewInit {
       // store string id for UI so falsy numeric 0 still shows the replying bar
       this.replyToId = idRaw !== null && idRaw !== undefined ? String(idRaw) : null;
       try { this.replyToAuthor = m?.actor ?? m?.author ?? (m?.raw && (m.raw.author || m.raw.user?.full_name)) ?? null; } catch (_) { this.replyToAuthor = null; }
-      console.debug('[DocumentsDetailChat] reply to', { id: this.replyToId, author: this.replyToAuthor, src: m });
       // do not prefill composer with an @mention for privacy/clarity — leave newMessage as-is
       // ensure UI updates and textarea receives focus
       this.cdr.markForCheck();
@@ -388,10 +387,9 @@ export class DocumentsDetailChatComponent implements OnChanges, AfterViewInit {
       const input = ev.target as HTMLInputElement;
       const files = input.files;
       if (files && files.length) {
-        console.debug('[DocumentsDetailChat] selected files', files);
         try { this.messageService.add({ severity: 'info', summary: 'Attachment', detail: `${files.length} file(s) selected` }); } catch (e) {}
       }
-    } catch (e) { console.error(e); }
+    } catch (e) { }
   }
 
   onMessageAvatarError(msg: any): void {
@@ -400,18 +398,18 @@ export class DocumentsDetailChatComponent implements OnChanges, AfterViewInit {
 
   scrollToMessage(targetId: any): void {
     try {
-      try { console.debug('[DocumentsDetailChat] scrollToMessage called with', targetId); } catch (e) {}
+      
       if (!targetId) return;
       const idStr = String(targetId);
       const selector = '#msg-' + idStr;
       const container: HTMLElement | undefined = this.messagesContainer?.nativeElement;
       let target: HTMLElement | null = null;
       if (container) { target = container.querySelector(selector) as HTMLElement | null; }
-      try { console.debug('[DocumentsDetailChat] container query result:', target); } catch (e) {}
+      
       if (!target) target = document.querySelector(selector) as HTMLElement | null;
-      try { console.debug('[DocumentsDetailChat] global query result:', target); } catch (e) {}
+      
       if (!target) {
-        try { console.debug('[DocumentsDetailChat] scrollToMessage: target not found for', selector); } catch (e) {}
+        
         return;
       }
 
@@ -476,7 +474,8 @@ export class DocumentsDetailChatComponent implements OnChanges, AfterViewInit {
           author: this.shortName(data?.user?.full_name || data?.user?.fullName || data?.author_name || data?.author || 'You'),
           text: data?.content || data?.message || data?.text || this.newMessage,
           time: data?.created_at || data?.createdAt || new Date().toISOString(),
-          avatar_url: pushedAvatar
+          avatar_url: pushedAvatar,
+          user: data?.user ?? null
         };
   // optimistic append then refresh messages+history from server
   // include parent_id for optimistic message when replying

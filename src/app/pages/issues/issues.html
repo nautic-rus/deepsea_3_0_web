@@ -190,8 +190,7 @@
                                             </ng-container>
                                             <ng-template #assigneeInitials>
                                                 <p-avatar [label]="initialsFromName(issue.assignee_name)" class="mr-2" shape="circle"
-                                                  [style.background]="issue.assignee_id ? issueAvatarColor({ id: issue.assignee_id, first_name: issue.assignee_name }) : undefined"
-                                                  [style.color]="issue.assignee_id ? issueAvatarTextColor({ id: issue.assignee_id, first_name: issue.assignee_name }) : undefined"></p-avatar>
+                                                  [style]="{ 'background-color': issue.assignee_id ? issueAvatarColor({ id: issue.assignee_id, first_name: issue.assignee_name }) : undefined, color: issue.assignee_id ? issueAvatarTextColor({ id: issue.assignee_id, first_name: issue.assignee_name }) : undefined }"></p-avatar>
                                             </ng-template>
                                             <span>{{ formatSurnameInitials(issue.assignee_name || issue) }}</span>
                                 </div>
@@ -203,8 +202,7 @@
                                     </ng-container>
                                     <ng-template #authorInitials>
                                         <p-avatar [label]="initialsFromName(issue.author_name)" class="mr-2" shape="circle"
-                                          [style.background]="issue.author_id ? issueAvatarColor({ id: issue.author_id, first_name: issue.author_name }) : undefined"
-                                          [style.color]="issue.author_id ? issueAvatarTextColor({ id: issue.author_id, first_name: issue.author_name }) : undefined"></p-avatar>
+                                          [style]="{ 'background-color': issue.author_id ? issueAvatarColor({ id: issue.author_id, first_name: issue.author_name }) : undefined, color: issue.author_id ? issueAvatarTextColor({ id: issue.author_id, first_name: issue.author_name }) : undefined }"></p-avatar>
                                     </ng-template>
                                     <span>{{ formatSurnameInitials(issue.author_name || issue) }}</span>
                                 </div>
@@ -295,7 +293,7 @@
                                     <img [src]="opt.avatar" alt="avatar" class="select-avatar" />
                                 </ng-container>
                                 <ng-template #initialsItem>
-                                    <p-avatar [label]="initialsFromName(opt.label)" class="mr-2" shape="circle" [style.background]="selectAvatarBg(opt.label)" [style.color]="selectAvatarTextColor(opt.label)"></p-avatar>
+                                    <p-avatar [label]="initialsFromName(opt.label)" class="mr-2" shape="circle" [style]="{ 'background-color': selectAvatarBg(opt.label), color: selectAvatarTextColor(opt.label) }"></p-avatar>
                                 </ng-template>
                                 <div>{{ opt.label }}</div>
                             </div>
@@ -306,7 +304,7 @@
                                     <img [src]="opt.avatar" alt="avatar" class="select-avatar" />
                                 </ng-container>
                                 <ng-template #initialsValue>
-                                    <p-avatar [label]="initialsFromName(opt.label)" class="mr-2" shape="circle" [style.background]="selectAvatarBg(opt.label)" [style.color]="selectAvatarTextColor(opt.label)"></p-avatar>
+                                    <p-avatar [label]="initialsFromName(opt.label)" class="mr-2" shape="circle" [style]="{ 'background-color': selectAvatarBg(opt.label), color: selectAvatarTextColor(opt.label) }"></p-avatar>
                                 </ng-template>
                                 <div>{{ opt.label }}</div>
                             </div>

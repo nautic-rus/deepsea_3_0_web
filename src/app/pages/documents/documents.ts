@@ -60,7 +60,7 @@ import { AvatarService } from '../../services/avatar.service';
 		Select
 	],
 	templateUrl: './documents.html',
-	styleUrls: ['./documents.scss'],
+	styleUrls: ['../../_quill-snow.scss', './documents.scss'],
 	providers: [NodeService, ConfirmationService, MessageService]
 	})
 	export class DocumentsComponent implements OnInit {
@@ -554,7 +554,6 @@ import { AvatarService } from '../../services/avatar.service';
 
 			this.displayCreateDialog = false;
 		} catch (e) {
-			console.error('Failed to create/update directory', e);
 			this.formErrors = this.formErrors || {};
 			this.formErrors.name = 'Failed to create/update directory';
 		} finally {
@@ -649,7 +648,6 @@ import { AvatarService } from '../../services/avatar.service';
 				});
 			})
 			.catch((err) => {
-				console.error('Failed to load documents for directory', id, err);
 				this.documentsItems = [];
 			})
 			.finally(() => {
@@ -774,7 +772,6 @@ import { AvatarService } from '../../services/avatar.service';
 		];
 	}
 
-
 	// load projects for project selectors from /api/my_projects (same as issues page)
 	loadProjects(): void {
 		this.http.get('/api/my_projects').subscribe({
@@ -847,7 +844,6 @@ import { AvatarService } from '../../services/avatar.service';
 			// navigate to /documents/:id
 			this.router.navigate(['/documents', item.id]);
 		} catch (e) {
-			console.warn('onRowClick failed', e);
 		}
 	}
 
@@ -883,7 +879,6 @@ import { AvatarService } from '../../services/avatar.service';
 				this.nodeService.getFiles().then((data) => this.files.set(this.applyExpansionFromCurrent(data)));
 			}
 		}).catch((err) => {
-			console.error('Failed to delete directory', err);
 			try { this.messageService.add({ severity: 'error', summary: 'Delete', detail: (err && err.message) ? err.message : 'Failed to delete directory' }); } catch (e) {}
 		}).finally(() => {
 			this.savingDir = false;
@@ -1004,13 +999,10 @@ import { AvatarService } from '../../services/avatar.service';
 	}
 
 	async saveDocument(): Promise<void> {
-		console.log('documents.saveDocument called', { editModel: this.editModel });
 		if (!this.editModel) {
-			console.warn('saveDocument aborted: no editModel');
 			return;
 		}
 		if (!this.validateDocumentForm()) {
-			console.warn('saveDocument aborted: validation failed', this.formErrors);
 			try { this.cdr.detectChanges(); } catch (e) { /* ignore */ }
 			return;
 		}
@@ -1064,7 +1056,6 @@ import { AvatarService } from '../../services/avatar.service';
 			// refresh current directory
 			if (this.selectedFile) this.onDirectorySelect(this.selectedFile);
 		} catch (e) {
-			console.error('Failed to save document', e);
 			const errMsg = (e && typeof e === 'object' && 'message' in e) ? (e as any).message : String(e);
 			try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.SAVE') || 'Save failed', detail: errMsg || (this.translate.instant('components.documents.messages.ERROR') || 'Failed to save') }); } catch (er) {}
 		} finally {
@@ -1089,7 +1080,6 @@ import { AvatarService } from '../../services/avatar.service';
 			const dropIndex = (event && event.dropIndex != null) ? Number(event.dropIndex) : null;
 			const visible = this.columns.filter(c => this.selectedColumns.includes(c.field));
 			if (dragIndex == null || dropIndex == null || dragIndex < 0 || dropIndex < 0 || dragIndex >= visible.length || dropIndex > visible.length) {
-				console.warn('onColumnsReordered: invalid indices', { dragIndex, dropIndex, visibleLength: visible.length });
 				return;
 			}
 			const moved = visible.splice(dragIndex, 1)[0];
@@ -1109,7 +1099,6 @@ import { AvatarService } from '../../services/avatar.service';
 			this.columnsOptions = (this.columns || []).map(c => ({ label: this.translate.instant(c.headerKey) || c.headerKey, value: c.field }));
 			try { this.cdr.detectChanges(); } catch (e) { /* ignore */ }
 		} catch (e) {
-			console.warn('onColumnsReordered failed', e);
 		}
 	}
 
@@ -1319,7 +1308,6 @@ import { AvatarService } from '../../services/avatar.service';
 					if (this.editModel) this.editModel.directory_id = null;
 					try { this.cdr.detectChanges(); } catch (e) { /* ignore */ }
 				}).catch((e) => {
-					console.warn('Failed to load directories on project change', e);
 					this.directoryTreeFiltered = [];
 					if (this.editModel) this.editModel.directory_id = null;
 					try { this.cdr.detectChanges(); } catch (er) { /* ignore */ }

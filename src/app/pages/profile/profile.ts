@@ -74,7 +74,6 @@ export class ProfileComponent implements OnInit {
     try {
       this.router.navigate(['/profile/edit']);
     } catch (e) {
-      console.warn('onEditProfile: navigation failed', e);
     }
   }
 
@@ -83,7 +82,6 @@ export class ProfileComponent implements OnInit {
     try {
       this.router.navigate(['/profile/security']);
     } catch (e) {
-      console.warn('onResetPassword: navigation failed', e);
     }
   }
 
@@ -92,7 +90,6 @@ export class ProfileComponent implements OnInit {
     try {
       this.router.navigate(['/profile/permissions']);
     } catch (e) {
-      console.warn('onShareRights: navigation failed', e);
     }
   }
 

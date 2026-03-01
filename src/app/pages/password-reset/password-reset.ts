@@ -70,7 +70,6 @@ export class PasswordResetComponent implements OnInit {
       error: (err: HttpErrorResponse) => {
         this.loading = false;
   this.errorMessage = (err.error?.message ?? err.error?.error ?? this.translate.instant('components.passwordReset.ERROR_SENDING')) || null; // TODO: make reactive (refresh on translate.onLangChange)
-        console.error('Password reset error', err);
       }
     });
   }
@@ -102,7 +101,6 @@ export class PasswordResetComponent implements OnInit {
       error: (err: HttpErrorResponse) => {
         this.loading = false;
   this.errorMessage = (err.error?.message ?? err.error?.error ?? this.translate.instant('components.passwordReset.ERROR_UPDATING')) || 'Error while updating password';
-        console.error('Password reset (set new) error', err);
       }
     });
   }

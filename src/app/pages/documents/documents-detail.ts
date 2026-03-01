@@ -38,7 +38,7 @@ import { DocumentsActivityComponent } from './documents-activity/documents-activ
   providers: [MessageService],
   imports: [CommonModule, TranslateModule, RouterModule, FormsModule, ButtonModule, DialogModule, InputTextModule, EditorModule, Select, MultiSelectModule, DatePickerModule, CheckboxModule, AvatarModule, TagModule, ProgressSpinnerModule, ChipModule, ToolbarModule, DocumentsDetailChatComponent, DocumentsDetailAttachComponent, DocumentsDetailRelationsTableComponent, SplitButtonModule, ToastModule, TreeSelectModule, DocumentsActivityComponent],
   templateUrl: './documents-detail.html',
-  styleUrls: ['./documents-detail.scss'],
+  styleUrls: ['../../_quill-snow.scss', './documents-detail.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DocumentsDetailComponent implements OnInit {
@@ -266,7 +266,6 @@ export class DocumentsDetailComponent implements OnInit {
         this.cdr.markForCheck();
       }
     } catch (e) {
-      console.warn('Failed to load directories', e);
       this.directoryOptions = [];
       this.cdr.markForCheck();
     }
@@ -346,7 +345,6 @@ export class DocumentsDetailComponent implements OnInit {
 
     // Ensure directory is present in the tree; if backend returns a directory_id not present in the loaded tree, defer adding fallback until directories are loaded
     const dirId = this.document?.directory_id ?? (this.document?.directory && (this.document.directory.id ?? this.document.directory_id)) ?? null;
-  console.log('openEditDialog: document.directory_id=', dirId, 'current directoryTree length=', this.directoryTree?.length);
     if (dirId != null) {
       // If tree already loaded, immediately ensure the node exists and set the selection. Otherwise remember pending key and let loadDirectories handle it when it finishes.
       if (this.directoryTree && this.directoryTree.length) {
@@ -383,11 +381,9 @@ export class DocumentsDetailComponent implements OnInit {
         };
         const nodeRef = (this.directoryTree || []).map((n: any) => findNodeRef(n)).find(Boolean) || null;
         this.editModel.directory_id = nodeRef || { key: String(dirId), data: { id: dirId }, label: `ID ${String(dirId)}` };
-        console.log('openEditDialog: set editModel.directory_id to node object, typeof=', typeof this.editModel.directory_id, 'topKeys=', (this.directoryTree || []).map((n: any) => n && n.key));
         try { this.directoryPlaceholder = this.getPathForDirectoryValue(this.editModel.directory_id); } catch (e) { this.directoryPlaceholder = ''; }
       } else {
         this.pendingDirectoryKey = String(dirId);
-        console.log('openEditDialog: deferred setting directory, pendingDirectoryKey=', this.pendingDirectoryKey);
       }
     }
 
@@ -461,7 +457,6 @@ export class DocumentsDetailComponent implements OnInit {
     const pathParts = findPath(this.directoryTree || [], key) || [];
     return pathParts.join('/');
   }
-
 
   loadProjects(): void {
     this.http.get('/api/my_projects').subscribe({
@@ -641,7 +636,6 @@ export class DocumentsDetailComponent implements OnInit {
         } catch (e) {}
       },
       error: (err: any) => {
-        console.error('Failed to save document', err);
         this.loading = false;
         this.cdr.markForCheck();
         try {
@@ -696,7 +690,7 @@ export class DocumentsDetailComponent implements OnInit {
   }
 
   // use chat-style shortName for display
-  formatSurnameInitials(name?: string): string { return this.shortName(name); }
+  formatSurnameInitials(item?: any): string { return this.avatarService.formatSurnameInitials(item); }
 
   prioritySeverity(priority: any): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | null {
     try {
@@ -827,7 +821,6 @@ export class DocumentsDetailComponent implements OnInit {
             try { this.messageService.add({ severity: 'success', summary: this.trOr('components.documents.messages.SUCCESS', 'Success'), detail: this.trOr('components.documents.messages.STATUS_UPDATED', 'Status updated') }); } catch (e) {}
           },
           error: (fetchErr: any) => {
-            console.warn('Failed to refresh document after status change', fetchErr);
             this.statusSaving = false;
             this.cdr.markForCheck();
             try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: this.translate.instant('components.documents.messages.STATUS_UPDATE_FAILED') || 'Failed to update status' }); } catch (e) {}
@@ -869,7 +862,6 @@ export class DocumentsDetailComponent implements OnInit {
         try { this.router.navigate(['/documents']); } catch (e) {}
       },
       error: (err: any) => {
-        console.error('Failed to delete document', err);
         this.deleting = false;
         this.displayDeleteDialog = false;
         this.cdr.markForCheck();
@@ -962,7 +954,6 @@ export class DocumentsDetailComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: (err) => {
-        console.warn('Failed to load available relation targets', err);
         this.availableIssuesOptions = [];
         this.availableDocumentsOptions = [];
         this.cdr.markForCheck();
@@ -1038,7 +1029,6 @@ export class DocumentsDetailComponent implements OnInit {
         try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Saved', detail: this.translate.instant('components.documents.relations.FORM.SAVED') || 'Relations created' }); } catch (e) {}
       },
       error: (err) => {
-        console.error('Failed to save relations', err);
         this.savingRelations = false;
         this.cdr.markForCheck();
         try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR'), detail: (err && err.message) ? err.message : this.translate.instant('components.documents.messages.ERROR') }); } catch (e) {}

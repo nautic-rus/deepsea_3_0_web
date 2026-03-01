@@ -83,7 +83,6 @@ export class ProjectsUsersComponent implements OnInit {
         }
       });
     } catch (e) {
-      console.warn('Failed to get current user', e);
     }
     // prepare status options with translations
     try {
@@ -116,10 +115,9 @@ export class ProjectsUsersComponent implements OnInit {
           this.safeDetect();
         },
         error: (err: any) => {
-          console.warn('Failed to load roles', err);
         }
       });
-    } catch (e) { console.warn('loadRoles failed', e); }
+    } catch (e) { }
   }
 
   onProjectChange(projectId: any): void {
@@ -130,7 +128,6 @@ export class ProjectsUsersComponent implements OnInit {
         id = projectId.value;
       }
     } catch (e) { /* ignore */ }
-    console.debug('onProjectChange ->', id);
     this.selectedProject = id;
     if (id === undefined || id === null || id === '') {
       this.assignments = [];
@@ -163,14 +160,12 @@ export class ProjectsUsersComponent implements OnInit {
             this.safeDetect();
         },
         error: (err: any) => {
-          console.error('Failed to load assignments', err);
           this.assignments = [];
           this.loading = false;
           this.safeDetect();
         }
       });
     } catch (e) {
-      console.warn('loadAssignments failed', e);
       this.assignments = [];
       this.loading = false;
     }
@@ -185,18 +180,16 @@ export class ProjectsUsersComponent implements OnInit {
           this.safeDetect();
         },
         error: (err: any) => {
-          console.warn('Failed to load users for owner select', err);
         }
       });
     } catch (e) {
-      console.warn('loadUsersForSelect failed', e);
     }
   }
 
   // global filter helper for p-table caption search
   onGlobalFilter(table: any, event: Event): void {
     const val = (event && (event.target as HTMLInputElement)) ? (event.target as HTMLInputElement).value : '';
-    try { table.filterGlobal(val, 'contains'); } catch (e) { console.warn('onGlobalFilter failed', e); }
+    try { table.filterGlobal(val, 'contains'); } catch (e) { }
   }
 
   private loadProjects(): void {
@@ -229,7 +222,6 @@ export class ProjectsUsersComponent implements OnInit {
         this.loading = false;
       },
       error: (err: any) => {
-        console.error('Failed to load projects', err);
         this.projects = [];
         this.loading = false;
         this.safeDetect();
@@ -255,11 +247,9 @@ export class ProjectsUsersComponent implements OnInit {
           this.safeDetect();
         },
         error: (err: any) => {
-          console.warn('Failed to load owner names', err);
         }
       });
     } catch (e) {
-      console.warn('loadOwnerNames failed', e);
     }
   }
 
@@ -352,7 +342,6 @@ export class ProjectsUsersComponent implements OnInit {
         this.safeDetect();
       },
       error: (err: any) => {
-        console.error('Failed to create assignments', err);
       try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.users.messages.SUMMARY_CREATE') || 'Create', detail: (err && err.message) ? err.message : 'Failed to assign' }); } catch (e) {}
         this.loading = false;
         this.safeDetect();
@@ -388,7 +377,6 @@ export class ProjectsUsersComponent implements OnInit {
           this.safeDetect();
         },
         error: (err: any) => {
-          console.error('Failed to create project', err);
           this.error = (err && err.message) ? err.message : 'Failed to create project';
           this.loading = false;
           try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.messages.SUMMARY_CREATE') || 'Create', detail: this.error || '' }); } catch (e) {}
@@ -419,7 +407,6 @@ export class ProjectsUsersComponent implements OnInit {
           this.safeDetect();
         },
         error: (err: any) => {
-          console.error('Failed to update project', err);
           this.error = (err && err.message) ? err.message : 'Failed to update project';
           this.loading = false;
           try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.messages.SUMMARY_EDIT') || 'Edit', detail: this.error || '' }); } catch (e) {}
@@ -462,7 +449,6 @@ export class ProjectsUsersComponent implements OnInit {
               this.safeDetect();
             },
             error: (err: any) => {
-              console.error('Failed to delete assignment', err);
               try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.users.messages.SUMMARY_DELETE') || 'Delete', detail: (err && err.message) ? err.message : 'Failed to delete assignment' }); } catch (e) {}
               this.loading = false;
               this.safeDetect();
@@ -482,7 +468,6 @@ export class ProjectsUsersComponent implements OnInit {
           this.safeDetect();
         },
         error: (err: any) => {
-          console.error('Failed to delete assignment', err);
           try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.users.messages.SUMMARY_DELETE') || 'Delete', detail: (err && err.message) ? err.message : 'Failed to delete assignment' }); } catch (e) {}
           this.loading = false;
           this.safeDetect();
@@ -558,7 +543,6 @@ export class ProjectsUsersComponent implements OnInit {
         this.safeDetect();
       },
       error: (err: any) => {
-        console.error('Failed to bulk delete assignments', err);
         try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.users.messages.SUMMARY_DELETE') || 'Delete', detail: (err && err.message) ? err.message : 'Failed to delete assignments' }); } catch (e) {}
         this.loading = false;
         this.safeDetect();

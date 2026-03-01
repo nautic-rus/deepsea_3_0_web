@@ -184,7 +184,6 @@ export class DxfViewerPageComponent implements OnInit, OnDestroy {
         }
       }
     } catch (e: any) {
-      console.error('Failed to fetch DXF by storage id', e);
       this.error = e?.message || 'Failed to load DXF';
     } finally {
       this.loading = false;
@@ -213,7 +212,6 @@ export class DxfViewerPageComponent implements OnInit, OnDestroy {
         }
       }
     } catch (e: any) {
-      console.error('Failed to fetch DXF by file id', e);
       this.error = e?.message || 'Failed to load DXF';
     } finally {
       this.loading = false;

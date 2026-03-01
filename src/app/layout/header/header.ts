@@ -72,7 +72,7 @@ export class HeaderComponent implements OnInit {
         this.title = this.translate.instant('APP.TITLE'); // TODO: make reactive (refresh on translate.onLangChange)
         this.langEnLabel = this.translate.instant('LANG.EN'); // TODO: make reactive (refresh on translate.onLangChange)
         this.langRuLabel = this.translate.instant('LANG.RU'); // TODO: make reactive (refresh on translate.onLangChange)
-      } catch (e) { console.warn('i18n initialization failed', e); }
+      } catch (e) { }
       this.buildUserMenu();
       this.remapPages();
       this.safeDetect();
@@ -131,7 +131,7 @@ export class HeaderComponent implements OnInit {
   }
 
   private safeDetect() {
-    try { this.cdr.detectChanges(); } catch (e) { console.warn('safeDetect failed', e); }
+    try { this.cdr.detectChanges(); } catch (e) { }
   }
 
   private reloadMenu() {
@@ -158,7 +158,7 @@ export class HeaderComponent implements OnInit {
   }
 
   setLang(lang: string) {
-  try { localStorage.setItem('lang', lang); } catch (e) { console.warn('localStorage.setItem lang failed', e); }
+  try { localStorage.setItem('lang', lang); } catch (e) { }
     
     // Use translate.use(lang) and wait for translations to load before rebuilding the menus.
     // This prevents a race where pages are remapped before translation files are ready.
@@ -192,14 +192,14 @@ export class HeaderComponent implements OnInit {
     // Try to read cached user from sessionStorage and then fetch fresh profile
     const cached = sessionStorage.getItem('currentUser');
     if (cached) {
-      try { this.currentUser = JSON.parse(cached); this.applyAvatarFromUser(this.currentUser); } catch (e) { console.warn('parse cached currentUser failed', e); }
+      try { this.currentUser = JSON.parse(cached); this.applyAvatarFromUser(this.currentUser); } catch (e) { }
     }
     this.authService.me().subscribe({
       next: (u) => {
         if (!u) { return; }
         // store shallow user first
         this.currentUser = u;
-        try { sessionStorage.setItem('currentUser', JSON.stringify(u)); } catch (e) { console.warn('sessionStorage.setItem currentUser failed', e); }
+        try { sessionStorage.setItem('currentUser', JSON.stringify(u)); } catch (e) { }
         // Try to fetch canonical user record (may contain avatar_url field) via UsersService
         const uid = this.getUserId(u);
         if (uid) {
@@ -301,7 +301,7 @@ export class HeaderComponent implements OnInit {
           const route = (p.path ?? p.url ?? p.route ?? (p.slug ? `/${p.slug}` : undefined) ?? p.href ?? '').toString();
           const parts = route.split('/').filter(Boolean);
           if (parts.length) keyBase = parts[parts.length - 1];
-        } catch (e) { console.warn('derive keyBase route failed', e); }
+        } catch (e) { }
         if (!keyBase && typeof raw === 'string') {
           keyBase = raw.toString().trim().toLowerCase().replace(/[^a-z0-9]+/gi, '_');
         }
@@ -363,7 +363,7 @@ export class HeaderComponent implements OnInit {
 
     const items = pages.map(mapItem).filter(Boolean);
     if (missing.size) {
-      try { console.info('[I18N-MISSING]', JSON.stringify(Array.from(missing))); } catch (e) { console.warn('i18n missing log failed', e); }
+      try { } catch (e) { }
     }
     return items;
   }

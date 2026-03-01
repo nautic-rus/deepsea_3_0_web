@@ -80,7 +80,7 @@ export class AdminPermissionsComponent implements OnInit {
   private safeDetect(): void {
     try {
       this.cd.detectChanges();
-    } catch (e) { console.warn('safeDetect failed', e); }
+    } catch (e) { }
   }
 
   ngOnInit(): void {
@@ -90,7 +90,7 @@ export class AdminPermissionsComponent implements OnInit {
   // global filter helper for p-table caption search
   onGlobalFilter(table: any, event: Event): void {
     const val = (event && (event.target as HTMLInputElement)) ? (event.target as HTMLInputElement).value : '';
-    try { table.filterGlobal(val, 'contains'); } catch (e) { console.warn('onGlobalFilter failed', e); }
+    try { table.filterGlobal(val, 'contains'); } catch (e) { }
   }
 
   // load permissions list from API
@@ -105,7 +105,6 @@ export class AdminPermissionsComponent implements OnInit {
         this.safeDetect();
       },
       error: (err) => {
-        console.error('Failed to load permissions:', err);
         this.error = (err && err.message) ? err.message : 'Failed to load items';
         this.loading = false;
         this.safeDetect();
@@ -130,7 +129,7 @@ export class AdminPermissionsComponent implements OnInit {
     const ids = this.selectedPermissions.map(s => s.id).join(', ');
     try {
       this.messageService.add({ severity: 'info', summary: 'Not implemented', detail: 'Bulk delete for permissions is not implemented yet' });
-    } catch (e) { console.warn('messageService.add failed', e); }
+    } catch (e) { }
   }
 
   // Edit existing permission
@@ -172,7 +171,6 @@ export class AdminPermissionsComponent implements OnInit {
           this.safeDetect();
         },
         error: (err) => {
-          console.error('Failed to create item', err);
           this.error = (err && err.message) ? err.message : 'Failed to create item';
           this.loading = false;
           try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CREATE') || 'Create', detail: (err && err.message) ? err.message : 'Failed to create permission' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
@@ -190,7 +188,6 @@ export class AdminPermissionsComponent implements OnInit {
           this.safeDetect();
         },
         error: (err) => {
-          console.error('Failed to update item', err);
           this.error = (err && err.message) ? err.message : 'Failed to update item';
           this.loading = false;
           try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.SAVE') || 'Save', detail: (err && err.message) ? err.message : 'Failed to update permission' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
@@ -220,7 +217,6 @@ export class AdminPermissionsComponent implements OnInit {
         this.safeDetect();
       },
       error: (err) => {
-        console.error('Failed to delete item', err);
         this.error = (err && err.message) ? err.message : 'Failed to delete item';
         this.loading = false;
         this.safeDetect();
@@ -261,7 +257,6 @@ export class AdminPermissionsComponent implements OnInit {
       URL.revokeObjectURL(url);
   try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('components.permissions.messages.EXPORTED') || 'Export completed' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
     } catch (err) {
-      console.error('Export failed', err);
       try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: 'Export failed' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
     }
   }

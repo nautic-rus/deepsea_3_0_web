@@ -72,7 +72,6 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
       // restore previously saved expanded/collapsed state (we no longer auto-expand)
       this._restoreExpandedState(this.files);
     } catch (e) {
-      console.error('Failed to load files for document', e);
       this.files = [];
     } finally {
       this.loadingFiles = false;
@@ -146,7 +145,6 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
       }
     } catch (e) {
       // ignore and leave rev untouched on error
-      console.warn('Failed to compute next rev for type', typeId, e);
     }
   }
 
@@ -476,7 +474,6 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
       a.remove();
   URL.revokeObjectURL(url);
     } catch (err: any) {
-      console.error('Download failed', err);
       try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: err?.message || this.translate.instant('components.documents.messages.ERROR') || 'Failed to download file' }); } catch(e) { this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.message || 'Failed to download file' }); }
     }
   }
@@ -528,7 +525,6 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
             return;
           }
         } catch (e) {
-          console.warn('DXF preview route open failed', e);
         }
       }
 
@@ -576,7 +572,6 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
       // Revoke after some time to allow browser to load the resource
       setTimeout(() => { try { URL.revokeObjectURL(url); } catch (_) {} }, 30000);
     } catch (err: any) {
-      console.error('Preview failed', err);
       try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: err?.message || 'Failed to preview file' }); } catch(e) { this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.message || 'Failed to preview file' }); }
     }
   }
@@ -655,7 +650,6 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
         this.loadFilesForDocument(this.document.id);
       }
     } catch (err: any) {
-      console.error('Archive (delete) failed', err);
       try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: err?.message || this.translate.instant('components.documents.messages.ERROR') || 'Failed to archive file' }); } catch(e) { this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.message || 'Failed to archive file' }); }
     }
   }
@@ -686,7 +680,6 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
         this.loadFilesForDocument(this.document.id);
       }
     } catch (err: any) {
-      console.error('Restore failed', err);
       try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: err?.message || this.translate.instant('components.documents.messages.ERROR') || 'Failed to restore file' }); } catch(e) { this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.message || 'Failed to restore file' }); }
     }
   }
@@ -753,7 +746,6 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
               a.remove();
               setTimeout(() => { try { URL.revokeObjectURL(url); } catch (_) {} }, 30000);
             } catch (err: any) {
-              console.error('downloadAll processing failed', err);
               try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: err?.message || 'Failed to process downloaded file' }); } catch(e) { this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.message || 'Failed to process downloaded file' }); }
             } finally {
               // ensure spinner is removed after processing the blob
@@ -764,7 +756,6 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
             }
           },
           error: (err: any) => {
-            console.error('downloadAll failed', err);
             try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: err?.message || 'Failed to download files' }); } catch(e) { this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.message || 'Failed to download files' }); }
             this.downloadingAll = false;
             try { this.cdr.markForCheck(); } catch(_) {}
@@ -778,7 +769,6 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
           }
         });
       } catch (err: any) {
-        console.error('downloadAll failed', err);
         try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: err?.message || 'Failed to download files' }); } catch(e) { this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.message || 'Failed to download files' }); }
         this.downloadingAll = false;
         this._downloadAllSub = null;
@@ -846,7 +836,6 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
         const list = Array.isArray(resp) ? resp : (resp?.data ? resp.data : []);
         this.storageTypesOptions = (list || []).map((it: any) => ({ label: it.name || it.title || String(it.id), value: it.id }));
       } catch (e) {
-        console.warn('Failed to load document storage types', e);
         this.storageTypesOptions = [];
       }
     }
@@ -958,11 +947,8 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
 
         entry.progress = 100; entry.uploaded = true; this.cdr.markForCheck();
         successCount++;
-        console.debug('[DocumentsDetailAttach] file uploaded and attached', f.name);
       } catch (err: any) {
-        console.warn('file upload/attach failed', err);
         failCount++;
-        console.error('[DocumentsDetailAttach] upload failed for', f.name, err?.message || err);
         entry.progress = 0; entry.uploaded = false; this.cdr.markForCheck();
       }
     }
@@ -1035,38 +1021,9 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
     return `${val.toFixed(i === 0 ? 0 : 2)} ${sizes[i]}`;
   }
 
-
-
   // Format surname with initials for given name and patronymic or accept full-name string
   formatSurnameInitials(item: any): string {
-    if (!item) return '-';
-    try {
-      if (typeof item === 'object') {
-        // try common fields: last_name / first_name / middle_name
-        const last = (item.last_name || item.lastName || item.surname || '').toString().trim();
-        const first = (item.first_name || item.firstName || item.given_name || '').toString().trim();
-        const middle = (item.middle_name || item.middleName || item.patronymic || '').toString().trim();
-        const initials: string[] = [];
-        if (first) initials.push(first[0].toUpperCase() + '.');
-        if (middle) initials.push(middle[0].toUpperCase() + '.');
-        if (last) return last + (initials.length ? ' ' + initials.join('') : '');
-        // fall back to full_name or username
-        if (item.full_name) return this.formatSurnameInitials(item.full_name);
-        return item.username || '-';
-      }
-
-      if (typeof item === 'string') {
-        const parts = item.trim().split(/\s+/).filter(Boolean);
-        if (!parts.length) return '-';
-        const surname = parts[0];
-        const rest = parts.slice(1);
-        const initials = rest.map(p => (p && p[0]) ? p[0].toUpperCase() + '.' : '').join('');
-        return surname + (initials ? ' ' + initials : '');
-      }
-    } catch (e) {
-      // fall through
-    }
-    return '-';
+    return this.avatarService.formatSurnameInitials(item);
   }
 
   getUserAvatarUrl(user: any): string | undefined {

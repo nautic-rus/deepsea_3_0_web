@@ -1,0 +1,2 @@
+/* Quill snow theme styles imported only where Editor is used to avoid adding Quill CSS to the global bundle */
+@use 'quill/dist/quill.snow.css';

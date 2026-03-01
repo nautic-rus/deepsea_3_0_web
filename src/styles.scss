@@ -5,8 +5,8 @@
 
 /* PrimeNG Icons */
 @import "primeicons/primeicons.css";
-/* Quill editor styles (required by PrimeNG Editor) */
-@import 'quill/dist/quill.snow.css';
+/* Quill editor styles are imported only in components that use the editor to keep the global
+  stylesheet small and avoid inflating the initial bundle. See src/app/_quill-snow.scss. */
 /* Google Fonts - Lato (moved to index.html to avoid build-time inlining) */
 
 /* Global Styles (merged from styles.css + previous styles.scss additions) */

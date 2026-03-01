@@ -81,7 +81,6 @@ export class AdministrationComponent implements OnInit, OnDestroy {
           { label: t('MENU.STORAGE'), icon: 'pi pi-fw pi-database', routerLink: ['/administration/storage'] },
           { label: t('MENU.PAGES'), icon: 'pi pi-fw pi-file', routerLink: ['/administration/pages'] }
 
-
         ]
       }
     ];

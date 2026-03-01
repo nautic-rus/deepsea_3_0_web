@@ -4,7 +4,6 @@ import { TranslateModule } from '@ngx-translate/core';
 import { RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 
-
 @Component({
   selector: 'app-specifications',
   standalone: true,

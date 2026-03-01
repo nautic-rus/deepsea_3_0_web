@@ -35,8 +35,7 @@
               <ng-template #avatarInitialsTpl>
                 <p-avatar [label]="personInitials(user?.name || user?.first_name || user?.firstName)"
                           shape="circle"
-                          [style.background]="user?.id ? issueAvatarColor({ id: user.id, first_name: user.first_name }) : undefined"
-                          [style.color]="user?.id ? issueAvatarTextColor({ id: user.id, first_name: user.first_name }) : undefined"
+                          [style]="{ 'background-color': user?.id ? issueAvatarColor({ id: user.id, first_name: user.first_name }) : undefined, color: user?.id ? issueAvatarTextColor({ id: user.id, first_name: user.first_name }) : undefined }"
                           styleClass="full-avatar self-stretch"></p-avatar>
               </ng-template>
               <div class="flex flex-col gap-4">
