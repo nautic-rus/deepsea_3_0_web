@@ -84,16 +84,15 @@
     <div class="flex items-center gap-2">
       <button pButton pRipple [label]="currentLang.toUpperCase()" class="p-button-text header-lang-button" (click)="toggleLang()"></button>
       <button pButton pRipple icon="pi pi-bell" [text]="true" class="header-icon-button"></button>
-      <p-avatar
-        [image]="avatarUrl"
-        [label]="avatarLabel"
-        shape="circle"
-        class="cursor-pointer ml-2"
-        (click)="userMenu.toggle($event)">
-        <ng-template pTemplate="icon">
-          <span class="avatar-initials">{{ avatarLabel }}</span>
+      <div class="cursor-pointer ml-2" (click)="userMenu.toggle($event)">
+        <ng-container *ngIf="(currentUser?.avatar_url || avatarUrl); else initialsTpl">
+          <p-avatar [image]="currentUser?.avatar_url || avatarUrl" shape="circle"></p-avatar>
+        </ng-container>
+        <ng-template #initialsTpl>
+          <p-avatar [label]="initialsFromName(currentUser?.full_name || currentUser?.first_name || currentUser?.username || currentUser?.email)" shape="circle"
+                    [style.background]="avatarColor(currentUser)" [style.color]="avatarTextColor(currentUser)"></p-avatar>
         </ng-template>
-      </p-avatar>
+      </div>
       <p-menu #userMenu [model]="userMenuItems" [popup]="true"></p-menu>
     </div>
   </div>

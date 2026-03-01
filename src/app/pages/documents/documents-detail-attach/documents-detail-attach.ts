@@ -20,6 +20,7 @@ import { TreeNode } from 'primeng/api';
 import { TranslateModule } from '@ngx-translate/core';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
+import { AvatarService } from '../../../services/avatar.service';
 
 @Component({
   selector: 'app-documents-detail-attach',
@@ -35,6 +36,7 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
   private messageService = inject(MessageService);
   private translate = inject(TranslateService);
   private confirmationService = inject(ConfirmationService);
+  private avatarService = inject(AvatarService);
   files!: TreeNode[];
   // raw nodes returned from the backend (unfiltered)
   private _rawFiles: any[] = [];
@@ -264,6 +266,42 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
   // Save expanded state on page unload
   private _beforeUnloadHandler = () => { try { this._saveExpandedState(this.files); } catch(_) {} };
 
+  // Expand nodes whose underlying data has matching type_id (or whose descendants do).
+  // This makes newly-uploaded files visible by expanding their containing category.
+  private _expandNodesForType(typeId: any, nodes?: any[]): boolean {
+    try {
+      if (!Array.isArray(nodes)) nodes = this.files || [];
+      const target = String(typeId);
+      const walk = (arr: any[]): boolean => {
+        let anyMatched = false;
+        for (const n of arr) {
+          if (!n) continue;
+          const raw = (n._original ?? n.data ?? n) as any;
+          const nodeType = raw?.type_id ?? raw?.typeId ?? raw?.type ?? raw?._original?.type_id ?? null;
+          // If this node itself represents the type (e.g., file row with type_id), mark as matched
+          let matched = false;
+          if (nodeType !== null && nodeType !== undefined && String(nodeType) === target) matched = true;
+          // Recurse into children; if any child matched, parent should be expanded as well
+          let childMatched = false;
+          if (n.children && Array.isArray(n.children) && n.children.length) {
+            childMatched = walk(n.children);
+          }
+          if (matched || childMatched) {
+            try { n.expanded = true; } catch(_) {}
+            anyMatched = true;
+          }
+        }
+        return anyMatched;
+      };
+      const res = walk(nodes as any[]);
+      // persist expanded state
+      try { this._saveExpandedState(this.files); } catch(_) {}
+      return res;
+    } catch (e) {
+      return false;
+    }
+  }
+
   previewVisible = false;
   previewFile: any | null = null;
   
@@ -286,11 +324,40 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
   private _addActiveUploadSubs: Subscription[] = [];
   private _addActiveUploads = 0;
   isAddDragOver = false;
-  maxFileSize = 100 * 1024 * 1024;
+  maxFileSize = 200 * 1024 * 1024;
 
   private http = inject(HttpClient);
   private ngZone = inject(NgZone);
   private cdr = inject(ChangeDetectorRef);
+
+  // Upload FormData via XHR to get upload progress events (better UX for large files).
+  private uploadFormDataWithProgress(url: string, fd: FormData, onProgress?: (percent: number) => void): Promise<any> {
+    return new Promise((resolve, reject) => {
+      try {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', url, true);
+        // include credentials so same-origin cookies / auth headers are sent
+        xhr.withCredentials = true;
+        xhr.upload.onprogress = (ev: ProgressEvent<EventTarget>) => {
+          if (!ev.lengthComputable) return;
+          const pct = Math.round((ev.loaded / ev.total) * 100);
+          try { if (onProgress) onProgress(pct); } catch (_) {}
+        };
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try { resolve(JSON.parse(xhr.responseText)); } catch (e) { resolve(xhr.responseText); }
+          } else {
+            reject(new Error(`Upload failed with status ${xhr.status}`));
+          }
+        };
+        xhr.onerror = () => reject(new Error('Network error during upload'));
+        xhr.ontimeout = () => reject(new Error('Upload timeout'));
+        xhr.send(fd);
+      } catch (e) {
+        reject(e);
+      }
+    });
+  }
 
   openPreview(rowData: any) {
     const data = rowData._original || rowData;
@@ -871,16 +938,21 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
         fd.append('file', f, f.name);
         // optional: include metadata if backend expects (content-type, filename)
 
-        // perform upload to storage
-        entry.progress = 10; this.cdr.markForCheck();
-        const resp: any = await firstValueFrom((this.http as any).post('/api/storage/local', fd));
+        // perform upload to storage using XHR so we get progress events for large files
+        entry.progress = 1; this.cdr.markForCheck();
+        const resp: any = await this.uploadFormDataWithProgress('/api/storage/local', fd, (pct) => {
+          // map 0..100 -> 1..85 to leave room for server-side attach step
+          const mapped = Math.max(1, Math.min(85, Math.round(pct * 0.85)));
+          entry.progress = mapped;
+          try { this.cdr.markForCheck(); } catch (_) {}
+        });
         const storage = resp?.data ?? resp ?? {};
         const storageId = storage.id ?? storage.storage_id ?? storage.file_id ?? null;
         if (!storageId) {
           throw new Error('No storage id returned from /api/storage/local');
         }
 
-        entry.progress = 60; this.cdr.markForCheck();
+  entry.progress = 90; this.cdr.markForCheck();
         // attach to document
         await firstValueFrom((this.http as any).post(`/api/documents/${this.document.id}/files`, { storage_id: storageId, type_id: this.addModel.type_id, rev: this.addModel.rev }));
 
@@ -904,7 +976,13 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
       try { this.messageService.add({ severity: 'error', summary: `${failCount} file(s) failed`, detail: 'No files were attached' }); } catch(e) { this.messageService.add({ severity: 'error', summary: `${failCount} file(s) failed`, detail: 'No files were attached' }); }
     }
 
-    try { if (this.document && this.document.id) await this.loadFilesForDocument(this.document.id); } catch(_) {}
+    try {
+      if (this.document && this.document.id) {
+        await this.loadFilesForDocument(this.document.id);
+        // after reloading files, ensure the category we uploaded to is expanded
+        try { if (this.addModel && (this.addModel.type_id !== undefined && this.addModel.type_id !== null)) this._expandNodesForType(this.addModel.type_id, this.files); } catch(_) {}
+      }
+    } catch(_) {}
     if (keepOpen) {
       // remove uploaded previews but keep dialog open so user can add more files
       this.addUploadedFiles = (this.addUploadedFiles || []).filter(p => !p.uploaded);
@@ -957,14 +1035,7 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
     return `${val.toFixed(i === 0 ? 0 : 2)} ${sizes[i]}`;
   }
 
-  // derive initials from a single full-name string
-  initialsFromName(name?: string | null): string {
-    if (!name) return '';
-    const parts = String(name).trim().split(/\s+/).filter(Boolean);
-    if (!parts.length) return '';
-    if (parts.length === 1) return parts[0].slice(0,2).toUpperCase();
-    return (parts[0][0] + parts[1][0]).toUpperCase();
-  }
+
 
   // Format surname with initials for given name and patronymic or accept full-name string
   formatSurnameInitials(item: any): string {
@@ -1010,27 +1081,12 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
     }
     return undefined;
   }
+  // Use shared AvatarService to compute deterministic avatar background and text color
+  initialsFromName(name?: string | null): string { try { return this.avatarService.initialsFromName(name); } catch (e) { return ''; } }
 
-  avatarBg(user: any): string {
-    const seed = (user && (user.id ?? user.username ?? user.full_name ?? '')) || '';
-    const s = seed.toString();
-    let hash = 0;
-    for (let i = 0; i < s.length; i++) {
-      const ch = s.charCodeAt(i);
-      hash = ((hash << 5) - hash) + ch;
-      hash = hash & hash;
-    }
-    const hue = Math.abs(hash) % 360;
-    return `hsl(${hue}, 65%, 45%)`;
-  }
+  avatarColor(user: any): string { try { return this.avatarService.issueAvatarColor(user); } catch (e) { return ''; } }
 
-  avatarTextColor(user: any): string {
-    const bg = this.avatarBg(user);
-    const m = bg.match(/hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?\)/);
-    if (!m) return '#fff';
-    const lightness = Number(m[3]);
-    return lightness > 70 ? '#111' : '#fff';
-  }
+  avatarTextColor(user: any): string { try { return this.avatarService.issueAvatarTextColor(user); } catch (e) { return '#fff'; } }
 
   toggleApplications() {
     if (!this.files || this.files.length === 0) return;

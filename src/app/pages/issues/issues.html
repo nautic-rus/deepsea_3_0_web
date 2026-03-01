@@ -185,15 +185,13 @@
                             <ng-container *ngSwitchCase="'assignee_name'">
                                 <div class="flex items-center gap-2">
                                             <ng-container *ngIf="issue.assignee_avatar || issue.assignee_avatar_url; else assigneeInitials">
-                                                <p-avatar [image]="issue.assignee_avatar || issue.assignee_avatar_url" class="mr-2" shape="circle" >
+                                                <p-avatar [image]="issue.assignee_avatar || issue.assignee_avatar_url || undefined" shape="circle" >
                                                 </p-avatar>
                                             </ng-container>
                                             <ng-template #assigneeInitials>
-                                                <div class="user-avatar user-avatar-initials mr-2"
-                                                     [style.background]="issue.assignee_id ? issueAvatarColor({ id: issue.assignee_id, first_name: issue.assignee_name }) : undefined"
-                                                     [style.color]="issue.assignee_id ? issueAvatarTextColor({ id: issue.assignee_id, first_name: issue.assignee_name }) : undefined">
-                                                    {{ initialsFromName(issue.assignee_name) }}
-                                                </div>
+                                                <p-avatar [label]="initialsFromName(issue.assignee_name)" class="mr-2" shape="circle"
+                                                  [style.background]="issue.assignee_id ? issueAvatarColor({ id: issue.assignee_id, first_name: issue.assignee_name }) : undefined"
+                                                  [style.color]="issue.assignee_id ? issueAvatarTextColor({ id: issue.assignee_id, first_name: issue.assignee_name }) : undefined"></p-avatar>
                                             </ng-template>
                                             <span>{{ formatSurnameInitials(issue.assignee_name || issue) }}</span>
                                 </div>
@@ -201,14 +199,12 @@
                             <ng-container *ngSwitchCase="'author_name'">
                                 <div class="flex items-center gap-2">
                                     <ng-container *ngIf="issue.author_avatar || issue.author_avatar_url; else authorInitials">
-                                        <p-avatar [image]="issue.author_avatar || issue.author_avatar_url" class="mr-2" shape="circle"></p-avatar>
+                                        <p-avatar [image]="issue.author_avatar || issue.author_avatar_url || undefined" shape="circle" ></p-avatar>
                                     </ng-container>
                                     <ng-template #authorInitials>
-                                        <div class="user-avatar user-avatar-initials mr-2"
-                                             [style.background]="issue.author_id ? issueAvatarColor({ id: issue.author_id, first_name: issue.author_name }) : undefined"
-                                             [style.color]="issue.author_id ? issueAvatarTextColor({ id: issue.author_id, first_name: issue.author_name }) : undefined">
-                                            {{ initialsFromName(issue.author_name) }}
-                                        </div>
+                                        <p-avatar [label]="initialsFromName(issue.author_name)" class="mr-2" shape="circle"
+                                          [style.background]="issue.author_id ? issueAvatarColor({ id: issue.author_id, first_name: issue.author_name }) : undefined"
+                                          [style.color]="issue.author_id ? issueAvatarTextColor({ id: issue.author_id, first_name: issue.author_name }) : undefined"></p-avatar>
                                     </ng-template>
                                     <span>{{ formatSurnameInitials(issue.author_name || issue) }}</span>
                                 </div>
@@ -293,13 +289,13 @@
                 <div class="flex-1 flex flex-col gap-2">
                     <label for="assigneeId" class="font-bold">{{ 'components.issues.form.ASSIGNEE' | translate }}</label>
                     <p-select id="assigneeId" [options]="usersOptions" [(ngModel)]="editModel.assignee_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body">
-                        <ng-template let-opt pTemplate="item">
+                                <ng-template let-opt pTemplate="item">
                             <div class="flex items-center gap-2">
                                 <ng-container *ngIf="opt.avatar; else initialsItem">
                                     <img [src]="opt.avatar" alt="avatar" class="select-avatar" />
                                 </ng-container>
                                 <ng-template #initialsItem>
-                                    <div class="select-avatar-initials" [style.background]="selectAvatarBg(opt.label)" [style.color]="selectAvatarTextColor(opt.label)">{{ initialsFromName(opt.label) }}</div>
+                                    <p-avatar [label]="initialsFromName(opt.label)" class="mr-2" shape="circle" [style.background]="selectAvatarBg(opt.label)" [style.color]="selectAvatarTextColor(opt.label)"></p-avatar>
                                 </ng-template>
                                 <div>{{ opt.label }}</div>
                             </div>
@@ -310,7 +306,7 @@
                                     <img [src]="opt.avatar" alt="avatar" class="select-avatar" />
                                 </ng-container>
                                 <ng-template #initialsValue>
-                                    <div class="select-avatar-initials" [style.background]="selectAvatarBg(opt.label)" [style.color]="selectAvatarTextColor(opt.label)">{{ initialsFromName(opt.label) }}</div>
+                                    <p-avatar [label]="initialsFromName(opt.label)" class="mr-2" shape="circle" [style.background]="selectAvatarBg(opt.label)" [style.color]="selectAvatarTextColor(opt.label)"></p-avatar>
                                 </ng-template>
                                 <div>{{ opt.label }}</div>
                             </div>

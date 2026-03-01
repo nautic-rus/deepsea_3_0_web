@@ -346,9 +346,15 @@ import { AvatarService } from '../../services/avatar.service';
 			if (maxIndex >= 0) suggestedIndex = maxIndex + 1;
 		} catch (e) { /* ignore and leave suggestedIndex = 0 */ }
 
+		// Prefer storing the full TreeNode object as parent_id so p-treeSelect can display the label/path correctly.
+		let parentValue: any = parentId;
+		try {
+			const found = parentId != null ? this.findNodeById(this.files() as any, parentId) : null;
+			if (found) parentValue = found;
+		} catch (e) { /* ignore and keep numeric id */ }
 		this.newDir = {
 			name: '',
-			parent_id: parentId,
+			parent_id: parentValue,
 			order_index: suggestedIndex,
 			// inherit project_id from parent when opened from context menu
 			project_id: this.createDirFromContext ? (sel && sel.data && (sel.data.project_id ?? sel.data.projectId) ? (sel.data.project_id ?? sel.data.projectId) : null) : null
@@ -368,9 +374,17 @@ import { AvatarService } from '../../services/avatar.service';
 			this.editingDirId = (data.id ?? (node.key ? Number(node.key) : null)) as number | null;
 			// when editing from context, treat dialog as opened from context so Parent selector shows
 			this.createDirFromContext = true;
+			// Try to resolve parent as a TreeNode so the TreeSelect displays properly
+			let parentValue: any = (data.parent_id ?? null) as number | null;
+			try {
+				if (parentValue != null) {
+					const found = this.findNodeById(this.files() as any, parentValue as number);
+					if (found) parentValue = found;
+				}
+			} catch (e) { /* ignore */ }
 			this.newDir = {
 				name: data.name || '',
-				parent_id: (data.parent_id ?? null) as number | null,
+				parent_id: parentValue,
 				order_index: (data.order_index ?? 0) as number,
 				project_id: (data.project_id ?? data.projectId ?? null) as number | null
 			};
@@ -385,7 +399,8 @@ import { AvatarService } from '../../services/avatar.service';
 		try {
 			// build payload: only include defined fields
 			const payload: any = { name: String(this.newDir.name) };
-			if (this.newDir.parent_id !== null && this.newDir.parent_id !== undefined) payload.parent_id = this.newDir.parent_id;
+			const normalizedParent = this.normalizeId(this.newDir.parent_id);
+			if (normalizedParent !== null && normalizedParent !== undefined) payload.parent_id = normalizedParent;
 			if (this.newDir.project_id !== null && this.newDir.project_id !== undefined) payload.project_id = this.newDir.project_id;
 			if (this.newDir.order_index !== null && this.newDir.order_index !== undefined) payload.order_index = this.newDir.order_index;
 
@@ -497,7 +512,7 @@ import { AvatarService } from '../../services/avatar.service';
 							label: created.name || (created.data && created.data.name) || payload.name,
 							data: created.data || created
 						};
-						const parentId = (created.parent_id ?? this.newDir.parent_id) as number | null;
+						const parentId = (created.parent_id ?? this.normalizeId(this.newDir.parent_id)) as number | null;
 						if (parentId == null) {
 							const copyRoots = JSON.parse(JSON.stringify(current || [])) as TreeNode[];
 							copyRoots.push(newNode);
@@ -1150,6 +1165,25 @@ import { AvatarService } from '../../services/avatar.service';
 		try { this.cdr.detectChanges(); } catch (e) { /* ignore */ }
 	}
 
+	// Handler for TreeSelect used in Create/Edit Directory dialog.
+	// Keep the raw TreeSelect value (node object or primitive) in newDir.parent_id so the UI shows the label.
+	// Also sync project_id when node contains project info.
+	onCreateDirParentChange(value: any): void {
+		try {
+			this.newDir = this.newDir || { name: '', parent_id: null, order_index: 0, project_id: null };
+			// store raw value (TreeNode object or primitive). We'll normalize when sending payload.
+			this.newDir.parent_id = value;
+			if (value && typeof value === 'object') {
+				try {
+					if (value.data && (value.data.project_id !== undefined || value.data.projectId !== undefined)) {
+						this.newDir.project_id = value.data.project_id ?? value.data.projectId ?? this.newDir.project_id;
+					}
+				} catch (e) { /* ignore */ }
+			}
+		} catch (e) { /* ignore */ }
+		try { this.cdr.detectChanges(); } catch (e) { /* ignore */ }
+	}
+
 	// Resolve path (dir/dir/...) for a given TreeSelect value which may be a node or primitive
 	private getPathForDirectoryValue(value: any): string {
 		if (!value) return '';
@@ -1188,6 +1222,22 @@ import { AvatarService } from '../../services/avatar.service';
 		};
 		const pathParts = findPath(this.directoryTree || [], key) || [];
 		return pathParts.join('/');
+	}
+
+	/**
+	 * Normalize a TreeSelect value (TreeNode object, node.key or numeric/string id) into numeric id or null.
+	 */
+	private normalizeId(value: any): number | null {
+		try {
+			if (value == null || value === '') return null;
+			if (typeof value === 'object') {
+				if (value.data && (value.data.id !== undefined && value.data.id !== null)) return Number(value.data.id);
+				if (value.key !== undefined && value.key !== null) return Number(value.key);
+				return null;
+			}
+			const num = Number(value);
+			return Number.isFinite(num) ? num : null;
+		} catch (e) { return null; }
 	}
 
 	/**

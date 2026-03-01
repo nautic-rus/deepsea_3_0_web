@@ -79,17 +79,17 @@ interface UploadEvent {
   <p-table *ngIf="attachments && attachments.length" [value]="attachments" [dataKey]="'id'" class="w-full" size="small">
         <ng-template pTemplate="body" let-a>
           <tr>
-            <td class="col-w-18rem">
+            <td style="width:40%">
               <a *ngIf="a.url" [href]="a.url" target="_blank" rel="noopener" class="text-blue-600 dark:text-blue-400 hover:underline">{{ a.name }}</a>
               <span *ngIf="!a.url">{{ a.name }}</span>
             </td>
-            <td class="col-w-6rem">
+            <td style="width:15%">
               <span class="text-sm text-surface-500">{{ a.size ? formatBytes(a.size) : (a.size_mb ? (a.size_mb + ' MB') : '-') }}</span>
             </td>
-            <td class="col-w-8rem">
+            <td style="width:20%">
               <span class="text-sm text-surface-500">{{ (a.created_at || a.createdAt) ? ((a.created_at || a.createdAt) | date:'dd.MM.yyyy, HH:mm') : '-' }}</span>
             </td>
-            <td class="text-right col-w-6rem">
+            <td class="text-right" style="width:15%">
               <p-button icon="pi pi-download" class="mr-2" (click)="downloadFile(a)" [outlined]="true"></p-button>
             <p-button icon="pi pi-trash" severity="danger" (click)="removeFile(a)" [outlined]="true"></p-button>
             </td>

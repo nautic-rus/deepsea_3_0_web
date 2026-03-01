@@ -495,9 +495,11 @@
   "RESTORE": "Восстановить",
   "MISSING_DOCUMENT_ID": "Отсутствует id документа",
   "VIEW": "Просмотр",
-        "VALIDATION_REQUIRED": "TYPE и REV обязательны",
-        "NO_ATTACHMENTS": "Нет вложений",
-        "DOWNLOADING": "Подготовка скачивания...",
+  "VALIDATION_REQUIRED": "TYPE и REV обязательны",
+  "NO_FILES": "Нет файлов",
+  "NO_FILES_DESC": "К этому документу не прикреплены файлы. Нажмите «Добавить файл», чтобы загрузить вложения.",
+  "NO_ATTACHMENTS": "Нет вложений",
+  "DOWNLOADING": "Подготовка скачивания...",
         "DOWNLOAD_CANCELLED": "Скачивание отменено"
       },
       "history": {
@@ -793,8 +795,29 @@
         "DOCUMENT": "Document"
       },
       "CHANGE_STATUS": "Действия",
+      "history": {
+        "ACTION_CHANGED": "изменил",
+        "FIELDS": {
+          "project_id": "проект",
+          "specialization_id": "специализацию",
+          "assigne_to": "исполнителя",
+          "assignee_id": "исполнителя",
+          "created_at": "Дата создания",
+          "directory_id": "директрию",
+          "created_by": "Создал",
+          "description": "описание",
+          "title": "наименование",
+          "code": "номер",
+          "status_id": "статус",
+          "priority": "приоритет",
+          "due_date": "срок",
+          "estimated_hours": "оценочное время",
+          "storage_id": "хранилище"
+        }
+      },
       "chat": {
         "TITLE": "Активность",
+        "SAID": "написал",
         "PLACEHOLDER": "Отправить сообщение (Ctrl/Cmd + Enter)",
         "NO_MESSAGES": "Нет сообщений для отображения",
         "IN_REPLY_TO": "В ответ на",

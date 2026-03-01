@@ -211,17 +211,16 @@
           <div class="flex flex-col md:flex-row gap-4">
             <div class="flex items-center gap-4 flex-1">
               <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.documents.detail.AUTHOR' | translate }}</div>
-                          <div class="flex-1 flex items-center gap-3">
+                          <div class="flex-1 flex items-center gap-1">
                                   <p-avatar *ngIf="document?.author_avatar_url || document?.author_avatar; else authorInitialsTpl"
-                                    [image]="document?.author_avatar_url || document?.author_avatar"
-                                            
-                                    shape="circle"></p-avatar>
+                                    [image]="document?.author_avatar_url || document?.author_avatar || undefined"
+                                    shape="circle" styleClass="mr-2"></p-avatar>
                                   <ng-template #authorInitialsTpl>
                     <p-avatar
-                      [label]="document?.author_initials"
+                      [label]="initialsFromName(document?.author_name)"
                       shape="circle"
-                      [style.background]="document?.author_avatar_bg"
-                      [style.color]="document?.author_avatar_color"></p-avatar>
+                      [style.background]="document?.author_id ? issueAvatarColor({ id: document.author_id, first_name: document.author_name }) : undefined"
+                      [style.color]="document?.author_id ? issueAvatarTextColor({ id: document.author_id, first_name: document.author_name }) : undefined" class="mr-2"></p-avatar>
                                   </ng-template>
                                     <div class="text-surface-500 dark:text-surface-0 text-base leading-tight">{{ formatSurnameInitials(document?.author_name || document) }}</div>
                               </div>

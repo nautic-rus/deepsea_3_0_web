@@ -19,12 +19,14 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 import { TagModule } from 'primeng/tag';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { Select } from 'primeng/select';
+import { Avatar } from 'primeng/avatar';
+import { AvatarService } from '../../../services/avatar.service';
 import { MultiSelectModule } from 'primeng/multiselect';
 
 @Component({
   selector: 'app-projects-users',
   standalone: true,
-  imports: [CommonModule, TranslateModule, FormsModule, ToolbarModule, ButtonModule, TableModule, InputTextModule, InputIconModule, IconFieldModule, DialogModule, ToastModule, TagModule, ConfirmDialogModule, Select, MultiSelectModule],
+  imports: [CommonModule, TranslateModule, FormsModule, ToolbarModule, ButtonModule, TableModule, InputTextModule, InputIconModule, IconFieldModule, DialogModule, ToastModule, TagModule, ConfirmDialogModule, Select, MultiSelectModule, Avatar],
   providers: [MessageService, ConfirmationService],
   templateUrl: './projects-users.html',
   styleUrls: ['./projects-users.scss']
@@ -58,7 +60,7 @@ export class ProjectsUsersComponent implements OnInit {
   assignDialog = false;
   assignModel: { project_id?: any; user_id: any[]; roles: any[] } = { user_id: [], roles: [] };
 
-  constructor(private svc: ProjectsUsersService, private cd: ChangeDetectorRef, private messageService: MessageService, private translate: TranslateService, private usersService: UsersService, private confirmationService: ConfirmationService, private auth: AuthService) {}
+  constructor(private svc: ProjectsUsersService, private cd: ChangeDetectorRef, private messageService: MessageService, private translate: TranslateService, private usersService: UsersService, private confirmationService: ConfirmationService, private auth: AuthService, private avatarService: AvatarService) {}
 
   private safeDetect(): void {
     try { this.cd.detectChanges(); } catch (e) { /* noop */ }
@@ -279,6 +281,19 @@ export class ProjectsUsersComponent implements OnInit {
     if (!user) return '';
     const parts = [user.last_name, user.first_name, user.middle_name].filter((s: any) => !!s).map((s: any) => String(s).trim());
     return parts.join(' ').trim();
+  }
+
+  // Avatar helpers delegating to the shared AvatarService so colors/initials are consistent
+  initialsFromName(name?: string | null): string {
+    try { return this.avatarService.initialsFromName(name); } catch (e) { return ''; }
+  }
+
+  avatarColor(user?: any): string {
+    try { return this.avatarService.issueAvatarColor(user); } catch (e) { return ''; }
+  }
+
+  avatarTextColor(user?: any): string {
+    try { return this.avatarService.issueAvatarTextColor(user); } catch (e) { return '#fff'; }
   }
 
   getOwnerName(id: any): string {

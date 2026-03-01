@@ -11,7 +11,7 @@
             <ng-template let-opt pTemplate="item">
               <div class="flex items-center gap-2">
                 <ng-container *ngIf="opt?.avatar; else initialsTpl">
-                  <p-avatar [image]="opt.avatar" shape="circle" styleClass="mr-2"></p-avatar>
+                  <p-avatar [image]="opt.avatar || undefined" shape="circle" styleClass="mr-2"></p-avatar>
                 </ng-container>
                 <ng-template #initialsTpl>
                   <p-avatar [label]="initialsFromName(opt?.label)" shape="circle" [style.background]="issueAvatarColor({ first_name: opt?.label })" [style.color]="issueAvatarTextColor({ first_name: opt?.label })" styleClass="mr-2"></p-avatar>
@@ -22,7 +22,7 @@
             <ng-template let-opt pTemplate="selectedItem">
               <div class="flex items-center gap-2">
                 <ng-container *ngIf="opt?.avatar; else initialsTplSel">
-                  <p-avatar [image]="opt.avatar" shape="circle" styleClass="mr-2"></p-avatar>
+                  <p-avatar [image]="opt.avatar || undefined" shape="circle" styleClass="mr-2"></p-avatar>
                 </ng-container>
                 <ng-template #initialsTplSel>
                   <p-avatar [label]="initialsFromName(opt?.label)" shape="circle" [style.background]="issueAvatarColor({ first_name: opt?.label })" [style.color]="issueAvatarTextColor({ first_name: opt?.label })" styleClass="mr-2"></p-avatar>

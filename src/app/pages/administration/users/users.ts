@@ -132,6 +132,9 @@ export class AdminUsersComponent implements OnInit {
     this.loadDepartments();
   }
 
+  // Expose initials helper for templates to keep avatar logic consistent
+  initialsFromName(name?: string | null): string { try { return this.avatarService.initialsFromName(name); } catch (e) { return ''; } }
+
   // global filter helper for p-table caption search
   onGlobalFilter(table: any, event: Event): void {
     const val = (event && (event.target as HTMLInputElement)) ? (event.target as HTMLInputElement).value : '';
@@ -446,28 +449,21 @@ export class AdminUsersComponent implements OnInit {
 
   // Deterministic color generator based on user id/username/name
   avatarColor(user: User | any): string {
-    const seed = (user && (user.id ?? user.username ?? (user.first_name || '') + (user.last_name || ''))) || '';
-    const s = seed.toString();
-    let hash = 0;
-    for (let i = 0; i < s.length; i++) {
-      const ch = s.charCodeAt(i);
-      hash = ((hash << 5) - hash) + ch;
-      hash = hash & hash; // keep 32-bit
+    try {
+      return this.avatarService.issueAvatarColor(user);
+    } catch (e) {
+      // fallback to an empty string (no background) if service fails
+      return '';
     }
-    const hue = Math.abs(hash) % 360;
-    // return a saturated pastel color
-    return `hsl(${hue}, 65%, 45%)`;
   }
 
   // Choose white or dark text depending on background luminance
   avatarTextColor(user: User | any): string {
-    const bg = this.avatarColor(user);
-    // parse hsl(h, s%, l%) and use l to determine contrast
-    const m = bg.match(/hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?\)/);
-    if (!m) return '#fff';
-    const lightness = Number(m[3]);
-    // if lightness is high -> dark text, else white
-    return lightness > 70 ? '#111' : '#fff';
+    try {
+      return this.avatarService.issueAvatarTextColor(user);
+    } catch (e) {
+      return '#fff';
+    }
   }
 
   // Delete a single user after confirmation

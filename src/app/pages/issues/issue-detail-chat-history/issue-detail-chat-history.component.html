@@ -1,7 +1,7 @@
 <div class="chat-history" *ngIf="history.length">
   <h5 class="history-title">{{ 'components.issues.chat.HISTORY' | translate }}</h5>
   <div *ngFor="let h of history" class="chat-history-item">
-    <p-avatar [label]="(h.author || '').slice(0,2).toUpperCase()" styleClass="mr-2"></p-avatar>
+  <p-avatar [label]="avatarService.initialsFromName(h.author)" shape="circle" [style.background]="avatarService.issueAvatarColor({ first_name: h.author })" [style.color]="avatarService.issueAvatarTextColor({ first_name: h.author })" styleClass="mr-2"></p-avatar>
     <div class="chat-history-body">
       <div class="msg-header">
         <div class="font-medium">{{ h.author }}</div>

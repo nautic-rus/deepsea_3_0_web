@@ -60,10 +60,10 @@
             <ng-container *ngIf="rowData._original || rowData.file_name; else userEmptyTpl">
               <div class="flex items-center gap-2">
                 <p-avatar *ngIf="getUserAvatarUrl(rowData.user); else userInitialsTpl"
-                  [image]="getUserAvatarUrl(rowData.user)" shape="circle"></p-avatar>
+                  [image]="getUserAvatarUrl(rowData.user) || undefined" shape="circle" class="mr-2"></p-avatar>
                 <ng-template #userInitialsTpl>
                   <p-avatar [label]="initialsFromName(rowData.user?.full_name || rowData.user?.username)"
-                    shape="circle" [style.background]="avatarBg(rowData.user)" [style.color]="avatarTextColor(rowData.user)"></p-avatar>
+                    shape="circle" class="mr-2" [style.background]="avatarColor(rowData.user)" [style.color]="avatarTextColor(rowData.user)"></p-avatar>
                 </ng-template>
                 <div class="text-surface-500 dark:text-surface-0 text-base leading-normal">{{ formatSurnameInitials(rowData.user?.full_name || rowData.user) }}</div>
               </div>
@@ -91,6 +91,19 @@
         </tr>
       </ng-template>
     </p-treetable>
+    <!-- Empty placeholder when files are loaded but none exist -->
+    <div *ngIf="!loadingFiles && (!files || files.length === 0)" class="py-8 flex flex-col items-center justify-center text-center text-gray-600">
+      <div class="mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 8h10M7 12h6m2 8H5a2 2 0 01-2-2V6a2 2 0 012-2h3l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2z" />
+        </svg>
+      </div>
+      <h4 class="mb-2 text-lg font-medium">{{ 'components.documents.attach.NO_FILES' | translate }}</h4>
+      <p class="mb-4 text-sm text-surface-500">{{ 'components.documents.attach.NO_FILES_DESC' | translate }}</p>
+      <div>
+        <button pButton type="button" label="{{ 'components.documents.attach.ADD_FILE' | translate }}" icon="pi pi-plus" (click)="openAddDialog()" class="p-button-plain"></button>
+      </div>
+    </div>
   <!-- Spinner overlay shown while loading files (no text) -->
   <div *ngIf="loadingFiles" class="absolute inset-0 z-40 flex items-center justify-center bg-transparent">
     <p-progressSpinner styleClass="text-primary" strokeWidth="6"></p-progressSpinner>

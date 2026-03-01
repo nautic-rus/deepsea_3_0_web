@@ -7,6 +7,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { AvatarModule } from 'primeng/avatar';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { DocumentsService } from '../../../services/documents.service';
+import { AvatarService } from '../../../services/avatar.service';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 
@@ -34,14 +35,14 @@ import { ToastModule } from 'primeng/toast';
         <ng-container *ngFor="let group of grouped()">
           <ul *ngIf="group.items && group.items.length" class="documents-history-group p-0 m-0 list-none mb-6">
             <li *ngFor="let ev of group.items" class="flex items-start mb-3" [attr.id]="ev.type === 'message' && ev.id ? ('msg-' + ev.id) : null" [class.message-highlight]="ev.type === 'message' && ev.id == highlightedMessageId">
-              <div class="w-10 h-10 flex items-center justify-center rounded-full mr-4 shrink-0 avatar-wrap" [ngClass]="colorFor(ev.type)">
+              <div class="w-10 h-10 flex items-center mr-2">
                 <ng-container *ngIf="ev?.avatar_url; else initialsTpl">
-                  <div class="p-avatar full-avatar">
-                    <img [src]="ev.avatar_url" alt="avatar" (error)="onMessageAvatarError(ev)" />
-                  </div>
+                  <p-avatar [image]="ev.avatar_url || undefined" shape="circle"  (imageError)="onMessageAvatarError(ev)"></p-avatar>
                 </ng-container>
                 <ng-template #initialsTpl>
-                  <div class="p-avatar full-avatar">{{ initials(ev.actor) }}</div>
+                  <p-avatar [label]="initialsFromName(ev.actor)" shape="circle" 
+                    [style.background]="avatarColor(ev.raw?.user ?? { first_name: ev.actor })"
+                    [style.color]="avatarTextColor(ev.raw?.user ?? { first_name: ev.actor })"></p-avatar>
                 </ng-template>
               </div>
               <div class="flex-1">
@@ -114,6 +115,7 @@ import { ToastModule } from 'primeng/toast';
 })
 export class DocumentsDetailChatComponent implements OnChanges, AfterViewInit {
   private documentsService = inject(DocumentsService);
+  public avatarService = inject(AvatarService);
   private messageService = inject(MessageService);
   private translate = inject(TranslateService);
   private cdr = inject(ChangeDetectorRef);
@@ -561,12 +563,15 @@ export class DocumentsDetailChatComponent implements OnChanges, AfterViewInit {
   }
 
   initials(name?: string): string {
-    if (!name) return '';
-    const parts = String(name).trim().split(/\s+/).filter(Boolean);
-    if (!parts.length) return '';
-    if (parts.length === 1) return parts[0].slice(0,2).toUpperCase();
-    return (parts[0][0] + parts[1][0]).toUpperCase();
+    try { return this.avatarService.initialsFromName(name); } catch (e) { return ''; }
   }
+
+  // Expose AvatarService helpers to the template for consistent initials/colors
+  initialsFromName(name?: string | null): string { try { return this.avatarService.initialsFromName(name); } catch (e) { return ''; } }
+
+  avatarColor(user?: any): string { try { return this.avatarService.issueAvatarColor(user); } catch (e) { return ''; } }
+
+  avatarTextColor(user?: any): string { try { return this.avatarService.issueAvatarTextColor(user); } catch (e) { return '#fff'; } }
 
   /**
    * Shorten a full name into "Surname I.O." style.

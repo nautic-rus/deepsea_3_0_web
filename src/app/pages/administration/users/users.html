@@ -147,10 +147,10 @@
                     <td>
                         <div class="flex items-center gap-2">
                             <ng-container *ngIf="user?.avatar_url; else initialsTpl">
-                                <p-avatar [image]="user.avatar_url" class="mr-2" shape="circle" />
+                                <p-avatar [image]="user.avatar_url || undefined" shape="circle" styleClass="mr-2"></p-avatar>
                             </ng-container>
                             <ng-template #initialsTpl>
-                                <div class="user-avatar user-avatar-initials" [style.background]="avatarColor(user)" [style.color]="avatarTextColor(user)">{{ getInitials(user) }}</div>
+                                <p-avatar [label]="initialsFromName(user?.full_name || user?.first_name || user?.username)" shape="circle" [style.background]="avatarColor(user)" [style.color]="avatarTextColor(user)" class="mr-2"></p-avatar>
                             </ng-template>
                             <span>{{ formatSurnameInitials(user) }}</span>
                         </div>

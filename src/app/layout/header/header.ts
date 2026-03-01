@@ -14,6 +14,8 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
 import { AuthService } from '../../auth/auth.service';
 import { AuthGuard } from '../../auth/auth.guard';
 import { PagesService } from '../../services/pages.service';
+import { UsersService } from '../../pages/administration/users/users.service';
+import { AvatarService } from '../../services/avatar.service';
 
 @Component({
   selector: 'app-header',
@@ -54,6 +56,8 @@ export class HeaderComponent implements OnInit {
     private authService: AuthService,
     private authGuard: AuthGuard,
     private pagesService: PagesService,
+    private usersService: UsersService,
+    private avatarService: AvatarService,
     private cdr: ChangeDetectorRef,
     private translate: TranslateService
   ) {
@@ -193,9 +197,30 @@ export class HeaderComponent implements OnInit {
     this.authService.me().subscribe({
       next: (u) => {
         if (!u) { return; }
+        // store shallow user first
         this.currentUser = u;
         try { sessionStorage.setItem('currentUser', JSON.stringify(u)); } catch (e) { console.warn('sessionStorage.setItem currentUser failed', e); }
-        this.applyAvatarFromUser(u);
+        // Try to fetch canonical user record (may contain avatar_url field) via UsersService
+        const uid = this.getUserId(u);
+        if (uid) {
+          this.usersService.getUser(uid).subscribe({
+            next: (full: any) => {
+              if (full) {
+                this.currentUser = full;
+                try { sessionStorage.setItem('currentUser', JSON.stringify(full)); } catch (e) {}
+                this.applyAvatarFromUser(full);
+              } else {
+                this.applyAvatarFromUser(u);
+              }
+            },
+            error: () => {
+              // fallback to shallow user
+              this.applyAvatarFromUser(u);
+            }
+          });
+        } else {
+          this.applyAvatarFromUser(u);
+        }
       },
       error: () => {}
     });
@@ -209,27 +234,34 @@ export class HeaderComponent implements OnInit {
       this.safeDetect();
       return;
     }
-    const candidates = ['avatarUrl','avatar','photo','image','profilePicture','picture','avatar_url','profile_image'];
-    let url: string | undefined;
-    for (const k of candidates) {
-      const v = u?.[k];
-      if (typeof v === 'string' && v.trim()) { url = v.trim(); break; }
-    }
-    // New API may return avatar_id instead of avatar_url — map it to a URL path.
-    // Assumption: uploaded avatars are served from '/uploads/{id}'. If your backend uses a different
-    // path (for example '/files/{id}' or '/api/attachments/{id}/download'), update the template below.
-    if (!url && (u?.avatar_id || u?.avatarId)) {
-      const aid = u?.avatar_id ?? u?.avatarId;
-      try {
-        if (typeof aid === 'number' || (typeof aid === 'string' && String(aid).trim())) {
-          // Use storage download endpoint for avatars by id
-          url = `/api/storage/${String(aid).trim()}/download`;
-        }
-      } catch (e) { /* ignore */ }
+    // Prefer canonical `avatar_url` if present (UsersService normalizes this on users list).
+    let url: string | undefined = undefined;
+    if (u) {
+      url = u.avatar_url || u.avatarUrl || u.avatar || u.photo || u.image || u.profilePicture || u.picture || u.profile_image || undefined;
+      if (!url && (u.avatar_id || u.avatarId)) {
+        const aid = u.avatar_id ?? u.avatarId;
+        try {
+          if (typeof aid === 'number' || (typeof aid === 'string' && String(aid).trim())) {
+            url = `/api/storage/${String(aid).trim()}/download`;
+          }
+        } catch (e) { /* ignore */ }
+      }
     }
     this.avatarUrl = url;
     this.avatarLabel = this.avatarUrl ? undefined : (this.computeInitials(u) || undefined);
     this.safeDetect();
+  }
+
+  // Public helpers delegated to AvatarService so header rendering matches users list
+  initialsFromName(name?: string | null): string { try { return this.avatarService.initialsFromName(name); } catch (e) { return ''; } }
+
+  avatarColor(user: any): string { try { return this.avatarService.issueAvatarColor(user); } catch (e) { return '#888'; } }
+
+  avatarTextColor(user: any): string { try { return this.avatarService.issueAvatarTextColor(user); } catch (e) { return '#fff'; } }
+
+  private getUserId(u: any): any {
+    if (!u) return null;
+    return u.id ?? u.user_id ?? u._id ?? u.id_str ?? u.uid ?? null;
   }
 
   private computeInitials(u: any): string | null {

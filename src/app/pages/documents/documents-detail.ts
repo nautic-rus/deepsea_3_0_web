@@ -258,8 +258,9 @@ export class DocumentsDetailComponent implements OnInit {
         };
   const nodeRef = (this.directoryTree || []).map((n: any) => findNodeRef(n)).find(Boolean) || null;
   this.editModel = this.editModel || {};
-  // Set primitive id (number) instead of TreeNode object so backend receives an integer
-  this.editModel.directory_id = idNum;
+  // Prefer setting the TreeNode object as the model so p-treeSelect displays the label/path correctly.
+  // When saving, saveDocument() normalizes tree node objects to numeric ids.
+  this.editModel.directory_id = nodeRef || { key: String(idNum), data: { id: idNum }, label: `ID ${String(idNum)}` };
   try { this.directoryPlaceholder = this.getPathForDirectoryValue(this.editModel.directory_id); } catch (e) { this.directoryPlaceholder = ''; }
         this.pendingDirectoryKey = null;
         this.cdr.markForCheck();
@@ -397,20 +398,10 @@ export class DocumentsDetailComponent implements OnInit {
 
   // Called when TreeSelect model changes (user selects a directory). Accepts either a TreeNode object or a primitive key.
   onDirectoryNgModelChange(value: any): void {
-    // Normalize TreeNode -> primitive id and update model so server receives integer id
-    let normalized: any = null;
-    try {
-      if (value === null || value === undefined || value === '') normalized = null;
-      else if (typeof value === 'object') {
-        if (value.data && (value.data.id !== undefined && value.data.id !== null)) normalized = value.data.id;
-        else if (value.key !== undefined && value.key !== null) normalized = (typeof value.key === 'number' ? value.key : Number(value.key));
-        else normalized = null;
-      } else {
-        normalized = (typeof value === 'number' ? value : (String(value).trim() === '' ? null : Number(value)));
-      }
-    } catch (e) { normalized = null; }
-    try { this.editModel = this.editModel || {}; this.editModel.directory_id = normalized; } catch (e) { /* ignore */ }
-    try { this.directoryPlaceholder = this.getPathForDirectoryValue(normalized); } catch (e) { this.directoryPlaceholder = ''; }
+    // Keep the raw TreeSelect value (TreeNode object or primitive key/string) in the model
+    // so PrimeNG TreeSelect can display the selected node label/path correctly.
+    try { this.editModel = this.editModel || {}; this.editModel.directory_id = value; } catch (e) { /* ignore */ }
+    try { this.directoryPlaceholder = this.getPathForDirectoryValue(value); } catch (e) { this.directoryPlaceholder = ''; }
     this.cdr.markForCheck();
   }
 

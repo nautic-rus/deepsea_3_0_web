@@ -509,9 +509,11 @@
   "VIEW": "View",
   "VALIDATION_REQUIRED": "TYPE and REV are required"
         ,
-        "DOWNLOADING": "Preparing download..."
-        ,
-        "NO_ATTACHMENTS": "No attachments",
+  "DOWNLOADING": "Preparing download..."
+  ,
+  "NO_FILES": "No files",
+  "NO_FILES_DESC": "There are no files attached to this document. Use \"Add file\" to upload attachments.",
+  "NO_ATTACHMENTS": "No attachments",
         "DOWNLOAD_CANCELLED": "Download cancelled"
       },
       "history": {
@@ -765,8 +767,29 @@
         "DOCUMENT": "Document"
       },
       "CHANGE_STATUS": "Change status",
+      "history": {
+        "ACTION_CHANGED": "changed",
+        "FIELDS": {
+          "project_id": "project",
+          "specialization_id": "specialization",
+          "assigne_to": "assignee",
+          "assignee_id": "assignee",
+          "created_at": "Created at",
+          "directory_id": "directory",
+          "created_by": "Created by",
+          "description": "description",
+          "title": "title",
+          "code": "number",
+          "status_id": "status",
+          "priority": "priority",
+          "due_date": "due date",
+          "estimated_hours": "estimated hours",
+          "storage_id": "storage"
+        }
+      },
       "chat": {
         "TITLE": "Activity",
+        "SAID": "said",
         "PLACEHOLDER": "Write a message...",
         "NO_MESSAGES": "No messages to display",
         "HISTORY": "History",

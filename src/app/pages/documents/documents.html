@@ -11,7 +11,7 @@
 								<p-button  severity="secondary" icon="pi pi-minus" (onClick)="collapseAll()"></p-button>
 							</div>
 			  <div class="pr-4" id="documents-tree-container">
-							<p-tree #tree [value]="files()" class="w-full" selectionMode="single" [(selection)]="selectedFile" (onNodeSelect)="onDirectorySelect($event.node)" (onNodeContextMenuSelect)="onTreeNodeContextMenu($event)" [contextMenu]="treeCm" [draggableNodes]="true" [droppableNodes]="true" dragdropScope="documents" ></p-tree>
+							<p-tree #tree [value]="files()" class="w-full" selectionMode="single" [(selection)]="selectedFile" (onNodeSelect)="onDirectorySelect($event.node)" (onNodeContextMenuSelect)="onTreeNodeContextMenu($event)" [contextMenu]="treeCm"></p-tree>
 							<p-contextMenu #treeCm [model]="treeItems"></p-contextMenu>
 			  </div>
             </div>
@@ -43,12 +43,12 @@
 
 							<div class="flex flex-col gap-2" *ngIf="createDirFromContext && !isEditingDir">
 								<label class="font-bold"  for="dirParent">{{ 'components.documents.form.PARENT_DIRECTORY' | translate }}</label>
-								<p-select id="dirParent" [options]="directoryOptions" optionLabel="label" optionValue="value" [(ngModel)]="newDir.parent_id" name="parent_id" placeholder="-" appendTo="body"></p-select>
+								<p-treeSelect id="dirParent" [options]="directoryTreeFiltered || directoryTree" [(ngModel)]="newDir.parent_id" (ngModelChange)="onCreateDirParentChange($event)" placeholder="-" appendTo="body"></p-treeSelect>
 							</div>
 
 							<div *ngIf="createDirFromContext && isEditingDir" class="flex flex-col gap-2">
 								<label class="font-bold"  for="dirParentEdit">{{ 'components.documents.form.PARENT_DIRECTORY' | translate }}</label>
-								<p-select id="dirParentEdit" [options]="directoryOptions" optionLabel="label" optionValue="value" [(ngModel)]="newDir.parent_id" name="parent_id" placeholder="-" appendTo="body"></p-select>
+								<p-treeSelect id="dirParentEdit" [options]="directoryTreeFiltered || directoryTree" [(ngModel)]="newDir.parent_id" (ngModelChange)="onCreateDirParentChange($event)" placeholder="-" appendTo="body"></p-treeSelect>
 							</div>
 
 							<div *ngIf="isEditingDir" class="flex flex-col gap-2">
@@ -421,30 +421,28 @@
 											<ng-container *ngSwitchCase="'assignee_name'">
 												<div class="flex items-center gap-2">
 													<ng-container *ngIf="issue.assignee_avatar || issue.assignee_avatar_url; else assigneeInitials">
-														<p-avatar [image]="issue.assignee_avatar || issue.assignee_avatar_url" class="mr-2" shape="circle"></p-avatar>
-													</ng-container>
-													<ng-template #assigneeInitials>
-														<div class="user-avatar user-avatar-initials mr-2"
-															[style.background]="issue.assignee_id ? issueAvatarColor({ id: issue.assignee_id, first_name: issue.assignee_name }) : undefined"
-															[style.color]="issue.assignee_id ? issueAvatarTextColor({ id: issue.assignee_id, first_name: issue.assignee_name }) : undefined">
-															{{ initialsFromName(issue.assignee_name) }}
-														</div>
-													</ng-template>
+															<p-avatar [image]="issue.assignee_avatar || issue.assignee_avatar_url || undefined" shape="circle" styleClass="mr-2"></p-avatar>
+														</ng-container>
+														<ng-template #assigneeInitials>
+															<p-avatar [label]="initialsFromName(issue.assignee_name)" shape="circle"
+																[style.background]="issue.assignee_id ? issueAvatarColor({ id: issue.assignee_id, first_name: issue.assignee_name }) : undefined"
+																[style.color]="issue.assignee_id ? issueAvatarTextColor({ id: issue.assignee_id, first_name: issue.assignee_name }) : undefined"
+																styleClass="mr-2"></p-avatar>
+														</ng-template>
 													<span>{{ formatSurnameInitials(issue.assignee_name || issue) }}</span>
 												</div>
 											</ng-container>
 											<ng-container *ngSwitchCase="'author_name'">
 												<div class="flex items-center gap-2">
 													<ng-container *ngIf="issue.author_avatar || issue.author_avatar_url; else authorInitials">
-														<p-avatar [image]="issue.author_avatar || issue.author_avatar_url" class="mr-2" shape="circle"></p-avatar>
-													</ng-container>
-													<ng-template #authorInitials>
-														<div class="user-avatar user-avatar-initials mr-2"
-															[style.background]="issue.author_id ? issueAvatarColor({ id: issue.author_id, first_name: issue.author_name }) : undefined"
-															[style.color]="issue.author_id ? issueAvatarTextColor({ id: issue.author_id, first_name: issue.author_name }) : undefined">
-															{{ initialsFromName(issue.author_name) }}
-														</div>
-													</ng-template>
+															<p-avatar [image]="issue.author_avatar || issue.author_avatar_url || undefined" shape="circle" styleClass="mr-2"></p-avatar>
+														</ng-container>
+														<ng-template #authorInitials>
+															<p-avatar [label]="initialsFromName(issue.author_name)" shape="circle"
+																[style.background]="issue.author_id ? issueAvatarColor({ id: issue.author_id, first_name: issue.author_name }) : undefined"
+																[style.color]="issue.author_id ? issueAvatarTextColor({ id: issue.author_id, first_name: issue.author_name }) : undefined"
+																styleClass="mr-2"></p-avatar>
+														</ng-template>
 													<span>{{ formatSurnameInitials(issue.author_name || issue) }}</span>
 												</div>
 											</ng-container>

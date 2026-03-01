@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { AvatarModule } from 'primeng/avatar';
 import { TranslateModule } from '@ngx-translate/core';
 import { IssuesService } from '../../../services/issues.service';
+import { AvatarService } from '../../../services/avatar.service';
 
 @Component({
   selector: 'app-issue-detail-chat-history',
@@ -17,7 +18,7 @@ export class IssueDetailChatHistoryComponent implements OnChanges {
   loading = false;
   history: Array<{ author: string; text: string; time?: any }> = [];
 
-  constructor(private issuesService: IssuesService, private cdr: ChangeDetectorRef) {}
+  constructor(private issuesService: IssuesService, private cdr: ChangeDetectorRef, public avatarService: AvatarService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['issueId']) {
