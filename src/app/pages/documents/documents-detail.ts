@@ -26,6 +26,7 @@ import { forkJoin } from 'rxjs';
 import { DocumentsService } from '../../services/documents.service';
 import { NodeService } from '../../services/nodeservice';
 import { AvatarService } from '../../services/avatar.service';
+import { LinksService } from '../../services/links.service';
 import { DocumentsDetailAttachComponent } from './documents-detail-attach/documents-detail-attach';
 import { DocumentsDetailRelationsTableComponent } from './documents-detail-relations-table';
 import { DocumentsDetailChatComponent } from './documents-detail-chat/documents-detail-chat.component';
@@ -63,6 +64,7 @@ export class DocumentsDetailComponent implements OnInit {
   stagesOptions: { label: string; value: any }[] = [];
   specializationsOptions: { label: string; value: any }[] = [];
   directoryTree: any[] = [];
+  directoryTreeFiltered: any[] = [];
   directoryPlaceholder: string = '';
   private pendingDirectoryKey: string | null = null;
   displayAddRelationDialog = false;
@@ -90,6 +92,7 @@ export class DocumentsDetailComponent implements OnInit {
   private documentsService = inject(DocumentsService);
   private nodeService = inject(NodeService);
   private avatarService = inject(AvatarService);
+  private linksService = inject(LinksService);
 
   constructor() {
     const idStr = this.route.snapshot.paramMap.get('id');
@@ -328,6 +331,11 @@ export class DocumentsDetailComponent implements OnInit {
       this.loadSpecializations();
     } catch (e) {}
 
+    // Initialize filtered directory tree for the current project so TreeSelect shows project-specific nodes
+    try {
+      this.onEditProjectChange(this.editModel.project_id ?? this.document?.project_id ?? null);
+    } catch (e) { /* ignore */ }
+
   // Ensure assignee value is taken from server field 'assigne_to' (some responses use this name)
     const assigneeId = this.document?.assigne_to ?? this.document?.assignee_id ?? this.document?.assigneTo ?? null;
     if (assigneeId != null) {
@@ -403,9 +411,42 @@ export class DocumentsDetailComponent implements OnInit {
 
   // Called when project selection changes in edit form: reload stages for selected project
   onEditProjectChange(projectId: any): void {
+    this.loadStages(projectId);
+    // reset stage selection to avoid stale selection
+    if (this.editModel) this.editModel.stage_id = null;
     try {
-      this.loadStages(projectId);
-    } catch (e) { /* ignore */ }
+      // when no project selected, clear filtered tree and placeholder
+      if (projectId === null || projectId === undefined || projectId === '') {
+        this.directoryTreeFiltered = [];
+        if (this.editModel) {
+          this.editModel.directory_id = null;
+          this.directoryPlaceholder = '';
+        }
+        try { this.cdr.detectChanges(); } catch (e) { /* ignore */ }
+        return;
+      }
+      // ensure we have the full tree loaded; if not, fetch it first then apply filter
+      if (!this.directoryTree || !this.directoryTree.length) {
+        this.nodeService.getFiles().then((data) => {
+          this.directoryTree = data || [];
+          this.directoryTreeFiltered = this.filterDirectoryTree(this.directoryTree, projectId);
+          // clear directory selection when project changes
+          if (this.editModel) this.editModel.directory_id = null;
+          try { this.cdr.detectChanges(); } catch (e) { /* ignore */ }
+        }).catch((e) => {
+          this.directoryTreeFiltered = [];
+          if (this.editModel) this.editModel.directory_id = null;
+          try { this.cdr.detectChanges(); } catch (er) { /* ignore */ }
+        });
+      } else {
+        this.directoryTreeFiltered = this.filterDirectoryTree(this.directoryTree, projectId);
+        if (this.editModel) {
+          this.editModel.directory_id = null;
+          this.directoryPlaceholder = '';
+        }
+        try { this.cdr.detectChanges(); } catch (e) { /* ignore */ }
+      }
+    } catch (e) { /* ignore filter errors */ }
     this.cdr.markForCheck();
   }
 
@@ -456,6 +497,35 @@ export class DocumentsDetailComponent implements OnInit {
 
     const pathParts = findPath(this.directoryTree || [], key) || [];
     return pathParts.join('/');
+  }
+
+  /**
+   * Filter a directory tree to only include nodes that belong to given projectId.
+   * Keeps parent nodes if any child matches.
+   */
+  private filterDirectoryTree(tree: any[] | undefined, projectId: any): any[] {
+    if (!tree || !tree.length) return [];
+    // if no project selected, show full tree
+    if (projectId === null || projectId === undefined || projectId === '') return tree;
+    const pid = projectId;
+    const filterNode = (n: any): any | null => {
+      if (!n) return null;
+      const dataProj = n?.data?.project_id ?? n?.data?.projectId ?? null;
+      let children: any[] = [];
+      if (n.children && Array.isArray(n.children)) {
+        children = n.children.map((c: any) => filterNode(c)).filter(Boolean);
+      }
+      // match only when node explicitly belongs to the project (do NOT include nodes with empty project_id)
+      const matches = (dataProj !== null && dataProj !== undefined && String(dataProj) !== '') && (String(dataProj) === String(pid));
+      if (matches || (children && children.length)) {
+        const copy: any = { ...n };
+        if (children && children.length) copy.children = children;
+        else delete copy.children;
+        return copy;
+      }
+      return null;
+    };
+    return tree.map(n => filterNode(n)).filter(Boolean);
   }
 
   loadProjects(): void {
@@ -985,14 +1055,14 @@ export class DocumentsDetailComponent implements OnInit {
       if (type === 'blocks') {
         if (this.relationForm.direction === 'source') {
           // current document blocks selected issue -> current is source
-          tasks.push(this.http.post('/api/links', buildPayload('document', sourceId, 'issue', id)));
+          tasks.push(this.linksService.createLink(buildPayload('document', sourceId, 'issue', id)));
         } else {
           // selected issue blocks current -> selected is source
-          tasks.push(this.http.post('/api/links', buildPayload('issue', id, 'document', sourceId)));
+          tasks.push(this.linksService.createLink(buildPayload('issue', id, 'document', sourceId)));
         }
       } else {
         // relates - directionless; create link with current as source for consistency
-        tasks.push(this.http.post('/api/links', buildPayload('document', sourceId, 'issue', id)));
+        tasks.push(this.linksService.createLink(buildPayload('document', sourceId, 'issue', id)));
       }
     }
 
@@ -1002,13 +1072,13 @@ export class DocumentsDetailComponent implements OnInit {
       if (type === 'blocks') {
         if (this.relationForm.direction === 'source') {
           // current document blocks document: current is source, document target
-          tasks.push(this.http.post('/api/links', buildPayload('document', sourceId, 'document', id)));
+          tasks.push(this.linksService.createLink(buildPayload('document', sourceId, 'document', id)));
         } else {
           // document blocks current -> document as source
-          tasks.push(this.http.post('/api/links', buildPayload('document', id, 'document', sourceId)));
+          tasks.push(this.linksService.createLink(buildPayload('document', id, 'document', sourceId)));
         }
       } else {
-        tasks.push(this.http.post('/api/links', buildPayload('document', sourceId, 'document', id)));
+        tasks.push(this.linksService.createLink(buildPayload('document', sourceId, 'document', id)));
       }
     }
 

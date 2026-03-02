@@ -22,7 +22,7 @@
                     <div class="flex-1 flex flex-col gap-2">
                       <label class="font-bold">{{ 'components.documents.form.DIRECTORY' | translate }}</label>
                       <!-- Use TreeNode objects as the model value (remove optionValue) so selected node label/path displays correctly -->
-                      <p-treeSelect [options]="directoryTree" [(ngModel)]="editModel.directory_id" [placeholder]="directoryPlaceholder || ('MENU.ANY' | translate)" (ngModelChange)="onDirectoryNgModelChange($event)" appendTo="body"></p-treeSelect>
+                      <p-treeSelect [options]="(directoryTreeFiltered && directoryTreeFiltered.length ? directoryTreeFiltered : directoryTree)" [(ngModel)]="editModel.directory_id" [placeholder]="directoryPlaceholder || ('MENU.ANY' | translate)" (ngModelChange)="onDirectoryNgModelChange($event)" appendTo="body"></p-treeSelect>
       
                     </div>
 
@@ -56,7 +56,7 @@
                     
                     <div class="flex-1 flex flex-col gap-2">
                       <label class="font-bold">{{ 'components.documents.form.PROJECT' | translate }}</label>
-                      <p-select [options]="projectOptions" [(ngModel)]="editModel.project_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body">
+                      <p-select [options]="projectOptions" [(ngModel)]="editModel.project_id" (ngModelChange)="onEditProjectChange($event)" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body">
                         <ng-template let-opt pTemplate="item">
                           <div class="flex items-center gap-2">
                             <div>{{ opt.label }}</div>
@@ -226,28 +226,19 @@
             </div>
                         
           </div>
+          <div class="border-t border-surface-200 dark:border-surface-700"></div>
+          <!-- <div class="border-t border-surface-200 dark:border-surface-700"></div> -->
 
           <!-- <div class="border-t border-surface-200 dark:border-surface-700"></div> -->
 
-          <!-- <div class="flex flex-col md:flex-row gap-4">
+          <!-- Comment (from API: comment) -->
+          <div class="flex flex-col md:flex-row gap-4">
             <div class="flex items-start gap-4 flex-1">
-              <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.documents.detail.ASSIGNEE' | translate }}</div>
-                            <div class="flex-1 flex items-center gap-3">
-                                <p-avatar *ngIf="document?.assignee_avatar_url || document?.assignee_avatar; else assigneeInitialsTpl"
-                                  [image]="document?.assignee_avatar_url || document?.assignee_avatar"
-                                                                    
-                                  shape="circle"></p-avatar>
-                                <ng-template #assigneeInitialsTpl>
-                                  <p-avatar
-                                    [label]="document?.assignee_initials"
-                                    shape="circle"
-                                    [style]="{ 'background-color': document?.assignee_avatar_bg, color: document?.assignee_avatar_color }"></p-avatar>
-                                </ng-template>
-                                <div class="text-surface-500 dark:text-surface-0 text-base leading-normal">{{ formatSurnameInitials(document?.assignee_name || document) }}</div>
-                            </div>
+              <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.documents.form.COMMENT' | translate }}</div>
+              <div class="flex-1 text-surface-500 dark:text-surface-0 text-base leading-normal">{{ document?.comment || '-' }}</div>
             </div>
-                        
-          </div> -->
+          </div>
+          
           <!-- <div class="border-t border-surface-200 dark:border-surface-700"></div>
 
           <div class="flex flex-col md:flex-row gap-4">

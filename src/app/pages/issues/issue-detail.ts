@@ -28,6 +28,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
 import { AvatarService } from '../../services/avatar.service';
+import { LinksService } from '../../services/links.service';
 
 @Component({
   selector: 'app-issue-detail',
@@ -75,7 +76,7 @@ export class IssueDetailComponent implements OnInit {
   displayDeleteDialog = false;
   deleting = false;
 
-  constructor(private route: ActivatedRoute, private router: Router, private issuesService: IssuesService, private http: HttpClient, private messageService: MessageService, private cdr: ChangeDetectorRef, private translate: TranslateService, private avatarService: AvatarService) {
+  constructor(private route: ActivatedRoute, private router: Router, private issuesService: IssuesService, private http: HttpClient, private messageService: MessageService, private cdr: ChangeDetectorRef, private translate: TranslateService, private avatarService: AvatarService, private linksService: LinksService) {
     // read route param synchronously in constructor to avoid ExpressionChangedAfterItHasBeenCheckedError
     // normalize numeric ids so initial template value type matches the server-provided issue.id
     const idStr = this.route.snapshot.paramMap.get('id');
@@ -478,14 +479,14 @@ export class IssueDetailComponent implements OnInit {
       if (type === 'blocks') {
         if (this.relationForm.direction === 'source') {
           // current issue blocks selected -> current is source
-          tasks.push(this.http.post('/api/links', buildPayload('issue', sourceId, 'issue', id)));
+          tasks.push(this.linksService.createLink(buildPayload('issue', sourceId, 'issue', id)));
         } else {
           // selected blocks current -> selected is source
-          tasks.push(this.http.post('/api/links', buildPayload('issue', id, 'issue', sourceId)));
+          tasks.push(this.linksService.createLink(buildPayload('issue', id, 'issue', sourceId)));
         }
       } else {
         // relates - directionless; create link with current as source for consistency
-        tasks.push(this.http.post('/api/links', buildPayload('issue', sourceId, 'issue', id)));
+        tasks.push(this.linksService.createLink(buildPayload('issue', sourceId, 'issue', id)));
       }
     }
 
@@ -495,13 +496,13 @@ export class IssueDetailComponent implements OnInit {
       if (type === 'blocks') {
         if (this.relationForm.direction === 'source') {
           // current issue blocks document: current is source, document target
-          tasks.push(this.http.post('/api/links', buildPayload('issue', sourceId, 'document', id)));
+          tasks.push(this.linksService.createLink(buildPayload('issue', sourceId, 'document', id)));
         } else {
           // document blocks current -> document as source
-          tasks.push(this.http.post('/api/links', buildPayload('document', id, 'issue', sourceId)));
+          tasks.push(this.linksService.createLink(buildPayload('document', id, 'issue', sourceId)));
         }
       } else {
-        tasks.push(this.http.post('/api/links', buildPayload('issue', sourceId, 'document', id)));
+        tasks.push(this.linksService.createLink(buildPayload('issue', sourceId, 'document', id)));
       }
     }
 

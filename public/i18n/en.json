@@ -422,6 +422,7 @@
       "form": {
         "TITLE": "Title",
         "DESCRIPTION": "Description",
+        "COMMENT": "Comment",
         "TAGS": "Tags",
         "PROJECT": "Project",
         "PROJECT_ID": "Project",
@@ -553,6 +554,8 @@
         "DIRECTION_LABEL_UNKNOWN": "Unknown",
         "ADD_TITLE": "Add relation",
         "DELETE_CONFIRM": "Delete this relation?",
+        "DELETE_CONFIRM_WITH_NAME": "Delete {{type}} #{{id}} - {{name}}?",
+        "DELETED": "Relation removed",
         "FORM": {
           "RELATION_TYPE": "Relation type",
           "BLOCKS_DIRECTION": "Blocks direction",
@@ -753,6 +756,9 @@
         "DIRECTION_LABEL_RELATES": "-",
         "DIRECTION_LABEL_UNKNOWN": "Unknown",
         "ADD_TITLE": "Add relation",
+        "DELETE_CONFIRM_WITH_NAME": "Delete relation {{type}} #{{id}} - {{name}}?",
+        "DELETE_CONFIRM": "Delete this relation?",
+        "DELETED": "Relation removed",
         "FORM": {
           "RELATION_TYPE": "Relation type",
           "BLOCKS_DIRECTION": "Blocks direction",
@@ -764,7 +770,10 @@
           "BLOCKS_PASSIVE": "Blocked by (selected -> current) - passive",
           "SAVED": "Relations created"
         },
-        "DOCUMENT": "Document"
+        "DOCUMENT": "Document",
+        "DELETE_CONFIRM_WITH_NAME": "Delete relation {{type}} #{{id}} - {{name}}?",
+        "DELETE_CONFIRM": "Delete this relation?",
+        "DELETED": "Relation removed"
       },
       "CHANGE_STATUS": "Change status",
       "history": {

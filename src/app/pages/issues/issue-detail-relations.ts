@@ -1,11 +1,12 @@
 import { Component, Input, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { ChipModule } from 'primeng/chip';
 import { ButtonModule } from 'primeng/button';
 import { BadgeModule } from 'primeng/badge';
+import { LinksService } from '../../services/links.service';
 
 @Component({
   selector: 'app-issue-detail-relations',
@@ -53,7 +54,7 @@ export class IssueDetailRelationsComponent implements OnChanges {
   @Input() issue: any | null = null;
   relations: Array<any> = [];
 
-  constructor(private cdr: ChangeDetectorRef, private http: HttpClient) {}
+  constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private linksService: LinksService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['issue']) {
@@ -68,12 +69,8 @@ export class IssueDetailRelationsComponent implements OnChanges {
   private loadLinksForIssue(issue: any | null) {
     if (!issue || (!issue.id && !issue._id)) return;
     const id = issue.id ?? issue._id;
-    let params = new HttpParams();
-    // Request links where this issue is the active/primary side
-    params = params.set('active_type', 'issue');
-    params = params.set('active_id', String(id));
 
-    this.http.get<any>('/api/links', { params }).subscribe({
+    this.linksService.getLinks({ active_type: 'issue', active_id: String(id) }).subscribe({
       next: (res: any) => {
         try {
           const links = Array.isArray(res) ? res : (res && (res.data || res.items) ? (res.data || res.items) : []);
@@ -144,7 +141,7 @@ export class IssueDetailRelationsComponent implements OnChanges {
     }
     if (!confirm('Delete this relation?')) return;
 
-    this.http.delete(`/api/links/${linkId}`).subscribe({
+    this.linksService.deleteLink(linkId).subscribe({
       next: () => {
         this.relations = (this.relations || []).filter(r => r.raw?.id !== linkId && r.raw?.link_id !== linkId && r.raw?._id !== linkId);
         this.cdr.markForCheck();

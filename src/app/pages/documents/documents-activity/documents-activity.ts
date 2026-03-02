@@ -17,6 +17,7 @@ import { MessageService } from 'primeng/api';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { AvatarModule } from 'primeng/avatar';
 import { AvatarService } from '../../../services/avatar.service';
+import { LinksService } from '../../../services/links.service';
 
 @Component({
   selector: 'app-documents-activity',
@@ -51,6 +52,7 @@ export class DocumentsActivityComponent {
   private messageService = inject(MessageService);
   private avatarService = inject(AvatarService);
   private translate = inject(TranslateService);
+  private linksService = inject(LinksService);
 
   menuItems: any[] = [];
   private langSub: Subscription | null = null;
@@ -182,14 +184,13 @@ export class DocumentsActivityComponent {
       // 3) create link between document and issue
       if (issueId && this.documentId != null) {
         try {
-          const linkPayload = {
+          await this.linksService.createLink({
             active_type: 'issue',
             active_id: issueId,
             passive_type: 'document',
             passive_id: this.documentId,
             relation_type: 'blocks'
-          };
-          await this.http.post('/api/links', linkPayload).toPromise();
+          }).toPromise();
         } catch (e) {
           // non-fatal
         }
@@ -231,23 +232,30 @@ export class DocumentsActivityComponent {
       this.messageService.add({ severity: 'warn', summary: 'Link', detail: 'No documents selected' });
       return;
     }
-
     try {
-      const results: any[] = [];
+      const createLinkPromises: Promise<any>[] = [];
       for (const tid of selected) {
-        const payload = { target_id: tid, reason: this.linkModel.reason };
-        if (this.documentId != null) {
-          try {
-            const res = await this.http.post(`/api/documents/${this.documentId}/relations`, payload).toPromise();
-            results.push({ tid, res });
-          } catch (e) {
-            results.push({ tid, error: true });
-          }
-        }
+        createLinkPromises.push(this.linksService.createLink({
+          active_type: 'document',
+          active_id: tid,
+          passive_type: 'document',
+          passive_id: this.documentId,
+          relation_type: 'relates'
+        }).toPromise().catch((err: any) => ({ error: true, err })));
       }
 
-      this.messageService.add({ severity: 'success', summary: 'Link', detail: 'Relations processed' });
-      this.linked.emit({ documentId: this.documentId, results, reason: this.linkModel.reason });
+      const linkResults = await Promise.all(createLinkPromises);
+
+      // After creating links, update the current document status and comment
+      try {
+        await this.http.put(`/api/documents/${this.documentId}`, { status_id: 5, comment: (this.linkModel.reason || null) }).toPromise();
+      } catch (updateErr: any) {
+        // non-fatal: show warning but continue
+        this.messageService.add({ severity: 'warn', summary: 'Link', detail: 'Linked but failed to update document status/comment' });
+      }
+
+      this.messageService.add({ severity: 'success', summary: 'Link', detail: 'Relations created and document updated' });
+      this.linked.emit({ documentId: this.documentId, results: linkResults, reason: this.linkModel.reason });
       this.showLinkDialog = false;
     } catch (e: any) {
       this.messageService.add({ severity: 'warn', summary: 'Link', detail: 'API call failed, emitted event' });

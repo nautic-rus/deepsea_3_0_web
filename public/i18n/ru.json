@@ -379,6 +379,7 @@
       "form": {
         "TITLE": "Название",
         "DESCRIPTION": "Описание",
+        "COMMENT": "Комментарий",
         "PROJECT": "Проект",
         "PROJECT_ID": "Проект",
         "TYPE": "Тип",
@@ -536,8 +537,11 @@
           "BLOCKS_PASSIVE": "Заблокирован (выбранный -> текущий) - пассивная",
           "SAVED": "Связи сохранены"
         },
-        "TITLE": "Связи",
-        "NO_RELATIONS": "Связей не найдено",
+          "TITLE": "Связи",
+          "NO_RELATIONS": "Связей не найдено",
+          "DELETE_CONFIRM_WITH_NAME": "Удалить {{type}} #{{id}} — {{name}}?",
+          "DELETED": "Связь удалена",
+          "DELETE_CONFIRM": "Удалить эту связь?",
         "COLUMN_TYPE_ID": "#",
         "COLUMN_NAME": "Наименование",
         "COLUMN_STATUS": "Статус",
@@ -771,6 +775,9 @@
       "relations": {
         "TITLE": "Связи",
         "NO_RELATIONS": "Связей не найдено",
+        "DELETE_CONFIRM_WITH_NAME": "Удалить связь {{type}} #{{id}} — {{name}}?",
+        "DELETE_CONFIRM": "Удалить эту связь?",
+        "DELETED": "Связь удалена",
         "COLUMN_TYPE_ID": "#",
         "COLUMN_NAME": "Наименование",
         "COLUMN_STATUS": "Статус",

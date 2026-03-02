@@ -1,21 +1,28 @@
 import { Component, Input, OnChanges, SimpleChanges, ChangeDetectorRef, Output, EventEmitter } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ToastModule } from 'primeng/toast';
 import { TagModule } from 'primeng/tag';
 import { BadgeModule } from 'primeng/badge';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
+import { LinksService } from '../../services/links.service';
 
 @Component({
   selector: 'app-issue-detail-relations-table',
   standalone: true,
-  imports: [CommonModule, TranslateModule, TagModule, BadgeModule, ButtonModule, TableModule],
+  imports: [CommonModule, TranslateModule, TagModule, BadgeModule, ButtonModule, TableModule, ConfirmDialogModule, ToastModule],
+  providers: [ConfirmationService, MessageService],
   template: `
     <section class="admin-subpage-relations card">
+      <p-toast></p-toast>
+      <p-confirmDialog header="{{ 'MENU.CONFIRM' | translate }}" [style]="{ width: '30%' }"></p-confirmDialog>
       <div class="flex items-center justify-between mt-0 mb-2">
          <h4 class="mb-0">{{ 'components.issues.relations.TITLE' | translate }}</h4>
           <p-button severity="secondary" icon="pi pi-plus" class="mt-0" [outlined]="true" (click)="onAddRelation($event)"></p-button>
@@ -75,7 +82,7 @@ export class IssueDetailRelationsTableComponent implements OnChanges {
   @Output() addRelation = new EventEmitter<void>();
   relations: Array<any> = [];
 
-  constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router) {}
+  constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router, private confirmationService: ConfirmationService, private messageService: MessageService, private translate: TranslateService, private linksService: LinksService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['issue']) {
@@ -94,18 +101,8 @@ export class IssueDetailRelationsTableComponent implements OnChanges {
     if (!issue || (!issue.id && !issue._id)) return;
     const id = issue.id ?? issue._id;
 
-  // Build params for links where the issue is the active/primary side
-  let paramsSource = new HttpParams();
-  paramsSource = paramsSource.set('active_type', 'issue');
-  paramsSource = paramsSource.set('active_id', String(id));
-
-  // Build params for links where the issue is the passive/other side
-  let paramsTarget = new HttpParams();
-  paramsTarget = paramsTarget.set('passive_type', 'issue');
-  paramsTarget = paramsTarget.set('passive_id', String(id));
-
-    const reqSource = this.http.get<any>('/api/links', { params: paramsSource }).pipe(catchError(() => of([])));
-    const reqTarget = this.http.get<any>('/api/links', { params: paramsTarget }).pipe(catchError(() => of([])));
+    const reqSource = this.linksService.getLinks({ active_type: 'issue', active_id: String(id) }).pipe(catchError(() => of([])));
+    const reqTarget = this.linksService.getLinks({ passive_type: 'issue', passive_id: String(id) }).pipe(catchError(() => of([])));
 
     forkJoin([reqSource, reqTarget]).subscribe({
       next: ([resSource, resTarget]: any) => {
@@ -255,15 +252,47 @@ export class IssueDetailRelationsTableComponent implements OnChanges {
     if (!rel || !rel.raw) return;
     const linkId = rel.raw.id ?? rel.raw.link_id ?? rel.raw._id;
     if (!linkId) return;
-    if (!confirm('Delete this relation?')) return;
+    const type = rel.type ?? (rel.raw && (rel.raw.active_type || rel.raw.passive_type)) ?? '';
+    const id = rel.id ?? rel.raw?.id ?? linkId;
+    const name = rel.title ?? rel.raw?.title ?? rel.raw?.name ?? '';
+    let text = '';
+    try {
+      text = this.translate.instant('components.issues.relations.DELETE_CONFIRM_WITH_NAME', { type, id, name });
+      if (!text || text === 'components.issues.relations.DELETE_CONFIRM_WITH_NAME') {
+        const base = this.translate.instant('components.issues.relations.DELETE_CONFIRM') || 'Delete this relation?';
+        text = `${base} ${type ? type + ' ' : ''}${id ? ('#' + id) : ''}${name ? ' - ' + name : ''}`.trim();
+      }
+    } catch (e) {
+      text = `Delete ${type ? type + ' ' : ''}${id ? ('#' + id) : ''}${name ? ' - ' + name : ''}?`;
+    }
 
-    this.http.delete(`/api/links/${linkId}`).subscribe({
-      next: () => {
-        this.relations = (this.relations || []).filter(r => r.raw?.id !== linkId && r.raw?.link_id !== linkId && r.raw?._id !== linkId);
-        this.cdr.markForCheck();
-      },
-      error: (err) => console.warn('Failed to delete link', linkId, err)
-    });
+    try {
+      this.confirmationService.confirm({
+        header: this.translate.instant('MENU.CONFIRM') || 'Confirm',
+        message: text,
+        icon: 'pi pi-exclamation-triangle',
+        acceptLabel: this.translate.instant('MENU.DELETE') || 'Delete',
+        acceptButtonStyleClass: 'p-button-danger',
+        rejectLabel: this.translate.instant('MENU.CANCEL') || 'Cancel',
+        accept: () => {
+          this.linksService.deleteLink(linkId).subscribe({
+            next: () => {
+              this.relations = (this.relations || []).filter(r => r.raw?.id !== linkId && r.raw?.link_id !== linkId && r.raw?._id !== linkId);
+              this.cdr.markForCheck();
+              try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Deleted', detail: this.translate.instant('components.issues.relations.DELETED') || 'Relation removed' }); } catch (e) {}
+            },
+            error: (err) => {
+              console.warn('Failed to delete link', linkId, err);
+              try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: (err && err.message) ? err.message : this.translate.instant('components.documents.messages.ERROR') || 'Failed to delete relation' }); } catch (e) {}
+            }
+          });
+        },
+        reject: () => {}
+      });
+    } catch (e) {
+      if (!confirm(text)) return;
+      this.linksService.deleteLink(linkId).subscribe({ next: () => { this.relations = (this.relations || []).filter(r => r.raw?.id !== linkId && r.raw?.link_id !== linkId && r.raw?._id !== linkId); this.cdr.markForCheck(); }, error: (err) => console.warn('Failed to delete link', linkId, err) });
+    }
   }
 
   public statusSeverity(status: any): 'success' | 'info' | 'warn' | 'danger' {
