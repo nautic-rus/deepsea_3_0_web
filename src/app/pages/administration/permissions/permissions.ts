@@ -19,7 +19,7 @@ import { ConfirmationService } from 'primeng/api';
 import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
-import { PermissionsService } from './permissions.service';
+import { PermissionsService } from '../../../services/permissions.service';
 
 interface Permission {
   id: number | string;

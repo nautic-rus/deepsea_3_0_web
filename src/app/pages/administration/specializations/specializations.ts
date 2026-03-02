@@ -19,7 +19,7 @@ import { ConfirmationService } from 'primeng/api';
 import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
-import { SpecializationsService } from './specializations.service';
+import { SpecializationsService } from '../../../services/specializations.service';
 
 interface Specialization {
  id: number | string;

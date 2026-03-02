@@ -19,7 +19,7 @@ import { ConfirmationService } from 'primeng/api';
 import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
-import { DepartmentsService } from './departments.service';
+import { DepartmentsService } from '../../../services/departments.service';
 
 interface Department {
  id: number | string;

@@ -3,7 +3,7 @@ import { ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
-import { RolesService } from './roles.service';
+import { RolesService } from '../../../services/roles.service';
 import { ToolbarModule } from 'primeng/toolbar';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';

@@ -14,7 +14,7 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
 import { AuthService } from '../../auth/auth.service';
 import { AuthGuard } from '../../auth/auth.guard';
 import { PagesService } from '../../services/pages.service';
-import { UsersService } from '../../pages/administration/users/users.service';
+import { UsersService } from '../../services/users.service';
 import { AvatarService } from '../../services/avatar.service';
 
 @Component({

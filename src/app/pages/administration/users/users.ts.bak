@@ -20,7 +20,7 @@ import { ConfirmationService } from 'primeng/api';
 import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
-import { UsersService } from './users.service';
+import { UsersService } from '../../../services/users.service';
 import { Select } from "primeng/select";
 
 interface User {

@@ -24,7 +24,7 @@ import { ConfirmationService } from 'primeng/api';
 import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
-import { UsersService } from '../administration/users/users.service';
+import { UsersService } from '../../services/users.service';
 import { IssuesService } from '../../services/issues.service';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
