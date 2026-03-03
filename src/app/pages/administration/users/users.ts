@@ -1,5 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { registerLocaleData } from '@angular/common';
+import ruLocale from '@angular/common/locales/ru';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { ToolbarModule } from 'primeng/toolbar';
@@ -20,6 +22,7 @@ import { ConfirmationService } from 'primeng/api';
 import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { Checkbox } from 'primeng/checkbox';
 import { UsersService } from '../../../services/users.service';
 import { Select } from "primeng/select";
 import { Avatar } from "primeng/avatar";
@@ -63,6 +66,7 @@ interface User {
     ProgressSpinnerModule,
     SkeletonModule,
     Select,
+    Checkbox,
     TagModule,
     ConfirmDialogModule,
     ToastModule,
@@ -104,6 +108,8 @@ export class AdminUsersComponent implements OnInit {
     private translate: TranslateService
     , private avatarService: AvatarService
   ) {
+    // register Russian locale data so DatePipe supports 'ru' formatting
+    try { registerLocaleData(ruLocale, 'ru'); } catch (e) { }
     // keep component lightweight; initial data will be loaded in ngOnInit
   }
 
@@ -147,6 +153,7 @@ export class AdminUsersComponent implements OnInit {
   ngOnInit(): void {
     this.loadUsers();
     this.loadDepartments();
+    this.loadJobTitles();
   }
 
   // Expose initials helper for templates to keep avatar logic consistent
@@ -208,6 +215,25 @@ export class AdminUsersComponent implements OnInit {
     });
   }
 
+  loadJobTitles(): void {
+    this.usersService.getJobTitles().subscribe({
+      next: (res) => {
+        const items = (res && (res as any).data) ? (res as any).data : (res || []);
+        // prefer numeric ids as option values if available
+        this.jobTitles = (items || []).map((t: any) => {
+          const label = (typeof t === 'string') ? t : (t.name || t.title || t.job_title || t.label || (t.id != null ? String(t.id) : String(t)));
+          const value = (t && (t.id != null)) ? t.id : label;
+          return { label: label, value: value };
+        });
+        this.safeDetect();
+      },
+      error: (err) => {
+        this.jobTitles = [];
+        this.safeDetect();
+      }
+    });
+  }
+
   loadUsers(): void {
     this.loading = true;
     this.error = null;
@@ -239,7 +265,10 @@ export class AdminUsersComponent implements OnInit {
         }
         // derive job titles from users for the job title filter
         const titles = Array.from(new Set((this.users || []).map((u: any) => u.job_title).filter(Boolean)));
-        this.jobTitles = (titles || []).map((t: any) => ({ label: t, value: t }));
+        // Do not overwrite jobTitles if they were loaded from the dedicated API
+        if (!this.jobTitles || this.jobTitles.length === 0) {
+          this.jobTitles = (titles || []).map((t: any) => ({ label: t, value: t }));
+        }
         this.loading = false;
         this.safeDetect();
       },
@@ -266,7 +295,8 @@ export class AdminUsersComponent implements OnInit {
       last_name: '',
       middle_name: '',
       department: null,
-      job_title: ''
+      job_title: null,
+      is_active: true
     };
     this.isCreating = true;
     this.displayDialog = true;
@@ -355,6 +385,21 @@ export class AdminUsersComponent implements OnInit {
       }
     }
 
+    // prefer explicit job title id fields if present on the user object
+    const rawJobId = (user as any).job_title_id ?? (user as any).jobTitleId ?? null;
+    if (rawJobId != null) {
+      (this.editModel as any).job_title = rawJobId;
+    } else if (user.job_title) {
+      // if we only have the job title string, try to find its id from loaded jobTitles
+      const foundJ = this.jobTitles.find(j => j.label === user.job_title || String(j.value) === String(user.job_title));
+      if (foundJ) {
+        (this.editModel as any).job_title = foundJ.value;
+      } else {
+        // keep the string as fallback (will be resolved when saving)
+        (this.editModel as any).job_title = user.job_title;
+      }
+    }
+
     this.displayDialog = true;
   }
 
@@ -377,16 +422,30 @@ export class AdminUsersComponent implements OnInit {
       if (found) departmentId = found.value;
     }
 
+    // Resolve job title id: accept job_title (id or label) or explicit job_title_id
+    let jobTitleId: any = (this.editModel as any).job_title ?? (this.editModel as any).job_title_id ?? (this.editModel as any).jobTitleId ?? null;
+    if (jobTitleId == null && this.editModel.job_title) {
+      jobTitleId = this.editModel.job_title;
+    }
+    // if jobTitleId is non-numeric label, try to find corresponding id from jobTitles list
+    if (typeof jobTitleId === 'string' && isNaN(Number(jobTitleId))) {
+      const found = this.jobTitles.find(j => j.label === jobTitleId || String(j.value) === jobTitleId);
+      if (found) jobTitleId = found.value;
+    }
+
     const payload: Partial<User> = {
       email: this.editModel.email,
       phone: this.editModel.phone,
       first_name: this.editModel.first_name,
       last_name: this.editModel.last_name,
       middle_name: this.editModel.middle_name,
-  // send department id (or null) explicitly
+      // send department id (or null) explicitly
       department_id: departmentId != null && departmentId !== '' ? Number(departmentId) : null,
-      job_title: this.editModel.job_title
-    };
+      // API expects job_title_id for PUT
+      job_title_id: jobTitleId != null && jobTitleId !== '' ? Number(jobTitleId) : null
+    } as any;
+    // always send explicit is_active boolean (true/false)
+    (payload as any).is_active = !!(this.editModel as any).is_active;
 
     // validate form before sending
     if (!this.validateForm()) {

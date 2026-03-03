@@ -70,7 +70,8 @@ export class AdministrationComponent implements OnInit, OnDestroy {
         label: t('MENU.ORGANIZATION'),
         items: [
           { label: t('MENU.DEPARTMENTS'), icon: 'pi pi-fw pi-sitemap', routerLink: ['/administration/departments'] },
-          { label: t('MENU.SPECIALIZATIONS'), icon: 'pi pi-fw pi-tags', routerLink: ['/administration/specializations'] }
+          { label: t('MENU.SPECIALIZATIONS'), icon: 'pi pi-fw pi-tags', routerLink: ['/administration/specializations'] },
+          { label: t('MENU.JOB_TITLE'), icon: 'pi pi-fw pi-user-edit', routerLink: ['/administration/job_title'] }
         ]
       },
       {

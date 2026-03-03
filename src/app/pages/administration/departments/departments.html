@@ -70,7 +70,20 @@
       </td>
       <td>{{ permission.id }}</td>
       <td>{{ permission.name }}</td>
-      <td>{{ permission.manager_id || '-' }}</td>
+      <td>
+        <ng-container *ngIf="permission.manager_id || permission.manager_name || permission.manager">
+          <div class="flex items-center gap-2">
+            <ng-container *ngIf="managerAvatar(permission) as mAvatar; else initialsTpl">
+              <p-avatar [image]="mAvatar" shape="circle" styleClass="mr-2"></p-avatar>
+            </ng-container>
+            <ng-template #initialsTpl>
+              <p-avatar [label]="initialsFromName(permission.manager_name || permission.manager_full_name || permission.manager)" shape="circle" [style]="{ 'background-color': issueAvatarColor({ id: permission.manager_id, first_name: (permission.manager_name || permission.manager_full_name || permission.manager) }), color: issueAvatarTextColor({ id: permission.manager_id, first_name: (permission.manager_name || permission.manager_full_name || permission.manager) }) }" class="mr-2"></p-avatar>
+            </ng-template>
+            <span>{{ formatSurnameInitials(permission.manager_name || permission.manager_full_name || permission.manager) }}</span>
+          </div>
+        </ng-container>
+        <span *ngIf="!(permission.manager_id || permission.manager_name || permission.manager)">-</span>
+      </td>
       <td>{{ permission.description || '-' }}</td>
       <td>{{ permission.created_at | date:'short' }}</td>
       <td>
@@ -111,7 +124,30 @@
     </div>
     <div class="flex flex-col gap-2">
   <label for="permManager">{{ 'components.departments.form.MANAGER' | translate }}</label>
-      <p-select id="permManager" [options]="usersOptions" optionLabel="label" optionValue="value" [(ngModel)]="editModel.manager_id" appendTo="body" placeholder="{{ 'MENU.ANY' | translate }}"></p-select>
+      <p-select id="permManager" [options]="usersOptions" optionLabel="label" optionValue="value" [(ngModel)]="editModel.manager_id" appendTo="body" placeholder="{{ 'MENU.ANY' | translate }}">
+        <ng-template let-opt pTemplate="item">
+          <div class="flex items-center gap-2">
+            <ng-container *ngIf="opt.avatar; else initialsItem">
+              <img [src]="opt.avatar" alt="avatar" class="select-avatar" />
+            </ng-container>
+            <ng-template #initialsItem>
+              <p-avatar [label]="initialsFromName(opt.label)" class="mr-2" shape="circle" [style]="{ 'background-color': issueAvatarColor({ id: opt.value, first_name: opt.label }), color: issueAvatarTextColor({ id: opt.value, first_name: opt.label }) }"></p-avatar>
+            </ng-template>
+            <div>{{ opt.label }}</div>
+          </div>
+        </ng-template>
+        <ng-template let-opt pTemplate="value">
+          <div class="flex items-center gap-2">
+            <ng-container *ngIf="opt.avatar; else initialsValue">
+              <img [src]="opt.avatar" alt="avatar" class="select-avatar" />
+            </ng-container>
+            <ng-template #initialsValue>
+              <p-avatar [label]="initialsFromName(opt.label)" class="mr-2" shape="circle" [style]="{ 'background-color': issueAvatarColor({ id: opt.value, first_name: opt.label }), color: issueAvatarTextColor({ id: opt.value, first_name: opt.label }) }"></p-avatar>
+            </ng-template>
+            <div>{{ opt.label }}</div>
+          </div>
+        </ng-template>
+      </p-select>
     </div>
     <div class="flex flex-col gap-2">
   <label for="permDesc">{{ 'components.permissions.form.DESCRIPTION' | translate }}</label>
@@ -120,7 +156,7 @@
     <div class="flex justify-end gap-2 mt-4">
       <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="displayDialog=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="loading"></p-button>
   <p-button label="{{ 'MENU.SAVE' | translate }}" (onClick)="savePermission()" severity="primary" icon="pi pi-check" iconPos="left" [loading]="loading" [disabled]="loading"></p-button>
-dfdsfd    
+ 
 </div>
   </div>
 </p-dialog>

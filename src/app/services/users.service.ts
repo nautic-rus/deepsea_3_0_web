@@ -14,6 +14,10 @@ export class UsersService {
     return this.http.get(`/api/departments?limit=${limit}`);
   }
 
+  getJobTitles(): Observable<any> {
+    return this.http.get(`/api/job_titles`);
+  }
+
   updateUser(id: string | number, payload: any): Observable<any> {
     return this.http.put(`/api/users/${encodeURIComponent(String(id))}`, payload);
   }

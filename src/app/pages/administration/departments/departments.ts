@@ -22,6 +22,8 @@ import { Select } from 'primeng/select';
 import { MessageService } from 'primeng/api';
 import { DepartmentsService } from '../../../services/departments.service';
 import { UsersService } from '../../../services/users.service';
+import { AvatarService } from '../../../services/avatar.service';
+import { AvatarModule } from 'primeng/avatar';
 
 interface Department {
  id: number | string;
@@ -53,7 +55,8 @@ interface Department {
  TagModule,
  ConfirmDialogModule,
  ToastModule,
- Select
+ Select,
+ AvatarModule
  ],
  providers: [ConfirmationService, MessageService],
  templateUrl: './departments.html',
@@ -73,6 +76,7 @@ export class AdminDepartmentsComponent implements OnInit {
  constructor(
  private departmentsService: DepartmentsService,
  private usersService: UsersService,
+ private avatarService: AvatarService,
  private cd: ChangeDetectorRef,
  private confirmationService: ConfirmationService,
  private messageService: MessageService,
@@ -88,7 +92,19 @@ loadUsers(): void {
 		this.usersService.getUsers(1, 1000).subscribe({
 			next: (res: any) => {
 				const items = (res && res.data) ? res.data : (res || []);
-				this.usersOptions = (items || []).map((u: any) => ({ label: (u.full_name || u.name || u.email || String(u.id)), value: u.id, avatar: u.avatar || null }));
+				this.usersOptions = (items || []).map((u: any) => {
+					const label = this.formatUserFullName(u);
+					let avatar: string | null = null;
+					if (u.avatar_url || u.avatar || u.avatarUrl) {
+						avatar = u.avatar_url || u.avatar || u.avatarUrl || null;
+					} else if (u.avatar_id || u.avatarId) {
+						const aid = u.avatar_id ?? u.avatarId;
+						if (typeof aid === 'number' || (typeof aid === 'string' && String(aid).trim())) {
+							avatar = `/api/storage/${String(aid).trim()}/download`;
+						}
+					}
+					return { label, value: u.id, avatar };
+				});
 				try { this.cd.detectChanges(); } catch (e) { }
 			},
 			error: (err: any) => { console.warn('Failed to load users', err); this.usersOptions = []; try { this.cd.detectChanges(); } catch (e) { } }
@@ -169,4 +185,58 @@ ngOnInit(): void { this.loadPermissions(); this.loadUsers(); }
  }
 
  validateForm(): boolean { this.formErrors = {}; const name = (this.editModel && this.editModel.name) ? String(this.editModel.name).trim() : ''; if (!name) this.formErrors.name = (this.translate.instant('components.permissions.form.NAME') || 'Name') + ' is required'; this.safeDetect(); return Object.keys(this.formErrors).length === 0; } // TODO: make reactive (refresh on translate.onLangChange)
+
+ initialsFromName(name?: string | null): string {
+  return this.avatarService.initialsFromName(name);
+ }
+
+ selectAvatarBg(label?: string | null): string {
+  return this.avatarService.selectAvatarBg(label);
+ }
+
+ selectAvatarTextColor(label?: string | null): string {
+  return this.avatarService.selectAvatarTextColor(label);
+ }
+
+formatSurnameInitials(item: any): string { try { return this.avatarService.formatSurnameInitials(item); } catch (e) { return '-'; } }
+
+formatUserFullName(u: any): string {
+	try {
+		if (!u) return '';
+		const full = u.full_name ?? u.fullName ?? null;
+		if (full && String(full).trim()) return String(full).trim();
+		const surname = String(u.last_name ?? u.surname ?? u.lastName ?? u.family ?? '').trim();
+		const name = String(u.first_name ?? u.firstName ?? u.name ?? '').trim();
+		const patronymic = String(u.middle_name ?? u.patronymic ?? u.middleName ?? '').trim();
+		const parts = [surname, name, patronymic].filter(p => p && p.length);
+		if (parts.length) return parts.join(' ');
+		if (u.email) return String(u.email);
+		return String(u.id ?? '');
+	} catch (e) {
+		return String(u && (u.full_name || u.name || u.email || u.id) || '');
+	}
 }
+
+issueAvatarColor(user: any): string { try { return this.avatarService.issueAvatarColor(user); } catch (e) { return ''; } }
+issueAvatarTextColor(user: any): string { try { return this.avatarService.issueAvatarTextColor(user); } catch (e) { return ''; } }
+
+managerAvatar(item: any): string | null {
+	try {
+		if (!item) return null;
+		const direct = item.manager_avatar_url || item.manager_avatar || item.manager_avatarUrl || null;
+		if (direct) return direct;
+		const aid = item.manager_avatar_id ?? item.manager_avatarId ?? item.managerAvatarId ?? null;
+		if (aid !== null && aid !== undefined && (typeof aid === 'number' || (typeof aid === 'string' && String(aid).trim()))) {
+			return `/api/storage/${String(aid).trim()}/download`;
+		}
+		const uid = item.manager_id ?? item.managerId ?? null;
+		if (uid !== null && uid !== undefined) {
+			const found = (this.usersOptions || []).find(u => String(u.value) === String(uid));
+			if (found && found.avatar) return found.avatar || null;
+		}
+		return null;
+	} catch (e) { return null; }
+}
+
+}
+

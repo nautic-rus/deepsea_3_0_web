@@ -14,6 +14,8 @@
     "RU": "RU"
   },
   "MENU": {
+    "UPDATED_AT": "Updated at",
+    "CREATED_AT": "Created at",
     "ACTIONS": "Actions",
     "ACTIVE": "Status",
     "ACTIVE_NO": "Inactive",
@@ -33,8 +35,8 @@
     "DEPARTMENT": "Department",
     "DEPARTMENTS": "Departments",
     "DOCUMENTS": "Documents",
-  "DOCUMENT": "Document",
-  "ISSUE": "Issue",
+    "DOCUMENT": "Document",
+    "ISSUE": "Issue",
     "EDIT": "EDIT",
     "EDIT_USER": "Edit user",
     "EMAIL": "Email",
@@ -56,9 +58,9 @@
     "PERMISSIONS": "Permissions",
     "PHONE": "Phone",
     "PROFILE": "Profile",
-  "EDIT_PROFILE": "Edit profile",
-  "RESET_PASSWORD": "Reset password",
-  "SHARE_RIGHTS": "Share rights",
+    "EDIT_PROFILE": "Edit profile",
+    "RESET_PASSWORD": "Reset password",
+    "SHARE_RIGHTS": "Share rights",
     "PROJECTS": "Projects",
     "PROJECTSMENU": "Projects",
     "PROJECT_USERS": "Users of the project",
@@ -66,6 +68,7 @@
     "ROLES": "Roles",
     "SAVE": "Save",
     "SELECT_DEPARTMENT": "Select department",
+    "SELECT_JOB_TITLE": "Select job title",
     "SETTINGS": "Settings",
     "SPECIALIZATIONS": "Specialization",
     "SPECIFICATIONS": "Specifications",
@@ -77,17 +80,17 @@
     "USER_DELETED": "User deleted",
     "USER_MANAGEMENT": "USERS",
     "USER_UPDATED": "User updated",
-    "WIKI": "WiKi"
-    ,
-  "SECURITY": "Security",
-  "STORAGE": "Storage",
-  "GENERAL": "General",
-  "ID": "ID",
-  "EDIT_DOCUMENT": "Edit document",
-  "CREATE_DOC": "Create document",
+    "WIKI": "WiKi",
+    "SECURITY": "Security",
+    "SEND_WELCOME": "Send welcome",
+    "STORAGE": "Storage",
+    "GENERAL": "General",
+    "ID": "ID",
+    "EDIT_DOCUMENT": "Edit document",
+    "CREATE_DOC": "Create document",
     "CREATE_ISSUE": "Create issue",
     "EDIT_ISSUE": "Edit issue",
-  "BULK_EDIT": "Bulk edit",
+    "BULK_EDIT": "Bulk edit",
     "QUERY": "Query",
     "APPLY": "Apply",
     "RESET": "Reset"
@@ -178,6 +181,40 @@
       "DASHBOARD_TITLE": "Dashboard",
       "DASHBOARD_SUB": "Go to your dashboard",
       "GO_HOME": "Go home"
+    },
+    "pages": {
+      "form": {
+        "CREATE_LABEL": "Create",
+        "EDIT_LABEL": "Edit",
+        "NAME": "Name",
+        "CODE": "Code",
+        "DESCRIPTION": "Description",
+        "KEY": "Key",
+        "PATH": "Path",
+        "PARENT_ID": "Parent ID",
+        "MAIN_MENU": "Main menu",
+        "PERMISSIONS": "Permissions",
+        "SAVE": "Save",
+        "CANCEL": "Cancel"
+      },
+      "table": {
+        "HEADERS": {
+          "NAME": "Name",
+          "CODE": "Code",
+          "DESCRIPTION": "Description",
+          "CREATED_AT": "Created At",
+          "KEY": "Key",
+          "PATH": "Path",
+          "PARENT_ID": "Parent ID",
+          "TITLE_KEY": "Title Key",
+          "TITLE_EN": "Title (EN)",
+          "ICON": "Icon",
+          "MAIN_MENU": "Main Menu",
+          "PERMISSIONS": "Permissions"
+        },
+        "EMPTY": "No pages to display",
+        "SEARCH": "Search"
+      }
     },
     "menu": {
       "ACTIONS": "Actions",
@@ -299,6 +336,16 @@
           "DESCRIPTION": "Description",
           "ID": "ID",
           "NAME": "Name"
+        }
+      }
+    },
+    "departments": {
+      "form": {
+        "MANAGER": "Manager"
+      },
+      "table": {
+        "HEADERS": {
+          "MANAGER": "Manager"
         }
       }
     },
@@ -436,16 +483,16 @@
         "ORDER_INDEX": "Order index",
         "ASSIGNEE": "Assignee",
         "DIRECTORY": "Directory",
-  "DIRECTORY_SELECT_PROJECT_FIRST": "Please choose a project first",
+        "DIRECTORY_SELECT_PROJECT_FIRST": "Please choose a project first",
         "STAGE": "Stage",
         "SPECIALIZATION": "Specialization",
         "STAGE_DATE": "Stage date",
         "TITLE_REQUIRED": "Title is required",
-  "PROJECT_REQUIRED": "Project is required",
-  "DIRECTORY_REQUIRED": "Directory is required",
-  "SPECIALIZATION_REQUIRED": "Specialization is required",
-  "TYPE_REQUIRED": "Type is required",
-  "DOCUMENT_NUMBER_REQUIRED": "Document number is required",
+        "PROJECT_REQUIRED": "Project is required",
+        "DIRECTORY_REQUIRED": "Directory is required",
+        "SPECIALIZATION_REQUIRED": "Specialization is required",
+        "TYPE_REQUIRED": "Type is required",
+        "DOCUMENT_NUMBER_REQUIRED": "Document number is required",
         "UPDATED": "Updated"
       },
       "priority": {

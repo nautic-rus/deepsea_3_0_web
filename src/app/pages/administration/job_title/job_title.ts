@@ -1,0 +1,204 @@
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { FormsModule } from '@angular/forms';
+import { ToolbarModule } from 'primeng/toolbar';
+import { ButtonModule } from 'primeng/button';
+import { TableModule } from 'primeng/table';
+import { RippleModule } from 'primeng/ripple';
+import { InputTextModule } from 'primeng/inputtext';
+import { DialogModule } from 'primeng/dialog';
+import { InputMaskModule } from 'primeng/inputmask';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { InputIconModule } from 'primeng/inputicon';
+import { IconFieldModule } from 'primeng/iconfield';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { SkeletonModule } from 'primeng/skeleton';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmationService } from 'primeng/api';
+import { TagModule } from 'primeng/tag';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+import { JobTitlesService } from '../../../services/job_titles.service';
+
+interface JobTitle {
+ id: number | string;
+ name: string;
+ description?: string | null;
+ created_at?: string | null;
+ updated_at?: string | null;
+}
+
+@Component({
+ selector: 'app-admin-job-title',
+ standalone: true,
+ imports: [
+ CommonModule,
+ TranslateModule,
+ FormsModule,
+ ToolbarModule,
+ ButtonModule,
+ TableModule,
+ RippleModule,
+ InputTextModule,
+ DialogModule,
+ InputMaskModule,
+ MultiSelectModule,
+ InputIconModule,
+ IconFieldModule,
+ ProgressSpinnerModule,
+ SkeletonModule,
+ TagModule,
+ ConfirmDialogModule,
+ ToastModule
+ ],
+ providers: [ConfirmationService, MessageService],
+ templateUrl: './job_title.html',
+ styleUrls: ['./job_title.scss']
+})
+export class AdminJobTitleComponent implements OnInit {
+ jobTitles: JobTitle[] = [];
+ selectedJobTitles: JobTitle[] = [];
+ loading = false;
+ error: string | null = null;
+ displayDialog = false;
+ editModel: Partial<JobTitle> = {};
+ isCreating = false;
+ formErrors: { name?: string } = {};
+
+ constructor(
+ private jobTitlesService: JobTitlesService,
+ private cd: ChangeDetectorRef,
+ private confirmationService: ConfirmationService,
+ private messageService: MessageService,
+ private translate: TranslateService
+ ) {}
+
+ private safeDetect(): void { try { this.cd.detectChanges(); } catch (e) { } }
+
+ ngOnInit(): void { this.loadJobTitles(); }
+
+ onGlobalFilter(table: any, event: Event): void { const val = (event && (event.target as HTMLInputElement)) ? (event.target as HTMLInputElement).value : ''; try { table.filterGlobal(val, 'contains'); } catch (e) { } }
+
+ loadJobTitles(): void { this.loading = true; this.error = null; this.jobTitlesService.getJobTitles().subscribe({ next: (data: any) => { this.jobTitles = (data && (data as any).data) ? (data as any).data : (data || []); this.loading = false; this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to load items'; this.loading = false; this.safeDetect(); } }); }
+
+ openNew(): void { this.editModel = { name: '', description: '' }; this.isCreating = true; this.displayDialog = true; }
+
+ deleteSelectedJobTitles(): void { if (!this.selectedJobTitles || !this.selectedJobTitles.length) return; try { this.messageService.add({ severity: 'info', summary: 'Not implemented', detail: 'Bulk delete is not implemented yet' }); } catch (e) {} }
+
+ openEdit(item: JobTitle): void { if (!item) return; this.editModel = { ...item } as any; this.isCreating = false; this.displayDialog = true; }
+
+ saveJobTitle(): void {
+ if (!this.editModel) return;
+ if (!this.isCreating && (this.editModel.id == null)) return;
+ const id = (this.editModel.id != null) ? this.editModel.id : null;
+ const payload: Partial<JobTitle> = { name: this.editModel.name, description: this.editModel.description };
+
+ if (!this.validateForm()) {
+ try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CONFIRM') || 'Error', detail: 'Please fix form errors' }); } catch (e) {}
+ return;
+ }
+
+ this.loading = true;
+ if (this.isCreating) {
+ this.jobTitlesService.createJobTitle(payload as any).subscribe({
+ next: (_res: any) => {
+ this.displayDialog = false;
+ this.editModel = {} as any;
+ this.loading = false;
+ this.isCreating = false;
+ try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.CREATE') || 'Success', detail: 'Created' }); } catch (e) {}
+ this.loadJobTitles();
+ this.safeDetect();
+ },
+ error: (err: any) => {
+ this.error = (err && err.message) ? err.message : 'Failed to create item';
+ this.loading = false;
+ try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CREATE') || 'Create', detail: (err && err.message) ? err.message : 'Failed to create job title' }); } catch (e) {}
+ this.safeDetect();
+ }
+ });
+ } else {
+ this.jobTitlesService.updateJobTitle(id as any, payload as any).subscribe({
+ next: (_res: any) => {
+ this.displayDialog = false;
+ this.editModel = {} as any;
+ this.loading = false;
+ try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Success', detail: 'Updated' }); } catch (e) {}
+ this.loadJobTitles();
+ this.safeDetect();
+ },
+ error: (err: any) => {
+ this.error = (err && err.message) ? err.message : 'Failed to update item';
+ this.loading = false;
+ try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.SAVE') || 'Save', detail: (err && err.message) ? err.message : 'Failed to update job title' }); } catch (e) {}
+ this.safeDetect();
+ }
+ });
+ }
+ }
+
+ confirmDelete(item: JobTitle): void { if (!item) return; this.confirmationService.confirm({ message: `${this.translate.instant('MENU.DELETE') || 'Delete'} "${item.name || item.id}"?`, icon: 'pi pi-exclamation-triangle', accept: () => this.deleteJobTitle(item) }); }
+
+ deleteJobTitle(item: JobTitle): void { if (!item) return; this.loading = true; this.jobTitlesService.deleteJobTitle(item.id).subscribe({ next: (_res: any) => { this.jobTitles = this.jobTitles.filter(u => u.id !== item.id); this.selectedJobTitles = this.selectedJobTitles.filter(s => s.id !== item.id); this.loading = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Delete', detail: 'Deleted' }); } catch (e) {} this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to delete item'; this.loading = false; this.safeDetect(); } }); }
+
+ exportCSV(): void {
+ try {
+ const rows = this.jobTitles || [];
+ if (!rows.length) {
+ try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('MENU.ANY') || 'No items to export' }); } catch (e) {}
+ return;
+ }
+
+ const headers = [
+ 'ID',
+ this.translate.instant('components.permissions.table.HEADERS.NAME') || 'Name',
+ this.translate.instant('components.permissions.table.HEADERS.DESCRIPTION') || 'Description',
+ this.translate.instant('components.permissions.table.HEADERS.CREATED_AT') || 'Created At'
+ ];
+
+ const esc = (v: any) => {
+ if (v === null || v === undefined) return '';
+ if (typeof v === 'boolean') return v ? (this.translate.instant('MENU.ACTIVE_YES') || 'Active') : (this.translate.instant('MENU.ACTIVE_NO') || 'Inactive');
+ const s = String(v);
+ return '"' + s.replace(/"/g, '""') + '"';
+ };
+
+ const lines = [headers.map(h => '"' + String(h).replace(/"/g, '""') + '"').join(',')];
+ for (const u of rows) {
+ const line = [esc(u.id), esc(u.name), esc((u as any).description), esc(u.created_at)].join(',');
+ lines.push(line);
+ }
+
+ const csv = lines.join('\n');
+ const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+ const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+ const filename = `job_titles_export_${timestamp}.csv`;
+ const link = document.createElement('a');
+ const url = URL.createObjectURL(blob);
+ link.href = url;
+ link.setAttribute('download', filename);
+ document.body.appendChild(link);
+ link.click();
+ document.body.removeChild(link);
+ URL.revokeObjectURL(url);
+
+ try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('components.permissions.messages.EXPORTED') || 'Export completed' }); } catch (e) {}
+ } catch (err) {
+ try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: 'Export failed' }); } catch (e) {}
+ }
+ }
+
+ validateForm(): boolean {
+ this.formErrors = {};
+ const name = (this.editModel && this.editModel.name) ? String(this.editModel.name).trim() : '';
+
+ if (!name) {
+ this.formErrors.name = (this.translate.instant('components.permissions.form.NAME') || 'Name') + ' is required';
+ }
+
+ this.safeDetect();
+ return Object.keys(this.formErrors).length === 0;
+ }
+
+}
