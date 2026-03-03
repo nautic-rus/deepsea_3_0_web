@@ -31,6 +31,11 @@ export class UsersService {
     return this.http.get(`/api/users/${encodeURIComponent(String(id))}`);
   }
 
+  getNotificationSettings(id: string | number, projectId?: number): Observable<any> {
+    const url = `/api/users/${encodeURIComponent(String(id))}/notification_settings` + (projectId ? `?project_id=${projectId}` : '');
+    return this.http.get(url);
+  }
+
   deleteUser(id: string | number): Observable<any> {
     return this.http.delete(`/api/users/${encodeURIComponent(String(id))}`);
   }
