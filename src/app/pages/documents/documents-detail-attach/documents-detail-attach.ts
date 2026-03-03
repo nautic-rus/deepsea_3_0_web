@@ -205,7 +205,7 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
   // previously saved expanded/collapsed state from localStorage so reloads keep
   // the user's last view.
 
-  private _nodeUniqueId(n: any, pathPrefix = ''): string {
+  private _nodeUniqueId(n: any): string {
     // Prefer stable numeric id from backend when available
     const raw = n?.data?._original ?? n?.data ?? null;
     if (raw && (raw.id !== null && raw.id !== undefined)) return `id:${String(raw.id)}`;
@@ -386,7 +386,7 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
     }
     try {
       // fallback: deprecated but widely supported trick
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+       
       // @ts-ignore
       return decodeURIComponent(escape(s));
     } catch (e) {

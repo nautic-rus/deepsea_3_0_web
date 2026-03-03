@@ -8,7 +8,6 @@ import { TableModule } from 'primeng/table';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputIconModule } from 'primeng/inputicon';
 import { ProjectsUsersService } from '../../../services/projects-users.service';
-import { Injectable } from '@angular/core';
 import { UsersService } from '../../../services/users.service';
 import { forkJoin } from 'rxjs';
 import { AuthService } from '../../../auth/auth.service';
@@ -114,7 +113,7 @@ export class ProjectsUsersComponent implements OnInit {
           this.rolesOptions = (list || []).map((r: any) => ({ label: (r && r.name) ? r.name : String(r?.id), value: r?.id }));
           this.safeDetect();
         },
-        error: (err: any) => {
+        error: () => {
         }
       });
     } catch (e) { }
@@ -159,7 +158,7 @@ export class ProjectsUsersComponent implements OnInit {
             this.loading = false;
             this.safeDetect();
         },
-        error: (err: any) => {
+        error: () => {
           this.assignments = [];
           this.loading = false;
           this.safeDetect();
@@ -179,7 +178,7 @@ export class ProjectsUsersComponent implements OnInit {
           this.usersOptions = (list || []).map((u: any) => ({ label: this.formatUserName(u) || (u.email || String(u.id)), value: u.id }));
           this.safeDetect();
         },
-        error: (err: any) => {
+        error: () => {
         }
       });
     } catch (e) {
@@ -221,7 +220,7 @@ export class ProjectsUsersComponent implements OnInit {
         this.loadOwnerNames();
         this.loading = false;
       },
-      error: (err: any) => {
+      error: () => {
         this.projects = [];
         this.loading = false;
         this.safeDetect();
@@ -246,7 +245,7 @@ export class ProjectsUsersComponent implements OnInit {
           });
           this.safeDetect();
         },
-        error: (err: any) => {
+        error: () => {
         }
       });
     } catch (e) {
@@ -333,7 +332,7 @@ export class ProjectsUsersComponent implements OnInit {
     const payload = { project_id: this.selectedProject, user_id: this.assignModel.user_id || [], roles: this.assignModel.roles || [] };
     this.loading = true;
   this.svc.createAssignments(payload).subscribe({
-      next: (res: any) => {
+      next: () => {
   try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.projects.users.messages.SUMMARY_CREATE') || 'Create', detail: this.translate.instant('components.projects.users.messages.CREATED') || 'Assigned' }); } catch (e) {}
         this.assignDialog = false;
         // reload assignments to reflect new entries
@@ -367,7 +366,7 @@ export class ProjectsUsersComponent implements OnInit {
     // If creating a new project => POST, otherwise update existing via PUT /api/projects/{id}
     if (this.isCreating) {
       this.svc.createProject(payload).subscribe({
-        next: (created: any) => {
+        next: () => {
           this.displayDialog = false;
           this.editModel = {};
           this.loading = false;
@@ -397,7 +396,7 @@ export class ProjectsUsersComponent implements OnInit {
       if (this.editModel.owner_id !== undefined) payload.owner_id = this.editModel.owner_id;
 
       this.svc.updateProject(id, payload).subscribe({
-        next: (updated: any) => {
+        next: () => {
           this.displayDialog = false;
           this.editModel = {};
           this.loading = false;

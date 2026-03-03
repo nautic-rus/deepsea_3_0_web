@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/eslint",
+    "types": ["vitest/globals"]
+  },
+  "include": [
+    "src/**/*.ts"
+  ]
+}

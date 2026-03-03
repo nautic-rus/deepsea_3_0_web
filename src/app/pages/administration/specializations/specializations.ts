@@ -104,7 +104,7 @@ export class AdminSpecializationsComponent implements OnInit {
  this.loading = true;
  if (this.isCreating) {
  this.specializationsService.createPermission(payload as any).subscribe({
- next: (_res: any) => {
+ next: () => {
  this.displayDialog = false;
  this.editModel = {} as any;
  this.loading = false;
@@ -122,7 +122,7 @@ export class AdminSpecializationsComponent implements OnInit {
  });
  } else {
  this.specializationsService.updatePermission(id as any, payload as any).subscribe({
- next: (_res: any) => {
+ next: () => {
  this.displayDialog = false;
  this.editModel = {} as any;
  this.loading = false;
@@ -142,7 +142,7 @@ export class AdminSpecializationsComponent implements OnInit {
 
  confirmDelete(item: Specialization): void { if (!item) return; this.confirmationService.confirm({ message: `${this.translate.instant('components.permissions.confirm.DELETE_QUESTION') || 'Delete item'} "${item.name || item.id}"?`, icon: 'pi pi-exclamation-triangle', accept: () => this.deletePermission(item) }); } // TODO: make reactive (refresh on translate.onLangChange)
 
- deletePermission(item: Specialization): void { if (!item) return; this.loading = true; this.specializationsService.deletePermission(item.id).subscribe({ next: (_res: any) => { this.permissions = this.permissions.filter(u => u.id !== item.id); this.selectedPermissions = this.selectedPermissions.filter(s => s.id !== item.id); this.loading = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Delete', detail: 'Deleted' }); } catch (e) {} this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to delete item'; this.loading = false; this.safeDetect(); } }); } // TODO: make reactive (refresh on translate.onLangChange)
+ deletePermission(item: Specialization): void { if (!item) return; this.loading = true; this.specializationsService.deletePermission(item.id).subscribe({ next: () => { this.permissions = this.permissions.filter(u => u.id !== item.id); this.selectedPermissions = this.selectedPermissions.filter(s => s.id !== item.id); this.loading = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Delete', detail: 'Deleted' }); } catch (e) {} this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to delete item'; this.loading = false; this.safeDetect(); } }); } // TODO: make reactive (refresh on translate.onLangChange)
 
  exportCSV(): void {
  try {

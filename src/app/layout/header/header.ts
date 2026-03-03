@@ -32,7 +32,7 @@ import { AvatarService } from '../../services/avatar.service';
     ])
   ]
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
   menuItems: MenuItem[] = [];
   userMenuItems: MenuItem[] = [];
   darkMode = false;

@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TranslateModule, TranslateService, LangChangeEvent } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { AccordionModule } from 'primeng/accordion';
 import { RippleModule } from 'primeng/ripple';
@@ -26,7 +26,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
 
 		ngOnInit(): void {
 			this.buildMenu();
-			this.langSub = this.translate.onLangChange.subscribe((e: LangChangeEvent) => {
+			this.langSub = this.translate.onLangChange.subscribe(() => {
 				this.buildMenu();
 			});
 		}

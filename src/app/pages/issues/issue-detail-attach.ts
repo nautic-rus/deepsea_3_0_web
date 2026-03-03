@@ -15,11 +15,6 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ProgressSpinner } from 'primeng/progressspinner';
 
-interface UploadEvent {
-  originalEvent?: any;
-  files?: any[];
-}
-
 @Component({
   selector: 'app-issue-detail-attach',
   standalone: true,
@@ -198,7 +193,7 @@ export class IssueDetailAttachComponent implements OnChanges, OnDestroy {
         this.isLoading = false;
         this.cdr.markForCheck();
       }),
-      catchError((err: any) => {
+      catchError(() => {
         return of([]);
       })
     );
@@ -273,7 +268,7 @@ export class IssueDetailAttachComponent implements OnChanges, OnDestroy {
                     try { if (this.activeUploads === 0) this._clearSelectedFiles(); } catch (_) {}
                   });
                 },
-                error: (err: any) => {
+                error: () => {
                   this.isLoading = false;
                   this.cdr.markForCheck();
                   this.messageService.add({
@@ -296,7 +291,7 @@ export class IssueDetailAttachComponent implements OnChanges, OnDestroy {
             this.finishOneUpload(sub);
           }
         },
-        error: (err: any) => {
+        error: () => {
           if (!this._cancelled) {
             this.messageService.add({
               severity: 'error',
@@ -479,7 +474,7 @@ export class IssueDetailAttachComponent implements OnChanges, OnDestroy {
                     try { if (this.activeUploads === 0) this._clearSelectedFiles(); } catch (_) {}
                   });
                 },
-                error: (err: any) => {
+                error: () => {
                   this.isLoading = false;
                   this.cdr.markForCheck();
                   this.messageService.add({
@@ -502,7 +497,7 @@ export class IssueDetailAttachComponent implements OnChanges, OnDestroy {
             this.finishOneUpload(sub);
           }
         },
-        error: (err: any) => {
+        error: () => {
           if (!this._cancelled) {
             this.messageService.add({
               severity: 'error',
@@ -574,7 +569,7 @@ export class IssueDetailAttachComponent implements OnChanges, OnDestroy {
               });
             });
           },
-          error: (err: any) => {
+          error: () => {
             this.isLoading = false;
             this.cdr.markForCheck();
             this.messageService.add({

@@ -647,7 +647,7 @@ import { AvatarService } from '../../services/avatar.service';
 					return copy;
 				});
 			})
-			.catch((err) => {
+			.catch(() => {
 				this.documentsItems = [];
 			})
 			.finally(() => {
@@ -1102,7 +1102,7 @@ import { AvatarService } from '../../services/avatar.service';
 		}
 	}
 
-	onColumnResized(event: any): void {
+	onColumnResized(_event?: any): void {
 		try {
 			// small no-op: detect changes after resize to ensure layout updates
 			setTimeout(() => { try { this.cdr.detectChanges(); } catch (e) { /* ignore */ } }, 50);
@@ -1129,7 +1129,7 @@ import { AvatarService } from '../../services/avatar.service';
 	issueAvatarColor(u: any): string { return this.avatarService.issueAvatarColor(u); }
 	issueAvatarTextColor(u: any): string { return this.avatarService.issueAvatarTextColor(u); }
 
-	statusSeverity(_code: any): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | null { return 'info'; }
+	statusSeverity(_code?: any): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | null { return 'info'; }
 	prioritySeverity(priority: any): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | null {
 		try {
 			if (!priority && priority !== 0) return 'info';
@@ -1141,7 +1141,7 @@ import { AvatarService } from '../../services/avatar.service';
 		} catch (e) { return 'info'; }
 	}
 
-	projectCode(_issue: any): string | null { return null; }
+	projectCode(_issue?: any): string | null { return null; }
 
 	// Called when TreeSelect model changes (user selects a directory)
 	onDirectoryNgModelChange(value: any): void {
@@ -1307,7 +1307,7 @@ import { AvatarService } from '../../services/avatar.service';
 					// clear directory selection when project changes
 					if (this.editModel) this.editModel.directory_id = null;
 					try { this.cdr.detectChanges(); } catch (e) { /* ignore */ }
-				}).catch((e) => {
+				}).catch(() => {
 					this.directoryTreeFiltered = [];
 					if (this.editModel) this.editModel.directory_id = null;
 					try { this.cdr.detectChanges(); } catch (er) { /* ignore */ }

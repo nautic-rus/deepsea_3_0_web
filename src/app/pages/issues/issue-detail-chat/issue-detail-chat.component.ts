@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges, ChangeDetectorRef, ViewChild, ElementRef, AfterViewInit, inject } from '@angular/core';
+import { Component, Input, OnChanges, ChangeDetectorRef, ViewChild, ElementRef, AfterViewInit, inject } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -43,7 +43,7 @@ export class IssueDetailChatComponent implements OnChanges, AfterViewInit {
 
   ngAfterViewInit(): void { if (this.messages?.length) this.scrollToBottom(); }
 
-  ngOnChanges(_changes: SimpleChanges): void { /* handled by setter */ }
+  ngOnChanges(): void { /* handled by setter */ }
 
   private processIssue(): void {
     if (!this._issue) { this.messages = []; return; }
@@ -72,13 +72,13 @@ export class IssueDetailChatComponent implements OnChanges, AfterViewInit {
             try { if (this._issue) this._issue.messages = list; } catch {}
             finish();
           },
-          error: (_err: any) => { try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR'), detail: this.translate.instant('components.issues.messages.ERROR') }); } catch (e) {} finish(); }
+          error: () => { try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR'), detail: this.translate.instant('components.issues.messages.ERROR') }); } catch (e) {} finish(); }
         });
       } else { finish(); }
 
       this.issuesService.getHistory(this._issue.id).subscribe({
         next: (res: any) => { const list = res?.data ?? res ?? []; this.historyEntries = this.normalizeHistory(list); try { if (this._issue) this._issue.history = list; } catch {} finish(); },
-        error: (_err: any) => { try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR'), detail: this.translate.instant('components.issues.messages.ERROR') }); } catch (e) {} finish(); }
+        error: () => { try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR'), detail: this.translate.instant('components.issues.messages.ERROR') }); } catch (e) {} finish(); }
       });
     }
   }
@@ -166,7 +166,7 @@ export class IssueDetailChatComponent implements OnChanges, AfterViewInit {
   }
 
   iconFor(type: string) { return type === 'history' ? 'pi pi-history' : 'pi pi-comment'; }
-  colorFor(_type: string) { return 'bg-gray-100 text-gray-500'; }
+  colorFor() { return 'bg-gray-100 text-gray-500'; }
 
   formatValue(raw: any): string {
     try {
@@ -303,11 +303,11 @@ export class IssueDetailChatComponent implements OnChanges, AfterViewInit {
               } catch (e) {}
               this.sending = false; this.cdr.markForCheck(); this.scrollToBottom(); try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.issues.messages.SAVED'), detail: this.translate.instant('components.issues.messages.SAVED') }); } catch (e) {}
             },
-            error: (err: any) => { this.sending = false; this.cdr.markForCheck(); this.scrollToBottom(); try { this.messageService.add({ severity: 'warn', summary: this.translate.instant('components.issues.messages.SAVED'), detail: this.translate.instant('components.issues.messages.SAVED') }); } catch (e) {} }
+            error: () => { this.sending = false; this.cdr.markForCheck(); this.scrollToBottom(); try { this.messageService.add({ severity: 'warn', summary: this.translate.instant('components.issues.messages.SAVED'), detail: this.translate.instant('components.issues.messages.SAVED') }); } catch (e) {} }
           });
   } else { this.sending = false; this.cdr.markForCheck(); this.scrollToBottom(); try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.issues.messages.SAVED'), detail: this.translate.instant('components.issues.messages.SAVED') }); } catch (e) {} }
       },
-  error: (err: any) => { this.sending = false; try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR'), detail: err?.message || this.translate.instant('components.issues.messages.ERROR') }); } catch (e) {} }
+  error: () => { this.sending = false; try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR'), detail: this.translate.instant('components.issues.messages.ERROR') }); } catch (e) {} }
     });
   }
 

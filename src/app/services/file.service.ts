@@ -79,7 +79,7 @@ export class FileService {
           } as Attachment;
         });
       }),
-      catchError((err: any) => {
+      catchError(() => {
         return of([] as Attachment[]);
       })
     );

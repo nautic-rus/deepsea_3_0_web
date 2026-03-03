@@ -246,7 +246,7 @@ export class IssueDetailComponent implements OnInit {
     if (!this.validateIssueForm()) return;
     this.loading = true;
     this.issuesService.updateIssue(id as any, payload).subscribe({
-      next: (res: any) => {
+      next: () => {
         // refresh issue data from server
         this.loadIssue(id);
         this.displayDialog = false;
@@ -295,7 +295,7 @@ export class IssueDetailComponent implements OnInit {
     this.statusSaving = true;
     this.cdr.markForCheck();
     this.issuesService.updateIssue(this.issue.id, { status_id: statusId }).subscribe({
-      next: (_res: any) => {
+      next: () => {
         // After changing status, re-fetch the issue to get authoritative fields including allowed_statuses
         this.issuesService.getIssue(this.issue.id).subscribe({
           next: (fetchRes: any) => {
@@ -316,7 +316,7 @@ export class IssueDetailComponent implements OnInit {
             this.cdr.markForCheck();
             try { this.messageService.add({ severity: 'success', summary: this.trOr('components.issues.messages.SUCCESS', 'Success'), detail: this.trOr('components.issues.messages.STATUS_UPDATED', 'Status updated') }); } catch (e) {}
           },
-          error: (fetchErr: any) => {
+          error: () => {
             this.statusSaving = false;
             this.cdr.markForCheck();
             try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR'), detail: this.translate.instant('components.issues.messages.STATUS_UPDATE_FAILED') }); } catch (e) {}
@@ -351,7 +351,7 @@ export class IssueDetailComponent implements OnInit {
       if (navigator && (navigator as any).clipboard && typeof (navigator as any).clipboard.writeText === 'function') {
         (navigator as any).clipboard.writeText(url).then(() => {
           try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.issues.messages.COPY_LINK') || 'Copied', detail: this.translate.instant('components.issues.messages.LINK_COPIED') || 'Link copied to clipboard' }); } catch (e) {}
-        }).catch((_err: any) => {
+        }).catch(() => {
           try { window.prompt(this.translate.instant('components.issues.messages.COPY_PROMPT') || 'Copy link', url); } catch (e) {}
         });
       } else {
@@ -382,7 +382,7 @@ export class IssueDetailComponent implements OnInit {
     this.deleting = true;
     this.cdr.markForCheck();
     this.issuesService.deleteIssue(this.issue.id).subscribe({
-      next: (_res: any) => {
+      next: () => {
         this.deleting = false;
         this.displayDeleteDialog = false;
         this.cdr.markForCheck();
@@ -447,7 +447,7 @@ export class IssueDetailComponent implements OnInit {
         }
         this.cdr.markForCheck();
       },
-      error: (err) => {
+      error: () => {
         this.availableIssuesOptions = [];
         this.availableDocumentsOptions = [];
         this.cdr.markForCheck();
@@ -514,7 +514,7 @@ export class IssueDetailComponent implements OnInit {
 
     this.savingRelations = true;
     forkJoin(tasks).subscribe({
-      next: (_res) => {
+      next: () => {
         this.savingRelations = false;
         this.displayAddRelationDialog = false;
         // refresh the issue to pick up new relations

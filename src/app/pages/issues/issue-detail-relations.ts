@@ -146,7 +146,7 @@ export class IssueDetailRelationsComponent implements OnChanges {
         this.relations = (this.relations || []).filter(r => r.raw?.id !== linkId && r.raw?.link_id !== linkId && r.raw?._id !== linkId);
         this.cdr.markForCheck();
       },
-      error: (err) => {
+      error: () => {
       }
     });
   }

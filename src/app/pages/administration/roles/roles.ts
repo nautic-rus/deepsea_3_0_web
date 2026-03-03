@@ -224,7 +224,7 @@ export class AdminRolesComponent implements OnInit, OnDestroy {
     // API expects payload in the shape: { permission_ids: [id, ...] }
     const payload = { permission_ids: this.selectedPermissionIds };
     const sub = this.rolesService.addRolePermissions(this.selectedRole.id as any, payload).subscribe({
-      next: (res: any) => {
+      next: () => {
         // reload permissions for the role to reflect changes
         this.loadRolePermissions(this.selectedRole!.id as any);
         try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Save', detail: this.translate.instant('components.roles.messages.ASSIGNED') || 'Permissions assigned' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
@@ -342,7 +342,6 @@ export class AdminRolesComponent implements OnInit, OnDestroy {
   // bulk delete stub
   deleteSelectedRoles(): void {
     if (!this.selectedRoles || !this.selectedRoles.length) return;
-    const ids = this.selectedRoles.map(s => s.id).join(', ');
     try {
       this.messageService.add({ severity: 'info', summary: 'Not implemented', detail: 'Bulk delete for roles is not implemented yet' });
     } catch (e) { }

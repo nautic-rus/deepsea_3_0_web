@@ -63,7 +63,7 @@ export class PasswordResetComponent implements OnInit {
 
     this.loading = true;
     this.authService.requestPasswordReset(this.email).subscribe({
-      next: (_res) => {
+      next: () => {
         this.loading = false;
         this.successMessage = this.translate.instant('components.passwordReset.MSG_SENT_IF_EXISTS'); // TODO: make reactive (refresh on translate.onLangChange)
       },
@@ -92,7 +92,7 @@ export class PasswordResetComponent implements OnInit {
 
     this.loading = true;
     this.authService.resetPassword(this.token, this.password).subscribe({
-      next: (_res) => {
+      next: () => {
         this.loading = false;
         this.successMessage = this.translate.instant('components.passwordReset.MSG_PASSWORD_UPDATED') || 'Password updated successfully';
         // optionally navigate to login after a short delay
