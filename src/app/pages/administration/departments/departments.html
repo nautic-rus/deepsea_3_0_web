@@ -21,7 +21,7 @@
     scrollHeight="flex"
     [rows]="10"
     size="small"
-    [globalFilterFields]="['id','name','code','description']"
+    [globalFilterFields]="['id','name','manager_id','description']"
   [(selection)]="selectedPermissions"
     [rowHover]="true"
     dataKey="id"
@@ -50,9 +50,9 @@
           {{ 'components.permissions.table.HEADERS.NAME' | translate }}
         <p-sortIcon field="name" />
       </th>
-      <th pSortableColumn="code">
-          {{ 'components.permissions.table.HEADERS.CODE' | translate }}
-        <p-sortIcon field="code" />
+      <th pSortableColumn="manager_id">
+          {{ 'components.departments.table.HEADERS.MANAGER' | translate }}
+        <p-sortIcon field="manager_id" />
       </th>
         <th>{{ 'components.permissions.table.HEADERS.DESCRIPTION' | translate }}</th>
       <th pSortableColumn="created_at">
@@ -70,7 +70,7 @@
       </td>
       <td>{{ permission.id }}</td>
       <td>{{ permission.name }}</td>
-      <td>{{ permission.code }}</td>
+      <td>{{ permission.manager_id || '-' }}</td>
       <td>{{ permission.description || '-' }}</td>
       <td>{{ permission.created_at | date:'short' }}</td>
       <td>
@@ -110,8 +110,8 @@
       <input pInputText id="permName" type="text" [(ngModel)]="editModel.name" name="name" />
     </div>
     <div class="flex flex-col gap-2">
-  <label for="permCode">{{ 'components.permissions.form.CODE' | translate }}</label>
-      <input pInputText id="permCode" type="text" [(ngModel)]="editModel.code" name="code" />
+  <label for="permManager">{{ 'components.departments.form.MANAGER' | translate }}</label>
+      <p-select id="permManager" [options]="usersOptions" optionLabel="label" optionValue="value" [(ngModel)]="editModel.manager_id" appendTo="body" placeholder="{{ 'MENU.ANY' | translate }}"></p-select>
     </div>
     <div class="flex flex-col gap-2">
   <label for="permDesc">{{ 'components.permissions.form.DESCRIPTION' | translate }}</label>

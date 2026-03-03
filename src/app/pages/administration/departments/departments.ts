@@ -18,13 +18,15 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
 import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
+import { Select } from 'primeng/select';
 import { MessageService } from 'primeng/api';
 import { DepartmentsService } from '../../../services/departments.service';
+import { UsersService } from '../../../services/users.service';
 
 interface Department {
  id: number | string;
  name: string;
- code?: string;
+ manager_id?: number | string | null;
  description?: string | null;
  created_at?: string | null;
 }
@@ -50,7 +52,8 @@ interface Department {
  SkeletonModule,
  TagModule,
  ConfirmDialogModule,
- ToastModule
+ ToastModule,
+ Select
  ],
  providers: [ConfirmationService, MessageService],
  templateUrl: './departments.html',
@@ -59,15 +62,17 @@ interface Department {
 export class AdminDepartmentsComponent implements OnInit {
  permissions: Department[] = [];
  selectedPermissions: Department[] = [];
+ usersOptions: { label: string; value: any; avatar?: string | null }[] = [];
  loading = false;
  error: string | null = null;
  displayDialog = false;
  editModel: Partial<Department> = {};
  isCreating = false;
- formErrors: { name?: string; code?: string } = {};
+ formErrors: { name?: string; manager_id?: string } = {};
 
  constructor(
  private departmentsService: DepartmentsService,
+ private usersService: UsersService,
  private cd: ChangeDetectorRef,
  private confirmationService: ConfirmationService,
  private messageService: MessageService,
@@ -78,7 +83,20 @@ export class AdminDepartmentsComponent implements OnInit {
  try { this.cd.detectChanges(); } catch (e) { }
  }
 
- ngOnInit(): void { this.loadPermissions(); }
+loadUsers(): void {
+	try {
+		this.usersService.getUsers(1, 1000).subscribe({
+			next: (res: any) => {
+				const items = (res && res.data) ? res.data : (res || []);
+				this.usersOptions = (items || []).map((u: any) => ({ label: (u.full_name || u.name || u.email || String(u.id)), value: u.id, avatar: u.avatar || null }));
+				try { this.cd.detectChanges(); } catch (e) { }
+			},
+			error: (err: any) => { console.warn('Failed to load users', err); this.usersOptions = []; try { this.cd.detectChanges(); } catch (e) { } }
+		});
+	} catch (e) { console.warn('Failed to load users', e); this.usersOptions = []; try { this.cd.detectChanges(); } catch (err) { } }
+}
+
+ngOnInit(): void { this.loadPermissions(); this.loadUsers(); }
 
  onGlobalFilter(table: any, event: Event): void {
  const val = (event && (event.target as HTMLInputElement)) ? (event.target as HTMLInputElement).value : '';
@@ -103,7 +121,7 @@ export class AdminDepartmentsComponent implements OnInit {
  }
 
  openNew(): void {
- this.editModel = { name: '', code: '', description: '' };
+ this.editModel = { name: '', manager_id: null, description: '' };
  this.isCreating = true; this.displayDialog = true;
  }
 
@@ -118,7 +136,7 @@ export class AdminDepartmentsComponent implements OnInit {
  if (!this.editModel) return;
  if (!this.isCreating && (this.editModel.id == null)) return;
  const id = (this.editModel.id != null) ? this.editModel.id : null;
- const payload: Partial<Department> = { name: this.editModel.name, code: (this.editModel as any).code, description: this.editModel.description };
+ const payload: Partial<Department> = { name: this.editModel.name, manager_id: (this.editModel as any).manager_id, description: this.editModel.description };
  if (!this.validateForm()) { try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CONFIRM') || 'Error', detail: 'Please fix form errors' }); } catch (e) {} return; } // TODO: make reactive (refresh on translate.onLangChange)
  this.loading = true;
  if (this.isCreating) {
@@ -144,11 +162,11 @@ export class AdminDepartmentsComponent implements OnInit {
 
  exportCSV(): void {
  try { const rows = this.permissions || []; if (!rows.length) { try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('MENU.ANY') || 'No users to export' }); } catch (e) {} return; } // TODO: make reactive (refresh on translate.onLangChange)
- const headers = ['ID', this.translate.instant('components.permissions.table.HEADERS.NAME') || 'Name', this.translate.instant('components.permissions.table.HEADERS.CODE') || 'Code', this.translate.instant('components.permissions.table.HEADERS.DESCRIPTION') || 'Description', this.translate.instant('components.permissions.table.HEADERS.CREATED_AT') || 'Created At']; // TODO: make reactive (refresh on translate.onLangChange)
+ const headers = ['ID', this.translate.instant('components.permissions.table.HEADERS.NAME') || 'Name', this.translate.instant('components.departments.table.HEADERS.MANAGER') || 'Manager', this.translate.instant('components.permissions.table.HEADERS.DESCRIPTION') || 'Description', this.translate.instant('components.permissions.table.HEADERS.CREATED_AT') || 'Created At']; // TODO: make reactive (refresh on translate.onLangChange)
  const esc = (v: any) => { if (v === null || v === undefined) return ''; if (typeof v === 'boolean') return v ? (this.translate.instant('MENU.ACTIVE_YES') || 'Active') : (this.translate.instant('MENU.ACTIVE_NO') || 'Inactive'); const s = String(v); return '"' + s.replace(/"/g, '""') + '"'; }; // TODO: make reactive (refresh on translate.onLangChange)
- const lines = [headers.map(h => '"' + String(h).replace(/"/g, '""') + '"').join(',')]; for (const u of rows) { const line = [esc(u.id), esc(u.name), esc((u as any).code), esc((u as any).description), esc(u.created_at)].join(','); lines.push(line); }
+ const lines = [headers.map(h => '"' + String(h).replace(/"/g, '""') + '"').join(',')]; for (const u of rows) { const line = [esc(u.id), esc(u.name), esc((u as any).manager_id), esc((u as any).description), esc(u.created_at)].join(','); lines.push(line); }
  const csv = lines.join('\n'); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const timestamp = new Date().toISOString().replace(/[:.]/g, '-'); const filename = `departments_export_${timestamp}.csv`; const link = document.createElement('a'); const url = URL.createObjectURL(blob); link.href = url; link.setAttribute('download', filename); document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url); try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('components.permissions.messages.EXPORTED') || 'Export completed' }); } catch (e) {} } catch (err) { try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: 'Export failed' }); } catch (e) {} } // TODO: make reactive (refresh on translate.onLangChange)
  }
 
- validateForm(): boolean { this.formErrors = {}; const name = (this.editModel && this.editModel.name) ? String(this.editModel.name).trim() : ''; const code = (this.editModel && (this.editModel as any).code) ? String((this.editModel as any).code).trim() : ''; if (!name) this.formErrors.name = (this.translate.instant('components.permissions.form.NAME') || 'Name') + ' is required'; if (!code) this.formErrors.code = (this.translate.instant('components.permissions.form.CODE') || 'Code') + ' is required'; this.safeDetect(); return Object.keys(this.formErrors).length === 0; } // TODO: make reactive (refresh on translate.onLangChange)
+ validateForm(): boolean { this.formErrors = {}; const name = (this.editModel && this.editModel.name) ? String(this.editModel.name).trim() : ''; if (!name) this.formErrors.name = (this.translate.instant('components.permissions.form.NAME') || 'Name') + ' is required'; this.safeDetect(); return Object.keys(this.formErrors).length === 0; } // TODO: make reactive (refresh on translate.onLangChange)
 }

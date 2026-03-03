@@ -126,6 +126,24 @@ export class AdminUsersComponent implements OnInit {
     }
   }
 
+  // Extract a human-readable error message from various server error shapes
+  private extractErrorMessage(err: any): string {
+    if (!err) return 'Unknown error';
+    try {
+      // API may return { error: '...' } or { message: '...' }
+      if (err.error && typeof err.error === 'string') return err.error;
+      if (err.error && typeof err.error === 'object') {
+        if (err.error.error && typeof err.error.error === 'string') return err.error.error;
+        if (err.error.message && typeof err.error.message === 'string') return err.error.message;
+      }
+      if (err.message && typeof err.message === 'string') return err.message;
+      // fallback to stringified payload
+      return JSON.stringify(err);
+    } catch (e) {
+      return String(err);
+    }
+  }
+
   ngOnInit(): void {
     this.loadUsers();
     this.loadDepartments();
@@ -396,14 +414,17 @@ export class AdminUsersComponent implements OnInit {
           this.safeDetect();
         },
         error: (err) => {
-          this.error = (err && err.message) ? err.message : 'Failed to create user';
+          this.error = this.extractErrorMessage(err) || 'Failed to create user';
           this.loading = false;
+          try {
+            this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CREATE_USER') || 'Error', detail: this.error ?? '' });
+          } catch (e) {}
           this.safeDetect();
         }
       });
     } else {
       // update existing user
-  this.usersService.updateUser(id as any, payload).subscribe({
+      this.usersService.updateUser(id as any, payload).subscribe({
         next: (updated: any) => {
           // after successful save, reload users from server to keep canonical state
           this.displayDialog = false;
@@ -419,8 +440,11 @@ export class AdminUsersComponent implements OnInit {
           this.safeDetect();
         },
         error: (err) => {
-          this.error = (err && err.message) ? err.message : 'Failed to update user';
+          this.error = this.extractErrorMessage(err) || 'Failed to update user';
           this.loading = false;
+          try {
+            this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.SAVE') || 'Error', detail: this.error ?? '' });
+          } catch (e) {}
           this.safeDetect();
         }
       });
@@ -482,8 +506,11 @@ export class AdminUsersComponent implements OnInit {
         this.safeDetect();
       },
       error: (err) => {
-        this.error = (err && err.message) ? err.message : 'Failed to delete user';
+        this.error = this.extractErrorMessage(err) || 'Failed to delete user';
         this.loading = false;
+        try {
+          this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.DELETE') || 'Error', detail: this.error ?? '' });
+        } catch (e) {}
         this.safeDetect();
       }
     });
