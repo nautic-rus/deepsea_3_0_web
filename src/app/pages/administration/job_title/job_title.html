@@ -2,7 +2,7 @@
   <p-toolbar >
     <ng-template #start>
   <p-button [label]="'components.permissions.form.CREATE_LABEL' | translate" icon="pi pi-plus" severity="primary" class="mr-2" (onClick)="openNew()" />
-  <p-button severity="secondary" [label]="'MENU.DELETE' | translate" icon="pi pi-trash"  (onClick)="deleteSelectedPermissions()" [disabled]="!selectedPermissions || !selectedPermissions.length" />
+  <p-button severity="secondary" [label]="'MENU.DELETE' | translate" icon="pi pi-trash"  (onClick)="deleteSelectedJobTitles()" [disabled]="!selectedJobTitles || !selectedJobTitles.length" />
     </ng-template>
 
     <ng-template #end>
@@ -15,14 +15,14 @@
   <div class="table-responsive">
   <p-table
     #dt
-    [value]="permissions"
+    [value]="jobTitles"
     [loading]="loading"
     [scrollable]="true"
     scrollHeight="flex"
     [rows]="10"
     size="small"
-    [globalFilterFields]="['id','name','code','description']"
-  [(selection)]="selectedPermissions"
+    [globalFilterFields]="['id','name','description']"
+  [(selection)]="selectedJobTitles"
     [rowHover]="true"
     dataKey="id"
     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} items"
@@ -32,7 +32,7 @@
 
   <ng-template #caption>
       <div class="flex justify-between mb-2">
-        <h3>{{ 'MENU.SPECIALIZATIONS' | translate }}</h3>
+        <h3>{{ 'MENU.JOB_TITLE' | translate }}</h3>
         <p-iconfield>
           <p-inputicon styleClass="pi pi-search" /> 
           <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
@@ -50,10 +50,6 @@
           {{ 'components.permissions.table.HEADERS.NAME' | translate }}
         <p-sortIcon field="name" />
       </th>
-      <th pSortableColumn="code">
-          {{ 'components.permissions.table.HEADERS.CODE' | translate }}
-        <p-sortIcon field="code" />
-      </th>
         <th>{{ 'components.permissions.table.HEADERS.DESCRIPTION' | translate }}</th>
       <th pSortableColumn="created_at">
           {{ 'components.permissions.table.HEADERS.CREATED_AT' | translate }}
@@ -63,19 +59,18 @@
     </tr>
   </ng-template>
   
-  <ng-template pTemplate="body" let-permission>
+  <ng-template pTemplate="body" let-item>
     <tr>
       <td>
-        <p-tableCheckbox [value]="permission" />
+        <p-tableCheckbox [value]="item" />
       </td>
-      <td>{{ permission.id }}</td>
-      <td>{{ permission.name }}</td>
-      <td>{{ permission.code }}</td>
-      <td>{{ permission.description || '-' }}</td>
-      <td>{{ permission.created_at | date:'short' }}</td>
+      <td>{{ item.id }}</td>
+      <td>{{ item.name }}</td>
+      <td>{{ item.description || '-' }}</td>
+      <td>{{ item.created_at | date:'short' }}</td>
       <td>
-  <p-button icon="pi pi-pencil" class="mr-2" [outlined]="true" (click)="openEdit(permission)" />
-  <p-button icon="pi pi-trash" severity="danger" [outlined]="true" (click)="confirmDelete(permission)" />
+  <p-button icon="pi pi-pencil" class="mr-2" [outlined]="true" (click)="openEdit(item)" />
+  <p-button icon="pi pi-trash" severity="danger" [outlined]="true" (click)="confirmDelete(item)" />
       </td>
     </tr>
   </ng-template>
@@ -110,16 +105,12 @@
       <input pInputText id="permName" type="text" [(ngModel)]="editModel.name" name="name" />
     </div>
     <div class="flex flex-col gap-2">
-  <label for="permCode">{{ 'components.permissions.form.CODE' | translate }}</label>
-      <input pInputText id="permCode" type="text" [(ngModel)]="editModel.code" name="code" />
-    </div>
-    <div class="flex flex-col gap-2">
   <label for="permDesc">{{ 'components.permissions.form.DESCRIPTION' | translate }}</label>
       <textarea id="permDesc" rows="3" [(ngModel)]="editModel.description" name="description" class="p-inputtext"></textarea>
     </div>
     <div class="flex justify-end gap-2 mt-4">
       <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="displayDialog=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="loading"></p-button>
-  <p-button label="{{ 'MENU.SAVE' | translate }}" (onClick)="savePermission()" severity="primary" icon="pi pi-check" iconPos="left" [loading]="loading" [disabled]="loading"></p-button>
+  <p-button label="{{ 'MENU.SAVE' | translate }}" (onClick)="saveJobTitle()" severity="primary" icon="pi pi-check" iconPos="left" [loading]="loading" [disabled]="loading"></p-button>
     </div>
   </div>
 </p-dialog>

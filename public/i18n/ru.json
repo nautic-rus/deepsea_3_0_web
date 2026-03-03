@@ -66,6 +66,7 @@
     "ROLES": "Роли",
     "SAVE": "Сохранить",
     "SELECT_DEPARTMENT": "Выберите отдел",
+    "SELECT_JOB_TITLE": "Выберите должность",
     "SETTINGS": "Настройки",
     "SPECIALIZATIONS": "Специализации",
     "SPECIFICATIONS": "Спецификации",
@@ -78,12 +79,13 @@
     "USER_MANAGEMENT": "ПОЛЬЗОВАТЕЛИ",
     "USER_UPDATED": "Пользователь обновлён",
     "WIKI": "База знаний",
+    "SEND_WELCOME": "Отправить приветствие",
     "SECURITY": "Безопасность",
     "STORAGE": "Хранилище",
     "GENERAL": "Общие настройки",
     "ID": "ID",
     "EDIT_DOCUMENT": "Редактировать документ",
-  "CREATE_DOC": "Создать документ",
+    "CREATE_DOC": "Создать документ",
     "CREATE_ISSUE": "Создать задачу",
     "EDIT_ISSUE": "Редактировать задачу",
     "BULK_EDIT": "Массовое редактирование",
@@ -91,7 +93,9 @@
     "APPLY": "Применить",
     "RESET": "Сбросить",
     "COLUMNS": "Колонки",
-    "SELECT": "Выбрать"
+    "SELECT": "Выбрать",
+    "CREATED_AT": "Дата создания",
+    "UPDATED_AT": "Дата обновления"
   },
  
   "TODAY": "Сегодня",
@@ -166,6 +170,40 @@
       "DASHBOARD_TITLE": "Главная",
       "DASHBOARD_SUB": "Перейти на главную",
       "GO_HOME": "На главную"
+    },
+    "pages": {
+      "form": {
+        "CREATE_LABEL": "Создать",
+        "EDIT_LABEL": "Редактировать",
+        "NAME": "Название",
+        "CODE": "Код",
+        "DESCRIPTION": "Описание",
+        "KEY": "Ключ",
+        "PATH": "Путь",
+        "PARENT_ID": "Родитель ID",
+        "MAIN_MENU": "Главное меню",
+        "PERMISSIONS": "Права",
+        "SAVE": "Сохранить",
+        "CANCEL": "Отмена"
+      },
+      "table": {
+        "HEADERS": {
+          "NAME": "Название",
+          "CODE": "Код",
+          "DESCRIPTION": "Описание",
+          "CREATED_AT": "Дата создания",
+          "KEY": "Ключ",
+          "PATH": "Путь",
+          "PARENT_ID": "Родитель ID",
+          "TITLE_KEY": "Ключ названия",
+          "TITLE_EN": "Название (EN)",
+          "ICON": "Иконка",
+          "MAIN_MENU": "Главное меню",
+          "PERMISSIONS": "Права"
+        },
+        "EMPTY": "Нет страниц для отображения",
+        "SEARCH": "Поиск"
+      }
     },
     "menu": {
       "ACTIONS": "Действия",
@@ -287,6 +325,16 @@
           "DESCRIPTION": "Описание",
           "ID": "ID",
           "NAME": "Название"
+        }
+      }
+    },
+    "departments": {
+      "form": {
+        "MANAGER": "Руководитель"
+      },
+      "table": {
+        "HEADERS": {
+          "MANAGER": "Руководитель"
         }
       }
     },

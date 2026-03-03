@@ -1,18 +1,130 @@
 <section class="admin-subpage-tools card mt-0">
-  <p>General system settings.</p>
+  <p-toolbar >
+    <ng-template #start>
+  <p-button [label]="'components.pages.form.CREATE_LABEL' | translate" icon="pi pi-plus" severity="primary" class="mr-2" (onClick)="openNew()" />
+  <p-button severity="secondary" [label]="'MENU.DELETE' | translate" icon="pi pi-trash"  (onClick)="deleteSelectedPages()" [disabled]="!selectedPages || !selectedPages.length" />
+    </ng-template>
+
+    <ng-template #end>
+      <p-button [label]="'MENU.EXPORT' | translate" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
+    </ng-template>
+  </p-toolbar>
 </section>
 
 <section class="admin-subpage-content card">
-<div class="page-wiki">
-  <section class="admin-subpage-content card text-center flex flex-col items-center justify-center" style="height: 90vh;">
-    <div class="mb-4">
-      <h1>{{ 'MENU.WIKI' | translate }}</h1>
-    </div>
+  <div class="table-responsive">
+  <p-table
+    #dt
+    [value]="pages"
+    [loading]="loading"
+    [scrollable]="true"
+    scrollHeight="flex"
+    [rows]="10"
+    size="small"
+    [globalFilterFields]="['id','key','path','parent_id']"
+  [(selection)]="selectedPages"
+    [rowHover]="true"
+    dataKey="id"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} items"
+    [showCurrentPageReport]="true"
+    [rowsPerPageOptions]="[10, 20, 30]"
+      >
 
-    <p>Мы работаем над этой страницей — приходите позже или вернитесь на главную.</p>
+  <ng-template #caption>
+      <div class="flex justify-between mb-2">
+        <h3>{{ 'MENU.PAGES' | translate }}</h3>
+        <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
+        </span>
+      </div>
+      </ng-template>
 
-    <p-button [label]="('components.underDevelopment.GO_HOME' | translate)" routerLink="/" severity="success" class="mt-5"/>
-  </section>
+  <ng-template pTemplate="header">
+    <tr>
+      <th style="width: 3rem">
+        <p-tableHeaderCheckbox />
+      </th>
+      <th>ID</th>
+      <th pSortableColumn="key">{{ 'components.pages.table.HEADERS.KEY' | translate }}<p-sortIcon field="key" /></th>
+      <th pSortableColumn="parent_id">{{ 'components.pages.table.HEADERS.PARENT_ID' | translate }}<p-sortIcon field="parent_id" /></th>
+      <th pSortableColumn="path">{{ 'components.pages.table.HEADERS.PATH' | translate }}<p-sortIcon field="path" /></th>
+      <th>{{ 'components.pages.table.HEADERS.MAIN_MENU' | translate }}</th>
+      <th>{{ 'components.pages.table.HEADERS.PERMISSIONS' | translate }}</th>
+      <th></th>
+    </tr>
+  </ng-template>
+  
+  <ng-template pTemplate="body" let-page>
+    <tr>
+      <td>
+        <p-tableCheckbox [value]="page" />
+      </td>
+      <td>{{ page.id }}</td>
+      <td>{{ page.key }}</td>
+      <td>{{ page.parent_id || '-' }}</td>
+      <td>{{ page.path }}</td>
+      
+      <td>
+        <p-tag [value]="(page.main_menu ? 'MENU.ACTIVE_YES' : 'MENU.ACTIVE_NO') | translate" [severity]="page.main_menu ? 'success' : 'danger'"></p-tag>
+      </td>
+      <td>{{ page.permissions ? (page.permissions.join(', ')) : '-' }}</td>
+      <td>
+  <p-button icon="pi pi-pencil" class="mr-2" [outlined]="true" (click)="openEdit(page)" />
+  <p-button icon="pi pi-trash" severity="danger" [outlined]="true" (click)="confirmDelete(page)" />
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
 </div>
-
 </section>
+
+<!-- Confirm dialog (styled similar to edit dialog) -->
+<p-confirmDialog
+  appendTo="body"
+  [dismissableMask]="true"
+  [baseZIndex]="10000"
+  [style]="{ width: '25%' }"
+  styleClass="user-confirm-dialog"
+  header="{{ 'MENU.CONFIRM' | translate }}"
+  acceptLabel="{{ 'MENU.DELETE' | translate }}"
+  rejectLabel="{{ 'MENU.CANCEL' | translate }}"
+  acceptIcon="pi pi-check"
+  acceptButtonStyleClass="p-button-danger"
+  rejectButtonStyleClass="secondary p-button-text"
+  rejectIcon="pi pi-times"
+  >
+</p-confirmDialog>
+<!-- Toast notifications (styled for user actions) -->
+<p-toast position="top-right" appendTo="body" [baseZIndex]="10001" styleClass="user-toast"></p-toast>
+
+<!-- Edit dialog -->
+<p-dialog [header]="isCreating ? ('components.pages.form.CREATE_LABEL' | translate) : ('components.pages.form.EDIT_LABEL' | translate)" [(visible)]="displayDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{width: '35%'}">
+  <div class=" flex flex-col gap-4">
+    <div class="flex flex-col gap-2">
+      <label for="pageKey">{{ 'components.pages.form.KEY' | translate }}</label>
+      <input pInputText id="pageKey" type="text" [(ngModel)]="editModel.key" name="key" />
+    </div>
+    <div class="flex flex-col gap-2">
+      <label for="pagePath">{{ 'components.pages.form.PATH' | translate }}</label>
+      <input pInputText id="pagePath" type="text" [(ngModel)]="editModel.path" name="path" />
+    </div>
+    <div class="flex flex-col gap-2">
+      <label for="pageParent">{{ 'components.pages.form.PARENT_ID' | translate }}</label>
+      <input pInputText id="pageParent" type="number" [(ngModel)]="editModel.parent_id" name="parent_id" />
+    </div>
+    <div class="flex items-center gap-2">
+      <p-checkbox binary="true" [(ngModel)]="editModel.main_menu" inputId="mainMenu"></p-checkbox>
+      <label for="mainMenu">{{ 'components.pages.form.MAIN_MENU' | translate }}</label>
+    </div>
+    <div class="flex flex-col gap-2">
+      <label for="pagePermissions">{{ 'components.pages.form.PERMISSIONS' | translate }}</label>
+      <p-multiSelect id="pagePermissions" [options]="permissionsOptions" [(ngModel)]="editModel.permissions" optionLabel="label" optionValue="value" placeholder="{{ 'components.pages.table.HEADERS.PERMISSIONS' | translate }}" appendTo="body"></p-multiSelect>
+    </div>
+    <div class="flex justify-end gap-2 mt-4">
+      <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="displayDialog=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="loading"></p-button>
+  <p-button label="{{ 'MENU.SAVE' | translate }}" (onClick)="savePage()" severity="primary" icon="pi pi-check" iconPos="left" [loading]="loading" [disabled]="loading"></p-button>
+    </div>
+  </div>
+</p-dialog>
+

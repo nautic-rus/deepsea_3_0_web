@@ -3,11 +3,15 @@ import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
 import { AvatarModule } from 'primeng/avatar';
+import { DialogModule } from 'primeng/dialog';
+import { InputTextModule } from 'primeng/inputtext';
+import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../auth/auth.service';
 import { AvatarService } from '../../services/avatar.service';
+import { UsersService } from '../../services/users.service';
 
 export interface ProfileMenuGroup {
   label: string;
@@ -17,15 +21,18 @@ export interface ProfileMenuGroup {
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, ButtonModule, RippleModule, RouterModule, TranslateModule, AvatarModule],
+  imports: [CommonModule, ButtonModule, RippleModule, RouterModule, TranslateModule, AvatarModule, DialogModule, InputTextModule, FormsModule],
   templateUrl: './profile.html',
   styleUrls: ['./profile.scss']
 })
 export class ProfileComponent implements OnInit {
   menuGroups: ProfileMenuGroup[] = [];
   user: any | null = null;
+  editDialog = false;
+  editModel: any = {};
+  saving = false;
 
-  constructor(private router: Router, private translate: TranslateService, private auth: AuthService, private avatarService: AvatarService) {}
+  constructor(private router: Router, private translate: TranslateService, private auth: AuthService, private avatarService: AvatarService, private usersService: UsersService) {}
 
   ngOnInit(): void {
     const t = (k: string) => this.translate.instant(k) || k;
@@ -69,12 +76,45 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  // Navigate to profile edit page (assumption: route exists)
+  // Open edit dialog
   onEditProfile(): void {
-    try {
-      this.router.navigate(['/profile/edit']);
-    } catch (e) {
-    }
+    this.editModel = {
+      last_name: this.user?.last_name || this.user?.lastName || '',
+      first_name: this.user?.first_name || this.user?.firstName || '',
+      middle_name: this.user?.middle_name || this.user?.middleName || '',
+      phone: this.user?.phone || '',
+      rocket_chat_login: this.user?.rocket_chat_login || this.user?.rocketchat || this.user?.rc_login || ''
+    };
+    this.editDialog = true;
+  }
+
+  cancelEdit(): void {
+    this.editDialog = false;
+  }
+
+  saveProfile(): void {
+    if (!this.user || !this.user.id) return;
+    this.saving = true;
+    const payload = {
+      last_name: this.editModel.last_name,
+      first_name: this.editModel.first_name,
+      middle_name: this.editModel.middle_name,
+      phone: this.editModel.phone,
+      rocket_chat_login: this.editModel.rocket_chat_login
+    };
+    this.usersService.updateUser(this.user.id, payload).subscribe({
+      next: (res) => {
+        // update local user and close dialog
+        this.user = (res && res.data) ? res.data : { ...this.user, ...payload };
+        try { sessionStorage.setItem('currentUser', JSON.stringify(this.user)); } catch (e) {}
+        this.saving = false;
+        this.editDialog = false;
+      },
+      error: () => {
+        this.saving = false;
+        // keep dialog open so user can retry
+      }
+    });
   }
 
   // Navigate to security/password settings (use existing security route)
@@ -99,7 +139,7 @@ export class ProfileComponent implements OnInit {
     const fn = this.user.first_name || this.user.firstName || '';
     const mn = this.user.middle_name || this.user.middleName || '';
     const ln = this.user.last_name || this.user.lastName || '';
-    const parts = [fn, mn, ln].map(p => (p || '').trim()).filter(Boolean);
+    const parts = [ln, fn, mn].map(p => (p || '').trim()).filter(Boolean);
     const full = parts.join(' ');
     return full || this.user.username || this.user.email || '';
   }

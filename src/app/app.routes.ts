@@ -59,7 +59,8 @@ export const routes: Routes = [
           { path: 'storage', loadComponent: () => import('./pages/administration/storage/storage').then(m => m.AdminStorageComponent), canActivate: [AuthGuard] },
           { path: 'general', loadComponent: () => import('./pages/administration/general/general').then(m => m.AdminGeneralComponent), canActivate: [AuthGuard] },
           { path: 'departments', loadComponent: () => import('./pages/administration/departments/departments').then(m => m.AdminDepartmentsComponent), canActivate: [AuthGuard] },
-          { path: 'specializations', loadComponent: () => import('./pages/administration/specializations/specializations').then(m => m.AdminSpecializationsComponent), canActivate: [AuthGuard] }
+          { path: 'specializations', loadComponent: () => import('./pages/administration/specializations/specializations').then(m => m.AdminSpecializationsComponent), canActivate: [AuthGuard] },
+          { path: 'job_title', loadComponent: () => import('./pages/administration/job_title/job_title').then(m => m.AdminJobTitleComponent), canActivate: [AuthGuard] }
         ]
       },
       {
