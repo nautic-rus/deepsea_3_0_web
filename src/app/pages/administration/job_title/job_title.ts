@@ -102,7 +102,7 @@ export class AdminJobTitleComponent implements OnInit {
  this.loading = true;
  if (this.isCreating) {
  this.jobTitlesService.createJobTitle(payload as any).subscribe({
- next: (_res: any) => {
+ next: () => {
  this.displayDialog = false;
  this.editModel = {} as any;
  this.loading = false;
@@ -120,7 +120,7 @@ export class AdminJobTitleComponent implements OnInit {
  });
  } else {
  this.jobTitlesService.updateJobTitle(id as any, payload as any).subscribe({
- next: (_res: any) => {
+ next: () => {
  this.displayDialog = false;
  this.editModel = {} as any;
  this.loading = false;
@@ -140,7 +140,7 @@ export class AdminJobTitleComponent implements OnInit {
 
  confirmDelete(item: JobTitle): void { if (!item) return; this.confirmationService.confirm({ message: `${this.translate.instant('MENU.DELETE') || 'Delete'} "${item.name || item.id}"?`, icon: 'pi pi-exclamation-triangle', accept: () => this.deleteJobTitle(item) }); }
 
- deleteJobTitle(item: JobTitle): void { if (!item) return; this.loading = true; this.jobTitlesService.deleteJobTitle(item.id).subscribe({ next: (_res: any) => { this.jobTitles = this.jobTitles.filter(u => u.id !== item.id); this.selectedJobTitles = this.selectedJobTitles.filter(s => s.id !== item.id); this.loading = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Delete', detail: 'Deleted' }); } catch (e) {} this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to delete item'; this.loading = false; this.safeDetect(); } }); }
+ deleteJobTitle(item: JobTitle): void { if (!item) return; this.loading = true; this.jobTitlesService.deleteJobTitle(item.id).subscribe({ next: () => { this.jobTitles = this.jobTitles.filter(u => u.id !== item.id); this.selectedJobTitles = this.selectedJobTitles.filter(s => s.id !== item.id); this.loading = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Delete', detail: 'Deleted' }); } catch (e) {} this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to delete item'; this.loading = false; this.safeDetect(); } }); }
 
  exportCSV(): void {
  try {

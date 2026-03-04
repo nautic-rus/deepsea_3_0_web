@@ -126,7 +126,6 @@ export class AdminPermissionsComponent implements OnInit {
   // Delete selected permissions (stub)
   deleteSelectedPermissions(): void {
     if (!this.selectedPermissions || !this.selectedPermissions.length) return;
-    const ids = this.selectedPermissions.map(s => s.id).join(', ');
     try {
       this.messageService.add({ severity: 'info', summary: 'Not implemented', detail: 'Bulk delete for permissions is not implemented yet' });
     } catch (e) { }
@@ -161,7 +160,7 @@ export class AdminPermissionsComponent implements OnInit {
     if (this.isCreating) {
       // reuse createUser endpoint if backend supports creating permissions; otherwise adapt
   this.permissionsService.createPermission(payload as any).subscribe({
-        next: (created: any) => {
+        next: () => {
           this.displayDialog = false;
           this.editModel = {} as any;
           this.loading = false;
@@ -179,7 +178,7 @@ export class AdminPermissionsComponent implements OnInit {
       });
     } else {
   this.permissionsService.updatePermission(id as any, payload as any).subscribe({
-        next: (updated: any) => {
+        next: () => {
           this.displayDialog = false;
           this.editModel = {} as any;
           this.loading = false;

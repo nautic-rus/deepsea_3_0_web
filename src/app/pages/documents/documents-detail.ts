@@ -433,7 +433,7 @@ export class DocumentsDetailComponent implements OnInit {
           // clear directory selection when project changes
           if (this.editModel) this.editModel.directory_id = null;
           try { this.cdr.detectChanges(); } catch (e) { /* ignore */ }
-        }).catch((e) => {
+        }).catch(() => {
           this.directoryTreeFiltered = [];
           if (this.editModel) this.editModel.directory_id = null;
           try { this.cdr.detectChanges(); } catch (er) { /* ignore */ }
@@ -869,7 +869,7 @@ export class DocumentsDetailComponent implements OnInit {
     this.statusSaving = true;
     this.cdr.markForCheck();
     this.documentsService.updateDocument(this.document.id, { status_id: statusId }).subscribe({
-      next: (_res: any) => {
+      next: () => {
         // After changing status, re-fetch the document to get authoritative fields including allowed_statuses
         this.documentsService.getDocument(this.document.id).subscribe({
           next: (fetchRes: any) => {
@@ -890,7 +890,7 @@ export class DocumentsDetailComponent implements OnInit {
             this.cdr.markForCheck();
             try { this.messageService.add({ severity: 'success', summary: this.trOr('components.documents.messages.SUCCESS', 'Success'), detail: this.trOr('components.documents.messages.STATUS_UPDATED', 'Status updated') }); } catch (e) {}
           },
-          error: (fetchErr: any) => {
+          error: () => {
             this.statusSaving = false;
             this.cdr.markForCheck();
             try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: this.translate.instant('components.documents.messages.STATUS_UPDATE_FAILED') || 'Failed to update status' }); } catch (e) {}
@@ -923,7 +923,7 @@ export class DocumentsDetailComponent implements OnInit {
     this.deleting = true;
     this.cdr.markForCheck();
     this.documentsService.deleteDocument(this.document.id).subscribe({
-      next: (_res: any) => {
+      next: () => {
         this.deleting = false;
         this.displayDeleteDialog = false;
         this.cdr.markForCheck();
@@ -961,7 +961,7 @@ export class DocumentsDetailComponent implements OnInit {
       if (navigator && (navigator as any).clipboard && typeof (navigator as any).clipboard.writeText === 'function') {
         (navigator as any).clipboard.writeText(url).then(() => {
           try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.documents.messages.COPY_LINK') || 'Copied', detail: this.translate.instant('components.documents.messages.LINK_COPIED') || 'Link copied to clipboard' }); } catch (e) {}
-        }).catch((_err: any) => {
+        }).catch(() => {
           // fallback to prompt
           try { window.prompt(this.translate.instant('components.documents.messages.COPY_PROMPT') || 'Copy link', url); } catch (e) {}
         });
@@ -1023,7 +1023,7 @@ export class DocumentsDetailComponent implements OnInit {
         }
         this.cdr.markForCheck();
       },
-      error: (err) => {
+      error: () => {
         this.availableIssuesOptions = [];
         this.availableDocumentsOptions = [];
         this.cdr.markForCheck();
@@ -1090,7 +1090,7 @@ export class DocumentsDetailComponent implements OnInit {
 
     this.savingRelations = true;
     forkJoin(tasks).subscribe({
-      next: (_res) => {
+      next: () => {
         this.savingRelations = false;
         this.displayAddRelationDialog = false;
         // refresh the document to pick up new relations

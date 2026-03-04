@@ -67,7 +67,6 @@ export class RecentSalesWidget {
         const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
         const weeks: any[][] = [];
         let week: any[] = new Array(7).fill(null);
-        let dayIndex = 0;
 
         // fill initial empty days
         for (let i = 0; i < firstDay; i++) {
@@ -82,7 +81,6 @@ export class RecentSalesWidget {
                 weeks.push(week);
                 week = new Array(7).fill(null);
             }
-            dayIndex++;
         }
 
         return weeks;

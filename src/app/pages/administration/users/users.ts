@@ -207,7 +207,7 @@ export class AdminUsersComponent implements OnInit {
         this.departmentsFilter = (this.departments || []).map(d => ({ label: d.label, value: d.label }));
         this.safeDetect();
       },
-      error: (err) => {
+      error: () => {
         // set empty departments and detect
         this.departments = [];
         this.safeDetect();
@@ -227,7 +227,7 @@ export class AdminUsersComponent implements OnInit {
         });
         this.safeDetect();
       },
-      error: (err) => {
+      error: () => {
         this.jobTitles = [];
         this.safeDetect();
       }
@@ -461,7 +461,7 @@ export class AdminUsersComponent implements OnInit {
     if (this.isCreating) {
       // create new user
       this.usersService.createUser(payload).subscribe({
-        next: (created: any) => {
+        next: () => {
           this.displayDialog = false;
           this.editModel = {};
           this.loading = false;
@@ -484,7 +484,7 @@ export class AdminUsersComponent implements OnInit {
     } else {
       // update existing user
       this.usersService.updateUser(id as any, payload).subscribe({
-        next: (updated: any) => {
+        next: () => {
           // after successful save, reload users from server to keep canonical state
           this.displayDialog = false;
           this.editModel = {};

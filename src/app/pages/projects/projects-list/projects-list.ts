@@ -8,7 +8,6 @@ import { TableModule } from 'primeng/table';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputIconModule } from 'primeng/inputicon';
 import { ProjectsListService } from '../../../services/projects-list.service';
-import { Injectable } from '@angular/core';
 import { UsersService } from '../../../services/users.service';
 import { forkJoin } from 'rxjs';
 import { AuthService } from '../../../auth/auth.service';
@@ -102,7 +101,7 @@ export class ProjectsListComponent implements OnInit, AfterViewInit {
           this.usersOptions = (list || []).map((u: any) => ({ label: this.formatUserName(u) || (u.email || String(u.id)), value: u.id }));
           this.safeDetect();
         },
-        error: (err: any) => {
+        error: () => {
         }
       });
     } catch (e) {
@@ -131,7 +130,7 @@ export class ProjectsListComponent implements OnInit, AfterViewInit {
         this.loadOwnerNames();
         this.loading = false;
       },
-      error: (err: any) => {
+      error: () => {
         this.projects = [];
         this.loading = false;
         this.safeDetect();
@@ -156,7 +155,7 @@ export class ProjectsListComponent implements OnInit, AfterViewInit {
           });
           this.safeDetect();
         },
-        error: (err: any) => {
+        error: () => {
         }
       });
     } catch (e) {
@@ -255,7 +254,7 @@ export class ProjectsListComponent implements OnInit, AfterViewInit {
     // If creating a new project => POST, otherwise update existing via PUT /api/projects/{id}
     if (this.isCreating) {
       this.svc.createProject(payload).subscribe({
-        next: (created: any) => {
+        next: () => {
           this.displayDialog = false;
           this.editModel = {};
           this.loading = false;
@@ -285,7 +284,7 @@ export class ProjectsListComponent implements OnInit, AfterViewInit {
       if (this.editModel.owner_id !== undefined) payload.owner_id = this.editModel.owner_id;
 
       this.svc.updateProject(id, payload).subscribe({
-        next: (updated: any) => {
+        next: () => {
           this.displayDialog = false;
           this.editModel = {};
           this.loading = false;

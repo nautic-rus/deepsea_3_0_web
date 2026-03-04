@@ -73,7 +73,6 @@ export class NotificationsWidget {
         const now = new Date();
         const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const startOfYesterday = new Date(startOfToday.getTime() - 1000 * 60 * 60 * 24);
-        const startOfWeek = new Date(startOfToday.getTime() - 1000 * 60 * 60 * 24 * 7);
 
         const groups: { label: string; items: any[] }[] = [
             { label: 'TODAY', items: [] },

@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges, ChangeDetectorRef, ViewChild, ElementRef, AfterViewInit, inject } from '@angular/core';
+import { Component, Input, OnChanges, ChangeDetectorRef, ViewChild, ElementRef, AfterViewInit, inject } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -136,7 +136,7 @@ export class DocumentsDetailChatComponent implements OnChanges, AfterViewInit {
 
   ngAfterViewInit(): void { if (this.messages?.length) this.scrollToBottom(); }
 
-  ngOnChanges(_changes: SimpleChanges): void { /* handled by setter */ }
+  ngOnChanges(): void { /* handled by setter */ }
 
   private processDocument(): void {
     if (!this._document) { this.messages = []; return; }
@@ -169,7 +169,7 @@ export class DocumentsDetailChatComponent implements OnChanges, AfterViewInit {
             try { if (this._document) this._document.messages = list; } catch {}
             finish();
           },
-          error: (_err: any) => {
+          error: () => {
             try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR'), detail: this.translate.instant('components.documents.messages.ERROR') }); } catch (e) {}
             finish();
           }
@@ -187,7 +187,7 @@ export class DocumentsDetailChatComponent implements OnChanges, AfterViewInit {
           try { if (this._document) this._document.history = list; } catch {}
           finish();
         },
-        error: (_err: any) => {
+        error: () => {
           try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR'), detail: this.translate.instant('components.documents.messages.ERROR') }); } catch (e) {}
           finish();
         }
@@ -304,7 +304,7 @@ export class DocumentsDetailChatComponent implements OnChanges, AfterViewInit {
   }
 
   iconFor(type: string) { return type === 'history' ? 'pi pi-history' : 'pi pi-comment'; }
-  colorFor(_type: string) { return 'bg-gray-100 text-gray-500'; }
+  colorFor() { return 'bg-gray-100 text-gray-500'; }
 
   // same helpers as history component
   formatValue(raw: any): string {
@@ -506,7 +506,7 @@ export class DocumentsDetailChatComponent implements OnChanges, AfterViewInit {
               this.scrollToBottom();
               try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.documents.messages.SAVED'), detail: this.translate.instant('components.documents.messages.SAVED') }); } catch (e) {}
             },
-            error: (err: any) => {
+            error: () => {
               this.sending = false;
               this.cdr.markForCheck();
               this.scrollToBottom();

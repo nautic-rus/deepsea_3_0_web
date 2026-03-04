@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, inject, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
@@ -315,7 +315,7 @@ export class DxfViewerPageComponent implements OnInit, OnDestroy {
     } catch (_) {}
     try {
       // fallback for older environments
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+       
       // @ts-ignore
       return decodeURIComponent(escape(String(s)));
     } catch (_) {

@@ -151,7 +151,7 @@ export class DxfViewerComponent implements AfterViewInit, OnDestroy {
 
       await this.ngZone.runOutsideAngular(async () => {
         // dynamic import to keep bundle size small and avoid build-time type issues
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
+         
         const mod: any = await import('dxf-viewer');
         const exported = mod && (mod.default || mod) as any;
         // prefer named export DxfViewer; fallback to other shapes
@@ -194,7 +194,7 @@ export class DxfViewerComponent implements AfterViewInit, OnDestroy {
           // subscribe to messages from the viewer for inline diagnostics
           try {
             if (typeof this._viewerInstance.Subscribe === 'function') {
-              this._viewerInstance.Subscribe('message', (_ev: any) => {
+              this._viewerInstance.Subscribe('message', () => {
                 // no-op: suppress debug messages in production mode
               });
             }

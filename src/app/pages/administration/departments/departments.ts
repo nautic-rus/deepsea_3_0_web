@@ -157,12 +157,12 @@ ngOnInit(): void { this.loadPermissions(); this.loadUsers(); }
  this.loading = true;
  if (this.isCreating) {
  this.departmentsService.createPermission(payload as any).subscribe({
- next: (_res: any) => { this.displayDialog = false; this.editModel = {} as any; this.loading = false; this.isCreating = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.CREATE') || 'Success', detail: 'Created' }); } catch (e) {} this.loadPermissions(); this.safeDetect(); }, // TODO: make reactive (refresh on translate.onLangChange)
+ next: () => { this.displayDialog = false; this.editModel = {} as any; this.loading = false; this.isCreating = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.CREATE') || 'Success', detail: 'Created' }); } catch (e) {} this.loadPermissions(); this.safeDetect(); }, // TODO: make reactive (refresh on translate.onLangChange)
  error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to create item'; this.loading = false; try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CREATE') || 'Create', detail: (err && err.message) ? err.message : 'Failed to create permission' }); } catch (e) {} this.safeDetect(); } // TODO: make reactive (refresh on translate.onLangChange)
  });
  } else {
  this.departmentsService.updatePermission(id as any, payload as any).subscribe({
- next: (_res: any) => { this.displayDialog = false; this.editModel = {} as any; this.loading = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Success', detail: 'Updated' }); } catch (e) {} this.loadPermissions(); this.safeDetect(); }, // TODO: make reactive (refresh on translate.onLangChange)
+ next: () => { this.displayDialog = false; this.editModel = {} as any; this.loading = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Success', detail: 'Updated' }); } catch (e) {} this.loadPermissions(); this.safeDetect(); }, // TODO: make reactive (refresh on translate.onLangChange)
  error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to update item'; this.loading = false; try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.SAVE') || 'Save', detail: (err && err.message) ? err.message : 'Failed to update permission' }); } catch (e) {} this.safeDetect(); } // TODO: make reactive (refresh on translate.onLangChange)
  });
  }
@@ -173,7 +173,7 @@ ngOnInit(): void { this.loadPermissions(); this.loadUsers(); }
  }
 
  deletePermission(item: Department): void {
- if (!item) return; this.loading = true; this.departmentsService.deletePermission(item.id).subscribe({ next: (_res: any) => { this.permissions = this.permissions.filter(u => u.id !== item.id); this.selectedPermissions = this.selectedPermissions.filter(s => s.id !== item.id); this.loading = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Delete', detail: 'Deleted' }); } catch (e) {} this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to delete item'; this.loading = false; this.safeDetect(); } }); // TODO: make reactive (refresh on translate.onLangChange)
+ if (!item) return; this.loading = true; this.departmentsService.deletePermission(item.id).subscribe({ next: () => { this.permissions = this.permissions.filter(u => u.id !== item.id); this.selectedPermissions = this.selectedPermissions.filter(s => s.id !== item.id); this.loading = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Delete', detail: 'Deleted' }); } catch (e) {} this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to delete item'; this.loading = false; this.safeDetect(); } }); // TODO: make reactive (refresh on translate.onLangChange)
  }
 
  exportCSV(): void {

@@ -26,7 +26,7 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { UsersService } from '../../services/users.service';
 import { IssuesService } from '../../services/issues.service';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
 import { Select } from 'primeng/select';
@@ -330,7 +330,7 @@ export class IssuesComponent implements OnInit {
     }
   }
 
-  onColumnResized(event: any): void {
+  onColumnResized(_event?: any): void {
     try {
       if (this.resizeTimeout) clearTimeout(this.resizeTimeout);
       this.resizeTimeout = setTimeout(() => {
@@ -431,7 +431,7 @@ export class IssuesComponent implements OnInit {
         ];
         this.safeDetect();
       },
-      error: (err) => {
+      error: () => {
         // fallback types
         this.typeOptions = [
           { label: 'Bug', value: 1 },
@@ -815,7 +815,7 @@ export class IssuesComponent implements OnInit {
     this.loading = true;
     if (this.isCreating) {
       this.issuesService.createIssue(payload).subscribe({
-        next: (created: any) => {
+        next: () => {
           this.displayDialog = false;
           this.editModel = {};
           this.loading = false;
