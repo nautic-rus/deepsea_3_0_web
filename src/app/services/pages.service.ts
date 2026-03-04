@@ -45,4 +45,9 @@ export class PagesService {
   deletePagePermission(id: any): Observable<any> {
     return this.http.delete<any>(`/api/page_permissions/${id}`);
   }
+
+  // Delete all permissions for a page by page id
+  deletePagePermissionsByPage(pageId: any): Observable<any> {
+    return this.http.delete<any>(`/api/page_permissions/${pageId}`);
+  }
 }

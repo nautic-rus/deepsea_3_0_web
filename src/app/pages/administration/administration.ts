@@ -16,6 +16,7 @@ export interface AdminMenuItem {
   label: string;
   icon: string;
   routerLink: string[];
+  disabled?: boolean;
 }
 
 @Component({
@@ -59,6 +60,16 @@ export class AdministrationComponent implements OnInit, OnDestroy {
     const t = (k: string) => this.translate.instant(k) || k;
     this.menuGroups = [
       {
+        label: t('MENU.SETTINGS'),
+        items: [
+          //{ label: t('MENU.GENERAL'), icon: 'pi pi-fw pi-cog', routerLink: ['/administration/general'], disabled: true },
+          { label: t('MENU.NOTIFICATIONS'), icon: 'pi pi-fw pi-bell', routerLink: ['/administration/notifications'] },
+          //{ label: t('MENU.STORAGE'), icon: 'pi pi-fw pi-database', routerLink: ['/administration/storage'] },
+          { label: t('MENU.PAGES'), icon: 'pi pi-fw pi-file', routerLink: ['/administration/pages'] }
+
+        ]
+      },
+      {
         label: t('MENU.USER_MANAGEMENT'),
         items: [
           { label: t('MENU.USERS'), icon: 'pi pi-fw pi-user', routerLink: ['/administration/users'] },
@@ -72,16 +83,6 @@ export class AdministrationComponent implements OnInit, OnDestroy {
           { label: t('MENU.DEPARTMENTS'), icon: 'pi pi-fw pi-sitemap', routerLink: ['/administration/departments'] },
           { label: t('MENU.SPECIALIZATIONS'), icon: 'pi pi-fw pi-tags', routerLink: ['/administration/specializations'] },
           { label: t('MENU.JOB_TITLE'), icon: 'pi pi-fw pi-user-edit', routerLink: ['/administration/job_title'] }
-        ]
-      },
-      {
-        label: t('MENU.SETTINGS'),
-        items: [
-          { label: t('MENU.GENERAL'), icon: 'pi pi-fw pi-cog', routerLink: ['/administration/general'] },
-          { label: t('MENU.NOTIFICATIONS'), icon: 'pi pi-fw pi-bell', routerLink: ['/administration/notifications'] },
-          { label: t('MENU.STORAGE'), icon: 'pi pi-fw pi-database', routerLink: ['/administration/storage'] },
-          { label: t('MENU.PAGES'), icon: 'pi pi-fw pi-file', routerLink: ['/administration/pages'] }
-
         ]
       }
     ];

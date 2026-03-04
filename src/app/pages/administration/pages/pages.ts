@@ -17,6 +17,8 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { PagesService } from '../../../services/pages.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
 
 @Component({
   selector: 'app-admin-pages',
@@ -36,6 +38,8 @@ import { ConfirmationService, MessageService } from 'primeng/api';
     TagModule,
     DialogModule,
     FormsModule,
+    IconFieldModule,
+    InputIconModule
   ],
   providers: [ConfirmationService, MessageService],
   templateUrl: './pages.html',
@@ -216,14 +220,23 @@ export class AdminPagesComponent implements OnInit {
   }
 
   deletePage(page: any): void {
-    this.pagesService.deletePage(page.id).subscribe({
+    // First delete all page permissions, then delete the page itself
+    this.pagesService.deletePagePermissionsByPage(page.id).subscribe({
       next: () => {
-        this.messageService.add({severity: 'success', summary: 'Deleted', detail: 'Page deleted'});
-        this.loadPages();
-        this.cd.detectChanges();
+        this.pagesService.deletePage(page.id).subscribe({
+          next: () => {
+            this.messageService.add({severity: 'success', summary: 'Deleted', detail: 'Page deleted'});
+            this.loadPages();
+            this.cd.detectChanges();
+          },
+          error: () => {
+            this.messageService.add({severity: 'error', summary: 'Error', detail: 'Failed to delete page'});
+            this.cd.detectChanges();
+          }
+        });
       },
       error: () => {
-        this.messageService.add({severity: 'error', summary: 'Error', detail: 'Failed to delete page'});
+        this.messageService.add({severity: 'error', summary: 'Error', detail: 'Failed to delete page permissions'});
         this.cd.detectChanges();
       }
     });
@@ -234,7 +247,9 @@ export class AdminPagesComponent implements OnInit {
     this.confirmation.confirm({
       message: `Are you sure you want to delete ${this.selectedPages.length} selected pages?`,
       accept: () => {
-        const deletes = this.selectedPages.map(p => this.pagesService.deletePage(p.id).toPromise());
+        const deletes = this.selectedPages.map(p =>
+          this.pagesService.deletePagePermissionsByPage(p.id).toPromise().then(() => this.pagesService.deletePage(p.id).toPromise())
+        );
         Promise.allSettled(deletes).then(() => {
           this.selectedPages = [];
           this.messageService.add({severity: 'success', summary: 'Deleted', detail: 'Selected pages deleted'});

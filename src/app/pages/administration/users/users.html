@@ -2,7 +2,7 @@
 <p-toolbar >
   <ng-template #start>
     <p-button [label]="'MENU.CREATE_USER' | translate" icon="pi pi-plus" severity="primary" class="mr-2" (onClick)="openNew()" />
-    <p-button severity="secondary" [label]="'MENU.DELETE' | translate" icon="pi pi-trash"  (onClick)="deleteSelectedProducts()" [disabled]="!selectedProducts || !selectedProducts.length" />
+    
   </ng-template>
 
   <ng-template #end>
@@ -174,8 +174,8 @@
           <td>
               <p-tag [value]="user.is_active ? ('MENU.ACTIVE_YES' | translate) : ('MENU.ACTIVE_NO' | translate)" [severity]="user.is_active ? 'success' : 'danger'"></p-tag>
           </td>
-                    <td>{{ user.created_at ? (user.created_at | date:'short':'':'ru') : '-' }}</td>
-                    <td>{{ user.updated_at ? (user.updated_at | date:'short':'':'ru') : '-' }}</td>
+                    <td>{{ user.created_at ? (user.created_at | date:'dd.MM.yyyy, HH:mm':'':'ru') : '-' }}</td>
+                    <td>{{ user.updated_at ? (user.updated_at | date:'dd.MM.yyyy, HH:mm':'':'ru') : '-' }}</td>
           <td>
                         <p-button icon="pi pi-envelope" class="mr-2" [outlined]="true" styleClass="p-button-text" title="{{ 'MENU.SEND_WELCOME' | translate }}"></p-button>
                         <p-button icon="pi pi-pencil" class="mr-2" [outlined]="true" (click)="openEdit(user)" />

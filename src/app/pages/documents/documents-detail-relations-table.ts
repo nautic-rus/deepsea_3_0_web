@@ -36,7 +36,7 @@ import { LinksService } from '../../services/links.service';
           <tr>
             <th style="width:20%">{{ 'components.documents.relations.COLUMN_TYPE_ID' | translate }}</th>
             <th style="width:30%">{{ 'components.documents.relations.COLUMN_NAME' | translate }}</th>
-            <th style="width:15%">{{ 'components.documents.relations.COLUMN_STATUS' | translate }}</th>
+            <th style="width:20%">{{ 'components.documents.relations.COLUMN_STATUS' | translate }}</th>
             <th style="width:15%">{{ 'components.documents.relations.COLUMN_TYPE' | translate }}</th>
             <th style="width:15%">{{ 'components.documents.relations.COLUMN_DIRECTION' | translate }}</th>
             <th style="width:5%"></th>
@@ -45,7 +45,7 @@ import { LinksService } from '../../services/links.service';
         <ng-template pTemplate="body" let-r>
           <tr>
             <td>
-              <a *ngIf="r.type === 'Issue'" href="#" (click)="openIssue($event, r)" class="text-blue-600 dark:text-blue-400 hover:underline">{{ r.type + ' #' + r.id }}</a>
+              <a *ngIf="r.type === 'Issue'" href="#" (click)="openIssue($event, r)" class="text-blue-600 dark:text-blue-400 font-medium hover:underline">{{ r.type + ' #' + r.id }}</a>
               <a *ngIf="r.type === 'Document'" href="#" (click)="openDocument($event, r)" class="text-blue-600 dark:text-blue-400 font-medium hover:underline">{{ r.type + ' #' + r.id }}</a>
             </td>
             <td>
@@ -54,6 +54,7 @@ import { LinksService } from '../../services/links.service';
                     [pTooltip]="(r.code ? (r.code + ' ') : '') + (r.title || '')"
                     tooltipPosition="top"
                     tooltipAppendTo="body"
+                    class="text-sm text-surface-700"
                     [tooltipDisabled]="(((r.code ? (r.code + ' ') : '') + (r.title || '')).length <= 50)">
                 {{ truncate((r.code ? (r.code + ' ') : '') + (r.title || '')) }}
               </span>
@@ -61,6 +62,7 @@ import { LinksService } from '../../services/links.service';
                     [pTooltip]="r.title"
                     tooltipPosition="top"
                     tooltipAppendTo="body"
+                    class="text-sm text-surface-700"
                     [tooltipDisabled]="((r.title || '').length <= 50)">
                 {{ truncate(r.title) }}
               </span>

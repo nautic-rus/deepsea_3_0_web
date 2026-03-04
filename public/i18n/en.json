@@ -53,6 +53,8 @@
     "MIDDLE_NAME": "Middle name",
     "NAME": "Name",
     "NOTIFICATIONS": "Notifications",
+    "NOTIFICATION_METHODS": "Notification methods",
+    "NOTIFICATION_EVENTS": "Notification events",
     "ORGANIZATION": "ORGANIZATION",
     "PAGES": "Pages",
     "PERMISSIONS": "Permissions",

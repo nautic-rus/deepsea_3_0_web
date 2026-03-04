@@ -51,6 +51,8 @@
     "MIDDLE_NAME": "Отчество",
     "NAME": "ФИО",
     "NOTIFICATIONS": "Уведомления",
+    "NOTIFICATION_METHODS": "Методы уведомлений",
+    "NOTIFICATION_EVENTS": "События уведомлений",
     "ORGANIZATION": "ОРГАНИЗАЦИЯ",
     "PAGES": "Страницы",
     "PERMISSIONS": "Разрешения",

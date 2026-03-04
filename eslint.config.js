@@ -6,7 +6,7 @@ module.exports = defineConfig([
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
-        project: "./tsconfig.app.json",
+        project: ["./tsconfig.app.json", "./tsconfig.spec.json"],
       },
     },
     plugins: {

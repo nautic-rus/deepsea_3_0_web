@@ -47,11 +47,11 @@ import { LinksService } from '../../services/links.service';
           <tr>
             <td>
               <!-- Use explicit open handlers to ensure links open correctly (new tab) even inside table components -->
-              <a *ngIf="r.type === 'Issue'" href="#" (click)="openIssue($event, r)" class="text-blue-600 dark:text-blue-400 hover:underline">{{ r.type + ' #' + r.id }}</a>
+              <a *ngIf="r.type === 'Issue'" href="#" (click)="openIssue($event, r)" class="text-blue-600 dark:text-blue-400 font-medium hover:underline">{{ r.type + ' #' + r.id }}</a>
               <a *ngIf="r.type === 'Document'" href="#" (click)="openDocument($event, r)" class="text-blue-600 dark:text-blue-400 font-medium hover:underline">{{ r.type + ' #' + r.id }}</a>
             </td>
             <td>
-              <span *ngIf="r.title" >{{r.title}}</span>
+              <span *ngIf="r.title" class="text-sm text-surface-700" >{{r.title}}</span>
 
             </td>
             <td>
