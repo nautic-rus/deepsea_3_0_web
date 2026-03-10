@@ -45,8 +45,17 @@ export class ProjectsComponent implements OnInit, OnDestroy {
 					label: t('components.projects.menu.TITLE'),
 					items: [
 						{ label: t('components.projects.menu.LIST'), icon: 'pi pi-fw pi-folder', routerLink: ['/projects/projects-list'] },
-						{ label: t('components.projects.menu.USERS'), icon: 'pi pi-fw pi-users', routerLink: ['/projects/projects-users'] },
-						{ label: t('components.projects.menu.TEMPLATES'), icon: 'pi pi-fw pi-clone', routerLink: ['/projects/projects-templates'] }
+						{ label: t('components.projects.menu.USERS'), icon: 'pi pi-fw pi-users', routerLink: ['/projects/projects-users'] }
+					]
+				}
+				,
+				{
+					label: t('components.projects.menu.SETTINGS'),
+					items: [
+						{ label: t('components.projects.menu.STATUSES'), icon: 'pi pi-fw pi-list', routerLink: ['/projects/statuses'] },
+						{ label: t('components.projects.menu.TYPES'), icon: 'pi pi-fw pi-tags', routerLink: ['/projects/types'] },
+						{ label: t('components.projects.menu.STORAGE_TYPES'), icon: 'pi pi-fw pi-database', routerLink: ['/projects/storage-types'] },
+						{ label: t('components.projects.menu.WORK_FLOW'), icon: 'pi pi-fw pi-cog', routerLink: ['/projects/work-flow'] }
 					]
 				}
 			];

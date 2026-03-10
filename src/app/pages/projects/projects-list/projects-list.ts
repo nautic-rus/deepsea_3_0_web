@@ -11,6 +11,7 @@ import { ProjectsListService } from '../../../services/projects-list.service';
 import { UsersService } from '../../../services/users.service';
 import { forkJoin } from 'rxjs';
 import { AuthService } from '../../../auth/auth.service';
+import { AvatarService } from '../../../services/avatar.service';
 import { IconFieldModule } from 'primeng/iconfield';
 import { DialogModule } from 'primeng/dialog';
 import { ToastModule } from 'primeng/toast';
@@ -18,11 +19,12 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 import { TagModule } from 'primeng/tag';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { Select } from 'primeng/select';
+import { AvatarModule } from 'primeng/avatar';
 
 @Component({
   selector: 'app-projects-list',
   standalone: true,
-  imports: [CommonModule, TranslateModule, FormsModule, ToolbarModule, ButtonModule, TableModule, InputTextModule, InputIconModule, IconFieldModule, DialogModule, ToastModule, TagModule, ConfirmDialogModule, Select],
+  imports: [CommonModule, TranslateModule, FormsModule, ToolbarModule, ButtonModule, TableModule, InputTextModule, InputIconModule, IconFieldModule, DialogModule, ToastModule, TagModule, ConfirmDialogModule, Select, AvatarModule],
   providers: [MessageService, ConfirmationService],
   templateUrl: './projects-list.html',
   styleUrls: ['./projects-list.scss']
@@ -41,11 +43,23 @@ export class ProjectsListComponent implements OnInit, AfterViewInit {
   isCreating = false;
   error: string | null = null;
   // options for owner select
-  usersOptions: { label: string; value: any }[] = [];
+  usersOptions: { label: string; value: any; avatar?: string | null }[] = [];
   // status options for select (populated in ngOnInit to support translations)
   statuses: { label: string; value: any }[] = [];
 
-  constructor(private svc: ProjectsListService, private cd: ChangeDetectorRef, private messageService: MessageService, private translate: TranslateService, private usersService: UsersService, private confirmationService: ConfirmationService, private auth: AuthService) {}
+  constructor(private svc: ProjectsListService, private cd: ChangeDetectorRef, private messageService: MessageService, private translate: TranslateService, private usersService: UsersService, private confirmationService: ConfirmationService, private auth: AuthService, private avatarService: AvatarService) {}
+
+  initialsFromName(name?: string | null): string {
+    try { return this.avatarService.initialsFromName(name); } catch (e) { return ''; }
+  }
+
+  selectAvatarBg(label?: string | null): string {
+    try { return this.avatarService.selectAvatarBg(label); } catch (e) { return ''; }
+  }
+
+  selectAvatarTextColor(label?: string | null): string {
+    try { return this.avatarService.selectAvatarTextColor(label); } catch (e) { return '#fff'; }
+  }
 
   private safeDetect(): void {
     try { this.cd.detectChanges(); } catch (e) { /* noop */ }
@@ -98,7 +112,18 @@ export class ProjectsListComponent implements OnInit, AfterViewInit {
       this.usersService.getUsers(1, 1000).subscribe({
         next: (res: any) => {
           const list = (res && res.data) ? res.data : (Array.isArray(res) ? res : (res || []));
-          this.usersOptions = (list || []).map((u: any) => ({ label: this.formatUserName(u) || (u.email || String(u.id)), value: u.id }));
+          this.usersOptions = (list || []).map((u: any) => {
+            let avatar: string | null = null;
+            if (u.avatar_url || u.avatar || u.avatarUrl) {
+              avatar = u.avatar_url || u.avatar || u.avatarUrl || null;
+            } else if (u.avatar_id || u.avatarId) {
+              const aid = u.avatar_id ?? u.avatarId;
+              if (typeof aid === 'number' || (typeof aid === 'string' && String(aid).trim())) {
+                avatar = `/api/storage/${String(aid).trim()}/download`;
+              }
+            }
+            return { label: this.formatUserName(u) || (u.email || String(u.id)), value: u.id, avatar };
+          });
           this.safeDetect();
         },
         error: () => {

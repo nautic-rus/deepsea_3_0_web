@@ -123,28 +123,20 @@
     </div>
     <div class="flex flex-col gap-2">
   <label for="permManager">{{ 'components.departments.form.MANAGER' | translate }}</label>
-      <p-select id="permManager" [options]="usersOptions" optionLabel="label" optionValue="value" [(ngModel)]="editModel.manager_id" appendTo="body" placeholder="{{ 'MENU.ANY' | translate }}">
+      <p-select filter="true" filterBy="label" id="permManager" [options]="usersOptions" optionLabel="label" optionValue="value" [(ngModel)]="editModel.manager_id" appendTo="body" placeholder="{{ 'MENU.ANY' | translate }}">
         <ng-template let-opt pTemplate="item">
           <div class="flex items-center gap-2">
             <ng-container *ngIf="opt.avatar; else initialsItem">
-              <img [src]="opt.avatar" alt="avatar" class="select-avatar" />
+              <img [src]="opt.avatar" alt="avatar" class="select-avatar mr-2" />
             </ng-container>
             <ng-template #initialsItem>
-              <p-avatar [label]="initialsFromName(opt.label)" class="mr-2" shape="circle" [style]="{ 'background-color': issueAvatarColor({ id: opt.value, first_name: opt.label }), color: issueAvatarTextColor({ id: opt.value, first_name: opt.label }) }"></p-avatar>
+              <p-avatar [label]="initialsFromName(opt.label)" class="mr-2" shape="circle" [style]="{ 'background-color': selectAvatarBg(opt.value || opt.label), color: selectAvatarTextColor(opt.value || opt.label) }"></p-avatar>
             </ng-template>
             <div>{{ opt.label }}</div>
           </div>
         </ng-template>
-        <ng-template let-opt pTemplate="value">
-          <div class="flex items-center gap-2">
-            <ng-container *ngIf="opt.avatar; else initialsValue">
-              <img [src]="opt.avatar" alt="avatar" class="select-avatar" />
-            </ng-container>
-            <ng-template #initialsValue>
-              <p-avatar [label]="initialsFromName(opt.label)" class="mr-2" shape="circle" [style]="{ 'background-color': issueAvatarColor({ id: opt.value, first_name: opt.label }), color: issueAvatarTextColor({ id: opt.value, first_name: opt.label }) }"></p-avatar>
-            </ng-template>
-            <div>{{ opt.label }}</div>
-          </div>
+        <ng-template let-opt pTemplate="selectedItem">
+          <div>{{ opt.label }}</div>
         </ng-template>
       </p-select>
     </div>

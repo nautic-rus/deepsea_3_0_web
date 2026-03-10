@@ -42,7 +42,7 @@
             <div class="flex justify-between mb-2 items-center">
                 <h3>{{ 'MENU.ISSUES' | translate }}</h3>
                 <div class="flex items-center gap-2">
-                    <p-multiSelect [options]="columnsOptions" [(ngModel)]="selectedColumns" (onChange)="onColumnsChange()" placeholder="{{ 'MENU.COLUMNS' | translate }}" appendTo="body" styleClass="mr-2"></p-multiSelect>
+                    <p-multiSelect filter="true" filterBy="label" [options]="columnsOptions" [(ngModel)]="selectedColumns" (onChange)="onColumnsChange()" placeholder="{{ 'MENU.COLUMNS' | translate }}" appendTo="body" styleClass="mr-2"></p-multiSelect>
                     <p-iconfield>
                         <p-inputicon styleClass="pi pi-search" /> 
                         <input pInputText type="text" (input)="onGlobalFilterIssue(dt, $event)" placeholder="{{ 'components.issues.table.SEARCH' | translate }}" />
@@ -71,7 +71,7 @@
                                 <ng-container *ngSwitchCase="'project_name'">
                                     <p-columnFilter field="project_name" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
                                         <ng-template #filter let-value let-filter="filterCallback">
-                                            <p-multiselect [ngModel]="value"
+                                            <p-multiselect filter="true" filterBy="label" [ngModel]="value"
                                                            [options]="projectOptions"
                                                            optionLabel="label"
                                                            optionValue="label"
@@ -86,7 +86,7 @@
                                 <ng-container *ngSwitchCase="'assignee_name'">
                                     <p-columnFilter field="assignee_name" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
                                         <ng-template #filter let-value let-filter="filterCallback">
-                                            <p-multiselect [ngModel]="value"
+                                            <p-multiselect filter="true" filterBy="label" [ngModel]="value"
                                                            [options]="usersOptions"
                                                            optionLabel="label"
                                                            optionValue="label"
@@ -101,7 +101,7 @@
                                 <ng-container *ngSwitchCase="'author_name'">
                                     <p-columnFilter field="author_name" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
                                         <ng-template #filter let-value let-filter="filterCallback">
-                                            <p-multiselect [ngModel]="value"
+                                            <p-multiselect filter="true" filterBy="label" [ngModel]="value"
                                                            [options]="usersOptions"
                                                            optionLabel="label"
                                                            optionValue="label"
@@ -116,7 +116,7 @@
                                 <ng-container *ngSwitchCase="'status_name'">
                                     <p-columnFilter field="status_name" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
                                         <ng-template #filter let-value let-filter="filterCallback">
-                                            <p-multiselect [ngModel]="value"
+                                            <p-multiselect filter="true" filterBy="label" [ngModel]="value"
                                                            [options]="statusOptions"
                                                            optionLabel="label"
                                                            optionValue="label"
@@ -131,7 +131,7 @@
                                 <ng-container *ngSwitchCase="'type_name'">
                                     <p-columnFilter field="type_name" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
                                         <ng-template #filter let-value let-filter="filterCallback">
-                                            <p-multiselect [ngModel]="value"
+                                            <p-multiselect filter="true" filterBy="label" [ngModel]="value"
                                                            [options]="typeOptions"
                                                            optionLabel="label"
                                                            optionValue="label"
@@ -146,7 +146,7 @@
                                 <ng-container *ngSwitchCase="'priority_text'">
                                     <p-columnFilter field="priority_text" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
                                         <ng-template #filter let-value let-filter="filterCallback">
-                                            <p-multiselect [ngModel]="value"
+                                            <p-multiselect filter="true" filterBy="label" [ngModel]="value"
                                                            [options]="priorityOptions"
                                                            optionLabel="label"
                                                            optionValue="label"
@@ -251,7 +251,7 @@
             <div class="flex gap-2">
                 <div class="flex-1 flex flex-col gap-2">
                     <label for="projectId" class="font-bold">{{ 'components.issues.form.PROJECT' | translate }}</label>
-                    <p-select id="projectId" [options]="projectOptions" [(ngModel)]="editModel.project_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body">
+                    <p-select filter="true" filterBy="label" id="projectId" [options]="projectOptions" [(ngModel)]="editModel.project_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body">
                         <ng-template let-opt pTemplate="item">
                             <div class="flex items-center gap-2">
                                 <div>{{ opt.label }}</div>
@@ -268,7 +268,7 @@
 
                 <div class="w-60 flex flex-col gap-2">
                     <label for="typeId" class="font-bold">{{ 'components.issues.form.TYPE' | translate }}</label>
-                    <p-select id="typeId" [options]="typeOptions" [(ngModel)]="editModel.type_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+                    <p-select filter="true" filterBy="label" id="typeId" [options]="typeOptions" [(ngModel)]="editModel.type_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
                 </div>
             </div>
 
@@ -286,28 +286,20 @@
             <div class="flex gap-2">
                 <div class="flex-1 flex flex-col gap-2">
                     <label for="assigneeId" class="font-bold">{{ 'components.issues.form.ASSIGNEE' | translate }}</label>
-                    <p-select id="assigneeId" [options]="usersOptions" [(ngModel)]="editModel.assignee_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body">
-                                <ng-template let-opt pTemplate="item">
+                    <p-select filter="true" filterBy="label" id="assigneeId" [options]="usersOptions" [(ngModel)]="editModel.assignee_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body">
+                        <ng-template let-opt pTemplate="item">
                             <div class="flex items-center gap-2">
                                 <ng-container *ngIf="opt.avatar; else initialsItem">
-                                    <img [src]="opt.avatar" alt="avatar" class="select-avatar" />
+                                    <img [src]="opt.avatar" alt="avatar" class="select-avatar mr-2" />
                                 </ng-container>
                                 <ng-template #initialsItem>
-                                    <p-avatar [label]="initialsFromName(opt.label)" class="mr-2" shape="circle" [style]="{ 'background-color': selectAvatarBg(opt.label), color: selectAvatarTextColor(opt.label) }"></p-avatar>
+                                    <p-avatar [label]="initialsFromName(opt.label)" class="mr-2" shape="circle" [style]="{ 'background-color': selectAvatarBg(opt.value || opt.label), color: selectAvatarTextColor(opt.value || opt.label) }"></p-avatar>
                                 </ng-template>
                                 <div>{{ opt.label }}</div>
                             </div>
                         </ng-template>
-                        <ng-template let-opt pTemplate="value">
-                            <div class="flex items-center gap-2">
-                                <ng-container *ngIf="opt.avatar; else initialsValue">
-                                    <img [src]="opt.avatar" alt="avatar" class="select-avatar" />
-                                </ng-container>
-                                <ng-template #initialsValue>
-                                    <p-avatar [label]="initialsFromName(opt.label)" class="mr-2" shape="circle" [style]="{ 'background-color': selectAvatarBg(opt.label), color: selectAvatarTextColor(opt.label) }"></p-avatar>
-                                </ng-template>
-                                <div>{{ opt.label }}</div>
-                            </div>
+                        <ng-template let-opt pTemplate="selectedItem">
+                            <div>{{ opt.label }}</div>
                         </ng-template>
                     </p-select>
                 </div>
@@ -315,7 +307,7 @@
 
             <div class="flex flex-col gap-2">
                 <label for="priority" class="font-bold">{{ 'components.issues.form.PRIORITY' | translate }}</label>
-                <p-select id="priority" [options]="priorityOptions" [(ngModel)]="editModel.priority" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+                <p-select filter="true" filterBy="label" id="priority" [options]="priorityOptions" [(ngModel)]="editModel.priority" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
             </div>
 
                         <div class="flex gap-2 mt-2">
@@ -353,27 +345,51 @@
             
             <div class="flex flex-col gap-2">
                 <label class="font-bold" for="isClosed">{{ 'components.issues.filters.IS_CLOSED' | translate }}</label>
-                <p-select id="isClosed" [options]="isClosedOptions" [(ngModel)]="filters.is_closed" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+                <p-select filter="true" filterBy="label" id="isClosed" [options]="isClosedOptions" [(ngModel)]="filters.is_closed" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
             </div>
 
             <div class="flex flex-col gap-2">
                 <label class="font-bold" for="projectId">{{ 'components.issues.filters.PROJECT_ID' | translate }}</label>
-                <p-multiSelect id="projectId" [options]="projectOptions" [(ngModel)]="filters.project_id" optionLabel="label" optionValue="value" placeholder="{{ 'components.issues.filters.SELECT_PROJECTS' | translate }}" appendTo="body" [panelStyle]="{ 'max-height': '300px' }"></p-multiSelect>
+                <p-multiSelect filter="true" filterBy="label" id="projectId" [options]="projectOptions" [(ngModel)]="filters.project_id" optionLabel="label" optionValue="value" placeholder="{{ 'components.issues.filters.SELECT_PROJECTS' | translate }}" appendTo="body" [panelStyle]="{ 'max-height': '300px' }"></p-multiSelect>
             </div>
 
             <div class="flex flex-col gap-2">
                 <label class="font-bold" for="statusId">{{ 'components.issues.filters.STATUS_ID' | translate }}</label>
-                <p-multiSelect id="statusId" [options]="statusOptions" [(ngModel)]="filters.status_id" optionLabel="label" optionValue="value" placeholder="{{ 'components.issues.filters.SELECT_STATUSES' | translate }}" appendTo="body" [panelStyle]="{ 'max-height': '300px' }"></p-multiSelect>
+                <p-multiSelect filter="true" filterBy="label" id="statusId" [options]="statusOptions" [(ngModel)]="filters.status_id" optionLabel="label" optionValue="value" placeholder="{{ 'components.issues.filters.SELECT_STATUSES' | translate }}" appendTo="body" [panelStyle]="{ 'max-height': '300px' }"></p-multiSelect>
             </div>
 
             <div class="flex flex-col gap-2">
                 <label class="font-bold" for="assigneeId">{{ 'components.issues.filters.ASSIGNEE_ID' | translate }}</label>
-                <p-multiSelect id="assigneeId" [options]="usersOptions" [(ngModel)]="filters.assignee_id" optionLabel="label" optionValue="value" placeholder="{{ 'components.issues.filters.SELECT_ASSIGNEES' | translate }}" appendTo="body" [panelStyle]="{ 'max-height': '300px' }"></p-multiSelect>
+                <p-multiSelect filter="true" filterBy="label" id="assigneeId" [options]="usersOptions" [(ngModel)]="filters.assignee_id" optionLabel="label" optionValue="value" placeholder="{{ 'components.issues.filters.SELECT_ASSIGNEES' | translate }}" appendTo="body" [panelStyle]="{ 'max-height': '300px' }">
+                    <ng-template let-opt pTemplate="item">
+                        <div class="flex items-center gap-2">
+                            <ng-container *ngIf="opt.avatar; else filterAssigneeInitials">
+                                <img [src]="opt.avatar" alt="avatar" class="select-avatar mr-2" />
+                            </ng-container>
+                            <ng-template #filterAssigneeInitials>
+                                <p-avatar [label]="initialsFromName(opt.label)" class="mr-2" shape="circle" [style]="{ 'background-color': selectAvatarBg(opt.value || opt.label), color: selectAvatarTextColor(opt.value || opt.label) }"></p-avatar>
+                            </ng-template>
+                            <div>{{ opt.label }}</div>
+                        </div>
+                    </ng-template>
+                </p-multiSelect>
             </div>
 
             <div class="flex flex-col gap-2">
                 <label class="font-bold" for="authorId">{{ 'components.issues.filters.AUTHOR_ID' | translate }}</label>
-                <p-multiSelect id="authorId" [options]="usersOptions" [(ngModel)]="filters.author_id" optionLabel="label" optionValue="value" placeholder="{{ 'components.issues.filters.SELECT_AUTHORS' | translate }}" appendTo="body" [panelStyle]="{ 'max-height': '300px' }"></p-multiSelect>
+                <p-multiSelect filter="true" filterBy="label" id="authorId" [options]="usersOptions" [(ngModel)]="filters.author_id" optionLabel="label" optionValue="value" placeholder="{{ 'components.issues.filters.SELECT_AUTHORS' | translate }}" appendTo="body" [panelStyle]="{ 'max-height': '300px' }">
+                    <ng-template let-opt pTemplate="item">
+                        <div class="flex items-center gap-2">
+                            <ng-container *ngIf="opt.avatar; else filterAuthorInitials">
+                                <img [src]="opt.avatar" alt="avatar" class="select-avatar mr-2" />
+                            </ng-container>
+                            <ng-template #filterAuthorInitials>
+                                <p-avatar [label]="initialsFromName(opt.label)" class="mr-2" shape="circle" [style]="{ 'background-color': selectAvatarBg(opt.value || opt.label), color: selectAvatarTextColor(opt.value || opt.label) }"></p-avatar>
+                            </ng-template>
+                            <div>{{ opt.label }}</div>
+                        </div>
+                    </ng-template>
+                </p-multiSelect>
             </div>
 
             <div class="flex flex-col gap-2">
@@ -383,7 +399,7 @@
 
             <div class="flex flex-col gap-2">
                 <label class="font-bold" for="priority">{{ 'components.issues.filters.PRIORITY' | translate }}</label>
-                <p-multiSelect id="priority" [options]="priorityOptions" [(ngModel)]="filters.priority" optionLabel="label" optionValue="value" placeholder="{{ 'components.issues.filters.SELECT_PRIORITIES' | translate }}" appendTo="body" [panelStyle]="{ 'max-height': '200px' }"></p-multiSelect>
+                <p-multiSelect filter="true" filterBy="label" id="priority" [options]="priorityOptions" [(ngModel)]="filters.priority" optionLabel="label" optionValue="value" placeholder="{{ 'components.issues.filters.SELECT_PRIORITIES' | translate }}" appendTo="body" [panelStyle]="{ 'max-height': '200px' }"></p-multiSelect>
             </div>
 
             <div class="flex flex-col gap-2">
@@ -440,40 +456,42 @@
         <div class="grid grid-cols-2 gap-4">
             <div class="flex flex-col gap-2">
                 <label class="font-bold">{{ 'components.issues.bulk.STATUS' | translate }}</label>
-                <p-select [options]="statusOptions" [(ngModel)]="bulkEditModel.status_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+                <p-select filter="true" filterBy="label" [options]="statusOptions" [(ngModel)]="bulkEditModel.status_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
             </div>
 
             <div class="flex flex-col gap-2">
                 <label class="font-bold">{{ 'components.issues.bulk.ASSIGNEE' | translate }}</label>
-                <p-select [options]="usersOptions" [(ngModel)]="bulkEditModel.assignee_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body">
+                <p-select filter="true" filterBy="label" [options]="usersOptions" [(ngModel)]="bulkEditModel.assignee_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body">
                     <ng-template let-opt pTemplate="item">
                         <div class="flex items-center gap-2">
-                            <img *ngIf="opt.avatar" [src]="opt.avatar" alt="avatar" class="select-avatar" />
+                            <ng-container *ngIf="opt.avatar; else bulkInitialsItem">
+                                <img [src]="opt.avatar" alt="avatar" class="select-avatar mr-2" />
+                            </ng-container>
+                            <ng-template #bulkInitialsItem>
+                                <p-avatar [label]="initialsFromName(opt.label)" class="mr-2" shape="circle" [style]="{ 'background-color': selectAvatarBg(opt.value || opt.label), color: selectAvatarTextColor(opt.value || opt.label) }"></p-avatar>
+                            </ng-template>
                             <div>{{ opt.label }}</div>
                         </div>
                     </ng-template>
-                    <ng-template let-opt pTemplate="value">
-                        <div class="flex items-center gap-2">
-                            <img *ngIf="opt.avatar" [src]="opt.avatar" alt="avatar" class="select-avatar" />
-                            <div>{{ opt.label }}</div>
-                        </div>
+                    <ng-template let-opt pTemplate="selectedItem">
+                        <div>{{ opt.label }}</div>
                     </ng-template>
                 </p-select>
             </div>
 
             <div class="flex flex-col gap-2">
                 <label class="font-bold">{{ 'components.issues.form.PROJECT' | translate }}</label>
-                <p-select [options]="projectOptions" [(ngModel)]="bulkEditModel.project_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+                <p-select filter="true" filterBy="label" [options]="projectOptions" [(ngModel)]="bulkEditModel.project_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
             </div>
 
             <div class="flex flex-col gap-2">
                 <label class="font-bold">{{ 'components.issues.form.TYPE' | translate }}</label>
-                <p-select [options]="typeOptions" [(ngModel)]="bulkEditModel.type_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+                <p-select filter="true" filterBy="label" [options]="typeOptions" [(ngModel)]="bulkEditModel.type_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
             </div>
 
             <div class="flex flex-col gap-2">
                 <label class="font-bold">{{ 'components.issues.form.PRIORITY' | translate }}</label>
-                <p-select [options]="priorityOptions" [(ngModel)]="bulkEditModel.priority" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+                <p-select filter="true" filterBy="label" [options]="priorityOptions" [(ngModel)]="bulkEditModel.priority" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
             </div>
 
             <div class="flex flex-col gap-2">

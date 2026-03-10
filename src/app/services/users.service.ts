@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class UsersService {
@@ -31,9 +32,13 @@ export class UsersService {
     return this.http.get(`/api/users/${encodeURIComponent(String(id))}`);
   }
 
-  getNotificationSettings(id: string | number, projectId?: number): Observable<any> {
-    const url = `/api/users/${encodeURIComponent(String(id))}/notification_settings` + (projectId ? `?project_id=${projectId}` : '');
-    return this.http.get(url);
+  getNotificationSettings(projectId?: number): Observable<any> {
+    const url = `/api/users/notification_settings` + (projectId ? `?project_id=${projectId}` : '');
+    return this.http.get(url).pipe(map((res: any) => res?.data || res));
+  }
+
+  createNotificationSetting(payload: any): Observable<any> {
+    return this.http.post('/api/users/notification_settings', payload);
   }
 
   deleteUser(id: string | number): Observable<any> {

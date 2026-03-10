@@ -285,6 +285,8 @@ export class DocumentsActivityComponent {
   initialsFromName(name?: string): string { try { return this.avatarService.initialsFromName(name); } catch (e: any) { return ''; } }
   issueAvatarColor(user?: any): string { try { return this.avatarService.issueAvatarColor(user); } catch (e: any) { return ''; } }
   issueAvatarTextColor(user?: any): string { try { return this.avatarService.issueAvatarTextColor(user); } catch (e: any) { return '#fff'; } }
+  selectAvatarBg(label?: string | null): string { try { return this.avatarService.selectAvatarBg(label); } catch (e: any) { return ''; } }
+  selectAvatarTextColor(label?: string | null): string { try { return this.avatarService.selectAvatarTextColor(label); } catch (e: any) { return '#fff'; } }
 
   // validation state for assign form
   assignErrors: { userRequired: boolean; titleRequired?: boolean } = { userRequired: false, titleRequired: false };

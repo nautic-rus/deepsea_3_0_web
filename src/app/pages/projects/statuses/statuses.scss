@@ -1,5 +1,8 @@
+.projects-subpage {
+  padding: 1rem;
+}
 
-
+/* copied styles from projects-list.scss to keep consistent look */
 :host {
   display: flex;
   flex-direction: column;
@@ -10,16 +13,14 @@
 .admin-subpage-content {
   flex: 1 1 auto;
   min-height: 0;
-  height: 80vh;
   display: flex;
   flex-direction: column;
+  height: 80vh;
 }
 
 .table-responsive {
-  /* make the table area scrollable internally */
   flex: 1 1 auto;
   overflow: auto;
-  /* ensure flex children can shrink properly */
   display: block;
 }
 
@@ -36,9 +37,7 @@
     gap: var(--p-toolbar-gap);
 }
 
-/* Style the confirm dialog to match the edit dialog appearance */
 .user-confirm-dialog {
-  /* card-like surface and subtle shadow to match edit dialog */
   box-shadow: 0 4px 14px rgba(16,24,40,0.08);
 }
 .user-confirm-dialog .p-dialog-header {
@@ -51,26 +50,6 @@
   padding: 1rem;
 }
 
-/* Toast customization for user actions */
 .user-toast .p-toast-message {
   border-radius: 8px;
-}
-
-/* Avatar styles for users table */
-.user-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-  display: inline-block;
-}
-.user-avatar-initials {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--surface-400, #cbd5e1);
-  color: var(--text-color-on-primary, #fff);
-  font-weight: 600;
-  font-size: 0.85rem;
-  line-height: 32px;
 }

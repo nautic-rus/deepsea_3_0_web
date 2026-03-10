@@ -136,6 +136,10 @@ export const routes: Routes = [
           { path: 'projects-list', loadComponent: () => import('./pages/projects/projects-list/projects-list').then(m => m.ProjectsListComponent), canActivate: [AuthGuard] },
           { path: 'projects-users', loadComponent: () => import('./pages/projects/projects-users/projects-users').then(m => m.ProjectsUsersComponent), canActivate: [AuthGuard] },
           { path: 'projects-templates', loadComponent: () => import('./pages/projects/projects-templates/projects-templates').then(m => m.ProjectsTemplatesComponent), canActivate: [AuthGuard] }
+          ,{ path: 'statuses', loadComponent: () => import('./pages/projects/statuses/statuses').then(m => m.ProjectsStatusesComponent), canActivate: [AuthGuard] },
+          { path: 'types', loadComponent: () => import('./pages/projects/types/types').then(m => m.ProjectsTypesComponent), canActivate: [AuthGuard] },
+          { path: 'storage-types', loadComponent: () => import('./pages/projects/storage-types/storage-types').then(m => m.ProjectsStorageTypesComponent), canActivate: [AuthGuard] },
+          { path: 'work-flow', loadComponent: () => import('./pages/projects/work-flow/work-flow').then(m => m.ProjectsWorkFlowComponent), canActivate: [AuthGuard] }
         ]
       }
     ]

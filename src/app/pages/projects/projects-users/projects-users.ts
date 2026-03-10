@@ -44,7 +44,7 @@ export class ProjectsUsersComponent implements OnInit {
   isCreating = false;
   error: string | null = null;
   // options for owner select
-  usersOptions: { label: string; value: any }[] = [];
+  usersOptions: { label: string; value: any; avatar?: string | null }[] = [];
   // status options for select (populated in ngOnInit to support translations)
   statuses: { label: string; value: any }[] = [];
   // roles options for multi-select
@@ -143,13 +143,27 @@ export class ProjectsUsersComponent implements OnInit {
           const list = (res && Array.isArray(res.data)) ? res.data : (Array.isArray(res) ? res : []);
             this.assignments = list || [];
             // assignments now include user info (full_name, first_name, last_name).
-            // Use those fields to populate ownerNames cache and avoid extra requests to /api/users/.
+            // Use those fields to populate ownerNames cache and resolve avatars.
             try {
               (this.assignments || []).forEach((a: any) => {
                 const uid = a && (a.user_id || a.user || a.userId);
                 if (uid !== undefined && uid !== null && !this.ownerNames[String(uid)]) {
                   const full = a?.full_name || [a?.last_name, a?.first_name, a?.middle_name].filter((s: any) => !!s).map((s: any) => String(s).trim()).join(' ');
                   this.ownerNames[String(uid)] = full || String(uid);
+                }
+                // Resolve avatar: prefer assignment fields, then fall back to usersOptions lookup
+                if (!a.avatar_url) {
+                  if (a.avatar || a.avatarUrl) {
+                    a.avatar_url = a.avatar || a.avatarUrl;
+                  } else if (a.avatar_id || a.avatarId) {
+                    const aid = a.avatar_id ?? a.avatarId;
+                    if (typeof aid === 'number' || (typeof aid === 'string' && String(aid).trim())) {
+                      a.avatar_url = `/api/storage/${String(aid).trim()}/download`;
+                    }
+                  } else if (uid != null) {
+                    const found = (this.usersOptions || []).find(u => String(u.value) === String(uid));
+                    if (found && found.avatar) { a.avatar_url = found.avatar; }
+                  }
                 }
               });
             } catch (e) {
@@ -175,7 +189,20 @@ export class ProjectsUsersComponent implements OnInit {
       this.usersService.getUsers(1, 1000).subscribe({
         next: (res: any) => {
           const list = (res && res.data) ? res.data : (Array.isArray(res) ? res : (res || []));
-          this.usersOptions = (list || []).map((u: any) => ({ label: this.formatUserName(u) || (u.email || String(u.id)), value: u.id }));
+          this.usersOptions = (list || []).map((u: any) => {
+            let avatar: string | null = null;
+            if (u.avatar_url || u.avatar || u.avatarUrl) {
+              avatar = u.avatar_url || u.avatar || u.avatarUrl || null;
+            } else if (u.avatar_id || u.avatarId) {
+              const aid = u.avatar_id ?? u.avatarId;
+              if (typeof aid === 'number' || (typeof aid === 'string' && String(aid).trim())) {
+                avatar = `/api/storage/${String(aid).trim()}/download`;
+              }
+            }
+            return { label: this.formatUserName(u) || (u.email || String(u.id)), value: u.id, avatar };
+          });
+          // Re-resolve avatars for any already-loaded assignments that lack avatar_url
+          this.resolveAssignmentAvatars();
           this.safeDetect();
         },
         error: () => {
@@ -183,6 +210,20 @@ export class ProjectsUsersComponent implements OnInit {
       });
     } catch (e) {
     }
+  }
+
+  /** Resolve avatar_url on already-loaded assignments from usersOptions lookup */
+  private resolveAssignmentAvatars(): void {
+    try {
+      (this.assignments || []).forEach((a: any) => {
+        if (a.avatar_url) return;
+        const uid = a && (a.user_id || a.user || a.userId);
+        if (uid != null) {
+          const found = (this.usersOptions || []).find(u => String(u.value) === String(uid));
+          if (found && found.avatar) { a.avatar_url = found.avatar; }
+        }
+      });
+    } catch (e) { /* ignore */ }
   }
 
   // global filter helper for p-table caption search
@@ -283,6 +324,14 @@ export class ProjectsUsersComponent implements OnInit {
 
   avatarTextColor(user?: any): string {
     try { return this.avatarService.issueAvatarTextColor(user); } catch (e) { return '#fff'; }
+  }
+
+  selectAvatarBg(label?: string | null): string {
+    try { return this.avatarService.selectAvatarBg(label); } catch (e) { return ''; }
+  }
+
+  selectAvatarTextColor(label?: string | null): string {
+    try { return this.avatarService.selectAvatarTextColor(label); } catch (e) { return '#fff'; }
   }
 
   getOwnerName(id: any): string {

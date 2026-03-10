@@ -23,6 +23,7 @@ import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { Checkbox } from 'primeng/checkbox';
+import { lastValueFrom } from 'rxjs';
 import { UsersService } from '../../../services/users.service';
 import { Select } from "primeng/select";
 import { Avatar } from "primeng/avatar";
@@ -99,6 +100,13 @@ export class AdminUsersComponent implements OnInit {
   jobTitles: { label: string; value: any }[] = [];
   // simple form errors for client-side validation
   formErrors: { email?: string; first_name?: string; last_name?: string } = {};
+  // bulk edit dialog state
+  bulkEditDialogVisible = false;
+  // model for bulk edit (checkboxes: true/false; false/false means "don't change")
+  bulkEditModel: { department_id?: any | null; job_title_id?: any | null; activeSelected?: boolean; inactiveSelected?: boolean } = {};
+  // send invitations confirmation dialog state
+  sendInvitationsDialogVisible = false;
+
 
   constructor(
     private usersService: UsersService,
@@ -300,6 +308,82 @@ export class AdminUsersComponent implements OnInit {
     };
     this.isCreating = true;
     this.displayDialog = true;
+  }
+
+  // Bulk edit dialog handlers
+  openBulkEditDialog(): void {
+    if (!this.selectedProducts || !this.selectedProducts.length) {
+      try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.users.bulk.NO_SELECTION') || 'No users selected' }); } catch (e) {}
+      return;
+    }
+    this.bulkEditModel = { department_id: null, job_title_id: null, activeSelected: false, inactiveSelected: false };
+    this.bulkEditDialogVisible = true;
+  }
+
+  closeBulkEditDialog(): void {
+    this.bulkEditDialogVisible = false;
+  }
+
+  // Send invitations dialog handlers
+  openSendInvitationsDialog(): void {
+    if (!this.selectedProducts || !this.selectedProducts.length) {
+      try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.SEND_INVITATIONS') || 'Send invitations', detail: this.translate.instant('components.users.bulk.NO_SELECTION') || 'No users selected' }); } catch (e) {}
+      return;
+    }
+    this.sendInvitationsDialogVisible = true;
+  }
+
+  closeSendInvitationsDialog(): void {
+    this.sendInvitationsDialogVisible = false;
+  }
+
+  confirmSendInvitations(): void {
+    // placeholder — actual sending not implemented yet
+    try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.SEND_INVITATIONS') || 'Send invitations', detail: this.translate.instant('components.users.bulk.SEND_CONFIRMED') || 'Invitation sending not implemented yet' }); } catch (e) {}
+    this.sendInvitationsDialogVisible = false;
+  }
+
+  async applyBulkEdit(): Promise<void> {
+    if (!this.selectedProducts || !this.selectedProducts.length) {
+      try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.users.bulk.NO_SELECTION') || 'No users selected' }); } catch (e) {}
+      return;
+    }
+    const ids = (this.selectedProducts || []).map((s: any) => s.id).filter(Boolean);
+    if (!ids.length) {
+      try { this.messageService.add({ severity: 'warn', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.users.bulk.NO_IDS') || 'No valid user ids selected' }); } catch (e) {}
+      return;
+    }
+
+    const fields: any = {};
+    if (this.bulkEditModel.department_id !== null && this.bulkEditModel.department_id !== undefined) fields.department_id = this.bulkEditModel.department_id;
+    if (this.bulkEditModel.job_title_id !== null && this.bulkEditModel.job_title_id !== undefined) fields.job_title_id = this.bulkEditModel.job_title_id;
+    // interpret two checkboxes: if exactly one is selected, apply that value; if both or none selected => don't change
+    const activeSel = !!this.bulkEditModel.activeSelected;
+    const inactiveSel = !!this.bulkEditModel.inactiveSelected;
+    if (activeSel !== inactiveSel) {
+      fields.is_active = activeSel;
+    }
+
+    if (!Object.keys(fields).length) {
+      try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.users.bulk.NOTHING_TO_APPLY') || 'Nothing to apply' }); } catch (e) {}
+      return;
+    }
+
+    this.loading = true;
+    const promises = ids.map(id => lastValueFrom(this.usersService.updateUser(id, fields)));
+    const results = await Promise.allSettled(promises);
+    this.loading = false;
+
+    const failed = results.filter(r => r.status === 'rejected');
+    if (failed.length) {
+      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.users.bulk.PARTIAL_ERROR')?.replace('{n}', String(failed.length)) || (String(failed.length) + ' updates failed') }); } catch (e) {}
+    } else {
+      try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.users.bulk.SUCCESS') || 'Bulk update applied' }); } catch (e) {}
+    }
+
+    this.bulkEditDialogVisible = false;
+    this.loadUsers();
+    this.safeDetect();
   }
 
   // Delete selected products/users (stub)

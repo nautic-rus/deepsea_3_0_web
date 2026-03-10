@@ -67,6 +67,7 @@
     "PROJECTSMENU": "Projects",
     "PROJECT_USERS": "Users of the project",
     "REPORTS": "Reports",
+    "QUESTIONS": "Questions and Answers",
     "ROLES": "Roles",
     "SAVE": "Save",
     "SELECT_DEPARTMENT": "Select department",
@@ -242,6 +243,7 @@
       "EQUIPMENT": "Equipment",
       "EQUIPMENTMENU": "Equipment",
       "EXPORT": "Export",
+      "SEND_INVITATIONS": "Send invitations",
       "FIRST_NAME": "First name",
       "ISSUES": "Issues",
       "JOB_TITLE": "Job title",
@@ -274,6 +276,18 @@
       "USER_MANAGEMENT": "User management",
       "USER_UPDATED": "User updated",
       "WIKI": "WiKi"
+    },
+    "users": {
+      "bulk": {
+        "SELECTED": "selected",
+        "NO_SELECTION": "No users selected",
+        "NO_IDS": "No valid user ids selected",
+        "NOTHING_TO_APPLY": "Nothing to apply",
+        "PARTIAL_ERROR": "{n} updates failed",
+        "SUCCESS": "Bulk update applied",
+        "SEND_CONFIRM": "Send welcome emails to the selected users?",
+        "SEND_CONFIRMED": "Invitation sending not implemented yet"
+      }
     },
     "passwordReset": {
       "BACK_TO_LOGIN": "Back to sign in",
@@ -369,7 +383,12 @@
         "LIST": "Projects List",
         "USERS": "Project Users",
         "TEMPLATES": "Templates",
-        "TITLE": "PROJECT MANAGEMENT"
+        "TITLE": "PROJECT MANAGEMENT",
+        "SETTINGS": "Settings",
+        "STATUSES": "Statuses",
+        "TYPES": "Types",
+        "STORAGE_TYPES": "Storage types",
+        "WORK_FLOW": "Work flow"
       },
       "messages": {
         "CREATED": "CREATED",
@@ -381,8 +400,14 @@
       },
       "table": {
         "HEADERS": {
+          "ENTITY": "Entity",
           "CODE": "Code",
+          "COLOR": "Color",
+          "PROJECT_ID": "Project ID",
+          "PROJECT_CODE": "Project Code",
+          "ORDER_INDEX": "Order Index",
           "CREATED_AT": "Created At",
+          "UPDATED_AT": "Updated At",
           "ROLE": "Role",
           "USER": "User",
           "DESCRIPTION": "Description",
@@ -411,6 +436,15 @@
           "DELETED": "Deleted",
           "SUMMARY_CREATE": "Summary Create",
           "SUMMARY_DELETE": "Summary Delete"
+        }
+        ,
+        "bulk": {
+          "SELECTED": "selected",
+          "NO_SELECTION": "No users selected",
+          "NO_IDS": "No valid user ids selected",
+          "NOTHING_TO_APPLY": "Nothing to apply",
+          "PARTIAL_ERROR": "{n} updates failed",
+          "SUCCESS": "Bulk update applied"
         }
       }
     },

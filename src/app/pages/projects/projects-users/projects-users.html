@@ -1,7 +1,7 @@
-<section class="admin-subpage-tools card">
+<section class="admin-subpage-tools card mt-0">
   <p-toolbar>
     <div class="p-toolbar-group-left">
-  <p-select [options]="projectOptions" [(ngModel)]="selectedProject" (ngModelChange)="onProjectChange($event)" [checkmark]="true" optionLabel="label" optionValue="value" [showClear]="true" placeholder="{{ 'components.projects.menu.LIST' | translate }}" class="mr-2" style="width: 280px;"></p-select>
+  <p-select filter="true" filterBy="label" [options]="projectOptions" [(ngModel)]="selectedProject" (ngModelChange)="onProjectChange($event)" [checkmark]="true" optionLabel="label" optionValue="value" [showClear]="true" placeholder="{{ 'components.projects.menu.LIST' | translate }}" class="mr-2" style="width: 280px;"></p-select>
   <p-button label="{{ 'components.projects.users.ASSIGN' | translate }}" icon="pi pi-user-plus" class="mr-2" severity="primary" (onClick)="openAssignDialog()" [disabled]="!selectedProject"></p-button>
   <p-button label="{{ 'MENU.DELETE' | translate }}" icon="pi pi-trash" severity="secondary" class="mr-2" (onClick)="confirmDeleteSelected()" [disabled]="!selectedProjects || !selectedProjects.length"></p-button>    
 </div>
@@ -112,12 +112,27 @@
     <!-- Status and Owner are editable only in edit mode -->
     <div *ngIf="!isCreating" class="flex flex-col gap-2">
       <label for="projectStatus">{{ 'components.projects.form.STATUS' | translate }}</label>
-      <p-select id="projectStatus" [options]="statuses" optionLabel="label" optionValue="value" [(ngModel)]="editModel.status" name="status" appendTo="body"></p-select>
+      <p-select filter="true" filterBy="label" id="projectStatus" [options]="statuses" optionLabel="label" optionValue="value" [(ngModel)]="editModel.status" name="status" appendTo="body"></p-select>
     </div>
 
     <div *ngIf="!isCreating" class="flex flex-col gap-2">
       <label for="projectOwner">{{ 'components.projects.form.OWNER' | translate }}</label>
-      <p-select id="projectOwner" [options]="usersOptions" optionLabel="label" optionValue="value" [(ngModel)]="editModel.owner_id" name="owner_id" appendTo="body"></p-select>
+      <p-select filter="true" filterBy="label" [options]="usersOptions" optionLabel="label" optionValue="value" [(ngModel)]="editModel.owner_id" name="owner_id" appendTo="body">
+        <ng-template let-opt pTemplate="item">
+          <div class="flex items-center gap-2">
+            <ng-container *ngIf="opt.avatar; else initialsItem">
+              <img [src]="opt.avatar" alt="avatar" class="select-avatar mr-2" />
+            </ng-container>
+            <ng-template #initialsItem>
+              <p-avatar [label]="initialsFromName(opt.label)" class="mr-2" shape="circle" [style]="{ 'background-color': selectAvatarBg(opt.value || opt.label), color: selectAvatarTextColor(opt.value || opt.label) }"></p-avatar>
+            </ng-template>
+            <div>{{ opt.label }}</div>
+          </div>
+        </ng-template>
+        <ng-template let-opt pTemplate="selectedItem">
+          <div>{{ opt.label }}</div>
+        </ng-template>
+      </p-select>
     </div>
 
     <div *ngIf="error" class="text-red-600 block">{{ error }}</div>
@@ -147,12 +162,24 @@
   <div class="flex flex-col gap-4">
     <div class="flex flex-col gap-2">
   <label for="assignUsers">{{ 'components.projects.users.ASSIGNMENTS_USERS' | translate }}</label>
-  <p-multiSelect id="assignUsers" [options]="usersOptions" optionLabel="label" optionValue="value" [(ngModel)]="assignModel.user_id" placeholder="{{ 'components.projects.users.ASSIGNMENTS_SELECT_USERS' | translate }}" appendTo="body" [panelStyle]="{ 'max-height': '300px' }"></p-multiSelect>
+  <p-multiSelect filter="true" filterBy="label" id="assignUsers" [options]="usersOptions" optionLabel="label" optionValue="value" [(ngModel)]="assignModel.user_id" placeholder="{{ 'components.projects.users.ASSIGNMENTS_SELECT_USERS' | translate }}" appendTo="body" [panelStyle]="{ 'max-height': '300px' }">
+    <ng-template let-opt pTemplate="item">
+      <div class="flex items-center gap-2">
+        <ng-container *ngIf="opt.avatar; else msInitialsItem">
+          <img [src]="opt.avatar" alt="avatar" class="select-avatar mr-2" />
+        </ng-container>
+        <ng-template #msInitialsItem>
+          <p-avatar [label]="initialsFromName(opt.label)" class="mr-2" shape="circle" [style]="{ 'background-color': selectAvatarBg(opt.value || opt.label), color: selectAvatarTextColor(opt.value || opt.label) }"></p-avatar>
+        </ng-template>
+        <div>{{ opt.label }}</div>
+      </div>
+    </ng-template>
+  </p-multiSelect>
     </div>
 
     <div class="flex flex-col gap-2">
   <label for="assignRoles">{{ 'components.projects.users.ASSIGNMENTS_ROLES' | translate }}</label>
-  <p-multiSelect id="assignRoles" [options]="rolesOptions" optionLabel="label" optionValue="value" [(ngModel)]="assignModel.roles" placeholder="{{ 'components.projects.users.ASSIGNMENTS_SELECT_ROLES' | translate }}" appendTo="body" [panelStyle]="{ 'max-height': '300px' }"></p-multiSelect>
+  <p-multiSelect filter="true" filterBy="label" id="assignRoles" [options]="rolesOptions" optionLabel="label" optionValue="value" [(ngModel)]="assignModel.roles" placeholder="{{ 'components.projects.users.ASSIGNMENTS_SELECT_ROLES' | translate }}" appendTo="body" [panelStyle]="{ 'max-height': '300px' }"></p-multiSelect>
     </div>
 
     <div *ngIf="error" class="text-red-600 block">{{ error }}</div>

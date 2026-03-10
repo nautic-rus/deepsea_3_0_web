@@ -126,7 +126,7 @@
     </div>
     <div class="flex flex-col gap-2">
       <label for="pagePermissions">{{ 'components.pages.form.PERMISSIONS' | translate }}</label>
-      <p-multiSelect id="pagePermissions" [options]="permissionsOptions" [(ngModel)]="editModel.permissions" optionLabel="label" optionValue="value" placeholder="{{ 'components.pages.table.HEADERS.PERMISSIONS' | translate }}" appendTo="body"></p-multiSelect>
+      <p-multiSelect filter="true" filterBy="label" id="pagePermissions" [options]="permissionsOptions" [(ngModel)]="editModel.permissions" optionLabel="label" optionValue="value" placeholder="{{ 'components.pages.table.HEADERS.PERMISSIONS' | translate }}" appendTo="body"></p-multiSelect>
     </div>
     <div class="flex justify-end gap-2 mt-4">
       <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="displayDialog=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="loading"></p-button>
