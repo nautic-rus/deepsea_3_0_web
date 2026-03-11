@@ -205,3 +205,17 @@
   overflow: hidden;
 }
 
+/* Compact editor style used on customer question detail page */
+.small-editor {
+  /* p-editor renders a wrapper with class 'p-editor' and inside a .ql-container/.ql-editor. We set heights here to control visible area */
+  display: block;
+}
+.small-editor ::ng-deep .ql-container {
+  height: 160px !important; /* slightly less than 180 to account for paddings */
+  max-height: 320px;
+  overflow: auto;
+}
+.small-editor ::ng-deep .ql-editor {
+  min-height: 50px;
+}
+

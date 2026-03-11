@@ -191,8 +191,8 @@
                   <div *ngIf="!editingQuestionInline" class="ql-view">
                       <div class="ql-editor" [innerHTML]="question?.question_text || ('components.customer_questions.detail.NO_ANSWER' | translate)"></div>
                   </div>
-                  <form *ngIf="editingQuestionInline" #questionForm="ngForm" (ngSubmit)="saveQuestionText()" class="flex flex-col ng-untouched ng-pristine ng-valid ng-star-inserted">
-                      <p-editor [(ngModel)]="editingQuestionText" name="questionContent" [style]="{ height: '320px' }"></p-editor>
+                  <form *ngIf="editingQuestionInline" #questionForm="ngForm" (ngSubmit)="saveQuestionText()" class="flex flex-col ng-untouched ng-pristine ng-valid ng-star-inserted" [style]="{ height: 'flex' }">
+                      <p-editor styleClass="small-editor" [(ngModel)]="editingQuestionText" name="questionContent" [style]="{ height: '50px' }"></p-editor>
                       <div class="flex gap-2 mt-4">
                           <p-button severity="primary" type="submit">{{ 'MENU.SAVE' | translate }}</p-button>
                           <p-button severity="secondary" (onClick)="(editingQuestionInline=false); editingQuestionText = question?.question_text">{{ 'MENU.CANCEL' | translate }}</p-button>
@@ -212,7 +212,7 @@
                   <div class="ql-editor" [innerHTML]="question?.answer_text || ('components.customer_questions.detail.NO_ANSWER' | translate)"></div>
               </div>
               <form *ngIf="editingAnswerInline" #answerForm="ngForm" (ngSubmit)="saveAnswerText()" class="flex flex-col">
-                  <p-editor [(ngModel)]="editingAnswerText" name="answerContent" [style]="{ height: '320px' }"></p-editor>
+                  <p-editor styleClass="small-editor" [(ngModel)]="editingAnswerText" name="answerContent" [style]="{ height: '180px' }"></p-editor>
                   <div class="flex gap-2 mt-4">
                       <p-button severity="primary" type="submit">{{ 'MENU.SAVE' | translate }}</p-button>
                       <p-button severity="secondary" (onClick)="(editingAnswerInline=false); editingAnswerText = question?.answer_text">{{ 'MENU.CANCEL' | translate }}</p-button>
@@ -223,7 +223,7 @@
           <!-- Edit Question Text Dialog -->
           <p-dialog header="{{ 'components.customer_questions.detail.EDIT_QUESTION' | translate }}" [(visible)]="displayEditQuestionDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{ width: '60%' }" appendTo="body">
               <div class="flex flex-col gap-4">
-                  <p-editor [(ngModel)]="editingQuestionText" styleClass="w-full" [style]="{ height: '320px' }"></p-editor>
+                  <p-editor styleClass="w-full small-editor" [(ngModel)]="editingQuestionText" [style]="{ height: '180px' }"></p-editor>
                   <div class="flex justify-end gap-2">
                       <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="displayEditQuestionDialog=false" class="p-button-text" severity="secondary"></p-button>
                       <p-button label="{{ 'MENU.SAVE' | translate }}" (onClick)="saveQuestionText()" severity="primary"></p-button>
@@ -234,7 +234,7 @@
           <!-- Edit Answer Text Dialog -->
           <p-dialog header="{{ 'components.customer_questions.detail.EDIT_ANSWER' | translate }}" [(visible)]="displayEditAnswerDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{ width: '60%' }" appendTo="body">
               <div class="flex flex-col gap-4">
-                  <p-editor [(ngModel)]="editingAnswerText" styleClass="w-full" [style]="{ height: '320px' }"></p-editor>
+                  <p-editor styleClass="w-full small-editor" [(ngModel)]="editingAnswerText" [style]="{ height: '180px' }"></p-editor>
                   <div class="flex justify-end gap-2">
                       <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="displayEditAnswerDialog=false" class="p-button-text" severity="secondary"></p-button>
                       <p-button label="{{ 'MENU.SAVE' | translate }}" (onClick)="saveAnswerText()" severity="primary"></p-button>
