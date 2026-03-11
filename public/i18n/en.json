@@ -45,6 +45,7 @@
     "EXPORT": "Export",
     "FIRST_NAME": "First name",
     "ISSUES": "Issues",
+    "CUSTOMER_QUESTIONS": "Customer questions",
     "JOB_TITLE": "Job title",
     "LAST_NAME": "Last name",
     "LOGOUT": "Logout",
@@ -90,6 +91,10 @@
     "CREATE_DOC": "Create document",
     "CREATE_ISSUE": "Create issue",
     "EDIT_ISSUE": "Edit issue",
+    "CREATE_QUESTION": "Create question",
+    "EDIT_QUESTION": "Edit question",
+    "QUESTION": "Question",
+    "CONFIRM_DELETE": "Confirm deletion",
     "BULK_EDIT": "Bulk edit",
     "QUERY": "Query",
     "APPLY": "Apply",
@@ -129,6 +134,99 @@
       "LOGOUT": "Logout",
           "PRIORITY_PLACEHOLDER": "Select priority",
           "USER_REQUIRED": "User is required"
+    },
+    "customer_questions": {
+      "table": {
+        "PROJECT": "Project",
+        "QUESTION": "Question",
+        "ASKED_BY": "Author",
+        "ANSWERED_BY": "Answered By",
+        "STATUS": "Status",
+        "PRIORITY": "Priority",
+        "ASKED_AT": "Date created",
+        "DUE_DATE": "Due Date",
+        "CREATED_AT": "Created At",
+        "SEARCH": "Search",
+        "TYPE": "Type"
+      },
+      "form": {
+        "PROJECT": "Project",
+        "QUESTION_TEXT": "Question",
+        "QUESTION_TITLE": "Title",
+        "SELECT_DOCUMENTS": "Select documents",
+        "QUESTION_TEXT_REQUIRED": "Question is required",
+        "ANSWER_TEXT": "Answer",
+        "PRIORITY": "Priority",
+        "DUE_DATE": "Due Date",
+        "CREATED": "Question created",
+        "UPDATED": "Question updated",
+        "ATTACH_DOCUMENTS": "Documents",
+        "DESCRIPTION": "Description",
+        "TYPE": "Type"
+      },
+      "priority": {
+        "HIGH": "High",
+        "MEDIUM": "Medium",
+        "LOW": "Low"
+      },
+      "filters": {
+        "PROJECT_ID": "Project",
+        "STATUS": "Status",
+        "PRIORITY": "Priority",
+        "ASKED_BY": "Author",
+        "ANSWERED_BY": "Answered By",
+        "ASKED_AT_FROM": "Date created from",
+        "ASKED_AT_TO": "Asked to",
+        "ANSWERED_AT_FROM": "Answered from",
+        "ANSWERED_AT_TO": "Answered to",
+        "DUE_DATE_FROM": "Due from",
+        "DUE_DATE_TO": "Due to",
+        "SELECT_PROJECTS": "Select projects",
+        "SELECT_STATUSES": "Select statuses",
+        "SELECT_PRIORITIES": "Select priorities",
+        "SELECT_USERS": "Select users",
+        "FILTERS_APPLIED": "Filters applied",
+        "FILTERS_APPLY_ERROR": "Failed to apply filters"
+      },
+      "bulk": {
+        "NO_SELECTION": "No questions selected",
+        "NO_IDS": "No valid question IDs selected",
+        "NOTHING_TO_APPLY": "Nothing to apply",
+        "PARTIAL_ERROR": "{n} updates failed",
+        "SUCCESS": "Bulk update applied",
+        "SELECTED": "selected",
+        "STATUS": "Status",
+        "ANSWERED_BY": "Answered By"
+      },
+      "detail": {
+        "STATUS": "Status",
+        "PRIORITY": "Priority",
+        "PROJECT": "Project",
+        "ASKED_BY": "Author",
+        "ANSWERED_BY": "Answered By",
+        "ASKED_AT": "Date created",
+        "DUE_DATE": "Due Date",
+        "ANSWER": "Answer",
+        "NO_ANSWER": "No answer yet"
+      },
+      "messages": {
+        "CREATED": "Question created",
+        "UPDATED": "Question updated",
+        "DELETED": "Question deleted",
+        "SUCCESS": "Success",
+        "ERROR": "Error",
+        "STATUS_UPDATED": "Status updated",
+        "STATUS_UPDATE_FAILED": "Failed to update status",
+        "COPY_LINK": "Copy link",
+        "LINK_COPIED": "Link copied to clipboard",
+        "COPY_PROMPT": "Copy link",
+        "DELETE_FAILED": "Failed to delete question",
+        "DELETE_CONFIRM": "Are you sure you want to delete this question?"
+      },
+      "errors": {
+        "QUESTION_ID_MISSING": "Question ID is missing",
+        "FAILED_LOAD": "Failed to load question"
+      }
     },
       "profile": {
         "TITLE": "Profile",

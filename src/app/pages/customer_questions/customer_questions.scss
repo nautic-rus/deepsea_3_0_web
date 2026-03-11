@@ -1,0 +1,124 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.admin-subpage-tools {
+  padding: 1rem;
+}
+
+.admin-subpage-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  height: 80vh;
+}
+
+.table-responsive {
+  flex: 1 1 auto;
+  overflow: auto;
+  display: block;
+}
+
+.p-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding: 0;
+    background: var(--p-toolbar-background);
+    border: 0 solid var(--p-toolbar-border-color);
+    color: var(--p-toolbar-color);
+    border-radius: var(--p-toolbar-border-radius);
+    gap: var(--p-toolbar-gap);
+}
+
+.user-confirm-dialog {
+  box-shadow: 0 4px 14px rgba(16,24,40,0.08);
+}
+.user-confirm-dialog .p-dialog-header {
+  background: var(--surface-0);
+  border-bottom: 1px solid var(--surface-border);
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+.user-confirm-dialog .p-dialog-content {
+  padding: 1rem;
+}
+
+.user-toast .p-toast-message {
+  border-radius: 8px;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: inline-block;
+}
+.user-avatar-initials {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-400, #cbd5e1);
+  color: var(--text-color-on-primary, #fff);
+  font-weight: 600;
+  font-size: 0.85rem;
+  line-height: 32px;
+}
+/* Make table rows look clickable: pointer on hover for the questions table.
+   Use ::ng-deep to penetrate PrimeNG child templates and explicit selectors for compatibility. */
+::ng-deep .questions-table tbody tr:hover,
+::ng-deep .questions-table tr:hover,
+::ng-deep .questions-table .p-datatable-tbody tr:hover,
+::ng-deep .questions-table .p-datatable-tbody > tr:hover,
+::ng-deep .questions-table .p-row:hover,
+:host ::ng-deep .questions-table .p-row:hover {
+  cursor: pointer !important;
+}
+
+/* Do not show pointer for interactive controls inside a hovered row (buttons/links/inputs/checkboxes) */
+::ng-deep .questions-table tbody tr:hover td button,
+::ng-deep .questions-table tbody tr:hover td a,
+::ng-deep .questions-table tbody tr:hover td input,
+::ng-deep .questions-table tbody tr:hover td textarea,
+::ng-deep .questions-table tbody tr:hover td select,
+::ng-deep .questions-table tbody tr:hover td .p-checkbox,
+::ng-deep .questions-table tbody tr:hover td .p-tablecheckbox {
+  cursor: default !important;
+}
+
+/* More reliable selector: rows explicitly marked as clickable */
+:host ::ng-deep .questions-table tr.clickable-row:hover,
+:host .questions-table tr.clickable-row:hover,
+.questions-table tr.clickable-row:hover {
+  cursor: pointer !important;
+}
+
+/* Keep default cursor for interactive elements inside clickable rows */
+.questions-table tr.clickable-row:hover td button,
+.questions-table tr.clickable-row:hover td a,
+.questions-table tr.clickable-row:hover td input,
+.questions-table tr.clickable-row:hover td textarea,
+.questions-table tr.clickable-row:hover td select,
+.questions-table tr.clickable-row:hover td .p-checkbox,
+.questions-table tr.clickable-row:hover td .p-tablecheckbox {
+  cursor: default !important;
+}
+.select-avatar-initials {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Note: hover/cursor rules above already cover both generic and clickable-row selectors;
+   keep only one set to avoid duplication. */

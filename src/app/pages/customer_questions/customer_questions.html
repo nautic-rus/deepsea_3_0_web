@@ -1,0 +1,406 @@
+<section class="admin-subpage-tools card mt-0">
+<p-toolbar >
+  <ng-template #start>
+    <p-button [label]="'MENU.CREATE_QUESTION' | translate" icon="pi pi-plus" severity="primary" class="mr-2" (onClick)="openNewQuestion()" />
+      <p-button severity="warn" icon="pi pi-filter" class="ml-2" (onClick)="openQueryDialog()" />
+      <p-button severity="secondary" icon="pi pi-pencil" class="ml-2" (onClick)="openBulkEditDialog()" [disabled]="!selectedQuestions || !selectedQuestions.length" />
+  </ng-template>
+
+  <ng-template #end>
+      <p-button [label]="'MENU.EXPORT' | translate" icon="pi pi-upload" severity="secondary" (onClick)="exportQuestionsCSV()" />
+  </ng-template>
+</p-toolbar>
+</section>
+
+<section class="admin-subpage-content card">
+    <div class="table-responsive" #tableContainer>
+  <p-table
+      #dt
+      [value]="questionsItems"
+      [loading]="loading"
+      styleClass="questions-table"
+    [reorderableColumns]="true"
+    (onColReorder)="onColumnsReordered($event)"
+    (onColResize)="onColumnResized($event)"
+      [scrollable]="true"
+      [resizableColumns]="true"
+      columnResizeMode="expand"
+      scrollHeight="flex"
+      [rows]="10"
+      size="small"
+        [globalFilterFields]="['id','question_title','question_text','project_name','asked_by_full_name','answered_by_full_name','status_name','priority']"
+      [(selection)]="selectedQuestions"
+      [rowHover]="true"
+      dataKey="id"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+      [showCurrentPageReport]="true"
+      [rowsPerPageOptions]="[10, 20, 30]"
+          >
+
+    <ng-template #caption>
+            <div class="flex justify-between mb-2 items-center">
+                <h3>{{ 'MENU.CUSTOMER_QUESTIONS' | translate }}</h3>
+                <div class="flex items-center gap-2">
+                    <p-multiSelect [options]="columnsOptions" [(ngModel)]="selectedColumns" (onChange)="onColumnsChange()" placeholder="{{ 'MENU.COLUMNS' | translate }}" appendTo="body" styleClass="mr-2"></p-multiSelect>
+                    <p-iconfield>
+                        <p-inputicon styleClass="pi pi-search" />
+                        <input pInputText type="text" (input)="onGlobalFilterQuestion(dt, $event)" placeholder="{{ 'components.customer_questions.table.SEARCH' | translate }}" />
+                    </p-iconfield>
+                </div>
+            </div>
+            </ng-template>
+
+        <ng-template pTemplate="header">
+            <tr>
+                <th style="width: 3rem" pResizableColumn>
+                    <p-tableHeaderCheckbox />
+                </th>
+
+                <ng-container *ngFor="let col of columns">
+                    <th *ngIf="isColumnVisible(col.field)" [attr.data-field]="col.field" pReorderableColumn [pSortableColumn]="col.field" pResizableColumn>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <span>{{ (col.headerKey | translate) }}</span>
+                                <p-sortIcon [field]="col.field" />
+                            </div>
+
+                            <ng-container [ngSwitch]="col.field">
+                                <ng-container *ngSwitchCase="'project_name'">
+                                    <p-columnFilter field="project_name" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
+                                        <ng-template #filter let-value let-filter="filterCallback">
+                                            <p-multiselect [ngModel]="value"
+                                                           [options]="projectOptions"
+                                                           optionLabel="label"
+                                                           optionValue="label"
+                                                           placeholder="{{ 'MENU.ANY' | translate }}"
+                                                           (onChange)="filter($event.value)"
+                                                           styleClass="w-full"
+                                                           appendTo="body">
+                                            </p-multiselect>
+                                        </ng-template>
+                                    </p-columnFilter>
+                                </ng-container>
+                                <ng-container *ngSwitchCase="'asked_by_full_name'">
+                                    <p-columnFilter field="asked_by_full_name" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
+                                        <ng-template #filter let-value let-filter="filterCallback">
+                                            <p-multiselect [ngModel]="value"
+                                                           [options]="usersOptions"
+                                                           optionLabel="label"
+                                                           optionValue="label"
+                                                           placeholder="{{ 'MENU.ANY' | translate }}"
+                                                           (onChange)="filter($event.value)"
+                                                           styleClass="w-full"
+                                                           appendTo="body">
+                                            </p-multiselect>
+                                        </ng-template>
+                                    </p-columnFilter>
+                                </ng-container>
+                                <ng-container *ngSwitchCase="'answered_by_full_name'">
+                                    <p-columnFilter field="answered_by_full_name" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
+                                        <ng-template #filter let-value let-filter="filterCallback">
+                                            <p-multiselect [ngModel]="value"
+                                                           [options]="usersOptions"
+                                                           optionLabel="label"
+                                                           optionValue="label"
+                                                           placeholder="{{ 'MENU.ANY' | translate }}"
+                                                           (onChange)="filter($event.value)"
+                                                           styleClass="w-full"
+                                                           appendTo="body">
+                                            </p-multiselect>
+                                        </ng-template>
+                                    </p-columnFilter>
+                                </ng-container>
+                                <ng-container *ngSwitchCase="'status_name'">
+                                    <p-columnFilter field="status_name" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
+                                        <ng-template #filter let-value let-filter="filterCallback">
+                                            <p-multiselect [ngModel]="value"
+                                                           [options]="statusOptions"
+                                                           optionLabel="label"
+                                                           optionValue="label"
+                                                           placeholder="{{ 'MENU.ANY' | translate }}"
+                                                           (onChange)="filter($event.value)"
+                                                           styleClass="w-full"
+                                                           appendTo="body">
+                                            </p-multiselect>
+                                        </ng-template>
+                                    </p-columnFilter>
+                                </ng-container>
+                                <ng-container *ngSwitchCase="'priority'">
+                                    <p-columnFilter field="priority" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
+                                        <ng-template #filter let-value let-filter="filterCallback">
+                                            <p-multiselect [ngModel]="value"
+                                                           [options]="priorityOptions"
+                                                           optionLabel="label"
+                                                           optionValue="label"
+                                                           placeholder="{{ 'MENU.ANY' | translate }}"
+                                                           (onChange)="filter($event.value)"
+                                                           styleClass="w-full"
+                                                           appendTo="body">
+                                            </p-multiselect>
+                                        </ng-template>
+                                    </p-columnFilter>
+                                </ng-container>
+                                <ng-container *ngSwitchDefault></ng-container>
+                            </ng-container>
+                        </div>
+                    </th>
+                </ng-container>
+
+                <th pResizableColumn></th>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-question>
+            <tr class="clickable-row" (click)="onRowClick(question, $event)">
+                <td>
+                    <p-tableCheckbox [value]="question" />
+                </td>
+
+                <ng-container *ngFor="let col of columns">
+                    <td *ngIf="isColumnVisible(col.field)" [attr.data-field]="col.field">
+                        <ng-container [ngSwitch]="col.field">
+                            <ng-container *ngSwitchCase="'id'">{{ question.id }}</ng-container>
+
+                            <ng-container *ngSwitchCase="'question_title'">{{ question.question_title || question.question_text || '-' }}</ng-container>
+                            <ng-container *ngSwitchCase="'type_name'">{{ question.type_name || (question.type && question.type.name) || '-' }}</ng-container>
+                            <ng-container *ngSwitchCase="'asked_by_full_name'">
+                                <div class="flex items-center gap-2">
+                                            <ng-container *ngIf="question.asked_by_avatar || question.asked_by_avatar_url; else askedByInitials">
+                                                <p-avatar [image]="question.asked_by_avatar || question.asked_by_avatar_url || undefined" shape="circle" >
+                                                </p-avatar>
+                                            </ng-container>
+                                            <ng-template #askedByInitials>
+                                                <p-avatar [label]="initialsFromName(question.asked_by_full_name)" class="mr-2" shape="circle"
+                                                  [style]="{ 'background-color': question.asked_by ? questionAvatarColor({ id: question.asked_by, first_name: question.asked_by_full_name }) : undefined, color: question.asked_by ? questionAvatarTextColor({ id: question.asked_by, first_name: question.asked_by_full_name }) : undefined }"></p-avatar>
+                                            </ng-template>
+                                            <span>{{ formatSurnameInitials(question.asked_by_full_name || question) }}</span>
+                                </div>
+                            </ng-container>
+                            <ng-container *ngSwitchCase="'answered_by_full_name'">
+                                <div class="flex items-center gap-2">
+                                    <ng-container *ngIf="question.answered_by_full_name; else noAnsweredByListTpl">
+                                        <ng-container *ngIf="question.answered_by_avatar || question.answered_by_avatar_url; else answeredByInitials">
+                                            <p-avatar [image]="question.answered_by_avatar || question.answered_by_avatar_url || undefined" shape="circle" ></p-avatar>
+                                        </ng-container>
+                                        <ng-template #answeredByInitials>
+                                            <p-avatar [label]="initialsFromName(question.answered_by_full_name)" class="mr-2" shape="circle"
+                                              [style]="{ 'background-color': question.answered_by ? questionAvatarColor({ id: question.answered_by, first_name: question.answered_by_full_name }) : undefined, color: question.answered_by ? questionAvatarTextColor({ id: question.answered_by, first_name: question.answered_by_full_name }) : undefined }"></p-avatar>
+                                        </ng-template>
+                                        <span>{{ formatSurnameInitials(question.answered_by_full_name || question) }}</span>
+                                    </ng-container>
+                                    <ng-template #noAnsweredByListTpl>
+                                        <span>-</span>
+                                    </ng-template>
+                                </div>
+                            </ng-container>
+                            <ng-container *ngSwitchCase="'status_name'">
+                                {{question.status_name ? question.status_name : '-'}}
+                            </ng-container>
+                            <ng-container *ngSwitchCase="'priority'">
+                                <p-tag [value]="question.priority || '-'" [severity]="prioritySeverity(question.priority)"></p-tag>
+                            </ng-container>
+                            <ng-container *ngSwitchCase="'due_date'">{{ question.due_date ? (question.due_date | date:'dd.MM.yyyy') : '-' }}</ng-container>
+                            <ng-container *ngSwitchCase="'created_at'">{{ question.created_at ? (question.created_at | date:'dd.MM.yyyy') : '-' }}</ng-container>
+                            <ng-container *ngSwitchDefault>{{ question[col.field] }}</ng-container>
+                        </ng-container>
+                    </td>
+                </ng-container>
+
+                <td></td>
+            </tr>
+        </ng-template>
+</p-table>
+</div>
+</section>
+
+<p-confirmDialog
+    appendTo="body"
+    [dismissableMask]="true"
+    [baseZIndex]="10000"
+    [style]="{ width: '25%' }"
+    styleClass="user-confirm-dialog"
+    header="{{ 'MENU.CONFIRM' | translate }}"
+    acceptLabel="{{ 'MENU.DELETE' | translate }}"
+    rejectLabel="{{ 'MENU.CANCEL' | translate }}"
+    acceptIcon="pi pi-check"
+    acceptButtonStyleClass="p-button-danger"
+    rejectButtonStyleClass="secondary p-button-text"
+    rejectIcon="pi pi-times"
+    >
+</p-confirmDialog>
+<p-toast position="top-right" appendTo="body" [baseZIndex]="10001" styleClass="user-toast"></p-toast>
+
+<p-dialog [header]="isCreating ? ('MENU.CREATE_QUESTION' | translate) : ('MENU.EDIT_QUESTION' | translate)" [(visible)]="displayDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{width: '40%'}">
+        <div class=" flex flex-col gap-4">
+            <div class="flex flex-col gap-2">
+                <label for="projectSelect" class="font-bold">{{ 'components.customer_questions.form.PROJECT' | translate }}</label>
+                <p-select id="projectSelect" [options]="projectOptions" [(ngModel)]="editModel.project_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body" (onChange)="onProjectChange($event.value)"></p-select>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label for="docs" class="font-bold">{{ 'components.customer_questions.form.ATTACH_DOCUMENTS' | translate }}</label>
+                <p-multiSelect id="docs" [options]="documentsOptions" [(ngModel)]="editModel.docs_selected" optionLabel="label" optionValue="value" placeholder="{{ 'components.customer_questions.form.SELECT_DOCUMENTS' | translate }}" appendTo="body" [panelStyle]="{ 'max-height': '300px' }" [disabled]="!editModel.project_id">
+                    <ng-template let-opt pTemplate="item">
+                        <div class="flex items-center gap-2">
+                            <div>{{ opt.label }}</div>
+                        </div>
+                    </ng-template>
+                </p-multiSelect>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label for="typeSelect" class="font-bold">{{ 'components.customer_questions.form.TYPE' | translate }}</label>
+                <p-select id="typeSelect" [options]="typeOptions" [(ngModel)]="editModel.type_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label for="questionTitle" class="font-bold">{{ 'components.customer_questions.form.QUESTION_TITLE' | translate }}</label>
+                <input pInputText id="questionTitle" type="text" [(ngModel)]="editModel.question_title" name="questionTitle" />
+                <small *ngIf="formErrors.question_title" class="text-red-600 block">{{ formErrors.question_title }}</small>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label for="questionTextArea" class="font-bold">{{ isCreating ? ('components.customer_questions.form.QUESTION_TEXT' | translate) : ('components.customer_questions.form.ANSWER_TEXT' | translate) }}</label>
+<!--                <input pInputText id="questionTextArea" type="text" [(ngModel)]="editModel.question_text" name="questionTextArea" [style]="{ height: '100px' }"/>-->
+                <p-editor id="questionTextArea" [(ngModel)]="editModel.question_text"  name="questionTextArea" styleClass="w-full" [style]="{ height: '100px' }"></p-editor>
+            </div>
+
+            <div class="flex gap-2">
+                <div class="flex-1 flex flex-col gap-2">
+                    <label for="priority" class="font-bold">{{ 'components.customer_questions.form.PRIORITY' | translate }}</label>
+                    <p-select id="priority" [options]="priorityOptions" [(ngModel)]="editModel.priority" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+                </div>
+
+                <div class="flex-1 flex flex-col gap-2">
+                    <label class="font-bold">{{ 'components.customer_questions.form.DUE_DATE' | translate }}</label>
+                    <p-datepicker [(ngModel)]="editModel.due_date" [showIcon]="true" appendTo="body" dateFormat="dd.mm.yy"></p-datepicker>
+                </div>
+            </div>
+
+
+
+        <div class="flex justify-end gap-2 mt-4">
+            <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="displayDialog=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="loading"></p-button>
+            <p-button label="{{ 'MENU.SAVE' | translate }}" (onClick)="saveQuestion()" severity="primary" icon="pi pi-check" iconPos="left" [loading]="loading" [disabled]="loading"></p-button>
+        </div>
+    </div>
+</p-dialog>
+
+<!-- Query dialog -->
+<p-dialog header="{{ 'MENU.QUERY' | translate }}" [(visible)]="queryDialogVisible" [modal]="true" [appendTo]="'body'" [resizable]="false" [style]="{ width: '40%' }">
+    <div class="flex flex-col gap-4">
+        <div class="grid grid-cols-2 gap-4">
+
+            <div class="flex flex-col gap-2">
+                <label class="font-bold" for="projectId">{{ 'components.customer_questions.filters.PROJECT_ID' | translate }}</label>
+                <p-multiSelect id="projectId" [options]="projectOptions" [(ngModel)]="filters.project_id" optionLabel="label" optionValue="value" placeholder="{{ 'components.customer_questions.filters.SELECT_PROJECTS' | translate }}" appendTo="body" [panelStyle]="{ 'max-height': '300px' }"></p-multiSelect>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="font-bold" for="status">{{ 'components.customer_questions.filters.STATUS' | translate }}</label>
+                <p-multiSelect id="status" [options]="statusOptions" [(ngModel)]="filters.status" optionLabel="label" optionValue="value" placeholder="{{ 'components.customer_questions.filters.SELECT_STATUSES' | translate }}" appendTo="body" [panelStyle]="{ 'max-height': '300px' }"></p-multiSelect>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="font-bold" for="askedBy">{{ 'components.customer_questions.filters.ASKED_BY' | translate }}</label>
+                <p-multiSelect id="askedBy" [options]="usersOptions" [(ngModel)]="filters.asked_by" optionLabel="label" optionValue="value" placeholder="{{ 'components.customer_questions.filters.SELECT_USERS' | translate }}" appendTo="body" [panelStyle]="{ 'max-height': '300px' }"></p-multiSelect>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="font-bold" for="answeredBy">{{ 'components.customer_questions.filters.ANSWERED_BY' | translate }}</label>
+                <p-multiSelect id="answeredBy" [options]="usersOptions" [(ngModel)]="filters.answered_by" optionLabel="label" optionValue="value" placeholder="{{ 'components.customer_questions.filters.SELECT_USERS' | translate }}" appendTo="body" [panelStyle]="{ 'max-height': '300px' }"></p-multiSelect>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="font-bold" for="priority">{{ 'components.customer_questions.filters.PRIORITY' | translate }}</label>
+                <p-multiSelect id="priority" [options]="priorityOptions" [(ngModel)]="filters.priority" optionLabel="label" optionValue="value" placeholder="{{ 'components.customer_questions.filters.SELECT_PRIORITIES' | translate }}" appendTo="body" [panelStyle]="{ 'max-height': '200px' }"></p-multiSelect>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="font-bold" for="askedFrom">{{ 'components.customer_questions.filters.ASKED_AT_FROM' | translate }}</label>
+                <p-datepicker [(ngModel)]="filters.asked_at_from" [showIcon]="true" inputId="askedFrom"></p-datepicker>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="font-bold" for="askedTo">{{ 'components.customer_questions.filters.ASKED_AT_TO' | translate }}</label>
+                <p-datepicker [(ngModel)]="filters.asked_at_to" [showIcon]="true" inputId="askedTo" ></p-datepicker>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="font-bold" for="answeredFrom">{{ 'components.customer_questions.filters.ANSWERED_AT_FROM' | translate }}</label>
+                <p-datepicker [(ngModel)]="filters.answered_at_from" [showIcon]="true" inputId="answeredFrom" ></p-datepicker>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="font-bold" for="answeredTo">{{ 'components.customer_questions.filters.ANSWERED_AT_TO' | translate }}</label>
+                <p-datepicker [(ngModel)]="filters.answered_at_to" [showIcon]="true" inputId="answeredTo" ></p-datepicker>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="font-bold" for="dueFrom">{{ 'components.customer_questions.filters.DUE_DATE_FROM' | translate }}</label>
+                <p-datepicker [(ngModel)]="filters.due_date_from" [showIcon]="true" inputId="dueFrom" ></p-datepicker>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="font-bold" for="dueTo">{{ 'components.customer_questions.filters.DUE_DATE_TO' | translate }}</label>
+                <p-datepicker [(ngModel)]="filters.due_date_to" [showIcon]="true" inputId="dueTo" ></p-datepicker>
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-2 mt-4">
+            <p-button label="{{ 'MENU.RESET' | translate }}" (onClick)="resetQuery()" class="p-button-text" severity="secondary"></p-button>
+            <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="closeQueryDialog()" class="p-button-text" severity="secondary"></p-button>
+            <p-button label="{{ 'MENU.APPLY' | translate }}" (onClick)="applyQuery()" severity="primary"></p-button>
+        </div>
+    </div>
+</p-dialog>
+
+<!-- Bulk edit dialog -->
+<p-dialog header="{{ 'MENU.BULK_EDIT' | translate }}" [(visible)]="bulkEditDialogVisible" [modal]="true" [appendTo]="'body'" [resizable]="false" [style]="{ width: '40%' }">
+    <div class="flex flex-col gap-4">
+        <div class="mb-3">
+            <strong>{{ selectedQuestions.length || 0 }}</strong> {{ 'components.customer_questions.bulk.SELECTED' | translate }}
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div class="flex flex-col gap-2">
+                <label class="font-bold">{{ 'components.customer_questions.bulk.STATUS' | translate }}</label>
+                <p-select [options]="statusOptions" [(ngModel)]="bulkEditModel.status_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="font-bold">{{ 'components.customer_questions.bulk.ANSWERED_BY' | translate }}</label>
+                <p-select [options]="usersOptions" [(ngModel)]="bulkEditModel.answered_by" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body">
+                    <ng-template let-opt pTemplate="item">
+                        <div class="flex items-center gap-2">
+                            <img *ngIf="opt.avatar" [src]="opt.avatar" alt="avatar" class="select-avatar" />
+                            <div>{{ opt.label }}</div>
+                        </div>
+                    </ng-template>
+                    <ng-template let-opt pTemplate="value">
+                        <div class="flex items-center gap-2">
+                            <img *ngIf="opt.avatar" [src]="opt.avatar" alt="avatar" class="select-avatar" />
+                            <div>{{ opt.label }}</div>
+                        </div>
+                    </ng-template>
+                </p-select>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="font-bold">{{ 'components.customer_questions.form.PRIORITY' | translate }}</label>
+                <p-select [options]="priorityOptions" [(ngModel)]="bulkEditModel.priority" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="font-bold">{{ 'components.customer_questions.form.DUE_DATE' | translate }}</label>
+                <p-datepicker [(ngModel)]="bulkEditModel.due_date" [showIcon]="true" appendTo="body"></p-datepicker>
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-2 mt-4">
+            <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="closeBulkEditDialog()" class="p-button-text" severity="secondary"></p-button>
+            <p-button label="{{ 'MENU.APPLY' | translate }}" (onClick)="applyBulkEdit()" severity="primary"></p-button>
+        </div>
+    </div>
+</p-dialog>
+
