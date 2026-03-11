@@ -16,7 +16,7 @@ import { LinksService } from '../../services/links.service';
     <section class="admin-subpage-relations card">
       <div class="flex items-center justify-between mt-0 mb-2">
          <h4 class="mb-">{{ 'components.issues.relations.TITLE' | translate }}</h4>
-          <p-button severity="secondary" icon="pi pi-plus" class="mt-0" [outlined]="true" (onClick)="emitAddRelation()"></p-button>
+          <p-button severity="secondary" icon="pi pi-plus" class="mt-0" [outlined]="true" (click)="emitAddRelation()"></p-button>
       </div>
 
       <div *ngIf="!relations || relations.length === 0" class="text-surface-500">{{ 'components.issues.relations.NO_RELATIONS' | translate }}</div>

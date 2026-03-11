@@ -192,15 +192,22 @@
         "ANSWERED_BY": "Ответил"
       },
       "detail": {
+        "QUESTION": "Вопрос",
         "STATUS": "Статус",
         "PRIORITY": "Приоритет",
         "PROJECT": "Проект",
         "ASKED_BY": "Автор",
         "ANSWERED_BY": "Ответил",
-        "ASKED_AT": "Дата создания",
+        "CREATED_AT": "Дата создания",
         "DUE_DATE": "Срок",
         "ANSWER": "Ответ",
-        "NO_ANSWER": "Ответа пока нет"
+        "NO_ANSWER": "Ответа пока нет",
+        "TYPE": "Тип",
+        "ATTACHE": "Вложения",
+        "CHOOSE": "Выбрать",
+        "UPLOAD": "Загрузить",
+        "CANCEL": "Отменить",
+        "DRAG_DROP": "Перетащите файлы сюда для загрузки"
       },
       "messages": {
         "CREATED": "Вопрос создан",

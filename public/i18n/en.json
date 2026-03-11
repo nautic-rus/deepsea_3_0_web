@@ -199,15 +199,25 @@
         "ANSWERED_BY": "Answered By"
       },
       "detail": {
+        "QUESTION": "Question",
         "STATUS": "Status",
         "PRIORITY": "Priority",
         "PROJECT": "Project",
-        "ASKED_BY": "Author",
+        "CREATED_AT": "Created at",
         "ANSWERED_BY": "Answered By",
+        "ASKED_BY": "Author",
         "ASKED_AT": "Date created",
         "DUE_DATE": "Due Date",
         "ANSWER": "Answer",
-        "NO_ANSWER": "No answer yet"
+        "NO_ANSWER": "No answer yet",
+        "TYPE": "Type",
+        "ATTACHE": "Attachments"
+      },
+      "attach": {
+        "CHOOSE" : "Choose",
+        "UPLOAD": "Upload",
+        "CANCEL": "Cancel",
+        "DRAG_DROP": "Drag and drop files here to upload"
       },
       "messages": {
         "CREATED": "Question created",

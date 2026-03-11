@@ -1,0 +1,316 @@
+import { Component, Input, OnChanges, SimpleChanges, ChangeDetectorRef, Output, EventEmitter } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ToastModule } from 'primeng/toast';
+import { TagModule } from 'primeng/tag';
+import { BadgeModule } from 'primeng/badge';
+import { ButtonModule } from 'primeng/button';
+import { TableModule } from 'primeng/table';
+import { LinksService } from '../../services/links.service';
+
+@Component({
+  selector: 'app-customer-question-relations-table',
+  standalone: true,
+  imports: [CommonModule, TranslateModule, TagModule, BadgeModule, ButtonModule, TableModule, ConfirmDialogModule, ToastModule],
+  providers: [ConfirmationService, MessageService],
+  template: `
+    <section class="admin-subpage-relations card">
+      <p-toast></p-toast>
+      <p-confirmDialog header="{{ 'MENU.CONFIRM' | translate }}" [style]="{ width: '30%' }"></p-confirmDialog>
+      <div class="flex items-center justify-between mt-0 mb-2">
+         <h4 class="mb-0">{{ 'components.issues.relations.TITLE' | translate }}</h4>
+          <p-button severity="secondary" icon="pi pi-plus" class="mt-0" [outlined]="true" (click)="onAddRelation($event)"></p-button>
+      </div>
+
+      <div *ngIf="!relations || relations.length === 0" class="text-surface-500">{{ 'components.issues.relations.NO_RELATIONS' | translate }}</div>
+
+      <p-table *ngIf="relations && relations.length" [value]="relations" class="w-full" size="small">
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width:20%">{{ 'components.issues.relations.COLUMN_TYPE_ID' | translate }}</th>
+            <th style="width:30%">{{ 'components.issues.relations.COLUMN_NAME' | translate }}</th>
+            <th style="width:20%">{{ 'components.issues.relations.COLUMN_STATUS' | translate }}</th>
+            <th style="width:15%">{{ 'components.issues.relations.COLUMN_TYPE' | translate }}</th>
+            <th style="width:20%">
+              {{ 'components.issues.relations.COLUMN_DIRECTION' | translate }}
+            </th>
+            <th style="width:5%"></th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-r>
+          <tr>
+            <td>
+              <a *ngIf="r.type === 'Question'" href="#" (click)="openQuestion($event, r)" class="text-blue-600 dark:text-blue-400 hover:underline">{{ r.type + ' #' + r.id }}</a>
+              <a *ngIf="r.type === 'Document'" href="#" (click)="openDocument($event, r)" class="text-blue-600 dark:text-blue-400 font-medium hover:underline">{{ r.type + ' #' + r.id }}</a>
+            </td>
+            <td>
+              <span *ngIf="r.title" >{{r.title}}</span>
+
+            </td>
+            <td>
+              <p-tag *ngIf="r.status" [value]="r.status" [severity]="statusSeverity(r.status)"></p-tag>
+            </td>
+            <td>
+              <p-badge *ngIf="r.raw?.relation_type" [value]="r.raw.relation_type" [severity]="typeSeverity(r.raw.relation_type)"></p-badge>
+            </td>
+            <td>
+              <span *ngIf="r.direction" class="text-surface-500">{{ directionLabelKey(r.direction) | translate }}</span>
+            </td>
+            <td class="text-right">
+              <p-button icon="pi pi-trash" severity="danger" (click)="removeLink(r)" [outlined]="true"></p-button>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </section>
+  `,
+  styles: [
+    `
+      :host { display: block; }
+    `
+  ]
+})
+export class CustomerQuestionRelationsTableComponent implements OnChanges {
+  @Input() question: any | null = null;
+  @Output() addRelation = new EventEmitter<void>();
+  relations: Array<any> = [];
+
+  constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router, private confirmationService: ConfirmationService, private messageService: MessageService, private translate: TranslateService, private linksService: LinksService) {}
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['question']) {
+      this.relations = this.extractRelations(this.question);
+      this.loadLinksForQuestion(this.question);
+      this.cdr.markForCheck();
+    }
+  }
+
+  public onAddRelation(event?: Event) {
+    if (event && typeof event.preventDefault === 'function') event.preventDefault();
+    this.addRelation.emit();
+  }
+
+  private loadLinksForQuestion(q: any | null) {
+    if (!q || (!q.id && !q._id)) return;
+    const id = q.id ?? q._id;
+
+    const reqSource = this.linksService.getLinks({ active_type: 'qna', active_id: String(id) }).pipe(catchError(() => of([])));
+    const reqTarget = this.linksService.getLinks({ passive_type: 'qna', passive_id: String(id) }).pipe(catchError(() => of([])));
+
+    forkJoin([reqSource, reqTarget]).subscribe({
+      next: ([resSource, resTarget]: any) => {
+        try {
+          const extract = (res: any) => Array.isArray(res) ? res : (res && (res.data || res.items) ? (res.data || res.items) : []);
+          const linksSource = extract(resSource) as any[];
+          const linksTarget = extract(resTarget) as any[];
+
+          const allLinks = [...(linksSource || []), ...(linksTarget || [])];
+
+          const mapped = (allLinks as any[])
+            .map(l => this.mapLinkToRelation(l, id))
+            .filter(r => r && (r.id || r.id === 0));
+
+          for (const rel of mapped) {
+            if (rel.type === 'Question' && rel.id) {
+              this.http.get<any>(`/api/customer_questions/${rel.id}`).subscribe({
+                next: (res) => {
+                  try {
+                    rel.title = rel.title || res.question_text || res.title || res.name || null;
+                    (rel as any).status = res.status || null;
+                  } catch (e) {}
+                  this.cdr.markForCheck();
+                },
+                error: () => {}
+              });
+            } else if (rel.type === 'Document' && rel.id) {
+              this.http.get<any>(`/api/documents/${rel.id}`).subscribe({
+                next: (res) => {
+                  try {
+                    rel.title = rel.title || res.title || res.name || null;
+                    (rel as any).status = res.status || null;
+                  } catch (e) {}
+                  this.cdr.markForCheck();
+                },
+                error: () => {}
+              });
+            }
+          }
+
+          const key = (r: any) => `${r.type}::${r.id}`;
+          const map = new Map<string, any>();
+          for (const r of this.relations || []) map.set(key(r), r);
+          for (const r of mapped) map.set(key(r), r);
+          this.relations = Array.from(map.values());
+        } catch (e) {
+          // ignore mapping errors
+        }
+        this.cdr.markForCheck();
+      },
+      error: () => {}
+    });
+  }
+
+  private mapLinkToRelation(link: any, currentQuestionId?: any) {
+    const getVal = (obj: any, ...keys: string[]) => {
+      for (const k of keys) if (obj[k] !== undefined) return obj[k];
+      return null;
+    };
+
+    const sourceId = getVal(link, 'source_id', 'sourceId', 'source', 'active_id', 'activeId', 'active');
+    const targetId = getVal(link, 'target_id', 'targetId', 'target', 'passive_id', 'passiveId', 'passive');
+    const sourceTypeRaw = String(getVal(link, 'source_type', 'active_type') || '').toLowerCase();
+    const targetTypeRaw = String(getVal(link, 'target_type', 'passive_type') || '').toLowerCase();
+
+    let otherTypeRaw = targetTypeRaw;
+    let otherId = targetId ?? link.id;
+
+    try {
+      if (currentQuestionId != null && String(sourceId) === String(currentQuestionId)) {
+        otherTypeRaw = targetTypeRaw;
+        otherId = targetId;
+      } else if (currentQuestionId != null && String(targetId) === String(currentQuestionId)) {
+        otherTypeRaw = sourceTypeRaw;
+        otherId = sourceId;
+      } else {
+        otherTypeRaw = targetTypeRaw || sourceTypeRaw;
+        otherId = targetId ?? sourceId ?? link.id;
+      }
+    } catch (e) {
+      otherTypeRaw = targetTypeRaw;
+      otherId = targetId ?? sourceId ?? link.id;
+    }
+
+    const type = (otherTypeRaw === 'qna' || otherTypeRaw === 'question' || otherTypeRaw === 'customer_question') ? 'Question' : (otherTypeRaw === 'doc' || otherTypeRaw === 'document' ? 'Document' : (link.relation_type || 'Relation'));
+    const id = otherId;
+
+    const relTypeRaw = String(link.relation_type || link.type || '').toLowerCase();
+    let direction = (currentQuestionId != null && String(sourceId) === String(currentQuestionId)) ? 'source' : ((currentQuestionId != null && String(targetId) === String(currentQuestionId)) ? 'target' : 'unknown');
+    if (relTypeRaw.includes('relates')) {
+      direction = '-';
+    }
+
+    return { type, id, title: link.title || link.name || null, raw: link, direction };
+  }
+
+  public directionLabelKey(direction: any): string {
+    if (!direction && direction !== 0) return '';
+    const d = String(direction).toLowerCase();
+    if (d === '-') return 'components.issues.relations.DIRECTION_LABEL_RELATES';
+    if (d === 'source') return 'components.issues.relations.DIRECTION_LABEL_SOURCE';
+    if (d === 'target') return 'components.issues.relations.DIRECTION_LABEL_TARGET';
+    return 'components.issues.relations.DIRECTION_LABEL_UNKNOWN';
+  }
+
+  public openQuestion(event: Event, r: any): void {
+    event.preventDefault();
+    if (!r || !r.id) return;
+    try {
+      const tree = this.router.createUrlTree(['/questions', r.id]);
+      const url = window.location.origin + this.router.serializeUrl(tree);
+      window.open(url, '_blank', 'noopener');
+    } catch (e) {
+      const url = window.location.origin + `/customer-questions/${r.id}`;
+      window.open(url, '_blank', 'noopener');
+    }
+  }
+
+  public openDocument(event: Event, r: any): void {
+    event.preventDefault();
+    if (!r) return;
+    const candidate = r.url || (r.id ? `/documents/${r.id}` : null);
+    if (!candidate) return;
+    const isAbsolute = /^https?:\/\//i.test(candidate);
+    const url = isAbsolute ? candidate : window.location.origin + candidate;
+    window.open(url, '_blank', 'noopener');
+  }
+
+  public removeLink(rel: any): void {
+    if (!rel || !rel.raw) return;
+    const linkId = rel.raw.id ?? rel.raw.link_id ?? rel.raw._id;
+    if (!linkId) return;
+    const type = rel.type ?? (rel.raw && (rel.raw.active_type || rel.raw.passive_type)) ?? '';
+    const id = rel.id ?? rel.raw?.id ?? linkId;
+    const name = rel.title ?? rel.raw?.title ?? rel.raw?.name ?? '';
+    let text = '';
+    try {
+      text = this.translate.instant('components.issues.relations.DELETE_CONFIRM_WITH_NAME', { type, id, name });
+      if (!text || text === 'components.issues.relations.DELETE_CONFIRM_WITH_NAME') {
+        const base = this.translate.instant('components.issues.relations.DELETE_CONFIRM') || 'Delete this relation?';
+        text = `${base} ${type ? type + ' ' : ''}${id ? ('#' + id) : ''}${name ? ' - ' + name : ''}`.trim();
+      }
+    } catch (e) {
+      text = `Delete ${type ? type + ' ' : ''}${id ? ('#' + id) : ''}${name ? ' - ' + name : ''}?`;
+    }
+
+    try {
+      this.confirmationService.confirm({
+        header: this.translate.instant('MENU.CONFIRM') || 'Confirm',
+        message: text,
+        icon: 'pi pi-exclamation-triangle',
+        acceptLabel: this.translate.instant('MENU.DELETE') || 'Delete',
+        acceptButtonStyleClass: 'p-button-danger',
+        rejectLabel: this.translate.instant('MENU.CANCEL') || 'Cancel',
+        accept: () => {
+          this.linksService.deleteLink(linkId).subscribe({
+            next: () => {
+              this.relations = (this.relations || []).filter(r => r.raw?.id !== linkId && r.raw?.link_id !== linkId && r.raw?._id !== linkId);
+              this.cdr.markForCheck();
+              try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Deleted', detail: this.translate.instant('components.issues.relations.DELETED') || 'Relation removed' }); } catch (e) {}
+            },
+            error: (err) => {
+              console.warn('Failed to delete link', linkId, err);
+              try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: (err && err.message) ? err.message : this.translate.instant('components.documents.messages.ERROR') || 'Failed to delete relation' }); } catch (e) {}
+            }
+          });
+        },
+        reject: () => {}
+      });
+    } catch (e) {
+      if (!confirm(text)) return;
+      this.linksService.deleteLink(linkId).subscribe({ next: () => { this.relations = (this.relations || []).filter(r => r.raw?.id !== linkId && r.raw?.link_id !== linkId && r.raw?._id !== linkId); this.cdr.markForCheck(); }, error: (err) => console.warn('Failed to delete link', linkId, err) });
+    }
+  }
+
+  public statusSeverity(status: any): 'success' | 'info' | 'warn' | 'danger' {
+    if (!status) return 'info';
+    const s = String(status).toLowerCase();
+    if (s.includes('done') || s.includes('closed') || s.includes('resolved') || s.includes('completed')) return 'success';
+    if (s.includes('progress') || s.includes('in progress') || s.includes('in-progress')) return 'warn';
+    if (s.includes('block') || s.includes('blocked') || s.includes('reject') || s.includes('error')) return 'danger';
+    if (s.includes('open') || s.includes('new')) return 'info';
+    return 'info';
+  }
+
+  public typeSeverity(relType: any): 'success' | 'info' | 'warn' | 'danger' | 'secondary' {
+    if (!relType) return 'info';
+    const s = String(relType).toLowerCase();
+    if (s.includes('block')) return 'danger';
+    if (s.includes('relates')) return 'info';
+    return 'info';
+  }
+
+  private extractRelations(q: any): Array<any> {
+    if (!q) return [];
+    const out: any[] = [];
+    try {
+      if (Array.isArray(q.relations) && q.relations.length) {
+        for (const it of q.relations) {
+          out.push({ type: it.type || 'Question', id: it.id ?? it.target_id ?? it.ref, title: it.title ?? it.name ?? it.summary ?? '', direction: 'source' });
+        }
+      }
+      if (Array.isArray(q.attachments) && q.attachments.length) {
+        for (const a of q.attachments) {
+          out.push({ type: 'Document', id: a.id ?? a.file_id ?? a._id ?? a.name, title: a.name || a.title || '', url: a.url || a.download_url || a.file_url || null, direction: 'source' });
+        }
+      }
+    } catch (e) { }
+    return out;
+  }
+}
+
