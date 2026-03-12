@@ -89,6 +89,48 @@ export class FileService {
     return this.http.delete(`/api/issues/${issueId}/files/${storageId}`, { withCredentials: true });
   }
 
+  // Customer questions file helpers (mirror issue endpoints but for customer_questions)
+  attachToQuestion(questionId: any, storageId: any): Observable<any> {
+    return this.http.post(`/api/customer_questions/${questionId}/files`, { storage_id: storageId }, { withCredentials: true });
+  }
+
+  getQuestionFiles(questionId: any): Observable<Attachment[]> {
+    return this.http.get(`/api/customer_questions/${questionId}/files`).pipe(
+      map((res: any) => {
+        const data = (res && res.data) ? res.data : res || [];
+        if (!Array.isArray(data)) return [];
+        return data.map((it: any) => {
+          const objectKey: string | undefined = it.object_key || it.objectKey || undefined;
+          let name = it.file_name || it.filename || it.filename_original || it.name || '';
+          if (!name && objectKey) {
+            const parts = objectKey.split('/');
+            name = parts.length ? parts[parts.length - 1] : objectKey;
+          }
+          const id = it.id ?? it.storage_id ?? it.file_id ?? null;
+          const url = id ? `/api/storage/${id}/download` : (it.url ?? it.download_url ?? null);
+          const sizeBytesRaw = (it.file_size != null) ? (isNaN(Number(it.file_size)) ? parseInt(String(it.file_size), 10) || 0 : Number(it.file_size)) : (it.size != null ? Number(it.size) : 0);
+          const sizeMb = sizeBytesRaw ? Math.round((sizeBytesRaw / (1024 * 1024)) * 100) / 100 : 0;
+          return {
+            name: this.fixEncoding(name || ''),
+            size: sizeBytesRaw,
+            size_bytes: sizeBytesRaw,
+            size_mb: sizeMb,
+            id,
+            url,
+            created_at: it.created_at ?? it.createdAt ?? null
+          } as Attachment;
+        });
+      }),
+      catchError(() => {
+        return of([] as Attachment[]);
+      })
+    );
+  }
+
+  deleteQuestionFile(questionId: any, storageId: any): Observable<any> {
+    return this.http.delete(`/api/customer_questions/${questionId}/files/${storageId}`, { withCredentials: true });
+  }
+
   downloadUrlForId(id: any): string {
     return id ? `/api/storage/${id}/download` : '';
   }

@@ -73,6 +73,15 @@ export const routes: Routes = [
         ]
       },
       {
+        path: 'questions',
+        canActivate: [AuthGuard],
+        data: { titleKey: 'MENU.CUSTOMER_QUESTIONS' },
+        children: [
+          { path: '', pathMatch: 'full', loadComponent: () => import('./pages/customer_questions/customer_questions').then(m => m.CustomerQuestionsComponent) },
+          { path: ':id', loadComponent: () => import('./pages/customer_questions/customer-question-detail').then(m => m.CustomerQuestionDetailComponent) }
+        ]
+      },
+      {
         path: 'documents',
         canActivate: [AuthGuard],
         data: { titleKey: 'MENU.DOCUMENTS' },

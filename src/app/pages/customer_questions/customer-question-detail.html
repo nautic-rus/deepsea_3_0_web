@@ -1,0 +1,316 @@
+<div class="page-administration">
+  <div class="admin-grid">
+    <aside class="admin-menu card mt-0">
+      <div class="admin-menu-header"></div>
+                <div class="flex flex-col gap-2 pb-4">
+                    <div class="flex items-center justify-between">
+                    <div class="font-semibold text-xl text-primary underline leading-tight cursor-pointer"
+                        (click)="copyQuestionLink($event)"
+                        title="{{ 'components.customer_questions.messages.COPY_LINK' | translate }}">{{ 'MENU.QUESTION' | translate }} #{{ question?.id ?? questionId }}</div>
+                                    <div>
+                                        <p-button severity="secondary" icon="pi pi-pencil" [outlined]="true" (onClick)="openEditDialog()"></p-button>
+                                    </div>
+                    </div>
+                    <div class="text-surface-500 dark:text-surface-300 text-base leading-tight">{{ question?.question_title ?? question?.question_title ?? '' }}</div>
+                </div>
+
+                <p-dialog header="{{ 'MENU.EDIT_QUESTION' | translate }}" [(visible)]="displayDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{width: '40%'}" appendTo="body">
+                    <div class="flex flex-col gap-4">
+                        <div class="flex flex-col gap-2">
+                            <label class="font-bold">{{ 'components.customer_questions.form.QUESTION_TITLE' | translate }}</label>
+                            <input pInputText type="text" [(ngModel)]="editModel.question_title" />
+                            <small *ngIf="formErrors.question_title" class="text-red-600 block">{{ formErrors.question_title }}</small>
+                        </div>
+
+<!--                        <div class="flex flex-col gap-2">-->
+<!--                            <label class="font-bold">{{ 'components.customer_questions.form.ANSWER_TEXT' | translate }}</label>-->
+<!--                            <p-editor [(ngModel)]="editModel.question_text" styleClass="w-full" [style]="{ height: '120px' }"></p-editor>-->
+<!--                        </div>-->
+
+                        <div class="flex gap-2">
+                            <div class="flex-1 flex flex-col gap-2">
+                                <label class="font-bold">{{ 'components.customer_questions.form.PRIORITY' | translate }}</label>
+                                <p-select [options]="priorityOptions" [(ngModel)]="editModel.priority" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+                            </div>
+
+                            <div class="flex-1 flex flex-col gap-2">
+                                <label class="font-bold">{{ 'components.customer_questions.form.DUE_DATE' | translate }}</label>
+                                <p-datepicker [(ngModel)]="editModel.due_date" [showIcon]="true" appendTo="body" dateFormat="dd.mm.yy"></p-datepicker>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <label class="font-bold">{{ 'components.customer_questions.form.TYPE' | translate }}</label>
+                            <p-select [options]="typeOptions" [(ngModel)]="editModel.type_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+                        </div>
+
+                        <!-- editors moved to separate per-block dialogs -->
+
+                        <div class="flex justify-end gap-2 mt-4">
+                            <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="displayDialog=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="loading"></p-button>
+                            <p-button label="{{ 'MENU.SAVE' | translate }}" (onClick)="saveQuestion()" severity="primary" icon="pi pi-check" iconPos="left" [loading]="loading" [disabled]="loading"></p-button>
+                        </div>
+                    </div>
+                </p-dialog>
+
+                <div class="flex flex-col gap-4">
+                    <div class="border-t border-surface-200 dark:border-surface-700"></div>
+                    <div class="flex flex-col md:flex-row gap-4">
+                            <div class="flex items-center gap-4 flex-1">
+                                    <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.customer_questions.detail.STATUS' | translate }}</div>
+                                        <div class="flex-1">
+                                            <p-tag [value]="question?.status_name || (question?.status && question.status.name)" [severity]="statusSeverity(question?.status_code || question?.status?.code)"></p-tag>
+                                        </div>
+                                </div>
+                    </div>
+
+                    <div class="border-t border-surface-200 dark:border-surface-700"></div>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex items-center gap-4 flex-1">
+                            <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.customer_questions.detail.PRIORITY' | translate }}</div>
+                                <div class="flex-1">
+                                    <p-tag [value]="question?.priority" [severity]="prioritySeverity(question?.priority)"></p-tag>
+                                </div>
+                        </div>
+                    </div>
+                    <div class="border-t border-surface-200 dark:border-surface-700"></div>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex items-center gap-4 flex-1">
+                            <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.customer_questions.detail.TYPE' | translate }}</div>
+                            <div class="flex-1 text-surface-500 dark:text-surface-0 text-base leading-tight">{{ question?.type_name || (question?.type && question.type.name) || '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-surface-200 dark:border-surface-700"></div>
+
+                    <div class="flex flex-col md:flex-row gap-4">
+                            <div class="flex items-center gap-4 flex-1">
+                                    <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.customer_questions.detail.PROJECT' | translate }}</div>
+                                    <div class="flex-1 text-surface-500 dark:text-surface-0 text-base leading-tight">{{ question?.project_name || (question?.project && question.project.name) || '-' }}</div>
+                                </div>
+                    </div>
+
+                    <div class="border-t border-surface-200 dark:border-surface-700"></div>
+
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex items-center gap-4 flex-1">
+                            <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.customer_questions.detail.ASKED_BY' | translate }}</div>
+                            <div class="flex-1 flex items-center gap-1">
+                                <p-avatar *ngIf="question?.asked_by_avatar_url || question?.asked_by_avatar; else askedByInitialsTpl"
+                                    [image]="question?.asked_by_avatar_url || question?.asked_by_avatar || undefined"
+                                    shape="circle" styleClass="mr-2"></p-avatar>
+                                <ng-template #askedByInitialsTpl>
+                                    <p-avatar
+                                        [label]="personInitials(question?.asked_by_full_name || question?.asked_by_name)"
+                                        shape="circle"
+                                        [style]="{ 'background-color': question?.asked_by ? questionAvatarColor({ id: question.asked_by, first_name: question.asked_by_full_name || question.asked_by_name }) : undefined, color: question?.asked_by ? questionAvatarTextColor({ id: question.asked_by, first_name: question.asked_by_full_name || question.asked_by_name }) : undefined }" styleClass="mr-2"></p-avatar>
+                                </ng-template>
+                                <div class="text-surface-500 dark:text-surface-0 text-base leading-tight">{{ formatSurnameInitials(question?.asked_by_full_name || question?.asked_by_name || question) }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-surface-200 dark:border-surface-700"></div>
+
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex items-start gap-4 flex-1">
+                            <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.customer_questions.detail.ANSWERED_BY' | translate }}</div>
+                            <div class="flex-1 flex items-center gap-1">
+                                <ng-container *ngIf="question?.answered_by_full_name; else noAnsweredByTpl">
+                                    <p-avatar *ngIf="question?.answered_by_avatar_url || question?.answered_by_avatar; else answeredByInitialsTpl"
+                                        [image]="question?.answered_by_avatar_url || question?.answered_by_avatar || undefined"
+                                        shape="circle" styleClass="mr-2"></p-avatar>
+                                    <ng-template #answeredByInitialsTpl>
+                                        <p-avatar
+                                            [label]="initialsFromName(question?.answered_by_full_name || question?.answered_by_name)"
+                                            shape="circle"
+                                            [style]="{ 'background-color': question?.answered_by ? questionAvatarColor({ id: question.answered_by, first_name: question.answered_by_full_name || question.answered_by_name }) : undefined, color: question?.answered_by ? questionAvatarTextColor({ id: question.answered_by, first_name: question.answered_by_full_name || question.answered_by_name }) : undefined }" styleClass="mr-2"></p-avatar>
+                                    </ng-template>
+                                    <div class="text-surface-500 dark:text-surface-0 text-base leading-normal">{{ formatSurnameInitials(question?.answered_by_full_name || question?.answered_by_name || question) || '-' }}</div>
+                                </ng-container>
+                                <ng-template #noAnsweredByTpl>
+                                    <div class="text-surface-500 dark:text-surface-0 text-base leading-normal">-</div>
+                                </ng-template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-surface-200 dark:border-surface-700"></div>
+
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex items-center gap-4 flex-1">
+                            <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.customer_questions.detail.DUE_DATE' | translate }}</div>
+                            <div class="flex-1 text-surface-500 dark:text-surface-0 text-base leading-tight">{{ question?.due_date ? (question.due_date | date:'dd.MM.yyyy') : '-' }}</div>
+                        </div>
+                    </div>
+                    <div class="border-t border-surface-200 dark:border-surface-700"></div>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex items-center gap-4 flex-1">
+                            <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.customer_questions.detail.CREATED_AT' | translate }}</div>
+                            <div class="flex-1 text-surface-500 dark:text-surface-0 text-base leading-tight">{{ question?.created_at ? (question.created_at | date:'dd.MM.yyyy') : '-' }}</div>
+                        </div>
+                    </div>
+                </div>
+    </aside>
+
+    <section class="admin-content-wrapper">
+      <section class="admin-subpage-tools card mt-0">
+        <p-toolbar>
+          <p-toast></p-toast>
+          <ng-template #start>
+            <p-splitButton
+              icon="pi pi-exchange"
+              severity="primary"
+              [label]="question?.status_name"
+              class="ml-2"
+              [model]="statusMenuItems"
+              [disabled]="statusSaving || !(statusMenuItems && statusMenuItems.length > 0)">
+            </p-splitButton>
+          </ng-template>
+
+          <ng-template #end>
+            <p-button severity="secondary" icon="pi pi-arrow-left" (click)="back()" aria-label="Return to questions"></p-button>
+            <p-button severity="secondary" icon="pi pi-copy" class="ml-2" disabled="true"></p-button>
+            <p-button severity="secondary" icon="pi pi-clock" class="ml-2" disabled="true"></p-button>
+            <p-button severity="danger" icon="pi pi-trash" class="ml-2" (onClick)="openDeleteDialog()"></p-button>
+          </ng-template>
+        </p-toolbar>
+      </section>
+
+      <div class="grid grid-cols-2 gap-4 issue-grid adjustable-columns">
+        <div class="issue-left-scroll">
+          <div class="card p-4 mb-4">
+              <div class="flex items-center justify-between mt-0 mb-2">
+                  <h3 class="text-xl font-bold mb-2">{{ 'components.customer_questions.detail.QUESTION' | translate }}</h3>
+                  <div class="flex justify-end mb-2">
+                      <p-button severity="secondary" icon="pi pi-pencil" [outlined]="true" (onClick)="openEditQuestionDialog()"></p-button>
+                  </div>
+              </div>
+              <!-- Inline editor like IssueDetailDescription -->
+              <div>
+                  <div *ngIf="!editingQuestionInline" class="ql-view">
+                      <div class="ql-editor" [innerHTML]="question?.question_text || ('components.customer_questions.detail.NO_ANSWER' | translate)"></div>
+                  </div>
+                  <form *ngIf="editingQuestionInline" #questionForm="ngForm" (ngSubmit)="saveQuestionText()" class="flex flex-col ng-untouched ng-pristine ng-valid ng-star-inserted" [style]="{ height: 'flex' }">
+                      <p-editor styleClass="small-editor" [(ngModel)]="editingQuestionText" name="questionContent" [style]="{ height: '50px' }"></p-editor>
+                      <div class="flex gap-2 mt-4">
+                          <p-button severity="primary" type="submit">{{ 'MENU.SAVE' | translate }}</p-button>
+                          <p-button severity="secondary" (onClick)="(editingQuestionInline=false); editingQuestionText = question?.question_text">{{ 'MENU.CANCEL' | translate }}</p-button>
+                      </div>
+                  </form>
+              </div>
+          </div>
+
+          <div class="card p-4 mb-4">
+              <div class="flex items-center justify-between mt-0 mb-2">
+                  <h3 class="text-xl font-bold mb-2">{{ 'components.customer_questions.detail.ANSWER' | translate }}</h3>
+                  <div class="flex justify-end mb-2">
+                      <p-button severity="secondary" icon="pi pi-pencil" [outlined]="true" (onClick)="openEditAnswerDialog()"></p-button>
+                  </div>
+              </div>
+              <div *ngIf="!editingAnswerInline" class="ql-view">
+                  <div class="ql-editor" [innerHTML]="question?.answer_text || ('components.customer_questions.detail.NO_ANSWER' | translate)"></div>
+              </div>
+              <form *ngIf="editingAnswerInline" #answerForm="ngForm" (ngSubmit)="saveAnswerText()" class="flex flex-col">
+                  <p-editor styleClass="small-editor" [(ngModel)]="editingAnswerText" name="answerContent" [style]="{ height: '180px' }"></p-editor>
+                  <div class="flex gap-2 mt-4">
+                      <p-button severity="primary" type="submit">{{ 'MENU.SAVE' | translate }}</p-button>
+                      <p-button severity="secondary" (onClick)="(editingAnswerInline=false); editingAnswerText = question?.answer_text">{{ 'MENU.CANCEL' | translate }}</p-button>
+                  </div>
+              </form>
+          </div>
+
+          <!-- Edit Question Text Dialog -->
+          <p-dialog header="{{ 'components.customer_questions.detail.EDIT_QUESTION' | translate }}" [(visible)]="displayEditQuestionDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{ width: '60%' }" appendTo="body">
+              <div class="flex flex-col gap-4">
+                  <p-editor styleClass="w-full small-editor" [(ngModel)]="editingQuestionText" [style]="{ height: '180px' }"></p-editor>
+                  <div class="flex justify-end gap-2">
+                      <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="displayEditQuestionDialog=false" class="p-button-text" severity="secondary"></p-button>
+                      <p-button label="{{ 'MENU.SAVE' | translate }}" (onClick)="saveQuestionText()" severity="primary"></p-button>
+                  </div>
+              </div>
+          </p-dialog>
+
+          <!-- Edit Answer Text Dialog -->
+          <p-dialog header="{{ 'components.customer_questions.detail.EDIT_ANSWER' | translate }}" [(visible)]="displayEditAnswerDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{ width: '60%' }" appendTo="body">
+              <div class="flex flex-col gap-4">
+                  <p-editor styleClass="w-full small-editor" [(ngModel)]="editingAnswerText" [style]="{ height: '180px' }"></p-editor>
+                  <div class="flex justify-end gap-2">
+                      <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="displayEditAnswerDialog=false" class="p-button-text" severity="secondary"></p-button>
+                      <p-button label="{{ 'MENU.SAVE' | translate }}" (onClick)="saveAnswerText()" severity="primary"></p-button>
+                  </div>
+              </div>
+          </p-dialog>
+
+          <!-- Attachments block (documents / related files) -->
+          <app-customer-question-attach [question]="question"></app-customer-question-attach>
+
+          <!-- Relations block (documents / related questions) -->
+          <app-customer-question-relations-table [question]="question" (addRelation)="openAddRelationDialog()"></app-customer-question-relations-table>
+
+          <!-- Add-relation dialog -->
+          <p-dialog header="{{ 'components.issues.relations.ADD_TITLE' | translate }}" [(visible)]="displayAddRelationDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{width: '40%'}" appendTo="body">
+              <div class="flex flex-col gap-4">
+                  <div class="flex flex-col gap-2">
+                      <label class="font-bold">{{ 'components.issues.relations.FORM.RELATION_TYPE' | translate }}</label>
+                      <p-select [options]="relationTypeOptions" [(ngModel)]="relationForm.relationType" optionLabel="label" optionValue="value" appendTo="body">
+                          <ng-template let-opt pTemplate="item">
+                              <div>{{ opt.label | translate }}</div>
+                          </ng-template>
+                          <ng-template let-opt pTemplate="selectedItem">
+                              <div>{{ opt.label | translate }}</div>
+                          </ng-template>
+                      </p-select>
+                  </div>
+
+                  <div *ngIf="relationForm.relationType === 'blocks'" class="flex flex-col gap-2">
+                      <label class="font-bold">{{ 'components.issues.relations.FORM.BLOCKS_DIRECTION' | translate }}</label>
+                      <p-select [options]="blocksDirectionOptions" [(ngModel)]="relationForm.direction" optionLabel="label" optionValue="value" appendTo="body">
+                          <ng-template let-opt pTemplate="item">
+                              <div>{{ opt.label | translate }}</div>
+                          </ng-template>
+                          <ng-template let-opt pTemplate="selectedItem">
+                              <div>{{ opt.label | translate }}</div>
+                          </ng-template>
+                      </p-select>
+                  </div>
+
+                  <div class="flex flex-col gap-2">
+                      <label class="font-bold">{{ 'components.issues.relations.FORM.ISSUES' | translate }}</label>
+                      <p-multiSelect [options]="availableIssuesOptions" [(ngModel)]="relationForm.selectedIssueIds" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body"></p-multiSelect>
+                  </div>
+
+                  <div class="flex flex-col gap-2">
+                      <label class="font-bold">{{ 'components.issues.relations.FORM.DOCUMENTS' | translate }}</label>
+                      <p-multiSelect [options]="availableDocumentsOptions" [(ngModel)]="relationForm.selectedDocumentIds" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body"></p-multiSelect>
+                  </div>
+
+                  <div class="flex justify-end gap-2 mt-4">
+                      <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="displayAddRelationDialog=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="savingRelations"></p-button>
+                      <p-button label="{{ 'MENU.SAVE' | translate }}" (onClick)="saveRelations()" severity="primary" icon="pi pi-check" iconPos="left" [loading]="savingRelations" [disabled]="savingRelations"></p-button>
+                  </div>
+              </div>
+          </p-dialog>
+        </div>
+
+        <div class="placeholder-history">
+          <!-- Placeholder for history/chat to preserve proportions and layout similar to issues -->
+          <div class="card p-4 mb-4 placeholder-card">
+            <div class="text-surface-500">Заглушка истории</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<p-dialog header="{{ 'MENU.CONFIRM_DELETE' | translate }}" [(visible)]="displayDeleteDialog" [modal]="true" [closable]="true" [style]="{width: '30%'}" appendTo="body">
+    <p>{{ 'components.customer_questions.messages.DELETE_CONFIRM' | translate }}</p>
+    <div class="flex justify-end gap-2 mt-4">
+        <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="closeDeleteDialog()" severity="secondary" [disabled]="deleting"></p-button>
+        <p-button label="{{ 'MENU.DELETE' | translate }}" (onClick)="confirmDelete()" severity="danger" [loading]="deleting" [disabled]="deleting"></p-button>
+    </div>
+</p-dialog>
+
+<p-toast position="top-right" appendTo="body" [baseZIndex]="10001"></p-toast>
+
