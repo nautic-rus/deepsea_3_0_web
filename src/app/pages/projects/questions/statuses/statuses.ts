@@ -10,7 +10,8 @@ import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { DialogModule } from 'primeng/dialog';
 import { ToastModule } from 'primeng/toast';
-import { MessageService, ConfirmationService } from 'primeng/api';
+import { ConfirmationService } from 'primeng/api';
+import { AppMessageService } from '../../../../services/message.service';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ColorPickerModule } from 'primeng/colorpicker';
 import { CustomerQuestionStatusesService } from '../../../../services/customer-question-statuses.service';
@@ -31,7 +32,7 @@ export class QuestionStatusesComponent implements OnInit {
   isCreating = false;
   error: string | null = null;
 
-  constructor(private svc: CustomerQuestionStatusesService, private cd: ChangeDetectorRef, private msg: MessageService, private translate: TranslateService, private confirm: ConfirmationService) {}
+  constructor(private svc: CustomerQuestionStatusesService, private cd: ChangeDetectorRef, private appMsg: AppMessageService, private translate: TranslateService, private confirm: ConfirmationService) {}
 
   ngOnInit(): void { this.load(); }
 
@@ -51,16 +52,23 @@ export class QuestionStatusesComponent implements OnInit {
     this.loading = true;
     const payload: any = { name: this.editModel.name, code: this.editModel.code, description: this.editModel.description, color: this.editModel.color, order_index: this.editModel.order_index };
     if (this.isCreating) {
-      this.svc.createStatus(payload).subscribe({ next: () => { this.displayDialog = false; this.load(); this.msg.add({ severity: 'success', summary: 'Created' }); this.loading = false; }, error: (e: any) => { this.error = e?.message || 'Error'; this.loading = false; } });
+      this.svc.createStatus(payload).subscribe({ next: () => { this.displayDialog = false; this.load(); this.appMsg.success('Created'); this.loading = false; }, error: (e: any) => { this.error = e?.message || 'Error'; this.loading = false; } });
     } else {
       const id = this.editModel.id || this.editModel._id;
-      this.svc.updateStatus(id, payload).subscribe({ next: () => { this.displayDialog = false; this.load(); this.msg.add({ severity: 'success', summary: 'Updated' }); this.loading = false; }, error: (e: any) => { this.error = e?.message || 'Error'; this.loading = false; } });
+      this.svc.updateStatus(id, payload).subscribe({ next: () => { this.displayDialog = false; this.load(); this.appMsg.success('Updated'); this.loading = false; }, error: (e: any) => { this.error = e?.message || 'Error'; this.loading = false; } });
     }
   }
 
   confirmDelete(item: any): void {
-    this.confirm.confirm({ message: `Delete ${item.name || item.id}?`, accept: () => {
-      this.svc.deleteStatus(item.id).subscribe({ next: () => { this.load(); this.msg.add({ severity: 'success', summary: 'Deleted' }); }, error: () => {} });
+    this.confirm.confirm({ message: `${this.translate.instant('components.projects.settings.confirm.DELETE_QUESTION') || 'Attention! Do you really want to delete'} ${item.name || item.id}?`, icon: 'pi pi-exclamation-triangle', accept: () => {
+      this.svc.deleteStatus(item.id).subscribe({
+        next: () => { this.load(); this.appMsg.success('Deleted'); },
+        error: (e: any) => {
+          const serverMsg = e?.error?.message || e?.error?.error || e?.message || (typeof e === 'string' ? e : 'Delete failed');
+          this.error = serverMsg;
+          this.appMsg.error(serverMsg);
+        }
+      });
     } });
   }
 

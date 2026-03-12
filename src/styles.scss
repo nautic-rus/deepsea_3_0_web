@@ -265,6 +265,20 @@ html::-webkit-scrollbar-thumb:hover, body::-webkit-scrollbar-thumb:hover, .permi
 /* Note: `app-avatar` class was removed from templates. Remove related helper rules to avoid
   dead CSS while keeping compatibility for components using `.p-avatar.full-avatar`. */
 
+/* Global confirm dialog styles (unified across all components) */
+.project-confirm-dialog {
+  box-shadow: 0 4px 14px rgba(16,24,40,0.08);
+}
+.project-confirm-dialog .p-dialog-header {
+  background: var(--surface-0);
+  border-bottom: 1px solid var(--surface-border);
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+.project-confirm-dialog .p-dialog-content {
+  padding: 1rem;
+}
+
 /* Backwards compatibility for components using `.p-avatar.full-avatar` */
 .p-avatar.full-avatar { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; font-weight: 600; font-size: 14px; overflow: hidden; }
 .p-avatar.full-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
