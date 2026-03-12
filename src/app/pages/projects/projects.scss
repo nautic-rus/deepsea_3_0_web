@@ -1,5 +1,5 @@
 /* Sakai-style sidebar menu — mirrors administration.scss */
-@import './_projects-shared.scss';
+@use './_projects-shared' as *;
 
 .page-administration {
   padding: 0;
