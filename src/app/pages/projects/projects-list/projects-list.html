@@ -41,30 +41,47 @@
       <ng-template pTemplate="header">
         <tr>
 
-          <th>{{ 'components.projects.table.HEADERS.ID' | translate }}</th>
-            <th pSortableColumn="code">
-            {{ 'components.projects.table.HEADERS.CODE' | translate }}
-            <p-sortIcon field="code" />
+          <th pSortableColumn="id">
+            <div class="flex items-center gap-2">
+              <span>{{ 'components.projects.table.HEADERS.ID' | translate }}</span>
+              <p-sortIcon field="id" />
+            </div>
+          </th>
+          <th pSortableColumn="code">
+            <div class="flex items-center gap-2">
+              <span>{{ 'components.projects.table.HEADERS.CODE' | translate }}</span>
+              <p-sortIcon field="code" />
+            </div>
           </th>
           <th pSortableColumn="name">
-            {{ 'components.projects.table.HEADERS.NAME' | translate }}
-            <p-sortIcon field="name" />
+            <div class="flex items-center gap-2">
+              <span>{{ 'components.projects.table.HEADERS.NAME' | translate }}</span>
+              <p-sortIcon field="name" />
+            </div>
           </th>
           <th pSortableColumn="description">
-            {{ 'components.projects.table.HEADERS.DESCRIPTION' | translate }}
-            <p-sortIcon field="description" />
+            <div class="flex items-center gap-2">
+              <span>{{ 'components.projects.table.HEADERS.DESCRIPTION' | translate }}</span>
+              <p-sortIcon field="description" />
+            </div>
           </th>
           <th pSortableColumn="owner_id">
-            {{ 'components.projects.table.HEADERS.OWNER' | translate }}
-            <p-sortIcon field="owner_id" />
+            <div class="flex items-center gap-2">
+              <span>{{ 'components.projects.table.HEADERS.OWNER' | translate }}</span>
+              <p-sortIcon field="owner_id" />
+            </div>
           </th>
           <th pSortableColumn="created_at">
-            {{ 'components.projects.table.HEADERS.CREATED_AT' | translate }}
-            <p-sortIcon field="created_at" />
+            <div class="flex items-center gap-2">
+              <span>{{ 'components.projects.table.HEADERS.CREATED_AT' | translate }}</span>
+              <p-sortIcon field="created_at" />
+            </div>
           </th>
           <th pSortableColumn="status">
-            {{ 'components.projects.table.HEADERS.STATUS' | translate }}
-            <p-sortIcon field="status" />
+            <div class="flex items-center gap-2">
+              <span>{{ 'components.projects.table.HEADERS.STATUS' | translate }}</span>
+              <p-sortIcon field="status" />
+            </div>
           </th>
           <th></th>
         </tr>
@@ -96,29 +113,44 @@
 <p-dialog [header]="isCreating ? ('MENU.CREATE' | translate) : ('MENU.EDIT' | translate)" [(visible)]="displayDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{width: '25%'}">
     <div class=" flex flex-col gap-4">
     <div class="flex flex-col gap-2">
-      <label for="projectName">{{ 'components.projects.form.NAME' | translate }}</label>
+      <label for="projectName" class="font-bold">{{ 'components.projects.form.NAME' | translate }}</label>
       <input pInputText id="projectName" type="text" [(ngModel)]="editModel.name" name="name" />
     </div>
 
     <div class="flex flex-col gap-2">
-      <label for="projectCode">{{ 'components.projects.form.CODE' | translate }}</label>
+      <label for="projectCode" class="font-bold">{{ 'components.projects.form.CODE' | translate }}</label>
       <input pInputText id="projectCode" type="text" [(ngModel)]="editModel.code" name="code" />
     </div>
 
     <div class="flex flex-col gap-2">
-      <label for="projectDescription">{{ 'components.projects.form.DESCRIPTION' | translate }}</label>
+      <label for="projectDescription" class="font-bold">{{ 'components.projects.form.DESCRIPTION' | translate }}</label>
       <input pInputText id="projectDescription" type="text" [(ngModel)]="editModel.description" name="description" />
     </div>
 
     <!-- Status and Owner are editable only in edit mode -->
     <div *ngIf="!isCreating" class="flex flex-col gap-2">
-      <label for="projectStatus">{{ 'components.projects.form.STATUS' | translate }}</label>
-      <p-select id="projectStatus" [options]="statuses" optionLabel="label" optionValue="value" [(ngModel)]="editModel.status" name="status" appendTo="body"></p-select>
+      <label for="projectStatus" class="font-bold">{{ 'components.projects.form.STATUS' | translate }}</label>
+      <p-select filter="true" filterBy="label" id="projectStatus" [options]="statuses" optionLabel="label" optionValue="value" [(ngModel)]="editModel.status" name="status" appendTo="body"></p-select>
     </div>
 
     <div *ngIf="!isCreating" class="flex flex-col gap-2">
-      <label for="projectOwner">{{ 'components.projects.form.OWNER' | translate }}</label>
-      <p-select id="projectOwner" [options]="usersOptions" optionLabel="label" optionValue="value" [(ngModel)]="editModel.owner_id" name="owner_id" appendTo="body"></p-select>
+      <label for="projectOwner" class="font-bold">{{ 'components.projects.form.OWNER' | translate }}</label>
+      <p-select filter="true" filterBy="label" id="projectOwner" [options]="usersOptions" optionLabel="label" optionValue="value" [(ngModel)]="editModel.owner_id" name="owner_id" appendTo="body">
+        <ng-template let-opt pTemplate="item">
+          <div class="flex items-center gap-2">
+            <ng-container *ngIf="opt.avatar; else initialsItem">
+              <img [src]="opt.avatar" alt="avatar" class="select-avatar mr-2" />
+            </ng-container>
+            <ng-template #initialsItem>
+              <p-avatar [label]="initialsFromName(opt.label)" class="mr-2" shape="circle" [style]="{ 'background-color': selectAvatarBg(opt.value || opt.label), color: selectAvatarTextColor(opt.value || opt.label) }"></p-avatar>
+            </ng-template>
+            <div>{{ opt.label }}</div>
+          </div>
+        </ng-template>
+        <ng-template let-opt pTemplate="selectedItem">
+          <div>{{ opt.label }}</div>
+        </ng-template>
+      </p-select>
     </div>
 
     <div *ngIf="error" class="text-red-600 block">{{ error }}</div>

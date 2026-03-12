@@ -93,6 +93,10 @@
       "description": ""
     },
     {
+      "name": "notifications",
+      "description": "Notification events and methods management"
+    },
+    {
       "name": "page_permissions",
       "description": "Привязка разрешений к страницам"
     },
@@ -264,10 +268,6 @@
           "id": {
             "type": "integer"
           },
-          "project_id": {
-            "type": "integer",
-            "nullable": true
-          },
           "name": {
             "type": "string"
           },
@@ -316,9 +316,17 @@
             "type": "integer",
             "description": "ID начального статуса вопроса"
           },
+          "from_status": {
+            "$ref": "#/components/schemas/CustomerQuestionStatus",
+            "nullable": true
+          },
           "to_status_id": {
             "type": "integer",
             "description": "ID целевого статуса вопроса"
+          },
+          "to_status": {
+            "$ref": "#/components/schemas/CustomerQuestionStatus",
+            "nullable": true
           },
           "name": {
             "type": "string",
@@ -334,6 +342,10 @@
           },
           "is_active": {
             "type": "boolean"
+          },
+          "project": {
+            "$ref": "#/components/schemas/Project",
+            "nullable": true
           },
           "order_index": {
             "type": "integer",
@@ -675,9 +687,17 @@
             "type": "integer",
             "description": "ID начального статуса документа"
           },
+          "from_status": {
+            "$ref": "#/components/schemas/DocumentStatus",
+            "nullable": true
+          },
           "to_status_id": {
             "type": "integer",
             "description": "ID целевого статуса документа"
+          },
+          "to_status": {
+            "$ref": "#/components/schemas/DocumentStatus",
+            "nullable": true
           },
           "name": {
             "type": "string",
@@ -693,6 +713,14 @@
           },
           "is_active": {
             "type": "boolean"
+          },
+          "document_type": {
+            "$ref": "#/components/schemas/DocumentType",
+            "nullable": true
+          },
+          "project": {
+            "$ref": "#/components/schemas/Project",
+            "nullable": true
           },
           "created_at": {
             "type": "string",
@@ -980,13 +1008,25 @@
             "type": "integer",
             "description": "ID типа задачи"
           },
+          "issue_type": {
+            "$ref": "#/components/schemas/IssueType",
+            "nullable": true
+          },
           "from_status_id": {
             "type": "integer",
             "description": "ID начального статуса задачи"
           },
+          "from_status": {
+            "$ref": "#/components/schemas/IssueStatus",
+            "nullable": true
+          },
           "to_status_id": {
             "type": "integer",
             "description": "ID целевого статуса задачи"
+          },
+          "to_status": {
+            "$ref": "#/components/schemas/IssueStatus",
+            "nullable": true
           },
           "name": {
             "type": "string",
@@ -1002,6 +1042,10 @@
           },
           "is_active": {
             "type": "boolean"
+          },
+          "project": {
+            "$ref": "#/components/schemas/Project",
+            "nullable": true
           },
           "created_at": {
             "type": "string",
@@ -1037,6 +1081,95 @@
             "type": "string",
             "format": "date-time"
           }
+        }
+      },
+      "PageItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "dbId": {
+            "type": "integer",
+            "nullable": true
+          },
+          "path": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "mainMenu": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "boolean"
+          },
+          "order": {
+            "type": "integer",
+            "nullable": true
+          },
+          "icon": {
+            "type": "string",
+            "nullable": true
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Permission"
+            }
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PageItem"
+            }
+          }
+        }
+      },
+      "UserPageItem": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "dbId": { "type": "integer", "nullable": true },
+          "path": { "type": "string", "nullable": true },
+          "title": { "type": "string", "nullable": true },
+          "mainMenu": { "type": "boolean" },
+          "status": { "type": "boolean" },
+          "order": { "type": "integer", "nullable": true },
+          "icon": { "type": "string", "nullable": true },
+          "children": { "type": "array", "items": { "$ref": "#/components/schemas/UserPageItem" } }
+        }
+      },
+      "PagesResponse": {
+        "type": "object",
+        "properties": {
+          "pages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PageItem"
+            }
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "string"
+          }
+        }
+      },
+      "UserPagesResponse": {
+        "type": "object",
+        "properties": {
+          "pages": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/UserPageItem" }
+          },
+          "generatedAt": { "type": "string", "format": "date-time" },
+          "version": { "type": "string" }
         }
       },
       "Project": {
@@ -1376,6 +1509,58 @@
             "format": "date-time"
           }
         }
+      },
+      "NotificationEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "NotificationMethod": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       }
     }
   },
@@ -1493,6 +1678,50 @@
                 "username": "admin",
                 "password": "password123"
               }
+            }
+          }
+        },
+        "NotificationEvent": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "code": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string",
+              "nullable": true
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "NotificationMethod": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "code": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string",
+              "nullable": true
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
             }
           }
         },
@@ -2002,10 +2231,6 @@
                   "code"
                 ],
                 "properties": {
-                  "project_id": {
-                    "type": "integer",
-                    "nullable": true
-                  },
                   "name": {
                     "type": "string"
                   },
@@ -3043,11 +3268,16 @@
                 "properties": {
                   "name": {
                     "type": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "nullable": true
                   }
                 }
               },
               "example": {
-                "name": ""
+                "name": "",
+                "description": null
               }
             }
           }
@@ -5304,7 +5534,29 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "integer" },
+                          "page_id": { "type": "integer" },
+                          "permission_id": { "type": "integer" },
+                          "permission_code": { "type": "string" },
+                          "permission_name": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       },
@@ -5456,10 +5708,6 @@
                   },
                   "order_index": {
                     "type": "integer"
-                  },
-                  "project_id": {
-                    "type": "integer",
-                    "nullable": true
                   }
                 }
               },
@@ -5577,10 +5825,6 @@
                   },
                   "order_index": {
                     "type": "integer"
-                  },
-                  "project_id": {
-                    "type": "integer",
-                    "nullable": true
                   }
                 }
               }
@@ -5721,11 +5965,8 @@
                   },
                   "order_index": {
                     "type": "integer"
-                  },
-                  "project_id": {
-                    "type": "integer",
-                    "nullable": true
                   }
+                  
                 }
               },
               "example": {
@@ -5846,11 +6087,8 @@
                   },
                   "order_index": {
                     "type": "integer"
-                  },
-                  "project_id": {
-                    "type": "integer",
-                    "nullable": true
                   }
+                  
                 }
               }
             }
@@ -8151,8 +8389,8 @@
         "tags": [
           "page_permissions"
         ],
-        "summary": "Удалить привязку разрешения к странице",
-        "description": "Удаляет запись из `page_permissions`.",
+        "summary": "Удалить все привязки разрешений для страницы",
+        "description": "Удаляет все записи из `page_permissions` для указанной страницы и возвращает число удалённых записей.",
         "security": [
           {
             "bearerAuth": []
@@ -8173,7 +8411,18 @@
         ],
         "responses": {
           "200": {
-            "description": "Deleted"
+            "description": "Deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "deleted": { "type": "integer" }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -8195,7 +8444,22 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PageItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       },
@@ -8239,6 +8503,9 @@
                     "type": "integer"
                   },
                   "main_menu": {
+                    "type": "boolean"
+                  },
+                  "status": {
                     "type": "boolean"
                   }
                 }
@@ -8301,6 +8568,9 @@
                     "type": "integer"
                   },
                   "main_menu": {
+                    "type": "boolean"
+                  },
+                  "status": {
                     "type": "boolean"
                   }
                 }
@@ -10541,7 +10811,14 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPagesResponse"
+                }
+              }
+            }
           },
           "401": {
             "description": "Authentication required"
@@ -10601,6 +10878,74 @@
           "403": {
             "description": "Forbidden - missing permission users.view"
           }
+        }
+      }
+    },
+    "/api/users/invite": {
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Send invitation emails to multiple users",
+        "description": "Sends the `user_created` email template to a list of existing users. Body must contain `user_ids` array.",
+        "security": [
+          { "bearerAuth": [] }
+        ],
+        "x-permissions": ["users.update"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["user_ids"],
+                "properties": {
+                  "user_ids": { "type": "array", "items": { "type": "integer" } }
+                }
+              },
+              "example": { "user_ids": [1, 2, 3] }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Results for each user" },
+          "400": { "description": "Bad request - user_ids required" },
+          "401": { "description": "Authentication required" },
+          "403": { "description": "Forbidden - missing permission users.update" }
+        }
+      }
+    },
+    "/api/users/password_reset": {
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Send password reset emails to multiple users",
+        "description": "Creates password reset tokens and sends reset emails to the provided user ids.",
+        "security": [
+          { "bearerAuth": [] }
+        ],
+        "x-permissions": ["users.update"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["user_ids"],
+                "properties": {
+                  "user_ids": { "type": "array", "items": { "type": "integer" } }
+                }
+              },
+              "example": { "user_ids": [1, 2, 3] }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Results for each user" },
+          "400": { "description": "Bad request - user_ids required" },
+          "401": { "description": "Authentication required" },
+          "403": { "description": "Forbidden - missing permission users.update" }
         }
       }
     },
@@ -10870,32 +11215,19 @@
         }
       }
     },
-    "/api/users/{id}/notification_settings": {
+    "/api/users/notification_settings": {
       "get": {
         "tags": [
           "users"
         ],
         "summary": "Получить настройки уведомлений пользователя",
-        "description": "Возвращает список настроек уведомлений для пользователя. Можно передать project_id в query для фильтрации по проекту.",
+        "description": "Возвращает список настроек уведомлений для текущего пользователя. Можно передать project_id в query для фильтрации по проекту.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
-        "x-permissions": [
-          "users.view"
-        ],
         "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            },
-            "description": "ID пользователя",
-            "example": "{{id}}"
-          },
           {
             "in": "query",
             "name": "project_id",
@@ -10908,16 +11240,43 @@
         ],
         "responses": {
           "200": {
-            "description": "List of settings",
+            "description": "Notification settings matrix",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
                     "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/UserNotificationSetting"
+                      "type": "object",
+                      "properties": {
+                        "events": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/NotificationEvent" }
+                        },
+                        "methods": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/NotificationMethod" }
+                        },
+                        "matrix": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "event": { "$ref": "#/components/schemas/NotificationEvent" },
+                              "methods": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "method": { "$ref": "#/components/schemas/NotificationMethod" },
+                                    "enabled": { "type": "boolean" },
+                                    "config": { "type": "object", "nullable": true }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
                       }
                     }
                   }
@@ -11567,6 +11926,461 @@
           },
           "404": {
             "description": "User not found"
+          }
+        }
+      }
+    },
+    "/api/notification_events": {
+      "get": {
+        "tags": [
+          "notifications"
+        ],
+        "summary": "List notification events",
+        "description": "Returns list of notification events.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "notification_events.view"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/NotificationEvent"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "notifications"
+        ],
+        "summary": "Create notification event",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "notification_events.create"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "code"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/NotificationEvent"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notification_events/{id}": {
+      "get": {
+        "tags": [
+          "notifications"
+        ],
+        "summary": "Get notification event by id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "notification_events.view"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/NotificationEvent"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "notifications"
+        ],
+        "summary": "Update notification event",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "notification_events.update"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/NotificationEvent"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "notifications"
+        ],
+        "summary": "Delete notification event",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "notification_events.delete"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/notification_methods": {
+      "get": {
+        "tags": [
+          "notifications"
+        ],
+        "summary": "List notification methods",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "notification_methods.view"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/NotificationMethod"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "notifications"
+        ],
+        "summary": "Create notification method",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "notification_methods.create"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "code"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/NotificationMethod"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notification_methods/{id}": {
+      "get": {
+        "tags": [
+          "notifications"
+        ],
+        "summary": "Get notification method by id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "notification_methods.view"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/NotificationMethod"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "notifications"
+        ],
+        "summary": "Update notification method",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "notification_methods.update"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/NotificationMethod"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "notifications"
+        ],
+        "summary": "Delete notification method",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-permissions": [
+          "notification_methods.delete"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }

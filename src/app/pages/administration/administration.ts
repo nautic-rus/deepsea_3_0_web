@@ -1,7 +1,7 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, DestroyRef, inject } from '@angular/core';
+import { NgIf } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { Subscription } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AccordionModule } from 'primeng/accordion';
 import { RippleModule } from 'primeng/ripple';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
@@ -16,25 +16,27 @@ export interface AdminMenuItem {
   label: string;
   icon: string;
   routerLink: string[];
+  disabled?: boolean;
 }
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-administration',
   standalone: true,
-  imports: [CommonModule, TranslateModule, AccordionModule, RippleModule, RouterModule],
+  imports: [NgIf, TranslateModule, AccordionModule, RippleModule, RouterModule],
   templateUrl: './administration.html',
   styleUrls: ['./administration.scss']
 })
 export class AdministrationComponent implements OnInit, OnDestroy {
   menuGroups: AdminMenuGroup[] = [];
   isAdminRoot = false;
-  private langSub: Subscription | null = null;
+  private destroyRef = inject(DestroyRef);
 
-  constructor(private translate: TranslateService, private router: Router) {}
+  constructor(private translate: TranslateService, private router: Router, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.buildMenu();
-    this.langSub = this.translate.onLangChange.subscribe(() => this.buildMenu());
+    this.translate.onLangChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => { this.buildMenu(); this.cdr.markForCheck(); });
 
     const isRoot = (url: string) => {
       const path = (url || '').split('?')[0].replace(/\/$/, '');
@@ -43,21 +45,27 @@ export class AdministrationComponent implements OnInit, OnDestroy {
 
     this.isAdminRoot = isRoot(this.router.url || '');
 
-    this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe((e: any) => {
+    this.router.events.pipe(takeUntilDestroyed(this.destroyRef), filter(e => e instanceof NavigationEnd)).subscribe((e: any) => {
       this.isAdminRoot = isRoot(e.urlAfterRedirects || e.url || '');
+      this.cdr.markForCheck();
     });
   }
 
-  ngOnDestroy(): void {
-    if (this.langSub) {
-      this.langSub.unsubscribe();
-      this.langSub = null;
-    }
-  }
+  ngOnDestroy(): void { /* subscriptions auto-cleaned via takeUntilDestroyed */ }
 
   private buildMenu(): void {
     const t = (k: string) => this.translate.instant(k) || k;
     this.menuGroups = [
+      {
+        label: t('MENU.SETTINGS'),
+        items: [
+          //{ label: t('MENU.GENERAL'), icon: 'pi pi-fw pi-cog', routerLink: ['/administration/general'], disabled: true },
+          { label: t('MENU.NOTIFICATIONS'), icon: 'pi pi-fw pi-bell', routerLink: ['/administration/notifications'] },
+          //{ label: t('MENU.STORAGE'), icon: 'pi pi-fw pi-database', routerLink: ['/administration/storage'] },
+          { label: t('MENU.PAGES'), icon: 'pi pi-fw pi-file', routerLink: ['/administration/pages'] }
+
+        ]
+      },
       {
         label: t('MENU.USER_MANAGEMENT'),
         items: [
@@ -72,16 +80,6 @@ export class AdministrationComponent implements OnInit, OnDestroy {
           { label: t('MENU.DEPARTMENTS'), icon: 'pi pi-fw pi-sitemap', routerLink: ['/administration/departments'] },
           { label: t('MENU.SPECIALIZATIONS'), icon: 'pi pi-fw pi-tags', routerLink: ['/administration/specializations'] },
           { label: t('MENU.JOB_TITLE'), icon: 'pi pi-fw pi-user-edit', routerLink: ['/administration/job_title'] }
-        ]
-      },
-      {
-        label: t('MENU.SETTINGS'),
-        items: [
-          { label: t('MENU.GENERAL'), icon: 'pi pi-fw pi-cog', routerLink: ['/administration/general'] },
-          { label: t('MENU.NOTIFICATIONS'), icon: 'pi pi-fw pi-bell', routerLink: ['/administration/notifications'] },
-          { label: t('MENU.STORAGE'), icon: 'pi pi-fw pi-database', routerLink: ['/administration/storage'] },
-          { label: t('MENU.PAGES'), icon: 'pi pi-fw pi-file', routerLink: ['/administration/pages'] }
-
         ]
       }
     ];

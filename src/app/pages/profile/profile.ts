@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, DestroyRef, inject } from '@angular/core';
+import { NgIf } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
 import { AvatarModule } from 'primeng/avatar';
@@ -8,6 +8,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../auth/auth.service';
 import { AvatarService } from '../../services/avatar.service';
@@ -21,7 +22,7 @@ export interface ProfileMenuGroup {
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, ButtonModule, RippleModule, RouterModule, TranslateModule, AvatarModule, DialogModule, InputTextModule, FormsModule],
+  imports: [NgIf, ButtonModule, RippleModule, RouterModule, TranslateModule, AvatarModule, DialogModule, InputTextModule, FormsModule],
   templateUrl: './profile.html',
   styleUrls: ['./profile.scss']
 })
@@ -31,6 +32,7 @@ export class ProfileComponent implements OnInit {
   editDialog = false;
   editModel: any = {};
   saving = false;
+  private destroyRef = inject(DestroyRef);
 
   constructor(private router: Router, private translate: TranslateService, private auth: AuthService, private avatarService: AvatarService, private usersService: UsersService) {}
 
@@ -47,7 +49,7 @@ export class ProfileComponent implements OnInit {
     ];
 
     // keep active state/update on navigation if needed later
-    this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe();
+    this.router.events.pipe(takeUntilDestroyed(this.destroyRef), filter(e => e instanceof NavigationEnd)).subscribe();
 
     // Try to show cached user from sessionStorage immediately to avoid UI flash/delay
     try {

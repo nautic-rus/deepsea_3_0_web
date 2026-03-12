@@ -1,6 +1,6 @@
 import { Component, Input, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { CommonModule } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { ChipModule } from 'primeng/chip';
@@ -11,7 +11,7 @@ import { LinksService } from '../../services/links.service';
 @Component({
   selector: 'app-issue-detail-relations',
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslateModule, ChipModule, ButtonModule, BadgeModule],
+  imports: [NgFor, NgIf, RouterModule, TranslateModule, ChipModule, ButtonModule, BadgeModule],
   template: `
     <section class="admin-subpage-relations card">
       <div class="flex items-center justify-between mt-0 mb-2">

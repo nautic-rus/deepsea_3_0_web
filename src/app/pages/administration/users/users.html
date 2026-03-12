@@ -2,10 +2,12 @@
 <p-toolbar >
   <ng-template #start>
     <p-button [label]="'MENU.CREATE_USER' | translate" icon="pi pi-plus" severity="primary" class="mr-2" (onClick)="openNew()" />
-    <p-button severity="secondary" [label]="'MENU.DELETE' | translate" icon="pi pi-trash"  (onClick)="deleteSelectedProducts()" [disabled]="!selectedProducts || !selectedProducts.length" />
+        <p-button  icon="pi pi-pencil" severity="secondary" class="mr-2" (onClick)="openBulkEditDialog()" [disabled]="!selectedProducts || !selectedProducts.length" />
+        <p-button icon="pi pi-envelope" severity="secondary" class="mr-2" (onClick)="openSendInvitationsDialog()" [disabled]="!selectedProducts || !selectedProducts.length" />
   </ng-template>
 
   <ng-template #end>
+      
       <p-button [label]="'MENU.EXPORT' | translate" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
   </ng-template>
 </p-toolbar>
@@ -21,14 +23,13 @@
       scrollHeight="flex"
       [rows]="10"
       size="small"
-      [globalFilterFields]="['id','email','first_name','last_name','department','job_title']"
+      [globalFilterFields]="['first_name','last_name','full_name','email','phone']"
       [(selection)]="selectedProducts"
       [rowHover]="true"
       dataKey="id"
       currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users"
       [showCurrentPageReport]="true"
       [rowsPerPageOptions]="[10, 20, 30]"
-      [globalFilterFields]="['name', 'country.name', 'representative.name', 'status']"
           >
 
     <ng-template #caption>
@@ -43,7 +44,7 @@
 
     <ng-template pTemplate="header">
       <tr>
-          <th style="width: 3rem">
+          <th>
               <p-tableHeaderCheckbox />
           </th>
           <th>ID</th>
@@ -64,7 +65,7 @@
                   </div>
                   <p-columnFilter field="department" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
                       <ng-template #filter let-value let-filter="filterCallback">
-                          <p-multiselect [ngModel]="value"
+                          <p-multiselect filter="true" filterBy="label" [ngModel]="value"
                                          [options]="departmentsFilter"
                                          optionValue="value"
                                          placeholder="{{ 'MENU.ANY' | translate }}"
@@ -90,7 +91,7 @@
                   </div>
                   <p-columnFilter field="job_title" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
                       <ng-template #filter let-value let-filter="filterCallback">
-                          <p-multiselect [ngModel]="value"
+                          <p-multiselect filter="true" filterBy="label" [ngModel]="value"
                                          [options]="jobTitles"
                                          optionValue="value"
                                          placeholder="{{ 'MENU.ANY' | translate }}"
@@ -116,7 +117,7 @@
                   </div>
                   <p-columnFilter field="is_active" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
                       <ng-template #filter let-value let-filter="filterCallback">
-                          <p-multiselect [ngModel]="value"
+                          <p-multiselect filter="true" filterBy="label" [ngModel]="value"
                                          [options]="statuses"
                                          optionValue="value"
                                          placeholder="{{ 'MENU.ANY' | translate }}"
@@ -146,7 +147,7 @@
                   <p-sortIcon field="updated_at" />
               </div>
           </th>
-          <th></th>
+          <th style="width: 10rem;"></th>
       </tr>
   </ng-template>
   
@@ -174,11 +175,11 @@
           <td>
               <p-tag [value]="user.is_active ? ('MENU.ACTIVE_YES' | translate) : ('MENU.ACTIVE_NO' | translate)" [severity]="user.is_active ? 'success' : 'danger'"></p-tag>
           </td>
-                    <td>{{ user.created_at ? (user.created_at | date:'short':'':'ru') : '-' }}</td>
-                    <td>{{ user.updated_at ? (user.updated_at | date:'short':'':'ru') : '-' }}</td>
+                    <td>{{ user.created_at ? (user.created_at | date:'dd.MM.yyyy, HH:mm':'':'ru') : '-' }}</td>
+                    <td>{{ user.updated_at ? (user.updated_at | date:'dd.MM.yyyy, HH:mm':'':'ru') : '-' }}</td>
           <td>
-                        <p-button icon="pi pi-envelope" class="mr-2" [outlined]="true" styleClass="p-button-text" title="{{ 'MENU.SEND_WELCOME' | translate }}"></p-button>
-                        <p-button icon="pi pi-pencil" class="mr-2" [outlined]="true" (click)="openEdit(user)" />
+                        <p-button icon="pi pi-envelope"  [outlined]="true" title="{{ 'MENU.SEND_WELCOME' | translate }}"></p-button>
+                        <p-button icon="pi pi-pencil"  [outlined]="true" (click)="openEdit(user)" />
                         <p-button icon="pi pi-trash" severity="danger" [outlined]="true" (click)="confirmDelete(user)" />
           </td>
       </tr>
@@ -186,6 +187,59 @@
 </p-table>
 </div>
 </section>
+
+<!-- Send invitations confirmation dialog -->
+<p-dialog header="{{ 'MENU.SEND_INVITATIONS' | translate }}" [(visible)]="sendInvitationsDialogVisible" [modal]="true" appendTo="body" [resizable]="false" [style]="{ width: '30%' }">
+    <div class="flex flex-col gap-4">
+        <div>
+            <strong>{{ selectedProducts.length || 0 }}</strong> {{ 'components.users.bulk.SELECTED' | translate }}
+        </div>
+        <div>
+            {{ 'components.users.bulk.SEND_CONFIRM' | translate }}
+        </div>
+        <div class="flex justify-end gap-2 mt-4">
+            <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="closeSendInvitationsDialog()" class="p-button-text" severity="secondary"></p-button>
+            <p-button label="{{ 'MENU.SEND' | translate }}" (onClick)="confirmSendInvitations()" severity="primary"></p-button>
+        </div>
+    </div>
+</p-dialog>
+
+<!-- Bulk edit dialog for users -->
+<p-dialog header="{{ 'MENU.BULK_EDIT' | translate }}" [(visible)]="bulkEditDialogVisible" [modal]="true" appendTo="body" [resizable]="false" [style]="{ width: '35%' }">
+    <div class="flex flex-col gap-4">
+        <div class="mb-3">
+            <strong>{{ selectedProducts.length || 0 }}</strong> {{ 'components.users.bulk.SELECTED' | translate }}
+        </div>
+
+        <div class="grid grid-cols-1 gap-4">
+            <div class="flex flex-col gap-2">
+                <label class="font-bold">{{ 'MENU.DEPARTMENT' | translate }}</label>
+                <p-select filter="true" filterBy="label" [options]="departments" [(ngModel)]="bulkEditModel.department_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="font-bold">{{ 'MENU.JOB_TITLE' | translate }}</label>
+                <p-select filter="true" filterBy="label" [options]="jobTitles" [(ngModel)]="bulkEditModel.job_title_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+            </div>
+
+            <div class="flex gap-4">
+                <div class="flex items-center gap-2">
+                    <p-checkbox binary="true" [(ngModel)]="bulkEditModel.activeSelected" inputId="bulkIsActiveTrue"></p-checkbox>
+                    <label for="bulkIsActiveTrue">{{ 'MENU.ACTIVE_YES' | translate }}</label>
+                </div>
+                <div class="flex items-center gap-2">
+                    <p-checkbox binary="true" [(ngModel)]="bulkEditModel.inactiveSelected" inputId="bulkIsActiveFalse"></p-checkbox>
+                    <label for="bulkIsActiveFalse">{{ 'MENU.ACTIVE_NO' | translate }}</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-2 mt-4">
+            <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="closeBulkEditDialog()" class="p-button-text" severity="secondary"></p-button>
+            <p-button label="{{ 'MENU.APPLY' | translate }}" (onClick)="applyBulkEdit()" severity="primary"></p-button>
+        </div>
+    </div>
+</p-dialog>
 
 <!-- Confirm dialog (styled similar to edit dialog) -->
 <p-confirmDialog
@@ -244,7 +298,7 @@
             </div>
             <div class="flex flex-col gap-2">
                 <label for="department">{{ 'MENU.DEPARTMENT' | translate }}</label>
-                <p-select id="department"
+                <p-select filter="true" filterBy="label" id="department"
                             [options]="departments"
                             [(ngModel)]="editModel.department"
                             optionLabel="label"
@@ -255,7 +309,7 @@
             </div>
             <div class="flex flex-col gap-2">
                 <label for="jobTitle">{{ 'MENU.JOB_TITLE' | translate }}</label>
-                <p-select id="jobTitle"
+                <p-select filter="true" filterBy="label" id="jobTitle"
                             [options]="jobTitles"
                             [(ngModel)]="editModel.job_title"
                             optionLabel="label"

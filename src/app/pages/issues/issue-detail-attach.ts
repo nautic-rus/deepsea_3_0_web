@@ -1,5 +1,5 @@
 import { Component, Input, OnChanges, OnDestroy, SimpleChanges, inject, ViewChild, ElementRef, NgZone, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DatePipe, NgFor, NgIf } from '@angular/common';
 // removed PrimeNG FileUpload — using native input + custom UI
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
@@ -14,12 +14,13 @@ import { TableModule } from 'primeng/table';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ProgressSpinner } from 'primeng/progressspinner';
+import { AppMessageService } from '../../services/message.service';
 
 @Component({
   selector: 'app-issue-detail-attach',
   standalone: true,
-  imports: [CommonModule, ToastModule, TranslateModule, ButtonModule, TableModule, ConfirmDialogModule, ProgressBarModule, ProgressSpinner],
-  providers: [MessageService, ConfirmationService],
+  imports: [DatePipe, NgFor, NgIf, ToastModule, TranslateModule, ButtonModule, TableModule, ConfirmDialogModule, ProgressBarModule, ProgressSpinner],
+  providers: [ConfirmationService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [
     `
@@ -144,6 +145,7 @@ export class IssueDetailAttachComponent implements OnChanges, OnDestroy {
   @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
 
   private messageService = inject(MessageService);
+  private appMsg = inject(AppMessageService);
   private translate = inject(TranslateService);
   private fileService = inject(FileService);
   private confirmationService = inject(ConfirmationService);
@@ -259,11 +261,7 @@ export class IssueDetailAttachComponent implements OnChanges, OnDestroy {
                 next: () => {
                   if (this._cancelled) return;
                   this.fetchIssueFiles(issueId).subscribe(() => {
-                    this.messageService.add({
-                      severity: 'success',
-                      summary: this.translate.instant('components.issues.messages.UPLOADED'),
-                      detail: this.translate.instant('components.issues.messages.UPLOADED_COUNT', { count: 1 })
-                    });
+                    this.appMsg.success(this.translate.instant('components.issues.messages.UPLOADED_COUNT', { count: 1 }));
                     // If all uploads finished and we've refreshed attachments, clear client previews
                     try { if (this.activeUploads === 0) this._clearSelectedFiles(); } catch (_) {}
                   });
@@ -271,20 +269,10 @@ export class IssueDetailAttachComponent implements OnChanges, OnDestroy {
                 error: () => {
                   this.isLoading = false;
                   this.cdr.markForCheck();
-                  this.messageService.add({
-                    severity: 'warn',
-                    summary: this.translate.instant('components.issues.messages.WARNING'),
-                    detail: this.translate.instant('components.issues.messages.UPLOAD_FAILED') + (name ? ': ' + name : '')
-                  });
-                }
+                  this.appMsg.warn(this.translate.instant('components.issues.messages.UPLOAD_FAILED') + (name ? ': ' + name : ''));}
               });
             } else {
-              this.messageService.add({
-                severity: 'info',
-                summary: this.translate.instant('components.issues.messages.SUCCESS'),
-                detail: this.translate.instant('components.issues.messages.SAVED_LOCAL') || 'Saved locally (no id)'
-              });
-            }
+              this.appMsg.info(this.translate.instant('components.issues.messages.SAVED_LOCAL') || 'Saved locally (no id)');}
 
             entry.progress = 100;
             entry.uploaded = true;
@@ -293,12 +281,7 @@ export class IssueDetailAttachComponent implements OnChanges, OnDestroy {
         },
         error: () => {
           if (!this._cancelled) {
-            this.messageService.add({
-              severity: 'error',
-              summary: this.translate.instant('components.issues.messages.ERROR'),
-              detail: this.translate.instant('components.issues.messages.UPLOAD_FAILED') + (f?.name ? ': ' + f.name : '')
-            });
-          }
+            this.appMsg.error(this.translate.instant('components.issues.messages.UPLOAD_FAILED') + (f?.name ? ': ' + f.name : ''));}
           try { entry.progress = 0; } catch(_) {}
           this.finishOneUpload(sub);
         }
@@ -309,11 +292,7 @@ export class IssueDetailAttachComponent implements OnChanges, OnDestroy {
 
     if (rejected.length) {
       const names = rejected.map((r: any) => r.name).join(', ');
-      this.messageService.add({
-        severity: 'error',
-        summary: this.translate.instant('components.issues.messages.ERROR'),
-        detail: this.translate.instant('components.issues.messages.FILE_TOO_LARGE') + `: ${names}`
-      });
+      this.appMsg.error(this.translate.instant('components.issues.messages.FILE_TOO_LARGE') + `: ${names}`);
     }
   }
 
@@ -334,11 +313,7 @@ export class IssueDetailAttachComponent implements OnChanges, OnDestroy {
     this.cdr.markForCheck();
     if (rejected.length) {
       const names = rejected.map(r => r.name).join(', ');
-      this.messageService.add({
-        severity: 'warn',
-        summary: this.translate.instant('components.issues.messages.WARNING'),
-        detail: this.translate.instant('components.issues.messages.FILE_TOO_LARGE') + `: ${names}`
-      });
+      this.appMsg.warn(this.translate.instant('components.issues.messages.FILE_TOO_LARGE') + `: ${names}`);
     }
   }
 
@@ -466,31 +441,17 @@ export class IssueDetailAttachComponent implements OnChanges, OnDestroy {
                 next: () => {
                   if (this._cancelled) return;
                   this.fetchIssueFiles(issueId).subscribe(() => {
-                    this.messageService.add({
-                      severity: 'success',
-                      summary: this.translate.instant('components.issues.messages.UPLOADED'),
-                      detail: this.translate.instant('components.issues.messages.UPLOADED_COUNT', { count: 1 })
-                    });
+                    this.appMsg.success(this.translate.instant('components.issues.messages.UPLOADED_COUNT', { count: 1 }));
                     try { if (this.activeUploads === 0) this._clearSelectedFiles(); } catch (_) {}
                   });
                 },
                 error: () => {
                   this.isLoading = false;
                   this.cdr.markForCheck();
-                  this.messageService.add({
-                    severity: 'warn',
-                    summary: this.translate.instant('components.issues.messages.WARNING'),
-                    detail: this.translate.instant('components.issues.messages.UPLOAD_FAILED') + (name ? ': ' + name : '')
-                  });
-                }
+                  this.appMsg.warn(this.translate.instant('components.issues.messages.UPLOAD_FAILED') + (name ? ': ' + name : ''));}
               });
             } else {
-              this.messageService.add({
-                severity: 'info',
-                summary: this.translate.instant('components.issues.messages.SUCCESS'),
-                detail: this.translate.instant('components.issues.messages.SAVED_LOCAL') || 'Saved locally (no id)'
-              });
-            }
+              this.appMsg.info(this.translate.instant('components.issues.messages.SAVED_LOCAL') || 'Saved locally (no id)');}
 
             entry.progress = 100;
             entry.uploaded = true;
@@ -499,12 +460,7 @@ export class IssueDetailAttachComponent implements OnChanges, OnDestroy {
         },
         error: () => {
           if (!this._cancelled) {
-            this.messageService.add({
-              severity: 'error',
-              summary: this.translate.instant('components.issues.messages.ERROR'),
-              detail: this.translate.instant('components.issues.messages.UPLOAD_FAILED') + (f?.name ? ': ' + f.name : '')
-            });
-          }
+            this.appMsg.error(this.translate.instant('components.issues.messages.UPLOAD_FAILED') + (f?.name ? ': ' + f.name : ''));}
           try { entry.progress = 0; } catch(_) {}
           this.finishOneUpload(sub);
         }
@@ -528,12 +484,7 @@ export class IssueDetailAttachComponent implements OnChanges, OnDestroy {
   try { this._clearSelectedFiles(); } catch(e) {}
     this.cdr.markForCheck();
 
-    this.messageService.add({
-      severity: 'info',
-      summary: this.translate.instant('components.issues.messages.WARNING') || 'Cancelled',
-      detail: this.translate.instant('components.issues.messages.UPLOAD_CANCELLED') || 'Upload cancelled'
-    });
-  }
+    this.appMsg.info(this.translate.instant('components.issues.messages.UPLOAD_CANCELLED') || 'Upload cancelled');}
 
   formatBytes(bytes: number): string {
     if (!bytes) return '0 B';
@@ -562,22 +513,12 @@ export class IssueDetailAttachComponent implements OnChanges, OnDestroy {
         this.fileService.deleteIssueFile(issueId, storageId).subscribe({
           next: () => {
             this.fetchIssueFiles(issueId).subscribe(() => {
-              this.messageService.add({
-                severity: 'success',
-                summary: this.translate.instant('components.issues.messages.SUCCESS'),
-                detail: this.translate.instant('components.issues.messages.SAVED') || 'Deleted'
-              });
-            });
+              this.appMsg.success(this.translate.instant('components.issues.messages.SAVED') || 'Deleted');});
           },
           error: () => {
             this.isLoading = false;
             this.cdr.markForCheck();
-            this.messageService.add({
-              severity: 'error',
-              summary: this.translate.instant('components.issues.messages.ERROR'),
-              detail: this.translate.instant('components.issues.messages.UPLOAD_FAILED') || 'Failed'
-            });
-          }
+            this.appMsg.error(this.translate.instant('components.issues.messages.UPLOAD_FAILED') || 'Failed');}
         });
       }
     });

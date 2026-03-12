@@ -1,11 +1,11 @@
 import { Component, signal } from '@angular/core';
 import { TableModule } from 'primeng/table';
-import { CommonModule } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 
 @Component({
     standalone: true,
     selector: 'app-timesheet-calendar-widget',
-    imports: [CommonModule, TableModule],
+    imports: [NgClass, NgFor, NgIf, TableModule],
     template: `<div class="card mt-0">
         <div class="font-semibold text-xl mb-4">My Timesheet</div>
         <div class="timesheet-calendar">

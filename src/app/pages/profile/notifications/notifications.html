@@ -1,62 +1,32 @@
 
 
 <section class="admin-subpage-content card">
-  <!-- Simple notifications table for testing (static data) -->
   <div class="table-responsive">
-    <p-table
-      #dt
-      [value]="notifications"
-      [loading]="loading"
-      [scrollable]="true"
-      scrollHeight="flex"
-      [rows]="10"
-      size="small"
-      [globalFilterFields]="['id','event_id','method_id','project_id']"
-      [(selection)]="selectedNotifications"
-      [rowHover]="true"
-      dataKey="id"
-      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} items"
-      [showCurrentPageReport]="true"
-      [rowsPerPageOptions]="[10,20,30]"
-    >
-
-      <ng-template #caption>
+    <p-toast></p-toast>
+    <p-table [value]="matrix" [loading]="loading" [scrollable]="true" scrollHeight="flex" >
+      <ng-template pTemplate="caption">
         <div class="flex justify-between mb-2">
           <h3>{{ 'MENU.NOTIFICATIONS' | translate }}</h3>
-          <p-iconfield>
-            <p-inputicon styleClass="pi pi-search" />
-            <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
-          </p-iconfield>
+          <div>
+            <p-select [options]="projectOptions" [(ngModel)]="selectedProject" (ngModelChange)="onProjectChange($event)" [checkmark]="true" optionLabel="label" optionValue="value" placeholder="{{ 'components.projects.menu.LIST' | translate }}" class="mr-2" style="width: 350px;" appendTo="body"></p-select>
+          </div>
         </div>
       </ng-template>
 
       <ng-template pTemplate="header">
         <tr>
-          <th style="width: 3rem">
-            <p-tableHeaderCheckbox />
-          </th>
-          <th>ID</th>
-          <th pSortableColumn="event_id">Event <p-sortIcon field="event_id" /></th>
-          <th pSortableColumn="method_id">Method <p-sortIcon field="method_id" /></th>
-          <th pSortableColumn="project_id">Project <p-sortIcon field="project_id" /></th>
-          <th>Enabled</th>
-          <th pSortableColumn="created_at">Created <p-sortIcon field="created_at" /></th>
-          <th></th>
+          <th>Event</th>
+          <th>Description</th>
+          <th *ngFor="let m of methods; trackBy: trackByMethodId">{{ m.name }}</th>
         </tr>
       </ng-template>
 
-      <ng-template pTemplate="body" let-notif>
+      <ng-template pTemplate="body" let-row let-i="rowIndex">
         <tr>
-          <td><p-tableCheckbox [value]="notif" /></td>
-          <td>{{ notif.id }}</td>
-          <td>{{ notif.event_id }}</td>
-          <td>{{ notif.method_id }}</td>
-          <td>{{ notif.project_id || '-' }}</td>
-          <td>{{ notif.enabled ? ('MENU.YES' | translate) : ('MENU.NO' | translate) }}</td>
-          <td>{{ notif.created_at | date:'short' }}</td>
-          <td>
-            <p-button icon="pi pi-pencil" class="mr-2" [outlined]="true" (click)="void(0)" />
-            <p-button icon="pi pi-trash" severity="danger" [outlined]="true" (click)="void(0)" />
+          <td>{{ row.event?.name || row.event?.code }}</td>
+          <td>{{ row.event?.description || '-' }}</td>
+          <td *ngFor="let methodEntry of row.methods; let j = index; trackBy: trackByIndex">
+            <p-checkbox [(ngModel)]="row.methods[j].enabled" (ngModelChange)="onToggleMethod(row.event, methodEntry, $event, row, j)" binary="true"></p-checkbox>
           </td>
         </tr>
       </ng-template>

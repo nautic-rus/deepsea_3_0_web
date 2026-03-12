@@ -1,18 +1,212 @@
 <section class="admin-subpage-tools card mt-0">
-  <p>Notification settings and templates.</p>
+  <p-toolbar>
+    <p-toast></p-toast>
+    <ng-template #start>
+      <p-button [label]="'MENU.NOTIFICATION_EVENTS' | translate" (onClick)="activeTab='events'" [severity]="activeTab==='events' ? 'primary' : 'secondary'" class="ml-2" />
+      <p-button [label]="'MENU.NOTIFICATION_METHODS' | translate" (onClick)="activeTab='methods'" [severity]="activeTab==='methods' ? 'primary' : 'secondary'" class="ml-2" />
+      
+    </ng-template>
+
+    <ng-template #end>
+      <p-button *ngIf="activeTab==='events'" [label]="'MENU.EXPORT' | translate" icon="pi pi-upload" severity="secondary" class="ml-2" (onClick)="exportEventsCSV()" />
+      <p-button *ngIf="activeTab==='methods'" [label]="'MENU.EXPORT' | translate" icon="pi pi-upload" severity="secondary" class="ml-2" (onClick)="exportMethodsCSV()" />
+    </ng-template>
+  </p-toolbar>
 </section>
 
 <section class="admin-subpage-content card">
-<div class="page-wiki">
-  <section class="admin-subpage-content card text-center flex flex-col items-center justify-center" style="height: 90vh;">
-    <div class="mb-4">
-      <h1>{{ 'MENU.WIKI' | translate }}</h1>
-    </div>
+  <div *ngIf="activeTab==='events'" class="table-responsive">
+  <p-table
+    #dtEvents
+    [value]="notificationEvents"
+    [loading]="loading"
+    [scrollable]="true"
+    style="table-layout: fixed;"
+    scrollHeight="flex"
+    [rows]="10"
+    size="small"
+    [globalFilterFields]="['id','name','description']"
+  [(selection)]="selectedNotificationEvents"
+    [rowHover]="true"
+    dataKey="id"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} items"
+    [showCurrentPageReport]="true"
+    [rowsPerPageOptions]="[10, 20, 30]"
+      >
 
-    <p>Мы работаем над этой страницей — приходите позже или вернитесь на главную.</p>
+  <ng-template pTemplate="caption">
+      <div class="flex justify-between mb-2">
+        <h3>{{ 'MENU.NOTIFICATION_EVENTS' | translate }}</h3>
+        <p-iconfield>
+          <p-inputicon styleClass="pi pi-search" /> 
+          <input pInputText type="text" (input)="onGlobalFilterEvents(dtEvents, $event)" placeholder="Search..." />
+        </p-iconfield>
+      </div>
+      </ng-template>
 
-    <p-button [label]="('components.underDevelopment.GO_HOME' | translate)" routerLink="/" severity="success" class="mt-5"/>
-  </section>
+  <ng-template pTemplate="header">
+    <tr>
+      <th style="width: 3rem">
+        <p-tableHeaderCheckbox />
+      </th>
+      <th style="width:5rem">ID</th>
+      <th pSortableColumn="name" style="width:10rem;">
+          {{ 'components.permissions.table.HEADERS.NAME' | translate }}
+        <p-sortIcon field="name" />
+      </th>
+        <th style="width:30rem">{{ 'components.permissions.table.HEADERS.DESCRIPTION' | translate }}</th>
+      <th style="width:8rem">Status</th>
+      <th pSortableColumn="created_at" style="width:10rem;">
+          {{ 'components.permissions.table.HEADERS.CREATED_AT' | translate }}
+        <p-sortIcon field="created_at" />
+      </th>
+      <th style="width:6rem"></th>
+    </tr>
+  </ng-template>
+  
+  <ng-template pTemplate="body" let-item>
+    <tr>
+      <td>
+        <p-tableCheckbox [value]="item" />
+      </td>
+      <td>{{ item.id }}</td>
+      <td>{{ item.name }}</td>
+      <td>{{ item.description || '-' }}</td>
+      <td>
+        <p-tag [value]="(item.is_active ? ('MENU.ACTIVE_YES' | translate) : (item.is_active === false ? ('MENU.ACTIVE_NO' | translate) : (item.active ? ('MENU.ACTIVE_YES' | translate) : ('MENU.ACTIVE_NO' | translate))))" [severity]="(item.is_active ? 'success' : (item.is_active === false ? 'danger' : (item.active ? 'success' : 'danger')) )"></p-tag>
+      </td>
+      <td>{{ item.created_at | date:'dd.MM.yyyy, HH:mm' }}</td>
+      <td>
+  <p-button icon="pi pi-pencil" class="mr-2" [outlined]="true" (click)="openEditEvent(item)" />
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+</div>
+
+  <!-- Methods table -->
+  <div *ngIf="activeTab==='methods'" class="table-responsive">
+  <p-table
+    #dtMethods
+    [value]="notificationMethods"
+    [loading]="loadingMethods"
+    [scrollable]="true"
+    style="table-layout: fixed;"
+    scrollHeight="flex"
+    [rows]="10"
+    size="small"
+    [globalFilterFields]="['id','name','description']"
+  [(selection)]="selectedNotificationMethods"
+    [rowHover]="true"
+    dataKey="id"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} items"
+    [showCurrentPageReport]="true"
+    [rowsPerPageOptions]="[10, 20, 30]"
+      >
+
+  <ng-template pTemplate="caption">
+      <div class="flex justify-between mb-2">
+        <h3>{{ 'MENU.NOTIFICATION_METHODS' | translate }}</h3>
+        <p-iconfield>
+          <p-inputicon styleClass="pi pi-search" /> 
+          <input pInputText type="text" (input)="onGlobalFilterMethods(dtMethods, $event)" placeholder="Search..." />
+        </p-iconfield>
+      </div>
+      </ng-template>
+
+  <ng-template pTemplate="header">
+    <tr>
+      <th style="width: 3rem">
+        <p-tableHeaderCheckbox />
+      </th>
+      <th style="width:5rem">ID</th>
+      <th pSortableColumn="name" style="width:10rem;">
+          Name
+        <p-sortIcon field="name" />
+      </th>
+        <th style="width:30rem">Description</th>
+      <th style="width:8rem">Status</th>
+      <th pSortableColumn="created_at" style="width:10rem;">
+          Created
+        <p-sortIcon field="created_at" />
+      </th>
+      <th style="width:6rem"></th>
+    </tr>
+  </ng-template>
+  
+  <ng-template pTemplate="body" let-item>
+    <tr>
+      <td>
+        <p-tableCheckbox [value]="item" />
+      </td>
+      <td>{{ item.id }}</td>
+      <td>{{ item.name }}</td>
+      <td>{{ item.description || '-' }}</td>
+      <td>
+        <p-tag [value]="(item.is_active ? ('MENU.ACTIVE_YES' | translate) : (item.is_active === false ? ('MENU.ACTIVE_NO' | translate) : (item.active ? ('MENU.ACTIVE_YES' | translate) : ('MENU.ACTIVE_NO' | translate))))" [severity]="(item.is_active ? 'success' : (item.is_active === false ? 'danger' : (item.active ? 'success' : 'danger')) )"></p-tag>
+      </td>
+      <td>{{ item.created_at | date:'dd.MM.yyyy, HH:mm' }}</td>
+      <td>
+  <p-button icon="pi pi-pencil" class="mr-2" [outlined]="true" (click)="openEditMethod(item)" />
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
 </div>
 
 </section>
+
+<!-- Confirm dialog (styled similar to edit dialog) -->
+<p-confirmDialog
+  appendTo="body"
+  [dismissableMask]="true"
+  [baseZIndex]="10000"
+  [style]="{ width: '25%' }"
+  styleClass="user-confirm-dialog"
+  header="{{ 'MENU.CONFIRM' | translate }}"
+  acceptLabel="{{ 'MENU.DELETE' | translate }}"
+  rejectLabel="{{ 'MENU.CANCEL' | translate }}"
+  acceptIcon="pi pi-check"
+  acceptButtonStyleClass="p-button-danger"
+  rejectButtonStyleClass="secondary p-button-text"
+  rejectIcon="pi pi-times"
+  >
+</p-confirmDialog>
+<!-- Toast notifications (styled for user actions) -->
+<p-toast position="top-right" appendTo="body" [baseZIndex]="10001" styleClass="user-toast"></p-toast>
+
+<!-- Edit dialog for Events -->
+<p-dialog [header]="isCreatingEvent ? ('components.permissions.form.CREATE_LABEL' | translate) : ('components.permissions.form.EDIT_LABEL' | translate)" [(visible)]="displayEventDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{width: '35%'}">
+  <div class=" flex flex-col gap-4">
+    <div class="flex flex-col gap-2">
+  <label for="eventName">{{ 'components.permissions.form.NAME' | translate }}</label>
+      <input pInputText id="eventName" type="text" [(ngModel)]="editEventModel.name" name="name" />
+    </div>
+    <div class="flex flex-col gap-2">
+  <label for="eventDesc">{{ 'components.permissions.form.DESCRIPTION' | translate }}</label>
+      <textarea id="eventDesc" rows="3" [(ngModel)]="editEventModel.description" name="description" class="p-inputtext"></textarea>
+    </div>
+    <div class="flex justify-end gap-2 mt-4">
+      <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="displayEventDialog=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="loading"></p-button>
+  <p-button label="{{ 'MENU.SAVE' | translate }}" (onClick)="saveNotificationEvent()" severity="primary" icon="pi pi-check" iconPos="left" [loading]="loading" [disabled]="loading"></p-button>
+    </div>
+  </div>
+</p-dialog>
+
+<!-- Edit dialog for Methods -->
+<p-dialog [header]="isCreatingMethod ? ('components.permissions.form.CREATE_LABEL' | translate) : ('components.permissions.form.EDIT_LABEL' | translate)" [(visible)]="displayMethodDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{width: '35%'}">
+  <div class=" flex flex-col gap-4">
+    <div class="flex flex-col gap-2">
+  <label for="methodName">Name</label>
+      <input pInputText id="methodName" type="text" [(ngModel)]="editMethodModel.name" name="name" />
+    </div>
+    <div class="flex flex-col gap-2">
+  <label for="methodDesc">Description</label>
+      <textarea id="methodDesc" rows="3" [(ngModel)]="editMethodModel.description" name="description" class="p-inputtext"></textarea>
+    </div>
+    <div class="flex justify-end gap-2 mt-4">
+      <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="displayMethodDialog=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="loadingMethods"></p-button>
+  <p-button label="{{ 'MENU.SAVE' | translate }}" (onClick)="saveNotificationMethod()" severity="primary" icon="pi pi-check" iconPos="left" [loading]="loadingMethods" [disabled]="loadingMethods"></p-button>
+    </div>
+  </div>
+</p-dialog>

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+;
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { TieredMenuModule } from 'primeng/tieredmenu';
 import { MenuItem } from 'primeng/api';
@@ -9,7 +9,7 @@ import { ButtonModule } from 'primeng/button';
 @Component({
   selector: 'app-materials',
   standalone: true,
-  imports: [CommonModule, TranslateModule, TieredMenuModule, RouterModule, ButtonModule],
+  imports: [TranslateModule, TieredMenuModule, RouterModule, ButtonModule],
   templateUrl: './materials.html',
   styleUrls: ['./materials.scss']
 })

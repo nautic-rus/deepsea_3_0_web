@@ -28,7 +28,7 @@
 
                     <div class="w-60 flex flex-col gap-2">
                       <label class="font-bold">{{ 'components.documents.form.SPECIALIZATION' | translate }}</label>
-                      <p-select [options]="specializationsOptions" [(ngModel)]="editModel.specialization_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body">
+                      <p-select filter="true" filterBy="label" [options]="specializationsOptions" [(ngModel)]="editModel.specialization_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body">
                         <ng-template let-opt pTemplate="item">
                           <div class="flex items-center gap-2">{{ opt.label }}</div>
                         </ng-template>
@@ -40,7 +40,7 @@
 
                     <div class="w-60 flex flex-col gap-2">
                       <label class="font-bold">{{ 'components.documents.form.STAGE' | translate }}</label>
-                      <p-select [options]="stagesOptions" [(ngModel)]="editModel.stage_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body">
+                      <p-select filter="true" filterBy="label" [options]="stagesOptions" [(ngModel)]="editModel.stage_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body">
                         <ng-template let-opt pTemplate="item">
                           <div class="flex items-center gap-2">{{ opt.label }}</div>
                         </ng-template>
@@ -56,7 +56,7 @@
                     
                     <div class="flex-1 flex flex-col gap-2">
                       <label class="font-bold">{{ 'components.documents.form.PROJECT' | translate }}</label>
-                      <p-select [options]="projectOptions" [(ngModel)]="editModel.project_id" (ngModelChange)="onEditProjectChange($event)" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body">
+                      <p-select filter="true" filterBy="label" [options]="projectOptions" [(ngModel)]="editModel.project_id" (ngModelChange)="onEditProjectChange($event)" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body">
                         <ng-template let-opt pTemplate="item">
                           <div class="flex items-center gap-2">
                             <div>{{ opt.label }}</div>
@@ -75,7 +75,7 @@
 
                     <div class="w-60 flex flex-col gap-2">
                       <label class="font-bold">{{ 'components.documents.form.TYPE' | translate }}</label>
-                      <p-select [options]="typeOptions" [(ngModel)]="editModel.type_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+                      <p-select filter="true" filterBy="label" [options]="typeOptions" [(ngModel)]="editModel.type_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
                     </div>
                   </div>
 
@@ -104,7 +104,7 @@
                         <div class="flex gap-2">
                           <div class="flex-1 flex flex-col gap-2">
                             <label class="font-bold">{{ 'components.documents.form.PRIORITY' | translate }}</label>
-                            <p-select [options]="priorityOptions" [(ngModel)]="editModel.priority" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+                            <p-select filter="true" filterBy="label" [options]="priorityOptions" [(ngModel)]="editModel.priority" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
                           </div>
 
                           <div class="flex-1 flex flex-col gap-2">
@@ -115,7 +115,7 @@
 
                               <!-- <div class="flex flex-col gap-2">
                                 <label class="font-bold">{{ 'components.documents.form.TAGS' | translate }}</label>
-                                <p-multiSelect [options]="tagsOptions" [(ngModel)]="editModel.tag_select" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-multiSelect>
+                                <p-multiSelect filter="true" filterBy="label" [options]="tagsOptions" [(ngModel)]="editModel.tag_select" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-multiSelect>
                                 <small class="text-xs text-surface-500">{{ 'components.issues.form.OR_ADD' | translate }}</small>
                                 <p-chips [(ngModel)]="editModel.tags_custom"></p-chips>
                               </div> -->
@@ -365,7 +365,7 @@
         <div class="flex flex-col gap-4">
           <div class="flex flex-col gap-2">
             <label class="font-bold">{{ 'components.documents.relations.FORM.RELATION_TYPE' | translate }}</label>
-            <p-select [options]="relationTypeOptions" [(ngModel)]="relationForm.relationType" optionLabel="label" optionValue="value" appendTo="body">
+            <p-select filter="true" filterBy="label" [options]="relationTypeOptions" [(ngModel)]="relationForm.relationType" optionLabel="label" optionValue="value" appendTo="body">
               <ng-template let-opt pTemplate="item">
                 <div>{{ opt.label | translate }}</div>
               </ng-template>
@@ -377,7 +377,7 @@
 
           <div *ngIf="relationForm.relationType === 'blocks'" class="flex flex-col gap-2">
             <label class="font-bold">{{ 'components.documents.relations.FORM.BLOCKS_DIRECTION' | translate }}</label>
-            <p-select [options]="blocksDirectionOptions" [(ngModel)]="relationForm.direction" optionLabel="label" optionValue="value" appendTo="body">
+            <p-select filter="true" filterBy="label" [options]="blocksDirectionOptions" [(ngModel)]="relationForm.direction" optionLabel="label" optionValue="value" appendTo="body">
               <ng-template let-opt pTemplate="item">
                 <div>{{ opt.label | translate }}</div>
               </ng-template>
@@ -389,12 +389,12 @@
 
           <div class="flex flex-col gap-2">
             <label class="font-bold">{{ 'components.issues.relations.FORM.ISSUES' | translate }}</label>
-            <p-multiSelect [options]="availableIssuesOptions" [(ngModel)]="relationForm.selectedIssueIds" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body"></p-multiSelect>
+            <p-multiSelect filter="true" filterBy="label" [options]="availableIssuesOptions" [(ngModel)]="relationForm.selectedIssueIds" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body"></p-multiSelect>
           </div>
 
           <div class="flex flex-col gap-2">
             <label class="font-bold">{{ 'components.issues.relations.FORM.DOCUMENTS' | translate }}</label>
-            <p-multiSelect [options]="availableDocumentsOptions" [(ngModel)]="relationForm.selectedDocumentIds" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body"></p-multiSelect>
+            <p-multiSelect filter="true" filterBy="label" [options]="availableDocumentsOptions" [(ngModel)]="relationForm.selectedDocumentIds" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body"></p-multiSelect>
           </div>
 
           <div class="flex justify-end gap-2 mt-4">

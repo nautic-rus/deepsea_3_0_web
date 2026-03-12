@@ -2,7 +2,6 @@
   <p-toolbar >
     <ng-template #start>
   <p-button [label]="'components.permissions.form.CREATE_LABEL' | translate" icon="pi pi-plus" severity="primary" class="mr-2" (onClick)="openNew()" />
-  <p-button severity="secondary" [label]="'MENU.DELETE' | translate" icon="pi pi-trash"  (onClick)="deleteSelectedPermissions()" [disabled]="!selectedPermissions || !selectedPermissions.length" />
     </ng-template>
 
     <ng-template #end>
@@ -32,13 +31,13 @@
 
   <ng-template #caption>
       <div class="flex justify-between mb-2">
-        <h3>Department</h3>
+        <h3>{{ 'MENU.DEPARTMENTS' | translate }}</h3>
         <p-iconfield>
           <p-inputicon styleClass="pi pi-search" /> 
           <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
         </p-iconfield>
       </div>
-      </ng-template>
+  </ng-template>
 
   <ng-template pTemplate="header">
     <tr>
@@ -85,7 +84,7 @@
         <span *ngIf="!(permission.manager_id || permission.manager_name || permission.manager)">-</span>
       </td>
       <td>{{ permission.description || '-' }}</td>
-      <td>{{ permission.created_at | date:'short' }}</td>
+      <td>{{ permission.created_at | date:'dd.MM.yyyy, HH:mm' }}</td>
       <td>
   <p-button icon="pi pi-pencil" class="mr-2" [outlined]="true" (click)="openEdit(permission)" />
   <p-button icon="pi pi-trash" severity="danger" [outlined]="true" (click)="confirmDelete(permission)" />
@@ -124,28 +123,20 @@
     </div>
     <div class="flex flex-col gap-2">
   <label for="permManager">{{ 'components.departments.form.MANAGER' | translate }}</label>
-      <p-select id="permManager" [options]="usersOptions" optionLabel="label" optionValue="value" [(ngModel)]="editModel.manager_id" appendTo="body" placeholder="{{ 'MENU.ANY' | translate }}">
+      <p-select filter="true" filterBy="label" id="permManager" [options]="usersOptions" optionLabel="label" optionValue="value" [(ngModel)]="editModel.manager_id" appendTo="body" placeholder="{{ 'MENU.ANY' | translate }}">
         <ng-template let-opt pTemplate="item">
           <div class="flex items-center gap-2">
             <ng-container *ngIf="opt.avatar; else initialsItem">
-              <img [src]="opt.avatar" alt="avatar" class="select-avatar" />
+              <img [src]="opt.avatar" alt="avatar" class="select-avatar mr-2" />
             </ng-container>
             <ng-template #initialsItem>
-              <p-avatar [label]="initialsFromName(opt.label)" class="mr-2" shape="circle" [style]="{ 'background-color': issueAvatarColor({ id: opt.value, first_name: opt.label }), color: issueAvatarTextColor({ id: opt.value, first_name: opt.label }) }"></p-avatar>
+              <p-avatar [label]="initialsFromName(opt.label)" class="mr-2" shape="circle" [style]="{ 'background-color': selectAvatarBg(opt.value || opt.label), color: selectAvatarTextColor(opt.value || opt.label) }"></p-avatar>
             </ng-template>
             <div>{{ opt.label }}</div>
           </div>
         </ng-template>
-        <ng-template let-opt pTemplate="value">
-          <div class="flex items-center gap-2">
-            <ng-container *ngIf="opt.avatar; else initialsValue">
-              <img [src]="opt.avatar" alt="avatar" class="select-avatar" />
-            </ng-container>
-            <ng-template #initialsValue>
-              <p-avatar [label]="initialsFromName(opt.label)" class="mr-2" shape="circle" [style]="{ 'background-color': issueAvatarColor({ id: opt.value, first_name: opt.label }), color: issueAvatarTextColor({ id: opt.value, first_name: opt.label }) }"></p-avatar>
-            </ng-template>
-            <div>{{ opt.label }}</div>
-          </div>
+        <ng-template let-opt pTemplate="selectedItem">
+          <div>{{ opt.label }}</div>
         </ng-template>
       </p-select>
     </div>

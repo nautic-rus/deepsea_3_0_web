@@ -1,14 +1,15 @@
-import { Component, Input, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, OnChanges, SimpleChanges, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { DatePipe, NgFor, NgIf } from '@angular/common';
 import { AvatarModule } from 'primeng/avatar';
 import { TranslateModule } from '@ngx-translate/core';
 import { IssuesService } from '../../../services/issues.service';
 import { AvatarService } from '../../../services/avatar.service';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-issue-detail-chat-history',
   standalone: true,
-  imports: [CommonModule, AvatarModule, TranslateModule],
+  imports: [DatePipe, NgFor, NgIf, AvatarModule, TranslateModule],
   templateUrl: './issue-detail-chat-history.component.html',
   styleUrls: ['./issue-detail-chat-history.component.scss']
 })
@@ -81,4 +82,6 @@ export class IssueDetailChatHistoryComponent implements OnChanges {
       }
     });
   }
+
+  trackByIndex(index: number): number { return index; }
 }

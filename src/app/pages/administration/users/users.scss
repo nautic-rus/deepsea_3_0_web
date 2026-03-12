@@ -9,6 +9,7 @@
 
 .admin-subpage-content {
   flex: 1 1 auto;
+  min-height: 0;
   height: 80vh;
   display: flex;
   flex-direction: column;

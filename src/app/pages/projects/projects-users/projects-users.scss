@@ -53,3 +53,23 @@
 .user-toast .p-toast-message {
   border-radius: 8px;
 }
+
+.select-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: inline-block;
+}
+
+/* initials variant for select when no avatar image available */
+.select-avatar-initials {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+}

@@ -1,8 +1,8 @@
-import { Component, Input, OnChanges, SimpleChanges, ChangeDetectorRef, Output, EventEmitter } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, ChangeDetectorRef, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { CommonModule } from '@angular/common';
+import { NgIf } from '@angular/common';
 import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -14,12 +14,14 @@ import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { TooltipModule } from 'primeng/tooltip';
 import { LinksService } from '../../services/links.service';
+import { AppMessageService } from '../../services/message.service';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-documents-detail-relations-table',
   standalone: true,
-  imports: [CommonModule, TranslateModule, TagModule, BadgeModule, ButtonModule, TableModule, TooltipModule, ConfirmDialogModule, ToastModule],
-  providers: [ConfirmationService, MessageService],
+  imports: [NgIf, TranslateModule, TagModule, BadgeModule, ButtonModule, TableModule, TooltipModule, ConfirmDialogModule, ToastModule],
+  providers: [ConfirmationService],
   template: `
     <section class="admin-subpage-relations card">
       <p-toast></p-toast>
@@ -36,7 +38,7 @@ import { LinksService } from '../../services/links.service';
           <tr>
             <th style="width:20%">{{ 'components.documents.relations.COLUMN_TYPE_ID' | translate }}</th>
             <th style="width:30%">{{ 'components.documents.relations.COLUMN_NAME' | translate }}</th>
-            <th style="width:15%">{{ 'components.documents.relations.COLUMN_STATUS' | translate }}</th>
+            <th style="width:20%">{{ 'components.documents.relations.COLUMN_STATUS' | translate }}</th>
             <th style="width:15%">{{ 'components.documents.relations.COLUMN_TYPE' | translate }}</th>
             <th style="width:15%">{{ 'components.documents.relations.COLUMN_DIRECTION' | translate }}</th>
             <th style="width:5%"></th>
@@ -45,7 +47,7 @@ import { LinksService } from '../../services/links.service';
         <ng-template pTemplate="body" let-r>
           <tr>
             <td>
-              <a *ngIf="r.type === 'Issue'" href="#" (click)="openIssue($event, r)" class="text-blue-600 dark:text-blue-400 hover:underline">{{ r.type + ' #' + r.id }}</a>
+              <a *ngIf="r.type === 'Issue'" href="#" (click)="openIssue($event, r)" class="text-blue-600 dark:text-blue-400 font-medium hover:underline">{{ r.type + ' #' + r.id }}</a>
               <a *ngIf="r.type === 'Document'" href="#" (click)="openDocument($event, r)" class="text-blue-600 dark:text-blue-400 font-medium hover:underline">{{ r.type + ' #' + r.id }}</a>
             </td>
             <td>
@@ -54,6 +56,7 @@ import { LinksService } from '../../services/links.service';
                     [pTooltip]="(r.code ? (r.code + ' ') : '') + (r.title || '')"
                     tooltipPosition="top"
                     tooltipAppendTo="body"
+                    class="text-sm text-surface-700"
                     [tooltipDisabled]="(((r.code ? (r.code + ' ') : '') + (r.title || '')).length <= 50)">
                 {{ truncate((r.code ? (r.code + ' ') : '') + (r.title || '')) }}
               </span>
@@ -61,6 +64,7 @@ import { LinksService } from '../../services/links.service';
                     [pTooltip]="r.title"
                     tooltipPosition="top"
                     tooltipAppendTo="body"
+                    class="text-sm text-surface-700"
                     [tooltipDisabled]="((r.title || '').length <= 50)">
                 {{ truncate(r.title) }}
               </span>
@@ -90,7 +94,9 @@ export class DocumentsDetailRelationsTableComponent implements OnChanges {
   @Output() addRelation = new EventEmitter<void>();
   relations: Array<any> = [];
 
-  constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router, private translate: TranslateService, private confirmationService: ConfirmationService, private messageService: MessageService, private linksService: LinksService) {}
+  constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router, private translate: TranslateService, private confirmationService: ConfirmationService, private linksService: LinksService,
+    private appMsg: AppMessageService
+  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['document']) {
@@ -273,11 +279,11 @@ export class DocumentsDetailRelationsTableComponent implements OnChanges {
             next: () => {
               this.relations = (this.relations || []).filter(r => r.raw?.id !== linkId && r.raw?.link_id !== linkId && r.raw?._id !== linkId);
               this.cdr.markForCheck();
-              try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Deleted', detail: this.translate.instant('components.documents.relations.DELETED') || 'Relation removed' }); } catch (e) {}
+              this.appMsg.success(this.translate.instant('components.documents.relations.DELETED') || 'Relation removed');
             },
             error: (err) => {
               console.warn('Failed to delete link', linkId, err);
-              try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: (err && err.message) ? err.message : this.translate.instant('components.documents.messages.ERROR') || 'Failed to delete relation' }); } catch (e) {}
+              this.appMsg.error((err && err.message) ? err.message : this.translate.instant('components.documents.messages.ERROR') || 'Failed to delete relation');
             }
           });
         },

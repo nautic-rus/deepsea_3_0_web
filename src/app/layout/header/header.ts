@@ -1,8 +1,8 @@
-import { Component, OnInit, Inject, ChangeDetectorRef, OnDestroy, HostListener } from '@angular/core';
-import { CommonModule, DOCUMENT } from '@angular/common';
+import { Component, OnInit, Inject, ChangeDetectorRef, OnDestroy, HostListener, ChangeDetectionStrategy, DestroyRef, inject } from '@angular/core';
+import { DOCUMENT, NgClass, NgIf } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
-import { Subscription } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ButtonModule } from 'primeng/button';
 import { MenubarModule } from 'primeng/menubar';
 import { BadgeModule } from 'primeng/badge';
@@ -18,9 +18,10 @@ import { UsersService } from '../../services/users.service';
 import { AvatarService } from '../../services/avatar.service';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterModule, ButtonModule, MenubarModule, BadgeModule, AvatarModule, RippleModule, MenuModule, TranslateModule],
+  imports: [NgClass, NgIf, RouterModule, ButtonModule, MenubarModule, BadgeModule, AvatarModule, RippleModule, MenuModule, TranslateModule],
   templateUrl: './header.html',
   styleUrls: ['./header.scss'],
   animations: [
@@ -41,7 +42,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   currentUser: any = null;
   rawPages: any[] = [];
   currentLang = 'en';
-  private langSub?: Subscription;
+  private destroyRef = inject(DestroyRef);
   title = 'DeepSea';
   langEnLabel = 'EN';
   langRuLabel = 'RU';
@@ -64,7 +65,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     // Check if dark mode was previously enabled
     this.darkMode = localStorage.getItem('darkMode') === 'true';
     // Ensure translation handler rebuilds menu labels and header texts on language change
-    this.langSub = this.translate.onLangChange.subscribe((event) => {
+    this.translate.onLangChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
       this.currentLang = event.lang || 'en';
       
       // update header title and language labels so template bindings refresh
@@ -82,9 +83,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy(): void {
-    this.langSub?.unsubscribe();
-  }
+  ngOnDestroy(): void { /* subscriptions auto-cleaned via takeUntilDestroyed */ }
 
   toggleDarkMode() {
     this.darkMode = !this.darkMode;

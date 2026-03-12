@@ -1,0 +1,145 @@
+<section class="admin-subpage-tools card mt-0">
+  <p-toolbar>
+    <div class="p-toolbar-group-left">
+      <p-button label="{{ 'MENU.CREATE' | translate }}" icon="pi pi-plus" class="mr-2" severity="primary" (onClick)="openNew()"></p-button>
+    </div>
+    <div class="p-toolbar-group-right">
+      <p-button label="{{ 'MENU.EXPORT' | translate }}" icon="pi pi-upload" severity="secondary"></p-button>
+    </div>
+  </p-toolbar>
+</section>
+
+<section class="admin-subpage-content card">
+  <div class="table-responsive">
+    <p-toast></p-toast>
+    <p-table #dt [value]="items" [loading]="loading" [scrollable]="true" scrollHeight="flex"
+      [rows]="10" size="small" [globalFilterFields]="['description','from_status_id','to_status_id','project.code','issue_type.name']"
+      [rowHover]="true" dataKey="id" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10,20,30]">
+
+      <ng-template pTemplate="caption">
+        <div class="flex justify-between mb-2">
+          <h3>{{ 'MENU.ISSUE' | translate }} — {{ 'components.projects.menu.WORK_FLOW' | translate }}</h3>
+          <p-iconfield>
+            <p-inputicon styleClass="pi pi-search"></p-inputicon>
+            <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="{{ 'components.projects.table.SEARCH' | translate }}" />
+          </p-iconfield>
+        </div>
+      </ng-template>
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="id">
+              <div class="flex items-center gap-2">
+                <span>{{ 'components.projects.table.HEADERS.ID' | translate }}</span>
+                <p-sortIcon field="id" />
+              </div>
+            </th>
+            <th pSortableColumn="project_code">
+              <div class="flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                  <span>{{ 'components.projects.table.HEADERS.PROJECT' | translate }}</span>
+                  <p-sortIcon field="project_code" />
+                </div>
+                <p-columnFilter field="project_code" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
+                  <ng-template #filter let-value let-filter="filterCallback">
+                    <p-multiSelect filter="true" filterBy="label" [ngModel]="value"
+                                   [options]="projectFilterOptions"
+                                   optionLabel="label"
+                                   optionValue="label"
+                                   placeholder="{{ 'MENU.ANY' | translate }}"
+                                   (onChange)="filter($event.value)"
+                                   styleClass="w-full"
+                                   appendTo="body">
+                    </p-multiSelect>
+                  </ng-template>
+                </p-columnFilter>
+              </div>
+            </th>
+            <th pSortableColumn="issue_type.name">
+              <div class="flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                  <span>{{ 'components.projects.table.HEADERS.TYPE' | translate }}</span>
+                  <p-sortIcon field="issue_type.name" />
+                </div>
+                <p-columnFilter field="issue_type.name" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
+                  <ng-template #filter let-value let-filter="filterCallback">
+                    <p-multiSelect filter="true" filterBy="label" [ngModel]="value"
+                                   [options]="typeFilterOptions"
+                                   optionLabel="label"
+                                   optionValue="label"
+                                   placeholder="{{ 'MENU.ANY' | translate }}"
+                                   (onChange)="filter($event.value)"
+                                   styleClass="w-full"
+                                   appendTo="body">
+                    </p-multiSelect>
+                  </ng-template>
+                </p-columnFilter>
+              </div>
+            </th>
+            <th pSortableColumn="from_status_id">
+              <div class="flex items-center gap-2">
+                <span>{{ 'components.projects.form.FROM_STATUS' | translate }}</span>
+                <p-sortIcon field="from_status_id" />
+              </div>
+            </th>
+            <th pSortableColumn="to_status_id">
+              <div class="flex items-center gap-2">
+                <span>{{ 'components.projects.form.TO_STATUS' | translate }}</span>
+                <p-sortIcon field="to_status_id" />
+              </div>
+            </th>
+            <th pSortableColumn="created_at">
+              <div class="flex items-center gap-2">
+                <span>{{ 'components.projects.table.HEADERS.CREATED_AT' | translate }}</span>
+                <p-sortIcon field="created_at" />
+              </div>
+            </th>
+            <th></th>
+          </tr>
+        </ng-template>
+
+      <ng-template pTemplate="body" let-p>
+        <tr>
+          <td>{{ p?.id || '—' }}</td>
+          <td>{{ p?.project?.code || p?.project_code || p?.project_id || '—' }}</td>
+          <td>{{ p?.issue_type?.name || p?.issue_type?.code || '—' }}</td>
+          <td>{{ statusName(p?.from_status_id) }}</td>
+          <td>{{ statusName(p?.to_status_id) }}</td>
+          <td>{{ p?.created_at ? (p.created_at | date:'short') : '—' }}</td>
+          <td>
+            <p-button icon="pi pi-pencil" class="mr-2" [outlined]="true" (click)="openEdit(p)" />
+            <p-button icon="pi pi-trash" severity="danger" [outlined]="true" (click)="confirmDelete(p)" />
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</section>
+
+    <p-dialog [header]="isCreating ? ('MENU.CREATE' | translate) : ('MENU.EDIT' | translate)" [(visible)]="displayDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{width: '35%'}">
+  <div class="flex flex-col gap-4">
+    <div class="flex flex-col gap-2">
+      <label for="wfProject" class="font-bold">{{ 'components.projects.form.PROJECT' | translate }}</label>
+      <p-select filter="true" filterBy="label" id="wfProject" [options]="projectOptions" optionLabel="label" optionValue="value" [(ngModel)]="editModel.project_id" appendTo="body" placeholder="{{ 'components.projects.form.PROJECT' | translate }}"></p-select>
+    </div>
+    <div class="flex flex-col gap-2">
+      <label for="wfType" class="font-bold">{{ 'components.projects.form.TYPE' | translate }}</label>
+      <p-select filter="true" filterBy="label" id="wfType" [options]="typeOptions" optionLabel="label" optionValue="value" [(ngModel)]="editModel.issue_type_id" appendTo="body" placeholder="{{ 'components.projects.form.TYPE' | translate }}"></p-select>
+    </div>
+    <div class="flex flex-col gap-2">
+      <label for="wfFrom" class="font-bold">{{ 'components.projects.form.FROM_STATUS' | translate }}</label>
+      <p-select filter="true" filterBy="label" id="wfFrom" [options]="statusOptions" optionLabel="label" optionValue="value" [(ngModel)]="editModel.from_status_id" appendTo="body" placeholder="{{ 'components.projects.form.FROM_STATUS' | translate }}"></p-select>
+    </div>
+    <div class="flex flex-col gap-2">
+      <label for="wfTo" class="font-bold">{{ 'components.projects.form.TO_STATUS' | translate }}</label>
+      <p-select filter="true" filterBy="label" id="wfTo" [options]="statusOptions" optionLabel="label" optionValue="value" [(ngModel)]="editModel.to_status_id" appendTo="body" placeholder="{{ 'components.projects.form.TO_STATUS' | translate }}"></p-select>
+    </div>
+    
+    <div *ngIf="error" class="text-red-600 block">{{ error }}</div>
+    <div class="flex justify-end gap-2 mt-4">
+      <p-button label="{{ 'components.projects.form.CANCEL' | translate }}" (onClick)="displayDialog=false" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="loading"></p-button>
+      <p-button label="{{ 'components.projects.form.SAVE' | translate }}" (onClick)="save()" severity="primary" icon="pi pi-check" iconPos="left" [disabled]="loading"></p-button>
+      <p-confirmDialog [style]="{ width: '25%' }" header="{{ 'MENU.CONFIRM' | translate }}" acceptLabel="{{ 'MENU.DELETE' | translate }}" rejectLabel="{{ 'MENU.CANCEL' | translate }}" acceptIcon="pi pi-check" acceptButtonStyleClass="p-button-danger" rejectButtonStyleClass="secondary p-button-text" rejectIcon="pi pi-times"></p-confirmDialog>
+    </div>
+  </div>
+</p-dialog>

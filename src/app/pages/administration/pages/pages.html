@@ -2,7 +2,6 @@
   <p-toolbar >
     <ng-template #start>
   <p-button [label]="'components.pages.form.CREATE_LABEL' | translate" icon="pi pi-plus" severity="primary" class="mr-2" (onClick)="openNew()" />
-  <p-button severity="secondary" [label]="'MENU.DELETE' | translate" icon="pi pi-trash"  (onClick)="deleteSelectedPages()" [disabled]="!selectedPages || !selectedPages.length" />
     </ng-template>
 
     <ng-template #end>
@@ -22,36 +21,37 @@
     [rows]="10"
     size="small"
     [globalFilterFields]="['id','key','path','parent_id']"
-  [(selection)]="selectedPages"
+    [(selection)]="selectedPages"
     [rowHover]="true"
     dataKey="id"
     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} items"
     [showCurrentPageReport]="true"
     [rowsPerPageOptions]="[10, 20, 30]"
+    style="table-layout: fixed;"
       >
 
   <ng-template #caption>
       <div class="flex justify-between mb-2">
         <h3>{{ 'MENU.PAGES' | translate }}</h3>
-        <span class="p-input-icon-left">
-          <i class="pi pi-search"></i>
+        <p-iconfield>
+          <p-inputicon styleClass="pi pi-search" /> 
           <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
-        </span>
+        </p-iconfield>
       </div>
-      </ng-template>
+  </ng-template>
 
   <ng-template pTemplate="header">
     <tr>
       <th style="width: 3rem">
         <p-tableHeaderCheckbox />
       </th>
-      <th>ID</th>
-      <th pSortableColumn="key">{{ 'components.pages.table.HEADERS.KEY' | translate }}<p-sortIcon field="key" /></th>
-      <th pSortableColumn="parent_id">{{ 'components.pages.table.HEADERS.PARENT_ID' | translate }}<p-sortIcon field="parent_id" /></th>
-      <th pSortableColumn="path">{{ 'components.pages.table.HEADERS.PATH' | translate }}<p-sortIcon field="path" /></th>
-      <th>{{ 'components.pages.table.HEADERS.MAIN_MENU' | translate }}</th>
-      <th>{{ 'components.pages.table.HEADERS.PERMISSIONS' | translate }}</th>
-      <th></th>
+      <th style="width: 4rem">ID</th>
+      <th pSortableColumn="key" style="width: 12rem">{{ 'components.pages.table.HEADERS.KEY' | translate }}<p-sortIcon field="key" /></th>
+      <th pSortableColumn="parent_id" style="width: 8rem">{{ 'components.pages.table.HEADERS.PARENT_ID' | translate }}<p-sortIcon field="parent_id" /></th>
+      <th pSortableColumn="path" style="width: 16rem">{{ 'components.pages.table.HEADERS.PATH' | translate }}<p-sortIcon field="path" /></th>
+      <th style="width: 8rem">{{ 'components.pages.table.HEADERS.MAIN_MENU' | translate }}</th>
+      <th style="width: 20rem">{{ 'components.pages.table.HEADERS.PERMISSIONS' | translate }}</th>
+      <th style="width: 8rem"></th>
     </tr>
   </ng-template>
   
@@ -68,7 +68,14 @@
       <td>
         <p-tag [value]="(page.main_menu ? 'MENU.ACTIVE_YES' : 'MENU.ACTIVE_NO') | translate" [severity]="page.main_menu ? 'success' : 'danger'"></p-tag>
       </td>
-      <td>{{ page.permissions ? (page.permissions.join(', ')) : '-' }}</td>
+      <td>
+        <ng-container *ngIf="page.permissions && page.permissions.length; else noPerms">
+          <span *ngFor="let perm of page.permissions; let i = index; trackBy: trackByPermId">
+            {{ perm.name || perm.code || perm }}<span *ngIf="i < page.permissions.length - 1">, </span>
+          </span>
+        </ng-container>
+        <ng-template #noPerms>-</ng-template>
+      </td>
       <td>
   <p-button icon="pi pi-pencil" class="mr-2" [outlined]="true" (click)="openEdit(page)" />
   <p-button icon="pi pi-trash" severity="danger" [outlined]="true" (click)="confirmDelete(page)" />
@@ -119,7 +126,7 @@
     </div>
     <div class="flex flex-col gap-2">
       <label for="pagePermissions">{{ 'components.pages.form.PERMISSIONS' | translate }}</label>
-      <p-multiSelect id="pagePermissions" [options]="permissionsOptions" [(ngModel)]="editModel.permissions" optionLabel="label" optionValue="value" placeholder="{{ 'components.pages.table.HEADERS.PERMISSIONS' | translate }}" appendTo="body"></p-multiSelect>
+      <p-multiSelect filter="true" filterBy="label" id="pagePermissions" [options]="permissionsOptions" [(ngModel)]="editModel.permissions" optionLabel="label" optionValue="value" placeholder="{{ 'components.pages.table.HEADERS.PERMISSIONS' | translate }}" appendTo="body"></p-multiSelect>
     </div>
     <div class="flex justify-end gap-2 mt-4">
       <p-button label="{{ 'MENU.CANCEL' | translate }}" (onClick)="displayDialog=false" class="p-button-text" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="loading"></p-button>

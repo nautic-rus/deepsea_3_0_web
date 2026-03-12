@@ -1,12 +1,12 @@
 import { Component, signal } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { MenuModule } from 'primeng/menu';
-import { CommonModule } from '@angular/common';
+import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
 
 @Component({
     standalone: true,
     selector: 'app-activity-widget',
-    imports: [ButtonModule, MenuModule, CommonModule],
+    imports: [ButtonModule, MenuModule, DatePipe, NgClass, NgFor, NgIf],
     template: `<div class="card mt-0">
         <div class="flex items-center justify-between mb-6">
             <div class="font-semibold text-xl">Activity</div>

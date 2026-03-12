@@ -1,5 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { DatePipe, NgIf } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { ToolbarModule } from 'primeng/toolbar';
@@ -21,12 +21,14 @@ import { Select } from 'primeng/select';
 import { Avatar } from 'primeng/avatar';
 import { AvatarService } from '../../../services/avatar.service';
 import { MultiSelectModule } from 'primeng/multiselect';
+import { AppMessageService } from '../../../services/message.service';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-projects-users',
   standalone: true,
-  imports: [CommonModule, TranslateModule, FormsModule, ToolbarModule, ButtonModule, TableModule, InputTextModule, InputIconModule, IconFieldModule, DialogModule, ToastModule, TagModule, ConfirmDialogModule, Select, MultiSelectModule, Avatar],
-  providers: [MessageService, ConfirmationService],
+  imports: [DatePipe, NgIf, TranslateModule, FormsModule, ToolbarModule, ButtonModule, TableModule, InputTextModule, InputIconModule, IconFieldModule, DialogModule, ToastModule, TagModule, ConfirmDialogModule, Select, MultiSelectModule, Avatar],
+  providers: [ConfirmationService],
   templateUrl: './projects-users.html',
   styleUrls: ['./projects-users.scss']
 })
@@ -44,7 +46,7 @@ export class ProjectsUsersComponent implements OnInit {
   isCreating = false;
   error: string | null = null;
   // options for owner select
-  usersOptions: { label: string; value: any }[] = [];
+  usersOptions: { label: string; value: any; avatar?: string | null }[] = [];
   // status options for select (populated in ngOnInit to support translations)
   statuses: { label: string; value: any }[] = [];
   // roles options for multi-select
@@ -59,7 +61,9 @@ export class ProjectsUsersComponent implements OnInit {
   assignDialog = false;
   assignModel: { project_id?: any; user_id: any[]; roles: any[] } = { user_id: [], roles: [] };
 
-  constructor(private svc: ProjectsUsersService, private cd: ChangeDetectorRef, private messageService: MessageService, private translate: TranslateService, private usersService: UsersService, private confirmationService: ConfirmationService, private auth: AuthService, private avatarService: AvatarService) {}
+  constructor(private svc: ProjectsUsersService, private cd: ChangeDetectorRef, private translate: TranslateService, private usersService: UsersService, private confirmationService: ConfirmationService, private auth: AuthService, private avatarService: AvatarService,
+    private appMsg: AppMessageService
+  ) {}
 
   private safeDetect(): void {
     try { this.cd.detectChanges(); } catch (e) { /* noop */ }
@@ -143,13 +147,27 @@ export class ProjectsUsersComponent implements OnInit {
           const list = (res && Array.isArray(res.data)) ? res.data : (Array.isArray(res) ? res : []);
             this.assignments = list || [];
             // assignments now include user info (full_name, first_name, last_name).
-            // Use those fields to populate ownerNames cache and avoid extra requests to /api/users/.
+            // Use those fields to populate ownerNames cache and resolve avatars.
             try {
               (this.assignments || []).forEach((a: any) => {
                 const uid = a && (a.user_id || a.user || a.userId);
                 if (uid !== undefined && uid !== null && !this.ownerNames[String(uid)]) {
                   const full = a?.full_name || [a?.last_name, a?.first_name, a?.middle_name].filter((s: any) => !!s).map((s: any) => String(s).trim()).join(' ');
                   this.ownerNames[String(uid)] = full || String(uid);
+                }
+                // Resolve avatar: prefer assignment fields, then fall back to usersOptions lookup
+                if (!a.avatar_url) {
+                  if (a.avatar || a.avatarUrl) {
+                    a.avatar_url = a.avatar || a.avatarUrl;
+                  } else if (a.avatar_id || a.avatarId) {
+                    const aid = a.avatar_id ?? a.avatarId;
+                    if (typeof aid === 'number' || (typeof aid === 'string' && String(aid).trim())) {
+                      a.avatar_url = `/api/storage/${String(aid).trim()}/download`;
+                    }
+                  } else if (uid != null) {
+                    const found = (this.usersOptions || []).find(u => String(u.value) === String(uid));
+                    if (found && found.avatar) { a.avatar_url = found.avatar; }
+                  }
                 }
               });
             } catch (e) {
@@ -175,7 +193,20 @@ export class ProjectsUsersComponent implements OnInit {
       this.usersService.getUsers(1, 1000).subscribe({
         next: (res: any) => {
           const list = (res && res.data) ? res.data : (Array.isArray(res) ? res : (res || []));
-          this.usersOptions = (list || []).map((u: any) => ({ label: this.formatUserName(u) || (u.email || String(u.id)), value: u.id }));
+          this.usersOptions = (list || []).map((u: any) => {
+            let avatar: string | null = null;
+            if (u.avatar_url || u.avatar || u.avatarUrl) {
+              avatar = u.avatar_url || u.avatar || u.avatarUrl || null;
+            } else if (u.avatar_id || u.avatarId) {
+              const aid = u.avatar_id ?? u.avatarId;
+              if (typeof aid === 'number' || (typeof aid === 'string' && String(aid).trim())) {
+                avatar = `/api/storage/${String(aid).trim()}/download`;
+              }
+            }
+            return { label: this.formatUserName(u) || (u.email || String(u.id)), value: u.id, avatar };
+          });
+          // Re-resolve avatars for any already-loaded assignments that lack avatar_url
+          this.resolveAssignmentAvatars();
           this.safeDetect();
         },
         error: () => {
@@ -183,6 +214,20 @@ export class ProjectsUsersComponent implements OnInit {
       });
     } catch (e) {
     }
+  }
+
+  /** Resolve avatar_url on already-loaded assignments from usersOptions lookup */
+  private resolveAssignmentAvatars(): void {
+    try {
+      (this.assignments || []).forEach((a: any) => {
+        if (a.avatar_url) return;
+        const uid = a && (a.user_id || a.user || a.userId);
+        if (uid != null) {
+          const found = (this.usersOptions || []).find(u => String(u.value) === String(uid));
+          if (found && found.avatar) { a.avatar_url = found.avatar; }
+        }
+      });
+    } catch (e) { /* ignore */ }
   }
 
   // global filter helper for p-table caption search
@@ -285,6 +330,14 @@ export class ProjectsUsersComponent implements OnInit {
     try { return this.avatarService.issueAvatarTextColor(user); } catch (e) { return '#fff'; }
   }
 
+  selectAvatarBg(label?: string | null): string {
+    try { return this.avatarService.selectAvatarBg(label); } catch (e) { return ''; }
+  }
+
+  selectAvatarTextColor(label?: string | null): string {
+    try { return this.avatarService.selectAvatarTextColor(label); } catch (e) { return '#fff'; }
+  }
+
   getOwnerName(id: any): string {
     if (!id && id !== 0) return '—';
     return this.ownerNames[String(id)] || String(id);
@@ -316,8 +369,7 @@ export class ProjectsUsersComponent implements OnInit {
   // Open assign dialog for the currently selected project
   openAssignDialog(): void {
     if (!this.selectedProject) {
-  this.messageService.add({ severity: 'warn', summary: '', detail: this.translate.instant('components.projects.users.SELECT_PROJECT.TEXT') || 'Select a project first' });
-      return;
+  this.appMsg.warn(this.translate.instant('components.projects.users.SELECT_PROJECT.TEXT') || 'Select a project first');return;
     }
     this.assignModel = { project_id: this.selectedProject, user_id: [], roles: [] };
     this.assignDialog = true;
@@ -326,14 +378,13 @@ export class ProjectsUsersComponent implements OnInit {
   // Save assignments (bulk) for selected project
   saveAssignments(): void {
     if (!this.selectedProject) {
-  this.messageService.add({ severity: 'error', summary: '', detail: this.translate.instant('components.projects.users.SELECT_PROJECT.TEXT') || 'Select a project' });
-      return;
+  this.appMsg.error(this.translate.instant('components.projects.users.SELECT_PROJECT.TEXT') || 'Select a project');return;
     }
     const payload = { project_id: this.selectedProject, user_id: this.assignModel.user_id || [], roles: this.assignModel.roles || [] };
     this.loading = true;
   this.svc.createAssignments(payload).subscribe({
       next: () => {
-  try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.projects.users.messages.SUMMARY_CREATE') || 'Create', detail: this.translate.instant('components.projects.users.messages.CREATED') || 'Assigned' }); } catch (e) {}
+  this.appMsg.success(this.translate.instant('components.projects.users.messages.CREATED') || 'Assigned');
         this.assignDialog = false;
         // reload assignments to reflect new entries
         this.loadAssignments(this.selectedProject);
@@ -341,7 +392,7 @@ export class ProjectsUsersComponent implements OnInit {
         this.safeDetect();
       },
       error: (err: any) => {
-      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.users.messages.SUMMARY_CREATE') || 'Create', detail: (err && err.message) ? err.message : 'Failed to assign' }); } catch (e) {}
+      this.appMsg.error((err && err.message) ? err.message : 'Failed to assign');
         this.loading = false;
         this.safeDetect();
       }
@@ -371,14 +422,14 @@ export class ProjectsUsersComponent implements OnInit {
           this.editModel = {};
           this.loading = false;
           this.isCreating = false;
-          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.projects.messages.SUMMARY_CREATE') || 'Create', detail: this.translate.instant('components.projects.messages.CREATED') || 'Project created' }); } catch (e) {}
+          this.appMsg.success(this.translate.instant('components.projects.messages.CREATED') || 'Project created');
           this.loadProjects();
           this.safeDetect();
         },
         error: (err: any) => {
           this.error = (err && err.message) ? err.message : 'Failed to create project';
           this.loading = false;
-          try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.messages.SUMMARY_CREATE') || 'Create', detail: this.error || '' }); } catch (e) {}
+          this.appMsg.error(this.error || '');
           this.safeDetect();
         }
       });
@@ -401,14 +452,14 @@ export class ProjectsUsersComponent implements OnInit {
           this.editModel = {};
           this.loading = false;
           this.isCreating = false;
-          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.projects.messages.SUMMARY_EDIT') || 'Edit', detail: this.translate.instant('components.projects.messages.UPDATED') || 'Project updated' }); } catch (e) {}
+          this.appMsg.success(this.translate.instant('components.projects.messages.UPDATED') || 'Project updated');
           this.loadProjects();
           this.safeDetect();
         },
         error: (err: any) => {
           this.error = (err && err.message) ? err.message : 'Failed to update project';
           this.loading = false;
-          try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.messages.SUMMARY_EDIT') || 'Edit', detail: this.error || '' }); } catch (e) {}
+          this.appMsg.error(this.error || '');
           this.safeDetect();
         }
       });
@@ -420,8 +471,7 @@ export class ProjectsUsersComponent implements OnInit {
     if (!a || !a.id) return;
     const projectId = this.selectedProject;
     if (!projectId) {
-  this.messageService.add({ severity: 'warn', summary: '', detail: this.translate.instant('components.projects.users.SELECT_PROJECT.TEXT') || 'Select a project first' });
-      return;
+  this.appMsg.warn(this.translate.instant('components.projects.users.SELECT_PROJECT.TEXT') || 'Select a project first');return;
     }
 
     // Build payload similar to bulk delete: include user_id and/or roles arrays
@@ -440,7 +490,7 @@ export class ProjectsUsersComponent implements OnInit {
           this.loading = true;
           this.svc.deleteAssignments(projectId, payload).subscribe({
             next: () => {
-              try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.projects.users.messages.SUMMARY_DELETE') || 'Delete', detail: this.translate.instant('components.projects.users.messages.DELETED') || 'Assignments deleted' }); } catch (e) {}
+              this.appMsg.success(this.translate.instant('components.projects.users.messages.DELETED') || 'Assignments deleted');
               // refresh assignments
               this.selectedProjects = [];
               this.loadAssignments(projectId);
@@ -448,7 +498,7 @@ export class ProjectsUsersComponent implements OnInit {
               this.safeDetect();
             },
             error: (err: any) => {
-              try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.users.messages.SUMMARY_DELETE') || 'Delete', detail: (err && err.message) ? err.message : 'Failed to delete assignment' }); } catch (e) {}
+              this.appMsg.error((err && err.message) ? err.message : 'Failed to delete assignment');
               this.loading = false;
               this.safeDetect();
             }
@@ -460,14 +510,14 @@ export class ProjectsUsersComponent implements OnInit {
       this.loading = true;
       this.svc.deleteAssignments(projectId, payload).subscribe({
         next: () => {
-          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.projects.users.messages.SUMMARY_DELETE') || 'Delete', detail: this.translate.instant('components.projects.users.messages.DELETED') || 'Assignments deleted' }); } catch (e) {}
+          this.appMsg.success(this.translate.instant('components.projects.users.messages.DELETED') || 'Assignments deleted');
           this.selectedProjects = [];
           this.loadAssignments(projectId);
           this.loading = false;
           this.safeDetect();
         },
         error: (err: any) => {
-          try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.users.messages.SUMMARY_DELETE') || 'Delete', detail: (err && err.message) ? err.message : 'Failed to delete assignment' }); } catch (e) {}
+          this.appMsg.error((err && err.message) ? err.message : 'Failed to delete assignment');
           this.loading = false;
           this.safeDetect();
         }
@@ -534,7 +584,7 @@ export class ProjectsUsersComponent implements OnInit {
     this.loading = true;
     this.svc.deleteAssignments(projectId, payload).subscribe({
       next: () => {
-          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.projects.users.messages.SUMMARY_DELETE') || 'Delete', detail: this.translate.instant('components.projects.users.messages.DELETED') || 'Assignments deleted' }); } catch (e) {}
+          this.appMsg.success(this.translate.instant('components.projects.users.messages.DELETED') || 'Assignments deleted');
         // reload assignments from server to get canonical state
         this.selectedProjects = [];
         this.loadAssignments(projectId);
@@ -542,7 +592,7 @@ export class ProjectsUsersComponent implements OnInit {
         this.safeDetect();
       },
       error: (err: any) => {
-        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.users.messages.SUMMARY_DELETE') || 'Delete', detail: (err && err.message) ? err.message : 'Failed to delete assignments' }); } catch (e) {}
+        this.appMsg.error((err && err.message) ? err.message : 'Failed to delete assignments');
         this.loading = false;
         this.safeDetect();
       }

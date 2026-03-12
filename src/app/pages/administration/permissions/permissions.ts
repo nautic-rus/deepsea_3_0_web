@@ -1,5 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { ToolbarModule } from 'primeng/toolbar';
@@ -20,6 +20,7 @@ import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { PermissionsService } from '../../../services/permissions.service';
+import { AppMessageService } from '../../../services/message.service';
 
 interface Permission {
   id: number | string;
@@ -30,10 +31,11 @@ interface Permission {
 }
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-admin-permissions',
   standalone: true,
   imports: [
-    CommonModule,
+    DatePipe,
     TranslateModule,
     FormsModule,
     ToolbarModule,
@@ -53,7 +55,7 @@ interface Permission {
     ConfirmDialogModule,
     ToastModule
   ],
-  providers: [ConfirmationService, MessageService],
+  providers: [ConfirmationService],
   templateUrl: './permissions.html',
   styleUrls: ['./permissions.scss']
 })
@@ -73,8 +75,8 @@ export class AdminPermissionsComponent implements OnInit {
     private permissionsService: PermissionsService,
     private cd: ChangeDetectorRef,
     private confirmationService: ConfirmationService,
-    private messageService: MessageService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private appMsg: AppMessageService
   ) {}
 
   private safeDetect(): void {
@@ -126,9 +128,7 @@ export class AdminPermissionsComponent implements OnInit {
   // Delete selected permissions (stub)
   deleteSelectedPermissions(): void {
     if (!this.selectedPermissions || !this.selectedPermissions.length) return;
-    try {
-      this.messageService.add({ severity: 'info', summary: 'Not implemented', detail: 'Bulk delete for permissions is not implemented yet' });
-    } catch (e) { }
+    this.appMsg.info('Bulk delete for permissions is not implemented yet');
   }
 
   // Edit existing permission
@@ -152,7 +152,7 @@ export class AdminPermissionsComponent implements OnInit {
     };
 
     if (!this.validateForm()) {
-      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CONFIRM') || 'Error', detail: 'Please fix form errors' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+      this.appMsg.error('Please fix form errors'); // TODO: make reactive (refresh on translate.onLangChange)
       return;
     }
 
@@ -165,14 +165,14 @@ export class AdminPermissionsComponent implements OnInit {
           this.editModel = {} as any;
           this.loading = false;
           this.isCreating = false;
-          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.CREATE') || 'Success', detail: this.translate.instant('components.permissions.messages.CREATED') || 'Created' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+          this.appMsg.success(this.translate.instant('components.permissions.messages.CREATED') || 'Created'); // TODO: make reactive (refresh on translate.onLangChange)
           this.loadPermissions();
           this.safeDetect();
         },
         error: (err) => {
           this.error = (err && err.message) ? err.message : 'Failed to create item';
           this.loading = false;
-          try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CREATE') || 'Create', detail: (err && err.message) ? err.message : 'Failed to create permission' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+          this.appMsg.error((err && err.message) ? err.message : 'Failed to create permission'); // TODO: make reactive (refresh on translate.onLangChange)
           this.safeDetect();
         }
       });
@@ -182,14 +182,14 @@ export class AdminPermissionsComponent implements OnInit {
           this.displayDialog = false;
           this.editModel = {} as any;
           this.loading = false;
-          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Success', detail: this.translate.instant('components.permissions.messages.UPDATED') || 'Updated' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+          this.appMsg.success(this.translate.instant('components.permissions.messages.UPDATED') || 'Updated'); // TODO: make reactive (refresh on translate.onLangChange)
           this.loadPermissions();
           this.safeDetect();
         },
         error: (err) => {
           this.error = (err && err.message) ? err.message : 'Failed to update item';
           this.loading = false;
-          try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.SAVE') || 'Save', detail: (err && err.message) ? err.message : 'Failed to update permission' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+          this.appMsg.error((err && err.message) ? err.message : 'Failed to update permission'); // TODO: make reactive (refresh on translate.onLangChange)
           this.safeDetect();
         }
       });
@@ -212,7 +212,7 @@ export class AdminPermissionsComponent implements OnInit {
         this.permissions = this.permissions.filter(u => u.id !== item.id);
         this.selectedPermissions = this.selectedPermissions.filter(s => s.id !== item.id);
         this.loading = false;
-  try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Delete', detail: this.translate.instant('components.permissions.messages.DELETED') || 'Deleted' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+  this.appMsg.success(this.translate.instant('components.permissions.messages.DELETED') || 'Deleted'); // TODO: make reactive (refresh on translate.onLangChange)
         this.safeDetect();
       },
       error: (err) => {
@@ -227,7 +227,7 @@ export class AdminPermissionsComponent implements OnInit {
     try {
       const rows = this.permissions || [];
       if (!rows.length) {
-        try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('MENU.ANY') || 'No users to export' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+        this.appMsg.info(this.translate.instant('MENU.ANY') || 'No users to export'); // TODO: make reactive (refresh on translate.onLangChange)
         return;
       }
   const headers = ['ID', this.translate.instant('components.permissions.table.HEADERS.NAME') || 'Name', this.translate.instant('components.permissions.table.HEADERS.CODE') || 'Code', this.translate.instant('components.permissions.table.HEADERS.DESCRIPTION') || 'Description', this.translate.instant('components.permissions.table.HEADERS.CREATED_AT') || 'Created At']; // TODO: make reactive (refresh on translate.onLangChange)
@@ -254,9 +254,9 @@ export class AdminPermissionsComponent implements OnInit {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-  try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('components.permissions.messages.EXPORTED') || 'Export completed' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+  this.appMsg.success(this.translate.instant('components.permissions.messages.EXPORTED') || 'Export completed'); // TODO: make reactive (refresh on translate.onLangChange)
     } catch (err) {
-      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: 'Export failed' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+      this.appMsg.error('Export failed'); // TODO: make reactive (refresh on translate.onLangChange)
     }
   }
 

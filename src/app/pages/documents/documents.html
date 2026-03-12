@@ -37,7 +37,7 @@
 
 							<div class="flex flex-col gap-2" *ngIf="!createDirFromContext || isEditingDir">
 								<label class="font-bold" for="dirProject">{{ 'components.documents.form.PROJECT_ID' | translate }} <span class="text-red-600">*</span></label>
-								<p-select id="dirProject" [options]="projectOptions" optionLabel="label" optionValue="value" [(ngModel)]="newDir.project_id" name="project_id" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+								<p-select filter="true" filterBy="label" id="dirProject" [options]="projectOptions" optionLabel="label" optionValue="value" [(ngModel)]="newDir.project_id" name="project_id" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
 								<div *ngIf="formErrors && formErrors.project_id" class="text-red-600 block">{{ formErrors.project_id }}</div>
 							</div>
 
@@ -75,7 +75,7 @@
 						<div class="grid grid-cols-2 gap-4">
 							<div class="flex flex-col gap-2">
 								<label class="font-bold">{{ 'components.documents.form.PROJECT' | translate }}</label>
-								<p-select [options]="projectOptions" [(ngModel)]="bulkEditModel.project_id" (ngModelChange)="onBulkDialogProjectChange($event)" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+								<p-select filter="true" filterBy="label" [options]="projectOptions" [(ngModel)]="bulkEditModel.project_id" (ngModelChange)="onBulkDialogProjectChange($event)" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
 							</div>
 							<div class="flex flex-col gap-2">
 								<label class="font-bold">{{ 'components.documents.form.DIRECTORY' | translate }}</label>
@@ -84,22 +84,22 @@
 
 							<div class="flex flex-col gap-2">
 								<label class="font-bold">{{ 'components.documents.form.TYPE' | translate }}</label>
-								<p-select [options]="typeOptions" [(ngModel)]="bulkEditModel.type_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+								<p-select filter="true" filterBy="label" [options]="typeOptions" [(ngModel)]="bulkEditModel.type_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
 							</div>
 
 							<div class="flex flex-col gap-2">
 								<label class="font-bold">{{ 'components.documents.form.SPECIALIZATION' | translate }}</label>
-								<p-select [options]="specializationsOptions" [(ngModel)]="bulkEditModel.specialization_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+								<p-select filter="true" filterBy="label" [options]="specializationsOptions" [(ngModel)]="bulkEditModel.specialization_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
 							</div>
 
 							<div class="flex flex-col gap-2">
 								<label class="font-bold">{{ 'components.documents.form.PRIORITY' | translate }}</label>
-								<p-select [options]="priorityOptions" [(ngModel)]="bulkEditModel.priority" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+								<p-select filter="true" filterBy="label" [options]="priorityOptions" [(ngModel)]="bulkEditModel.priority" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
 							</div>
 
 							<div class="flex flex-col gap-2">
 								<label class="font-bold">{{ 'components.documents.form.STAGE' | translate }}</label>
-								<p-select [options]="stagesOptions" [(ngModel)]="bulkEditModel.stage_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+								<p-select filter="true" filterBy="label" [options]="stagesOptions" [(ngModel)]="bulkEditModel.stage_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
 							</div>
 						</div>
 
@@ -147,7 +147,7 @@
 						<div class="flex gap-2">
 							<div class="flex-1 flex flex-col gap-2">
 								<label class="font-bold">{{ 'components.documents.form.PROJECT' | translate }} <span class="text-red-600">*</span></label>
-								<p-select [options]="projectOptions" [(ngModel)]="editModel.project_id" (ngModelChange)="onDialogProjectChange($event)" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body"></p-select>
+								<p-select filter="true" filterBy="label" [options]="projectOptions" [(ngModel)]="editModel.project_id" (ngModelChange)="onDialogProjectChange($event)" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body"></p-select>
 								<small *ngIf="formErrors.project_id" class="text-red-600 block">{{ formErrors.project_id }}</small>
 							</div>
 
@@ -166,7 +166,7 @@
 							<div class="flex gap-2">
 								<div class="flex-1 flex flex-col gap-2">
 									<label class="font-bold">{{ 'components.documents.form.SPECIALIZATION' | translate }} <span class="text-red-600">*</span></label>
-									<p-select [options]="specializationsOptions" [(ngModel)]="editModel.specialization_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body">
+									<p-select filter="true" filterBy="label" [options]="specializationsOptions" [(ngModel)]="editModel.specialization_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body">
 										<ng-template let-opt pTemplate="item">
 											<div class="flex items-center gap-2">{{ opt.label }}</div>
 										</ng-template>
@@ -181,7 +181,7 @@
 
 								<div class=" flex-1 flex flex-col gap-2">
 									<label class="font-bold">{{ 'components.documents.form.TYPE' | translate }} <span class="text-red-600">*</span></label>
-									<p-select [options]="typeOptions" [(ngModel)]="editModel.type_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+									<p-select filter="true" filterBy="label" [options]="typeOptions" [(ngModel)]="editModel.type_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
 									<small *ngIf="formErrors.type_id" class="text-red-600 block">{{ formErrors.type_id }}</small>
 								</div>
 							</div>
@@ -204,7 +204,7 @@
 						<div class="flex gap-2">
 							<div class="flex-1 flex flex-col gap-2">
 									<label class="font-bold">{{ 'components.documents.form.STAGE' | translate }}</label>
-									<p-select [options]="stagesOptions" [(ngModel)]="editModel.stage_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body">
+									<p-select filter="true" filterBy="label" [options]="stagesOptions" [(ngModel)]="editModel.stage_id" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body">
 										<ng-template let-opt pTemplate="item">
 											<div class="flex items-center gap-2">{{ opt.label }}</div>
 										</ng-template>
@@ -217,7 +217,7 @@
 
 							<div class="flex-1 flex flex-col gap-2">
 								<label class="font-bold">{{ 'components.documents.form.PRIORITY' | translate }}</label>
-								<p-select [options]="priorityOptions" [(ngModel)]="editModel.priority" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
+								<p-select filter="true" filterBy="label" [options]="priorityOptions" [(ngModel)]="editModel.priority" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.ANY' | translate }}" appendTo="body"></p-select>
 							</div>
 
 							<div class="flex-1 flex flex-col gap-2">
@@ -263,7 +263,7 @@
 							<div class="flex justify-between mb-2 items-center">
 								<h3>{{ 'MENU.DOCUMENTS' | translate }}</h3>
 								<div class="flex items-center gap-2">
-									<p-multiSelect [options]="columnsOptions" [(ngModel)]="selectedColumns" (onChange)="onColumnsChange()" placeholder="{{ 'MENU.COLUMNS' | translate }}" appendTo="body" styleClass="mr-2"></p-multiSelect>
+									<p-multiSelect filter="true" filterBy="label" [options]="columnsOptions" [(ngModel)]="selectedColumns" (onChange)="onColumnsChange()" placeholder="{{ 'MENU.COLUMNS' | translate }}" appendTo="body" styleClass="mr-2"></p-multiSelect>
 									<p-iconfield>
 										<p-inputicon styleClass="pi pi-search"></p-inputicon>
 										<input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="{{ 'components.issues.table.SEARCH' | translate }}" />
@@ -278,7 +278,7 @@
 									<p-tableHeaderCheckbox></p-tableHeaderCheckbox>
 								</th>
 
-								<ng-container *ngFor="let col of columns">
+								<ng-container *ngFor="let col of columns; trackBy: trackByField">
 									<th *ngIf="isColumnVisible(col.field)" [attr.data-field]="col.field" pReorderableColumn [pSortableColumn]="col.field" pResizableColumn>
 										<div class="flex justify-between items-center">
 											<div class="flex items-center gap-2">
@@ -290,7 +290,7 @@
 												<ng-container *ngSwitchCase="'project_name'">
 													<p-columnFilter field="project_name" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
 														<ng-template #filter let-value let-filter="filterCallback">
-															<p-multiselect [ngModel]="value"
+															<p-multiselect filter="true" filterBy="label" [ngModel]="value"
 																[options]="projectOptions"
 																optionLabel="label"
 																optionValue="label"
@@ -305,7 +305,7 @@
 												<ng-container *ngSwitchCase="'specialization_name'">
 													<p-columnFilter field="specialization_name" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
 														<ng-template #filter let-value let-filter="filterCallback">
-															<p-multiselect [ngModel]="value"
+															<p-multiselect filter="true" filterBy="label" [ngModel]="value"
 																[options]="specializationsOptions"
 																optionLabel="label"
 																optionValue="label"
@@ -320,7 +320,7 @@
 												<ng-container *ngSwitchCase="'assignee_name'">
 													<p-columnFilter field="assignee_name" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
 														<ng-template #filter let-value let-filter="filterCallback">
-															<p-multiselect [ngModel]="value"
+															<p-multiselect filter="true" filterBy="label" [ngModel]="value"
 																			[options]="usersOptions"
 																			optionLabel="label"
 																			optionValue="label"
@@ -335,7 +335,7 @@
 												<ng-container *ngSwitchCase="'author_name'">
 													<p-columnFilter field="author_name" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
 														<ng-template #filter let-value let-filter="filterCallback">
-															<p-multiselect [ngModel]="value"
+															<p-multiselect filter="true" filterBy="label" [ngModel]="value"
 																			[options]="usersOptions"
 																			optionLabel="label"
 																			optionValue="label"
@@ -350,7 +350,7 @@
 												<ng-container *ngSwitchCase="'status_name'">
 													<p-columnFilter field="status_name" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
 														<ng-template #filter let-value let-filter="filterCallback">
-															<p-multiselect [ngModel]="value"
+															<p-multiselect filter="true" filterBy="label" [ngModel]="value"
 																			[options]="statusOptions"
 																			optionLabel="label"
 																			optionValue="label"
@@ -365,7 +365,7 @@
 												<ng-container *ngSwitchCase="'type_name'">
 													<p-columnFilter field="type_name" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
 														<ng-template #filter let-value let-filter="filterCallback">
-															<p-multiselect [ngModel]="value"
+															<p-multiselect filter="true" filterBy="label" [ngModel]="value"
 																			[options]="typeOptions"
 																			optionLabel="label"
 																			optionValue="label"
@@ -381,7 +381,7 @@
 												<ng-container *ngSwitchCase="'priority_text'">
 													<p-columnFilter field="priority_text" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
 														<ng-template #filter let-value let-filter="filterCallback">
-															<p-multiselect [ngModel]="value"
+															<p-multiselect filter="true" filterBy="label" [ngModel]="value"
 																			[options]="priorityOptions"
 																			optionLabel="label"
 																			optionValue="label"
@@ -409,7 +409,7 @@
 									<p-tableCheckbox [value]="issue"></p-tableCheckbox>
 								</td>
 
-								<ng-container *ngFor="let col of columns">
+								<ng-container *ngFor="let col of columns; trackBy: trackByField">
 									<td *ngIf="isColumnVisible(col.field)" [attr.data-field]="col.field">
 										<ng-container [ngSwitch]="col.field">
 											<ng-container *ngSwitchCase="'id'">{{ issue.id }}</ng-container>

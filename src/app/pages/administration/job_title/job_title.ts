@@ -1,5 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { ToolbarModule } from 'primeng/toolbar';
@@ -20,6 +20,7 @@ import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { JobTitlesService } from '../../../services/job_titles.service';
+import { AppMessageService } from '../../../services/message.service';
 
 interface JobTitle {
  id: number | string;
@@ -30,10 +31,11 @@ interface JobTitle {
 }
 
 @Component({
+ changeDetection: ChangeDetectionStrategy.OnPush,
  selector: 'app-admin-job-title',
  standalone: true,
  imports: [
- CommonModule,
+ DatePipe,
  TranslateModule,
  FormsModule,
  ToolbarModule,
@@ -52,7 +54,7 @@ interface JobTitle {
  ConfirmDialogModule,
  ToastModule
  ],
- providers: [ConfirmationService, MessageService],
+ providers: [ConfirmationService],
  templateUrl: './job_title.html',
  styleUrls: ['./job_title.scss']
 })
@@ -70,9 +72,9 @@ export class AdminJobTitleComponent implements OnInit {
  private jobTitlesService: JobTitlesService,
  private cd: ChangeDetectorRef,
  private confirmationService: ConfirmationService,
- private messageService: MessageService,
- private translate: TranslateService
- ) {}
+ private translate: TranslateService,
+    private appMsg: AppMessageService
+  ) {}
 
  private safeDetect(): void { try { this.cd.detectChanges(); } catch (e) { } }
 
@@ -84,7 +86,7 @@ export class AdminJobTitleComponent implements OnInit {
 
  openNew(): void { this.editModel = { name: '', description: '' }; this.isCreating = true; this.displayDialog = true; }
 
- deleteSelectedJobTitles(): void { if (!this.selectedJobTitles || !this.selectedJobTitles.length) return; try { this.messageService.add({ severity: 'info', summary: 'Not implemented', detail: 'Bulk delete is not implemented yet' }); } catch (e) {} }
+ deleteSelectedJobTitles(): void { if (!this.selectedJobTitles || !this.selectedJobTitles.length) return; this.appMsg.info('Bulk delete is not implemented yet'); }
 
  openEdit(item: JobTitle): void { if (!item) return; this.editModel = { ...item } as any; this.isCreating = false; this.displayDialog = true; }
 
@@ -95,7 +97,7 @@ export class AdminJobTitleComponent implements OnInit {
  const payload: Partial<JobTitle> = { name: this.editModel.name, description: this.editModel.description };
 
  if (!this.validateForm()) {
- try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CONFIRM') || 'Error', detail: 'Please fix form errors' }); } catch (e) {}
+ this.appMsg.error('Please fix form errors');
  return;
  }
 
@@ -107,14 +109,14 @@ export class AdminJobTitleComponent implements OnInit {
  this.editModel = {} as any;
  this.loading = false;
  this.isCreating = false;
- try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.CREATE') || 'Success', detail: 'Created' }); } catch (e) {}
+ this.appMsg.success('Created');
  this.loadJobTitles();
  this.safeDetect();
  },
  error: (err: any) => {
  this.error = (err && err.message) ? err.message : 'Failed to create item';
  this.loading = false;
- try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CREATE') || 'Create', detail: (err && err.message) ? err.message : 'Failed to create job title' }); } catch (e) {}
+ this.appMsg.error((err && err.message) ? err.message : 'Failed to create job title');
  this.safeDetect();
  }
  });
@@ -124,14 +126,14 @@ export class AdminJobTitleComponent implements OnInit {
  this.displayDialog = false;
  this.editModel = {} as any;
  this.loading = false;
- try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Success', detail: 'Updated' }); } catch (e) {}
+ this.appMsg.success('Updated');
  this.loadJobTitles();
  this.safeDetect();
  },
  error: (err: any) => {
  this.error = (err && err.message) ? err.message : 'Failed to update item';
  this.loading = false;
- try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.SAVE') || 'Save', detail: (err && err.message) ? err.message : 'Failed to update job title' }); } catch (e) {}
+ this.appMsg.error((err && err.message) ? err.message : 'Failed to update job title');
  this.safeDetect();
  }
  });
@@ -140,13 +142,13 @@ export class AdminJobTitleComponent implements OnInit {
 
  confirmDelete(item: JobTitle): void { if (!item) return; this.confirmationService.confirm({ message: `${this.translate.instant('MENU.DELETE') || 'Delete'} "${item.name || item.id}"?`, icon: 'pi pi-exclamation-triangle', accept: () => this.deleteJobTitle(item) }); }
 
- deleteJobTitle(item: JobTitle): void { if (!item) return; this.loading = true; this.jobTitlesService.deleteJobTitle(item.id).subscribe({ next: () => { this.jobTitles = this.jobTitles.filter(u => u.id !== item.id); this.selectedJobTitles = this.selectedJobTitles.filter(s => s.id !== item.id); this.loading = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Delete', detail: 'Deleted' }); } catch (e) {} this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to delete item'; this.loading = false; this.safeDetect(); } }); }
+ deleteJobTitle(item: JobTitle): void { if (!item) return; this.loading = true; this.jobTitlesService.deleteJobTitle(item.id).subscribe({ next: () => { this.jobTitles = this.jobTitles.filter(u => u.id !== item.id); this.selectedJobTitles = this.selectedJobTitles.filter(s => s.id !== item.id); this.loading = false; this.appMsg.success('Deleted'); this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to delete item'; this.loading = false; this.safeDetect(); } }); }
 
  exportCSV(): void {
  try {
  const rows = this.jobTitles || [];
  if (!rows.length) {
- try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('MENU.ANY') || 'No items to export' }); } catch (e) {}
+ this.appMsg.info(this.translate.instant('MENU.ANY') || 'No items to export');
  return;
  }
 
@@ -183,9 +185,9 @@ export class AdminJobTitleComponent implements OnInit {
  document.body.removeChild(link);
  URL.revokeObjectURL(url);
 
- try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('components.permissions.messages.EXPORTED') || 'Export completed' }); } catch (e) {}
+ this.appMsg.success(this.translate.instant('components.permissions.messages.EXPORTED') || 'Export completed');
  } catch (err) {
- try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: 'Export failed' }); } catch (e) {}
+ this.appMsg.error('Export failed');
  }
  }
 

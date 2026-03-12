@@ -116,11 +116,11 @@
         <div class="grid grid-cols-2 gap-4 items-center">
           <div>
             <label class="font-bold block text-sm mb-1">{{ 'components.documents.attach.TYPE' | translate }} <span class="text-red-600">*</span></label>
-            <p-select style="width:100%" [options]="storageTypesOptions" [(ngModel)]="addModel.type_id" (ngModelChange)="onTypeChange($event)" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body"></p-select>
+            <p-select filter="true" filterBy="label" style="width:100%" [options]="storageTypesOptions" [(ngModel)]="addModel.type_id" (ngModelChange)="onTypeChange($event)" optionLabel="label" optionValue="value" placeholder="{{ 'MENU.SELECT' | translate }}" appendTo="body"></p-select>
           </div>
           <div>
             <label class="font-bold block text-sm mb-1">{{ 'components.documents.attach.REV' | translate }} <span class="text-red-600">*</span></label>
-            <p-select style="width:100%" [options]="revOptions" [(ngModel)]="addModel.rev" optionLabel="label" optionValue="value" placeholder="-" appendTo="body"></p-select>
+            <p-select filter="true" filterBy="label" style="width:100%" [options]="revOptions" [(ngModel)]="addModel.rev" optionLabel="label" optionValue="value" placeholder="-" appendTo="body"></p-select>
           </div>
         </div>
         <div *ngIf="addUploadedFiles && addUploadedFiles.length && (!addModel.type_id || !addModel.rev)" class="text-sm text-red-600 mt-2">
@@ -144,7 +144,7 @@
           </div>
 
           <div class="uploaded-previews mt-4" *ngIf="addUploadedFiles && addUploadedFiles.length">
-            <div *ngFor="let p of addUploadedFiles" class="preview-item flex items-center justify-between mb-3">
+            <div *ngFor="let p of addUploadedFiles; trackBy: trackByUploadId" class="preview-item flex items-center justify-between mb-3">
               <div class="flex items-center gap-3">
                 <img *ngIf="p.url" [src]="p.url" [alt]="p.file.name" style="width:48px;height:48px;object-fit:cover;border-radius:4px;" />
                 <div>

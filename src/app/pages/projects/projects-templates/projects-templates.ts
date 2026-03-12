@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+;
 import { TranslateModule } from '@ngx-translate/core';
 import { RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
@@ -7,7 +7,7 @@ import { ButtonModule } from 'primeng/button';
 @Component({
   selector: 'app-projects-templates',
   standalone: true,
-  imports: [CommonModule, TranslateModule, RouterModule, ButtonModule],
+  imports: [TranslateModule, RouterModule, ButtonModule],
   template: `
 <div class="page-wiki">
   <section class="admin-subpage-content card text-center flex flex-col items-center justify-center mt-0" style="height: 92vh;">

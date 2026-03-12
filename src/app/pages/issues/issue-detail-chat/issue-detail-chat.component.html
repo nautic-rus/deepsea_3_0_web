@@ -13,9 +13,9 @@
       {{ 'components.issues.chat.NO_MESSAGES' | translate }}
     </div>
 
-    <ng-container *ngFor="let group of grouped()">
+    <ng-container *ngFor="let group of grouped(); trackBy: trackByLabel">
       <ul *ngIf="group.items && group.items.length" class="documents-history-group p-0 m-0 list-none mb-6">
-        <li *ngFor="let ev of group.items" class="flex items-start mb-3" [attr.id]="ev.type === 'message' && ev.id ? ('msg-' + ev.id) : null" [class.message-highlight]="ev.type === 'message' && ev.id == highlightedMessageId">
+        <li *ngFor="let ev of group.items; trackBy: trackByEvId" class="flex items-start mb-3" [attr.id]="ev.type === 'message' && ev.id ? ('msg-' + ev.id) : null" [class.message-highlight]="ev.type === 'message' && ev.id == highlightedMessageId">
           <div class="w-10 h-10 flex items-center mr-2">
             <ng-container *ngIf="ev?.avatar_url; else initialsTpl">
               <p-avatar [image]="ev.avatar_url || undefined" shape="circle"  (imageError)="onMessageAvatarError(ev)"></p-avatar>

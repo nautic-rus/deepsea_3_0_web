@@ -1,0 +1,5 @@
+.projects-subpage { padding: 1rem; }
+:host { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+.admin-subpage-content { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; height: 80vh; }
+.table-responsive { flex: 1 1 auto; overflow: auto; display: block; }
+.p-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 0; background: var(--p-toolbar-background); border: 0px solid var(--p-toolbar-border-color); color: var(--p-toolbar-color); border-radius: var(--p-toolbar-border-radius); gap: var(--p-toolbar-gap); }

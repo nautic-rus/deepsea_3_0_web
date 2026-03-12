@@ -7,28 +7,20 @@
       <div class="flex gap-2">
         <div class="flex-1 flex flex-col gap-2">
           <label class="font-bold">{{ 'components.documents.activity.assign.USER' | translate }} <span class="text-red-600">*</span></label>
-          <p-select [options]="usersOptions" optionLabel="label" optionValue="value" [(ngModel)]="assignModel.user_id" appendTo="body" placeholder="{{ 'components.documents.activity.assign.USER_PLACEHOLDER' | translate }}" [ngClass]="{'p-invalid': assignErrors.userRequired}">
+          <p-select filter="true" filterBy="label" [options]="usersOptions" optionLabel="label" optionValue="value" [(ngModel)]="assignModel.user_id" appendTo="body" placeholder="{{ 'components.documents.activity.assign.USER_PLACEHOLDER' | translate }}" [ngClass]="{'p-invalid': assignErrors.userRequired}">
             <ng-template let-opt pTemplate="item">
               <div class="flex items-center gap-2">
-                <ng-container *ngIf="opt?.avatar; else initialsTpl">
-                  <p-avatar [image]="opt.avatar || undefined" shape="circle" styleClass="mr-2"></p-avatar>
+                <ng-container *ngIf="opt.avatar; else initialsItem">
+                  <img [src]="opt.avatar" alt="avatar" class="select-avatar mr-2" />
                 </ng-container>
-                <ng-template #initialsTpl>
-                  <p-avatar [label]="initialsFromName(opt?.label)" shape="circle" [style]="{ 'background-color': issueAvatarColor({ first_name: opt?.label }), color: issueAvatarTextColor({ first_name: opt?.label }) }" styleClass="mr-2"></p-avatar>
+                <ng-template #initialsItem>
+                  <p-avatar [label]="initialsFromName(opt.label)" class="mr-2" shape="circle" [style]="{ 'background-color': selectAvatarBg(opt.value || opt.label), color: selectAvatarTextColor(opt.value || opt.label) }"></p-avatar>
                 </ng-template>
-                <div>{{ opt?.label }}</div>
+                <div>{{ opt.label }}</div>
               </div>
             </ng-template>
             <ng-template let-opt pTemplate="selectedItem">
-              <div class="flex items-center gap-2">
-                <ng-container *ngIf="opt?.avatar; else initialsTplSel">
-                  <p-avatar [image]="opt.avatar || undefined" shape="circle" styleClass="mr-2"></p-avatar>
-                </ng-container>
-                <ng-template #initialsTplSel>
-                  <p-avatar [label]="initialsFromName(opt?.label)" shape="circle" [style]="{ 'background-color': issueAvatarColor({ first_name: opt?.label }), color: issueAvatarTextColor({ first_name: opt?.label }) }" styleClass="mr-2"></p-avatar>
-                </ng-template>
-                <div>{{ opt?.label }}</div>
-              </div>
+              <div>{{ opt.label }}</div>
             </ng-template>
           </p-select>
           <small *ngIf="assignErrors.userRequired" class="text-red-600">{{ 'components.documents.activity.assign.USER_REQUIRED' | translate }}</small>
@@ -44,7 +36,7 @@
         </div>
         <div class="flex-1 flex flex-col gap-2">
           <label class="font-bold">{{ 'components.documents.activity.assign.PRIORITY' | translate }}</label>
-          <p-select [options]="priorityOptions" optionLabel="label" optionValue="value" [(ngModel)]="assignModel.priority" appendTo="body" placeholder="{{ 'components.documents.activity.assign.PRIORITY_PLACEHOLDER' | translate }}"></p-select>
+          <p-select filter="true" filterBy="label" [options]="priorityOptions" optionLabel="label" optionValue="value" [(ngModel)]="assignModel.priority" appendTo="body" placeholder="{{ 'components.documents.activity.assign.PRIORITY_PLACEHOLDER' | translate }}"></p-select>
         </div>
       </div>
 
