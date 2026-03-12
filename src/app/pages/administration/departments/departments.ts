@@ -1,5 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { DatePipe, NgIf } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { ToolbarModule } from 'primeng/toolbar';
@@ -24,6 +24,7 @@ import { DepartmentsService } from '../../../services/departments.service';
 import { UsersService } from '../../../services/users.service';
 import { AvatarService } from '../../../services/avatar.service';
 import { AvatarModule } from 'primeng/avatar';
+import { AppMessageService } from '../../../services/message.service';
 
 interface Department {
  id: number | string;
@@ -34,10 +35,11 @@ interface Department {
 }
 
 @Component({
+ changeDetection: ChangeDetectionStrategy.OnPush,
  selector: 'app-admin-departments',
  standalone: true,
  imports: [
- CommonModule,
+ DatePipe, NgIf,
  TranslateModule,
  FormsModule,
  ToolbarModule,
@@ -58,7 +60,7 @@ interface Department {
  Select,
  AvatarModule
  ],
- providers: [ConfirmationService, MessageService],
+ providers: [ConfirmationService],
  templateUrl: './departments.html',
  styleUrls: ['./departments.scss']
 })
@@ -79,9 +81,9 @@ export class AdminDepartmentsComponent implements OnInit {
  private avatarService: AvatarService,
  private cd: ChangeDetectorRef,
  private confirmationService: ConfirmationService,
- private messageService: MessageService,
- private translate: TranslateService
- ) {}
+ private translate: TranslateService,
+    private appMsg: AppMessageService
+  ) {}
 
  private safeDetect(): void {
  try { this.cd.detectChanges(); } catch (e) { }
@@ -143,7 +145,7 @@ ngOnInit(): void { this.loadPermissions(); this.loadUsers(); }
 
  deleteSelectedPermissions(): void {
  if (!this.selectedPermissions || !this.selectedPermissions.length) return;
- try { this.messageService.add({ severity: 'info', summary: 'Not implemented', detail: 'Bulk delete is not implemented yet' }); } catch (e) {}
+ this.appMsg.info('Bulk delete is not implemented yet');
  }
 
  openEdit(item: Department): void { if (!item) return; this.editModel = { ...item } as any; this.isCreating = false; this.displayDialog = true; }
@@ -153,17 +155,17 @@ ngOnInit(): void { this.loadPermissions(); this.loadUsers(); }
  if (!this.isCreating && (this.editModel.id == null)) return;
  const id = (this.editModel.id != null) ? this.editModel.id : null;
  const payload: Partial<Department> = { name: this.editModel.name, manager_id: (this.editModel as any).manager_id, description: this.editModel.description };
- if (!this.validateForm()) { try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CONFIRM') || 'Error', detail: 'Please fix form errors' }); } catch (e) {} return; } // TODO: make reactive (refresh on translate.onLangChange)
+ if (!this.validateForm()) { this.appMsg.error('Please fix form errors'); return; } // TODO: make reactive (refresh on translate.onLangChange)
  this.loading = true;
  if (this.isCreating) {
  this.departmentsService.createPermission(payload as any).subscribe({
- next: () => { this.displayDialog = false; this.editModel = {} as any; this.loading = false; this.isCreating = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.CREATE') || 'Success', detail: 'Created' }); } catch (e) {} this.loadPermissions(); this.safeDetect(); }, // TODO: make reactive (refresh on translate.onLangChange)
- error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to create item'; this.loading = false; try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CREATE') || 'Create', detail: (err && err.message) ? err.message : 'Failed to create permission' }); } catch (e) {} this.safeDetect(); } // TODO: make reactive (refresh on translate.onLangChange)
+ next: () => { this.displayDialog = false; this.editModel = {} as any; this.loading = false; this.isCreating = false; this.appMsg.success('Created'); this.loadPermissions(); this.safeDetect(); }, // TODO: make reactive (refresh on translate.onLangChange)
+ error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to create item'; this.loading = false; this.appMsg.error((err && err.message) ? err.message : 'Failed to create permission'); this.safeDetect(); } // TODO: make reactive (refresh on translate.onLangChange)
  });
  } else {
  this.departmentsService.updatePermission(id as any, payload as any).subscribe({
- next: () => { this.displayDialog = false; this.editModel = {} as any; this.loading = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Success', detail: 'Updated' }); } catch (e) {} this.loadPermissions(); this.safeDetect(); }, // TODO: make reactive (refresh on translate.onLangChange)
- error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to update item'; this.loading = false; try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.SAVE') || 'Save', detail: (err && err.message) ? err.message : 'Failed to update permission' }); } catch (e) {} this.safeDetect(); } // TODO: make reactive (refresh on translate.onLangChange)
+ next: () => { this.displayDialog = false; this.editModel = {} as any; this.loading = false; this.appMsg.success('Updated'); this.loadPermissions(); this.safeDetect(); }, // TODO: make reactive (refresh on translate.onLangChange)
+ error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to update item'; this.loading = false; this.appMsg.error((err && err.message) ? err.message : 'Failed to update permission'); this.safeDetect(); } // TODO: make reactive (refresh on translate.onLangChange)
  });
  }
  }
@@ -173,15 +175,15 @@ ngOnInit(): void { this.loadPermissions(); this.loadUsers(); }
  }
 
  deletePermission(item: Department): void {
- if (!item) return; this.loading = true; this.departmentsService.deletePermission(item.id).subscribe({ next: () => { this.permissions = this.permissions.filter(u => u.id !== item.id); this.selectedPermissions = this.selectedPermissions.filter(s => s.id !== item.id); this.loading = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Delete', detail: 'Deleted' }); } catch (e) {} this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to delete item'; this.loading = false; this.safeDetect(); } }); // TODO: make reactive (refresh on translate.onLangChange)
+ if (!item) return; this.loading = true; this.departmentsService.deletePermission(item.id).subscribe({ next: () => { this.permissions = this.permissions.filter(u => u.id !== item.id); this.selectedPermissions = this.selectedPermissions.filter(s => s.id !== item.id); this.loading = false; this.appMsg.success('Deleted'); this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to delete item'; this.loading = false; this.safeDetect(); } }); // TODO: make reactive (refresh on translate.onLangChange)
  }
 
  exportCSV(): void {
- try { const rows = this.permissions || []; if (!rows.length) { try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('MENU.ANY') || 'No users to export' }); } catch (e) {} return; } // TODO: make reactive (refresh on translate.onLangChange)
+ try { const rows = this.permissions || []; if (!rows.length) { this.appMsg.info(this.translate.instant('MENU.ANY') || 'No users to export'); return; } // TODO: make reactive (refresh on translate.onLangChange)
  const headers = ['ID', this.translate.instant('components.permissions.table.HEADERS.NAME') || 'Name', this.translate.instant('components.departments.table.HEADERS.MANAGER') || 'Manager', this.translate.instant('components.permissions.table.HEADERS.DESCRIPTION') || 'Description', this.translate.instant('components.permissions.table.HEADERS.CREATED_AT') || 'Created At']; // TODO: make reactive (refresh on translate.onLangChange)
  const esc = (v: any) => { if (v === null || v === undefined) return ''; if (typeof v === 'boolean') return v ? (this.translate.instant('MENU.ACTIVE_YES') || 'Active') : (this.translate.instant('MENU.ACTIVE_NO') || 'Inactive'); const s = String(v); return '"' + s.replace(/"/g, '""') + '"'; }; // TODO: make reactive (refresh on translate.onLangChange)
  const lines = [headers.map(h => '"' + String(h).replace(/"/g, '""') + '"').join(',')]; for (const u of rows) { const line = [esc(u.id), esc(u.name), esc((u as any).manager_id), esc((u as any).description), esc(u.created_at)].join(','); lines.push(line); }
- const csv = lines.join('\n'); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const timestamp = new Date().toISOString().replace(/[:.]/g, '-'); const filename = `departments_export_${timestamp}.csv`; const link = document.createElement('a'); const url = URL.createObjectURL(blob); link.href = url; link.setAttribute('download', filename); document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url); try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('components.permissions.messages.EXPORTED') || 'Export completed' }); } catch (e) {} } catch (err) { try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: 'Export failed' }); } catch (e) {} } // TODO: make reactive (refresh on translate.onLangChange)
+ const csv = lines.join('\n'); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const timestamp = new Date().toISOString().replace(/[:.]/g, '-'); const filename = `departments_export_${timestamp}.csv`; const link = document.createElement('a'); const url = URL.createObjectURL(blob); link.href = url; link.setAttribute('download', filename); document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url); this.appMsg.success(this.translate.instant('components.permissions.messages.EXPORTED') || 'Export completed'); } catch (err) { this.appMsg.error('Export failed'); } // TODO: make reactive (refresh on translate.onLangChange)
  }
 
  validateForm(): boolean { this.formErrors = {}; const name = (this.editModel && this.editModel.name) ? String(this.editModel.name).trim() : ''; if (!name) this.formErrors.name = (this.translate.instant('components.permissions.form.NAME') || 'Name') + ' is required'; this.safeDetect(); return Object.keys(this.formErrors).length === 0; } // TODO: make reactive (refresh on translate.onLangChange)

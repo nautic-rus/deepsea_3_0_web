@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { Component, OnInit, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectorRef, ViewChild, ElementRef, ChangeDetectionStrategy } from '@angular/core';
+import { DatePipe, NgFor, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { ToolbarModule } from 'primeng/toolbar';
@@ -33,6 +33,7 @@ import { lastValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
 import { Select } from 'primeng/select';
 import { AvatarService } from '../../services/avatar.service';
+import { AppMessageService } from '../../services/message.service';
 
 interface User {
   id: number | string;
@@ -52,10 +53,11 @@ interface User {
 }
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-issues',
   standalone: true,
   imports: [
-    CommonModule,
+    DatePipe, NgFor, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault,
     TranslateModule,
     FormsModule,
     ToolbarModule,
@@ -80,7 +82,7 @@ interface User {
     ConfirmDialogModule,
     ToastModule
   ],
-  providers: [ConfirmationService, MessageService],
+  providers: [ConfirmationService],
   templateUrl: './issues.html',
   styleUrls: ['../../_quill-snow.scss', './issues.scss']
 })
@@ -182,12 +184,12 @@ export class IssuesComponent implements OnInit {
     private usersService: UsersService,
     private cd: ChangeDetectorRef,
     private confirmationService: ConfirmationService,
-    private messageService: MessageService,
     private translate: TranslateService,
     private http: HttpClient,
     private issuesService: IssuesService,
     private router: Router,
-    private avatarService: AvatarService
+    private avatarService: AvatarService,
+    private appMsg: AppMessageService
   ) {}
 
   // Navigate to issue detail page when a table row is clicked
@@ -455,7 +457,7 @@ export class IssuesComponent implements OnInit {
   // Bulk edit dialog handlers
   openBulkEditDialog(): void {
     if (!this.selectedIssues || !this.selectedIssues.length) {
-      try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.issues.bulk.NO_SELECTION') || 'No issues selected' }); } catch (e) {}
+      this.appMsg.info(this.translate.instant('components.issues.bulk.NO_SELECTION') || 'No issues selected');
       return;
     }
     // reset model
@@ -469,12 +471,12 @@ export class IssuesComponent implements OnInit {
 
   async applyBulkEdit(): Promise<void> {
     if (!this.selectedIssues || !this.selectedIssues.length) {
-      try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.issues.bulk.NO_SELECTION') || 'No issues selected' }); } catch (e) {}
+      this.appMsg.info(this.translate.instant('components.issues.bulk.NO_SELECTION') || 'No issues selected');
       return;
     }
     const ids = (this.selectedIssues || []).map((s: any) => s.id).filter(Boolean);
     if (!ids.length) {
-      try { this.messageService.add({ severity: 'warn', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.issues.bulk.NO_IDS') || 'No valid issue ids selected' }); } catch (e) {}
+      this.appMsg.warn(this.translate.instant('components.issues.bulk.NO_IDS') || 'No valid issue ids selected');
       return;
     }
     // prepare fields to apply
@@ -491,7 +493,7 @@ export class IssuesComponent implements OnInit {
     }
 
     if (!Object.keys(fields).length) {
-      try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.issues.bulk.NOTHING_TO_APPLY') || 'Nothing to apply' }); } catch (e) {}
+      this.appMsg.info(this.translate.instant('components.issues.bulk.NOTHING_TO_APPLY') || 'Nothing to apply');
       return;
     }
 
@@ -503,9 +505,9 @@ export class IssuesComponent implements OnInit {
 
     const failed = results.filter(r => r.status === 'rejected');
     if (failed.length) {
-      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.issues.bulk.PARTIAL_ERROR')?.replace('{n}', String(failed.length)) || (String(failed.length) + ' updates failed') }); } catch (e) {}
+      this.appMsg.error(this.translate.instant('components.issues.bulk.PARTIAL_ERROR')?.replace('{n}', String(failed.length)) || (String(failed.length) + ' updates failed'));
     } else {
-      try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.issues.bulk.SUCCESS') || 'Bulk update applied' }); } catch (e) {}
+      this.appMsg.success(this.translate.instant('components.issues.bulk.SUCCESS') || 'Bulk update applied');
     }
 
     this.bulkEditDialogVisible = false;
@@ -562,7 +564,7 @@ export class IssuesComponent implements OnInit {
         this.issuesItems = this.normalizeIssuesList(items);
         this.loading = false;
         if (!silent) {
-          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.QUERY') || 'Query', detail: this.translate.instant('components.issues.filters.FILTERS_APPLIED') || 'Filters applied' }); } catch (e) {}
+          this.appMsg.success(this.translate.instant('components.issues.filters.FILTERS_APPLIED') || 'Filters applied');
         }
         this.safeDetect();
       },
@@ -570,7 +572,7 @@ export class IssuesComponent implements OnInit {
         this.error = (err && err.message) ? err.message : 'Failed to fetch issues';
         this.loading = false;
         if (!silent) {
-          try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.QUERY') || 'Query', detail: this.translate.instant('components.issues.filters.FILTERS_APPLY_ERROR') || 'Failed to apply filters' }); } catch (e) {}
+          this.appMsg.error(this.translate.instant('components.issues.filters.FILTERS_APPLY_ERROR') || 'Failed to apply filters');
         }
         this.safeDetect();
       }
@@ -758,21 +760,19 @@ export class IssuesComponent implements OnInit {
   }
 
   deleteSelectedIssues(): void {
-    try {
-      this.messageService.add({ severity: 'info', summary: 'Not implemented', detail: 'Bulk delete (issues) is not implemented yet' });
-    } catch (e) { }
+    this.appMsg.info('Bulk delete (issues) is not implemented yet');
   }
 
   exportIssuesCSV(): void {
     try {
       const rows = this.issuesItems || [];
       if (!rows.length) {
-        try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('MENU.ANY') || 'No entries to export' }); } catch (e) { }
+        this.appMsg.info(this.translate.instant('MENU.ANY') || 'No entries to export');
         return;
       }
       // export logic (kept similar to users export if later needed)
     } catch (err) {
-      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: 'Export failed' }); } catch (e) { }
+      this.appMsg.error('Export failed');
     }
   }
 
@@ -810,7 +810,7 @@ export class IssuesComponent implements OnInit {
     };
 
     if (!this.validateIssueForm()) {
-      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CONFIRM') || 'Error', detail: 'Please fix form errors' }); } catch (e) {}
+      this.appMsg.error('Please fix form errors');
       return;
     }
 
@@ -822,7 +822,7 @@ export class IssuesComponent implements OnInit {
           this.editModel = {};
           this.loading = false;
           this.isCreating = false;
-          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.CREATE_ISSUE') || 'Success', detail: this.translate.instant('components.issues.form.CREATED') || 'Created' }); } catch (e) {}
+          this.appMsg.success(this.translate.instant('components.issues.form.CREATED') || 'Created');
           // refresh list
           if (this.appliedFilters && Object.keys(this.appliedFilters).length) {
             try { this.applyQuery(true); } catch (e) { this.loadIssues(); }
@@ -839,7 +839,7 @@ export class IssuesComponent implements OnInit {
           this.displayDialog = false;
           this.editModel = {};
           this.loading = false;
-          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Success', detail: this.translate.instant('components.issues.form.UPDATED') || 'Updated' }); } catch (e) {}
+          this.appMsg.success(this.translate.instant('components.issues.form.UPDATED') || 'Updated');
           if (this.appliedFilters && Object.keys(this.appliedFilters).length) {
             try { this.applyQuery(true); } catch (e) { this.loadIssues(); }
           } else {
@@ -956,10 +956,12 @@ export class IssuesComponent implements OnInit {
         this.issuesItems = this.issuesItems.filter((u: any) => u.id !== issue.id);
         this.selectedIssues = this.selectedIssues.filter((s: any) => s.id !== issue.id);
         this.loading = false;
-        try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Success', detail: this.translate.instant('components.issues.messages.DELETED') || 'Issue deleted' }); } catch (e) {}
+        this.appMsg.success(this.translate.instant('components.issues.messages.DELETED') || 'Issue deleted');
         this.safeDetect();
       },
       error: (err) => { console.error('Failed to delete issue', err); this.error = (err && err.message) ? err.message : 'Failed to delete'; this.loading = false; this.safeDetect(); }
     });
   }
+
+  trackByField(index: number, col: any): string { return col.field; }
 }

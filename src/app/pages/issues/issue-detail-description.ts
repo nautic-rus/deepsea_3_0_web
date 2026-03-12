@@ -1,5 +1,5 @@
-import { Component, Input, inject, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, inject, OnChanges, SimpleChanges, Output, EventEmitter, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EditorModule } from 'primeng/editor';
 import { MessageModule } from 'primeng/message';
@@ -8,12 +8,14 @@ import { ButtonModule } from 'primeng/button';
 import { MessageService } from 'primeng/api';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { IssuesService } from '../../services/issues.service';
+import { AppMessageService } from '../../services/message.service';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-issue-detail-description',
   standalone: true,
-  providers: [MessageService],
-  imports: [CommonModule, FormsModule, EditorModule, MessageModule, ToastModule, ButtonModule,TranslateModule],
+  providers: [],
+  imports: [NgIf, FormsModule, EditorModule, MessageModule, ToastModule, ButtonModule,TranslateModule],
   styleUrls: ['./issue-detail-description.scss'],
   template: `
     <p-toast></p-toast>
@@ -86,8 +88,10 @@ export class IssueDetailDescriptionComponent implements OnChanges {
   @Output() descriptionSaved = new EventEmitter<any>();
 
   messageService = inject(MessageService);
+  appMsg = inject(AppMessageService);
   issuesService = inject(IssuesService);
   translate = inject(TranslateService);
+  private cdr = inject(ChangeDetectorRef);
   text: string | undefined;
   editing = false;
   saving = false;
@@ -107,12 +111,14 @@ export class IssueDetailDescriptionComponent implements OnChanges {
             // notify parent that the issue (and its description) was updated
             try { this.descriptionSaved.emit(this.issue); } catch (e) { /* ignore */ }
             this.saving = false;
-            try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.issues.messages.SAVED') || 'Saved', detail: this.translate.instant('components.issues.messages.SAVED') || 'Description saved' }); } catch (e) { this.messageService.add({ severity: 'success', summary: 'Saved', detail: 'Description saved' }); }
+            this.appMsg.success(this.translate.instant('components.issues.messages.SAVED') || 'Description saved');
             try { form.resetForm({ content: this.text || '' }); } catch (e) { /* ignore */ }
+            this.cdr.markForCheck();
           },
           error: (err: any) => {
             this.saving = false;
-            try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR') || 'Error', detail: (err && err.message) ? err.message : this.translate.instant('components.issues.messages.DESCRIPTION_SAVE_FAILED') || 'Failed to save description' }); } catch (e) { this.messageService.add({ severity: 'error', summary: 'Error', detail: (err && err.message) ? err.message : 'Failed to save description' }); }
+            this.appMsg.error((err && err.message) ? err.message : this.translate.instant('components.issues.messages.DESCRIPTION_SAVE_FAILED') || 'Failed to save description');
+            this.cdr.markForCheck();
           }
         });
         return;
@@ -124,8 +130,8 @@ export class IssueDetailDescriptionComponent implements OnChanges {
       }
       // notify parent about local update as well
       try { this.descriptionSaved.emit(this.issue); } catch (e) { /* ignore */ }
-  this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Form Submitted', life: 3000 });
-  this.editing = false;
+      this.appMsg.success('Form Submitted');
+      this.editing = false;
   try { form.resetForm({ content: this.text || '' }); } catch (e) { /* ignore */ }
     } else {
       try { form.control?.markAllAsTouched(); } catch (e) { /* ignore */ }

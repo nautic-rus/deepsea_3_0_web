@@ -1,5 +1,5 @@
-import { Component, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, AfterViewInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { DatePipe, NgIf } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { ToolbarModule } from 'primeng/toolbar';
@@ -18,14 +18,15 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { TagModule } from 'primeng/tag';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { Select } from 'primeng/select';
 import { AvatarModule } from 'primeng/avatar';
+import { AppMessageService } from '../../../services/message.service';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-projects-storage-types',
   standalone: true,
-  imports: [CommonModule, TranslateModule, FormsModule, ToolbarModule, ButtonModule, TableModule, InputTextModule, InputIconModule, IconFieldModule, DialogModule, ToastModule, TagModule, ConfirmDialogModule, Select, AvatarModule],
-  providers: [MessageService, ConfirmationService],
+  imports: [DatePipe, NgIf, TranslateModule, FormsModule, ToolbarModule, ButtonModule, TableModule, InputTextModule, InputIconModule, IconFieldModule, DialogModule, ToastModule, TagModule, ConfirmDialogModule, AvatarModule],
+  providers: [ConfirmationService],
   templateUrl: './storage-types.html',
   styleUrls: ['./storage-types.scss']
 })
@@ -42,7 +43,9 @@ export class ProjectsStorageTypesComponent implements OnInit, AfterViewInit {
   usersOptions: { label: string; value: any; avatar?: string | null }[] = [];
   statuses: { label: string; value: any }[] = [];
 
-  constructor(private svc: ProjectsStorageTypesService, private cd: ChangeDetectorRef, private messageService: MessageService, private translate: TranslateService, private usersService: UsersService, private confirmationService: ConfirmationService, private auth: AuthService, private avatarService: AvatarService) {}
+  constructor(private svc: ProjectsStorageTypesService, private cd: ChangeDetectorRef, private translate: TranslateService, private usersService: UsersService, private confirmationService: ConfirmationService, private auth: AuthService, private avatarService: AvatarService,
+    private appMsg: AppMessageService
+  ) {}
 
   initialsFromName(name?: string | null): string { try { return this.avatarService.initialsFromName(name); } catch (e) { return ''; } }
   selectAvatarBg(label?: string | null): string { try { return this.avatarService.selectAvatarBg(label); } catch (e) { return ''; } }
@@ -83,7 +86,7 @@ export class ProjectsStorageTypesComponent implements OnInit, AfterViewInit {
 
   confirmDelete(item: any): void { if (!item) return; try { this.confirmationService.confirm({ message: `${this.translate.instant('components.projects.confirm.DELETE_QUESTION') || 'Attention! Do you really want to delete project'} ${item.name || item.id}?`, icon: 'pi pi-exclamation-triangle', accept: () => this.deleteItem(item) }); } catch (e) { this.deleteItem(item); } }
 
-  deleteItem(item: any): void { if (!item || !item.id) return; this.loading = true; this.svc.deleteStorageType(item.id).subscribe({ next: () => { try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.projects.messages.SUMMARY_DELETE') || 'Delete', detail: this.translate.instant('components.projects.messages.DELETED') || 'Deleted' }); } catch (e) {} this.loadStorageTypes(); this.safeDetect(); this.loading = false; }, error: (err: any) => { try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.messages.SUMMARY_DELETE') || 'Delete', detail: (err && err.message) ? err.message : 'Failed to delete' }); } catch (e) {} this.loading = false; this.safeDetect(); } }); }
+  deleteItem(item: any): void { if (!item || !item.id) return; this.loading = true; this.svc.deleteStorageType(item.id).subscribe({ next: () => { this.appMsg.success(this.translate.instant('components.projects.messages.DELETED') || 'Deleted'); this.loadStorageTypes(); this.safeDetect(); this.loading = false; }, error: (err: any) => { this.appMsg.error((err && err.message) ? err.message : 'Failed to delete'); this.loading = false; this.safeDetect(); } }); }
 
   openNew(): void { this.editModel = { name: '', code: '', description: '' }; this.isCreating = true; this.displayDialog = true; this.error = null; }
 
@@ -97,13 +100,13 @@ export class ProjectsStorageTypesComponent implements OnInit, AfterViewInit {
     const payload: any = { name: this.editModel.name, code: this.editModel.code };
     if (this.editModel.description !== undefined) payload.description = this.editModel.description;
     if (this.isCreating) {
-      this.svc.createStorageType(payload).subscribe({ next: () => { this.displayDialog = false; this.editModel = {}; this.loading = false; this.isCreating = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.projects.messages.SUMMARY_CREATE') || 'Create', detail: this.translate.instant('components.projects.messages.CREATED') || 'Created' }); } catch (e) {} this.loadStorageTypes(); this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to create'; this.loading = false; try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.messages.SUMMARY_CREATE') || 'Create', detail: this.error || '' }); } catch (e) {} this.safeDetect(); } });
+      this.svc.createStorageType(payload).subscribe({ next: () => { this.displayDialog = false; this.editModel = {}; this.loading = false; this.isCreating = false; this.appMsg.success(this.translate.instant('components.projects.messages.CREATED') || 'Created'); this.loadStorageTypes(); this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to create'; this.loading = false; this.appMsg.error(this.error || ''); this.safeDetect(); } });
     } else {
       const id = this.editModel && (this.editModel.id || this.editModel._id || this.editModel.ID);
       if (!id) { this.error = 'id is missing'; this.loading = false; this.safeDetect(); return; }
       if (this.editModel.status !== undefined) payload.status = this.editModel.status;
       if (this.editModel.owner_id !== undefined) payload.owner_id = this.editModel.owner_id;
-      this.svc.updateStorageType(id, payload).subscribe({ next: () => { this.displayDialog = false; this.editModel = {}; this.loading = false; this.isCreating = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.projects.messages.SUMMARY_EDIT') || 'Edit', detail: this.translate.instant('components.projects.messages.UPDATED') || 'Updated' }); } catch (e) {} this.loadStorageTypes(); this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to update'; this.loading = false; try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.messages.SUMMARY_EDIT') || 'Edit', detail: this.error || '' }); } catch (e) {} this.safeDetect(); } });
+      this.svc.updateStorageType(id, payload).subscribe({ next: () => { this.displayDialog = false; this.editModel = {}; this.loading = false; this.isCreating = false; this.appMsg.success(this.translate.instant('components.projects.messages.UPDATED') || 'Updated'); this.loadStorageTypes(); this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to update'; this.loading = false; this.appMsg.error(this.error || ''); this.safeDetect(); } });
     }
   }
 

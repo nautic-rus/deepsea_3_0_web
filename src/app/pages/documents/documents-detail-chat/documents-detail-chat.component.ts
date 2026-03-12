@@ -1,6 +1,6 @@
-import { Component, Input, OnChanges, ChangeDetectorRef, ViewChild, ElementRef, AfterViewInit, inject } from '@angular/core';
+import { Component, Input, OnChanges, ChangeDetectorRef, ViewChild, ElementRef, AfterViewInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { forkJoin } from 'rxjs';
-import { CommonModule } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
@@ -10,12 +10,14 @@ import { DocumentsService } from '../../../services/documents.service';
 import { AvatarService } from '../../../services/avatar.service';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { AppMessageService } from '../../../services/message.service';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-documents-detail-chat',
   standalone: true,
-  providers: [MessageService],
-  imports: [CommonModule, FormsModule, ButtonModule, AvatarModule, TranslateModule, ToastModule, ProgressSpinnerModule],
+  providers: [],
+  imports: [NgFor, NgIf, FormsModule, ButtonModule, AvatarModule, TranslateModule, ToastModule, ProgressSpinnerModule],
   template: `
     <section class="chat-container card">
       <p-toast></p-toast>
@@ -116,6 +118,7 @@ export class DocumentsDetailChatComponent implements OnChanges, AfterViewInit {
   private documentsService = inject(DocumentsService);
   public avatarService = inject(AvatarService);
   private messageService = inject(MessageService);
+  private appMsg = inject(AppMessageService);
   private translate = inject(TranslateService);
   private cdr = inject(ChangeDetectorRef);
 
@@ -170,7 +173,7 @@ export class DocumentsDetailChatComponent implements OnChanges, AfterViewInit {
             finish();
           },
           error: () => {
-            try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR'), detail: this.translate.instant('components.documents.messages.ERROR') }); } catch (e) {}
+            this.appMsg.error(this.translate.instant('components.documents.messages.ERROR'));
             finish();
           }
         });
@@ -188,7 +191,7 @@ export class DocumentsDetailChatComponent implements OnChanges, AfterViewInit {
           finish();
         },
         error: () => {
-          try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR'), detail: this.translate.instant('components.documents.messages.ERROR') }); } catch (e) {}
+          this.appMsg.error(this.translate.instant('components.documents.messages.ERROR'));
           finish();
         }
       });
@@ -387,7 +390,7 @@ export class DocumentsDetailChatComponent implements OnChanges, AfterViewInit {
       const input = ev.target as HTMLInputElement;
       const files = input.files;
       if (files && files.length) {
-        try { this.messageService.add({ severity: 'info', summary: 'Attachment', detail: `${files.length} file(s) selected` }); } catch (e) {}
+        this.appMsg.info(`${files.length} file(s) selected`);
       }
     } catch (e) { }
   }
@@ -504,25 +507,25 @@ export class DocumentsDetailChatComponent implements OnChanges, AfterViewInit {
               this.sending = false;
               this.cdr.markForCheck();
               this.scrollToBottom();
-              try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.documents.messages.SAVED'), detail: this.translate.instant('components.documents.messages.SAVED') }); } catch (e) {}
+              this.appMsg.success(this.translate.instant('components.documents.messages.SAVED'));
             },
             error: () => {
               this.sending = false;
               this.cdr.markForCheck();
               this.scrollToBottom();
-              try { this.messageService.add({ severity: 'warn', summary: this.translate.instant('components.documents.messages.SAVED'), detail: this.translate.instant('components.documents.messages.SAVED') }); } catch (e) {}
+              this.appMsg.warn(this.translate.instant('components.documents.messages.SAVED'));
             }
           });
         } else {
           this.sending = false;
           this.cdr.markForCheck();
           this.scrollToBottom();
-          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.documents.messages.SAVED'), detail: this.translate.instant('components.documents.messages.SAVED') }); } catch (e) {}
+          this.appMsg.success(this.translate.instant('components.documents.messages.SAVED'));
         }
       },
       error: (err: any) => {
         this.sending = false;
-        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR'), detail: err?.message || this.translate.instant('components.documents.messages.ERROR') }); } catch (e) {}
+        this.appMsg.error(err?.message || this.translate.instant('components.documents.messages.ERROR'));
       }
     });
   }

@@ -1,5 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { DatePipe, NgIf } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { ToolbarModule } from 'primeng/toolbar';
@@ -20,6 +20,7 @@ import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { NotificationsService } from '../../../services/notifications.service';
+import { AppMessageService } from '../../../services/message.service';
 
 interface NotificationItem {
   id: number | string;
@@ -30,10 +31,11 @@ interface NotificationItem {
 }
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-admin-notifications',
   standalone: true,
   imports: [
-    CommonModule,
+    DatePipe, NgIf,
     TranslateModule,
     FormsModule,
     ToolbarModule,
@@ -52,7 +54,7 @@ interface NotificationItem {
     ConfirmDialogModule,
     ToastModule
   ],
-  providers: [ConfirmationService, MessageService],
+  providers: [ConfirmationService],
   templateUrl: './notifications.html',
   styleUrls: ['./notifications.scss']
 })
@@ -78,8 +80,8 @@ export class AdminNotificationsComponent implements OnInit {
     private notificationsService: NotificationsService,
     private cd: ChangeDetectorRef,
     private confirmationService: ConfirmationService,
-    private messageService: MessageService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private appMsg: AppMessageService
   ) {}
 
   private safeDetect(): void { try { this.cd.detectChanges(); } catch (e) { } }
@@ -109,7 +111,7 @@ export class AdminNotificationsComponent implements OnInit {
 
   openNewMethod(): void { this.editMethodModel = { name: '', description: '' }; this.isCreatingMethod = true; this.displayMethodDialog = true; }
 
-  deleteSelectedNotificationEvents(): void { if (!this.selectedNotificationEvents || !this.selectedNotificationEvents.length) return; try { this.messageService.add({ severity: 'info', summary: 'Not implemented', detail: 'Bulk delete is not implemented yet' }); } catch (e) {} }
+  deleteSelectedNotificationEvents(): void { if (!this.selectedNotificationEvents || !this.selectedNotificationEvents.length) return; this.appMsg.info('Bulk delete is not implemented yet'); }
 
   openEditEvent(item: NotificationItem): void { if (!item) return; this.editEventModel = { ...item } as any; this.isCreatingEvent = false; this.displayEventDialog = true; }
 
@@ -120,7 +122,7 @@ export class AdminNotificationsComponent implements OnInit {
     const payload: Partial<NotificationItem> = { name: this.editEventModel.name, description: this.editEventModel.description };
 
     if (!this.validateEventForm()) {
-      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CONFIRM') || 'Error', detail: 'Please fix form errors' }); } catch (e) {}
+      this.appMsg.error('Please fix form errors');
       return;
     }
 
@@ -129,34 +131,34 @@ export class AdminNotificationsComponent implements OnInit {
       this.notificationsService.createNotificationEvent(payload as any).subscribe({
         next: () => {
           this.displayEventDialog = false; this.editEventModel = {} as any; this.loading = false; this.isCreatingEvent = false;
-          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.CREATE') || 'Success', detail: 'Created' }); } catch (e) {}
+          this.appMsg.success('Created');
           this.loadNotificationEvents(); this.safeDetect();
         },
         error: (err: any) => {
           this.error = (err && err.message) ? err.message : 'Failed to create item'; this.loading = false;
-          try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CREATE') || 'Create', detail: (err && err.message) ? err.message : 'Failed to create' }); } catch (e) {}
+          this.appMsg.error((err && err.message) ? err.message : 'Failed to create');
           this.safeDetect();
         }
       });
     } else {
       this.notificationsService.updateNotificationEvent(id as any, payload as any).subscribe({
         next: () => {
-          this.displayEventDialog = false; this.editEventModel = {} as any; this.loading = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Success', detail: 'Updated' }); } catch (e) {}
+          this.displayEventDialog = false; this.editEventModel = {} as any; this.loading = false; this.appMsg.success('Updated');
           this.loadNotificationEvents(); this.safeDetect();
         },
-        error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to update item'; this.loading = false; try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.SAVE') || 'Save', detail: (err && err.message) ? err.message : 'Failed to update' }); } catch (e) {} this.safeDetect(); }
+        error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to update item'; this.loading = false; this.appMsg.error((err && err.message) ? err.message : 'Failed to update'); this.safeDetect(); }
       });
     }
   }
 
   confirmDeleteEvent(item: NotificationItem): void { if (!item) return; this.confirmationService.confirm({ message: `${this.translate.instant('MENU.DELETE') || 'Delete'} "${item.name || item.id}"?`, icon: 'pi pi-exclamation-triangle', accept: () => this.deleteNotificationEvent(item) }); }
 
-  deleteNotificationEvent(item: NotificationItem): void { if (!item) return; this.loading = true; this.notificationsService.deleteNotificationEvent(item.id).subscribe({ next: () => { this.notificationEvents = this.notificationEvents.filter(u => u.id !== item.id); this.selectedNotificationEvents = (this.selectedNotificationEvents || []).filter(s => s.id !== item.id); this.loading = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Delete', detail: 'Deleted' }); } catch (e) {} this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to delete item'; this.loading = false; this.safeDetect(); } }); }
+  deleteNotificationEvent(item: NotificationItem): void { if (!item) return; this.loading = true; this.notificationsService.deleteNotificationEvent(item.id).subscribe({ next: () => { this.notificationEvents = this.notificationEvents.filter(u => u.id !== item.id); this.selectedNotificationEvents = (this.selectedNotificationEvents || []).filter(s => s.id !== item.id); this.loading = false; this.appMsg.success('Deleted'); this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to delete item'; this.loading = false; this.safeDetect(); } }); }
 
   exportEventsCSV(): void {
     try {
       const rows = this.notificationEvents || [];
-      if (!rows.length) { try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('MENU.ANY') || 'No items to export' }); } catch (e) {} return; }
+      if (!rows.length) { this.appMsg.info(this.translate.instant('MENU.ANY') || 'No items to export'); return; }
 
       const headers = [ 'ID', this.translate.instant('components.permissions.table.HEADERS.NAME') || 'Name', this.translate.instant('components.permissions.table.HEADERS.DESCRIPTION') || 'Description', this.translate.instant('components.permissions.table.HEADERS.CREATED_AT') || 'Created At' ];
 
@@ -167,14 +169,14 @@ export class AdminNotificationsComponent implements OnInit {
 
       const csv = lines.join('\n'); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const timestamp = new Date().toISOString().replace(/[:.]/g, '-'); const filename = `notification_events_export_${timestamp}.csv`; const link = document.createElement('a'); const url = URL.createObjectURL(blob); link.href = url; link.setAttribute('download', filename); document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
 
-      try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('components.permissions.messages.EXPORTED') || 'Export completed' }); } catch (e) {}
-    } catch (err) { try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: 'Export failed' }); } catch (e) {} }
+      this.appMsg.success(this.translate.instant('components.permissions.messages.EXPORTED') || 'Export completed');
+    } catch (err) { this.appMsg.error('Export failed'); }
   }
 
   exportMethodsCSV(): void {
     try {
       const rows = this.notificationMethods || [];
-      if (!rows.length) { try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('MENU.ANY') || 'No items to export' }); } catch (e) {} return; }
+      if (!rows.length) { this.appMsg.info(this.translate.instant('MENU.ANY') || 'No items to export'); return; }
 
       const headers = [ 'ID', this.translate.instant('components.permissions.table.HEADERS.NAME') || 'Name', this.translate.instant('components.permissions.table.HEADERS.DESCRIPTION') || 'Description', this.translate.instant('components.permissions.table.HEADERS.CREATED_AT') || 'Created At' ];
 
@@ -185,8 +187,8 @@ export class AdminNotificationsComponent implements OnInit {
 
       const csv = lines.join('\n'); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const timestamp = new Date().toISOString().replace(/[:.]/g, '-'); const filename = `notification_methods_export_${timestamp}.csv`; const link = document.createElement('a'); const url = URL.createObjectURL(blob); link.href = url; link.setAttribute('download', filename); document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
 
-      try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('components.permissions.messages.EXPORTED') || 'Export completed' }); } catch (e) {}
-    } catch (err) { try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: 'Export failed' }); } catch (e) {} }
+      this.appMsg.success(this.translate.instant('components.permissions.messages.EXPORTED') || 'Export completed');
+    } catch (err) { this.appMsg.error('Export failed'); }
   }
 
   /* Methods handlers */
@@ -199,15 +201,15 @@ export class AdminNotificationsComponent implements OnInit {
 
     this.loadingMethods = true;
     if (this.isCreatingMethod) {
-      this.notificationsService.createNotificationMethod(payload as any).subscribe({ next: () => { this.displayMethodDialog = false; this.editMethodModel = {} as any; this.loadingMethods = false; this.isCreatingMethod = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.CREATE') || 'Success', detail: 'Created' }); } catch (e) {} this.loadNotificationMethods(); this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to create method'; this.loadingMethods = false; try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CREATE') || 'Create', detail: (err && err.message) ? err.message : 'Failed to create' }); } catch (e) {} this.safeDetect(); } });
+      this.notificationsService.createNotificationMethod(payload as any).subscribe({ next: () => { this.displayMethodDialog = false; this.editMethodModel = {} as any; this.loadingMethods = false; this.isCreatingMethod = false; this.appMsg.success('Created'); this.loadNotificationMethods(); this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to create method'; this.loadingMethods = false; this.appMsg.error((err && err.message) ? err.message : 'Failed to create'); this.safeDetect(); } });
     } else {
-      this.notificationsService.updateNotificationMethod(id as any, payload as any).subscribe({ next: () => { this.displayMethodDialog = false; this.editMethodModel = {} as any; this.loadingMethods = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Success', detail: 'Updated' }); } catch (e) {} this.loadNotificationMethods(); this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to update method'; this.loadingMethods = false; try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.SAVE') || 'Save', detail: (err && err.message) ? err.message : 'Failed to update' }); } catch (e) {} this.safeDetect(); } });
+      this.notificationsService.updateNotificationMethod(id as any, payload as any).subscribe({ next: () => { this.displayMethodDialog = false; this.editMethodModel = {} as any; this.loadingMethods = false; this.appMsg.success('Updated'); this.loadNotificationMethods(); this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to update method'; this.loadingMethods = false; this.appMsg.error((err && err.message) ? err.message : 'Failed to update'); this.safeDetect(); } });
     }
   }
 
   confirmDeleteMethod(item: NotificationItem): void { if (!item) return; this.confirmationService.confirm({ message: `${this.translate.instant('MENU.DELETE') || 'Delete'} "${item.name || item.id}"?`, icon: 'pi pi-exclamation-triangle', accept: () => this.deleteNotificationMethod(item) }); }
 
-  deleteNotificationMethod(item: NotificationItem): void { if (!item) return; this.loadingMethods = true; this.notificationsService.deleteNotificationMethod(item.id).subscribe({ next: () => { this.notificationMethods = this.notificationMethods.filter(u => u.id !== item.id); this.selectedNotificationMethods = (this.selectedNotificationMethods || []).filter(s => s.id !== item.id); this.loadingMethods = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Delete', detail: 'Deleted' }); } catch (e) {} this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to delete method'; this.loadingMethods = false; this.safeDetect(); } }); }
+  deleteNotificationMethod(item: NotificationItem): void { if (!item) return; this.loadingMethods = true; this.notificationsService.deleteNotificationMethod(item.id).subscribe({ next: () => { this.notificationMethods = this.notificationMethods.filter(u => u.id !== item.id); this.selectedNotificationMethods = (this.selectedNotificationMethods || []).filter(s => s.id !== item.id); this.loadingMethods = false; this.appMsg.success('Deleted'); this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to delete method'; this.loadingMethods = false; this.safeDetect(); } }); }
 
   validateEventForm(): boolean {
     this.formErrors = {};

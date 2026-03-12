@@ -1,0 +1,137 @@
+<section class="admin-subpage-tools card mt-0">
+  <p-toolbar>
+    <div class="p-toolbar-group-left">
+      <p-button label="{{ 'MENU.CREATE' | translate }}" icon="pi pi-plus" class="mr-2" severity="primary" (onClick)="openNew()"></p-button>
+    </div>
+    <div class="p-toolbar-group-right">
+      <p-button label="{{ 'MENU.EXPORT' | translate }}" icon="pi pi-upload" severity="secondary"></p-button>
+    </div>
+  </p-toolbar>
+</section>
+
+<section class="admin-subpage-content card">
+  <div class="table-responsive">
+    <p-toast></p-toast>
+    <p-table #dt [value]="items" [loading]="loading" [scrollable]="true" scrollHeight="flex"
+      [rows]="10" size="small" [globalFilterFields]="['code','name','description','color','order_index']"
+      [rowHover]="true" dataKey="id" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10,20,30]">
+
+      <ng-template pTemplate="caption">
+        <div class="flex justify-between mb-2">
+          <h3>{{ 'MENU.CUSTOMER_QUESTION' | translate }} — {{ 'components.projects.menu.STATUSES' | translate }}</h3>
+          <p-iconfield>
+            <p-inputicon styleClass="pi pi-search"></p-inputicon>
+            <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="{{ 'components.projects.table.SEARCH' | translate }}" />
+          </p-iconfield>
+        </div>
+      </ng-template>
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="id">
+            <div class="flex items-center gap-2">
+              <span>{{ 'components.projects.table.HEADERS.ID' | translate }}</span>
+              <p-sortIcon field="id" />
+            </div>
+          </th>
+          <th pSortableColumn="code">
+            <div class="flex items-center gap-2">
+              <span>{{ 'components.projects.table.HEADERS.CODE' | translate }}</span>
+              <p-sortIcon field="code" />
+            </div>
+          </th>
+          <th pSortableColumn="name">
+            <div class="flex items-center gap-2">
+              <span>{{ 'components.projects.table.HEADERS.NAME' | translate }}</span>
+              <p-sortIcon field="name" />
+            </div>
+          </th>
+          <th pSortableColumn="description">
+            <div class="flex items-center gap-2">
+              <span>{{ 'components.projects.table.HEADERS.DESCRIPTION' | translate }}</span>
+              <p-sortIcon field="description" />
+            </div>
+          </th>
+          <th pSortableColumn="color">
+            <div class="flex items-center gap-2">
+              <span>{{ 'components.projects.table.HEADERS.COLOR' | translate }}</span>
+              <p-sortIcon field="color" />
+            </div>
+          </th>
+          <th pSortableColumn="order_index">
+            <div class="flex items-center gap-2">
+              <span>{{ 'components.projects.table.HEADERS.ORDER_INDEX' | translate }}</span>
+              <p-sortIcon field="order_index" />
+            </div>
+          </th>
+          <th pSortableColumn="created_at">
+            <div class="flex items-center gap-2">
+              <span>{{ 'components.projects.table.HEADERS.CREATED_AT' | translate }}</span>
+              <p-sortIcon field="created_at" />
+            </div>
+          </th>
+          <th pSortableColumn="updated_at">
+            <div class="flex items-center gap-2">
+              <span>{{ 'components.projects.table.HEADERS.UPDATED_AT' | translate }}</span>
+              <p-sortIcon field="updated_at" />
+            </div>
+          </th>
+          <th></th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-p let-i="rowIndex">
+        <tr>
+          <td>{{ p?.id || '—' }}</td>
+          <td>{{ p?.code || '—' }}</td>
+          <td>{{ p?.name || '—' }}</td>
+          <td>{{ p?.description || '—' }}</td>
+          <td>
+            <span [style.background]="p?.color" style="display:inline-block;width:18px;height:18px;border-radius:3px;margin-right:8px;border:1px solid rgba(0,0,0,0.08);vertical-align:middle"></span>
+            <span>{{ p?.color || '—' }}</span>
+          </td>
+          <td>{{ p?.order_index !== undefined && p?.order_index !== null ? p.order_index : '—' }}</td>
+          <td>{{ p?.created_at ? (p.created_at | date:'short') : '—' }}</td>
+          <td>{{ p?.updated_at ? (p.updated_at | date:'short') : '—' }}</td>
+          <td>
+            <p-button icon="pi pi-pencil" class="mr-2" [outlined]="true" (click)="openEdit(p)" />
+            <p-button icon="pi pi-trash" severity="danger" [outlined]="true" (click)="confirmDelete(p)" />
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</section>
+
+<p-dialog [header]="isCreating ? ('MENU.CREATE' | translate) : ('MENU.EDIT' | translate)" [(visible)]="displayDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{width: '25%'}">
+  <div class="flex flex-col gap-4">
+    <div class="flex flex-col gap-2">
+      <label for="name" class="font-bold">{{ 'components.projects.form.NAME' | translate }}</label>
+      <input pInputText id="name" type="text" [(ngModel)]="editModel.name" name="name" />
+    </div>
+    <div class="flex flex-col gap-2">
+      <label for="code" class="font-bold">{{ 'components.projects.form.CODE' | translate }}</label>
+      <input pInputText id="code" type="text" [(ngModel)]="editModel.code" name="code" />
+    </div>
+    <div class="flex flex-col gap-2">
+      <label for="description" class="font-bold">{{ 'components.projects.form.DESCRIPTION' | translate }}</label>
+      <input pInputText id="description" type="text" [(ngModel)]="editModel.description" name="description" />
+    </div>
+    <div class="flex items-center gap-4">
+      <div class="flex flex-col gap-2">
+        <label for="color" class="font-bold">Color</label>
+        <p-colorPicker id="color" [(ngModel)]="editModel.color" appendTo="body"></p-colorPicker>
+      </div>
+      <div class="flex flex-col gap-2">
+        <label for="orderIndex" class="font-bold">Order Index</label>
+        <input pInputText id="orderIndex" type="number" [(ngModel)]="editModel.order_index" name="order_index" />
+      </div>
+    </div>
+    <div *ngIf="error" class="text-red-600 block">{{ error }}</div>
+    <div class="flex justify-end gap-2 mt-4">
+      <p-button label="{{ 'components.projects.form.CANCEL' | translate }}" (onClick)="displayDialog=false" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="loading"></p-button>
+      <p-button label="{{ 'components.projects.form.SAVE' | translate }}" (onClick)="save()" severity="primary" icon="pi pi-check" iconPos="left" [disabled]="loading"></p-button>
+      <p-confirmDialog [style]="{ width: '25%' }" header="{{ 'MENU.CONFIRM' | translate }}" acceptLabel="{{ 'MENU.DELETE' | translate }}" rejectLabel="{{ 'MENU.CANCEL' | translate }}" acceptIcon="pi pi-check" acceptButtonStyleClass="p-button-danger" rejectButtonStyleClass="secondary p-button-text" rejectIcon="pi pi-times"></p-confirmDialog>
+    </div>
+  </div>
+</p-dialog>

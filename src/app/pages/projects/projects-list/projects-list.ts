@@ -1,5 +1,5 @@
-import { Component, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, AfterViewInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { DatePipe, NgIf } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { ToolbarModule } from 'primeng/toolbar';
@@ -20,12 +20,14 @@ import { TagModule } from 'primeng/tag';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { Select } from 'primeng/select';
 import { AvatarModule } from 'primeng/avatar';
+import { AppMessageService } from '../../../services/message.service';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-projects-list',
   standalone: true,
-  imports: [CommonModule, TranslateModule, FormsModule, ToolbarModule, ButtonModule, TableModule, InputTextModule, InputIconModule, IconFieldModule, DialogModule, ToastModule, TagModule, ConfirmDialogModule, Select, AvatarModule],
-  providers: [MessageService, ConfirmationService],
+  imports: [DatePipe, NgIf, TranslateModule, FormsModule, ToolbarModule, ButtonModule, TableModule, InputTextModule, InputIconModule, IconFieldModule, DialogModule, ToastModule, TagModule, ConfirmDialogModule, Select, AvatarModule],
+  providers: [ConfirmationService],
   templateUrl: './projects-list.html',
   styleUrls: ['./projects-list.scss']
 })
@@ -47,7 +49,9 @@ export class ProjectsListComponent implements OnInit, AfterViewInit {
   // status options for select (populated in ngOnInit to support translations)
   statuses: { label: string; value: any }[] = [];
 
-  constructor(private svc: ProjectsListService, private cd: ChangeDetectorRef, private messageService: MessageService, private translate: TranslateService, private usersService: UsersService, private confirmationService: ConfirmationService, private auth: AuthService, private avatarService: AvatarService) {}
+  constructor(private svc: ProjectsListService, private cd: ChangeDetectorRef, private translate: TranslateService, private usersService: UsersService, private confirmationService: ConfirmationService, private auth: AuthService, private avatarService: AvatarService,
+    private appMsg: AppMessageService
+  ) {}
 
   initialsFromName(name?: string | null): string {
     try { return this.avatarService.initialsFromName(name); } catch (e) { return ''; }
@@ -230,13 +234,13 @@ export class ProjectsListComponent implements OnInit, AfterViewInit {
     this.loading = true;
     this.svc.deleteProject(project.id).subscribe({
   next: () => {
-  try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.projects.messages.SUMMARY_DELETE') || 'Delete', detail: this.translate.instant('components.projects.messages.DELETED') || 'Project deleted' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+  this.appMsg.success(this.translate.instant('components.projects.messages.DELETED') || 'Project deleted'); // TODO: make reactive (refresh on translate.onLangChange)
         this.loadProjects();
         this.safeDetect();
         this.loading = false;
       },
   error: (err: any) => {
-  try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.messages.SUMMARY_DELETE') || 'Delete', detail: (err && err.message) ? err.message : 'Failed to delete project' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+  this.appMsg.error((err && err.message) ? err.message : 'Failed to delete project'); // TODO: make reactive (refresh on translate.onLangChange)
         this.loading = false;
         this.safeDetect();
       }
@@ -284,14 +288,14 @@ export class ProjectsListComponent implements OnInit, AfterViewInit {
           this.editModel = {};
           this.loading = false;
           this.isCreating = false;
-          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.projects.messages.SUMMARY_CREATE') || 'Create', detail: this.translate.instant('components.projects.messages.CREATED') || 'Project created' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+          this.appMsg.success(this.translate.instant('components.projects.messages.CREATED') || 'Project created'); // TODO: make reactive (refresh on translate.onLangChange)
           this.loadProjects();
           this.safeDetect();
         },
         error: (err: any) => {
           this.error = (err && err.message) ? err.message : 'Failed to create project';
           this.loading = false;
-          try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.messages.SUMMARY_CREATE') || 'Create', detail: this.error || '' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+          this.appMsg.error(this.error || ''); // TODO: make reactive (refresh on translate.onLangChange)
           this.safeDetect();
         }
       });
@@ -314,14 +318,14 @@ export class ProjectsListComponent implements OnInit, AfterViewInit {
           this.editModel = {};
           this.loading = false;
           this.isCreating = false;
-          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.projects.messages.SUMMARY_EDIT') || 'Edit', detail: this.translate.instant('components.projects.messages.UPDATED') || 'Project updated' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+          this.appMsg.success(this.translate.instant('components.projects.messages.UPDATED') || 'Project updated'); // TODO: make reactive (refresh on translate.onLangChange)
           this.loadProjects();
           this.safeDetect();
         },
         error: (err: any) => {
           this.error = (err && err.message) ? err.message : 'Failed to update project';
           this.loading = false;
-          try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.messages.SUMMARY_EDIT') || 'Edit', detail: this.error || '' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+          this.appMsg.error(this.error || ''); // TODO: make reactive (refresh on translate.onLangChange)
           this.safeDetect();
         }
       });

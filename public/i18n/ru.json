@@ -35,6 +35,7 @@
     "DOCUMENTS": "Документы",
     "DOCUMENT": "Документ",
     "ISSUE": "Задача",
+    "CUSTOMER_QUESTION": "Вопрос",
     "EDIT": "EDIT",
     "EDIT_USER": "Редактировать пользователя",
     "EMAIL": "Email",
@@ -102,6 +103,14 @@
   },
  
   "TODAY": "Сегодня",
+  "MESSAGES": {
+    "SUCCESS": "Успешно",
+    "INFO": "Инфо",
+    "WARNING": "Внимание",
+    "ERROR": "Ошибка",
+    "SECONDARY": "Второстепенное",
+    "CONTRAST": "Контрастный"
+  },
   "YESTERDAY": "Вчера",
   "LAST_WEEK": "На прошлой неделе",
   "PERMISSIONS": {
@@ -366,13 +375,17 @@
         "NAME": "Название",
         "OWNER": "Владелец",
         "SAVE": "Сохранить",
-        "STATUS": "Статус"
+        "STATUS": "Статус",
+        "PROJECT": "Проект",
+        "TYPE": "Тип",
+        "FROM_STATUS": "Статус (от)",
+        "TO_STATUS": "Статус (до)"
       },
       "menu": {
-        "LIST": "Список проектов",
-        "USERS": "Пользователи проектов",
+        "LIST": "Проекты",
+        "USERS": "Пользователи",
         "TEMPLATES": "Шаблоны",
-        "TITLE": "УПРАВЛЕНИЕ ПРОЕКТАМИ",
+        "TITLE": "УПРАВЛЕНИЕ",
         "SETTINGS": "Настройки",
         "STATUSES": "Статусы",
         "TYPES": "Типы",
@@ -391,6 +404,8 @@
         "HEADERS": {
           "ENTITY": "Сущность",
           "CODE": "Код",
+          "PROJECT": "Проект",
+          "TYPE": "Тип",
           "COLOR": "Цвет",
           "PROJECT_ID": "ID проекта",
           "PROJECT_CODE": "Код проекта",
@@ -405,7 +420,8 @@
           "OWNER": "Владелец",
           "STATUS": "Статус"
         },
-        "SEARCH": "Поиск"
+        "SEARCH": "Поиск",
+        "FILTER": "Фильтр"
       },
       "users": {
         "ASSIGN": "Назначить",

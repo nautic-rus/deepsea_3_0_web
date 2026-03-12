@@ -1,5 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { ToolbarModule } from 'primeng/toolbar';
@@ -20,6 +20,7 @@ import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { SpecializationsService } from '../../../services/specializations.service';
+import { AppMessageService } from '../../../services/message.service';
 
 interface Specialization {
  id: number | string;
@@ -30,10 +31,11 @@ interface Specialization {
 }
 
 @Component({
+ changeDetection: ChangeDetectionStrategy.OnPush,
  selector: 'app-admin-specializations',
  standalone: true,
  imports: [
- CommonModule,
+ DatePipe,
  TranslateModule,
  FormsModule,
  ToolbarModule,
@@ -52,7 +54,7 @@ interface Specialization {
  ConfirmDialogModule,
  ToastModule
  ],
- providers: [ConfirmationService, MessageService],
+ providers: [ConfirmationService],
  templateUrl: './specializations.html',
  styleUrls: ['./specializations.scss']
 })
@@ -70,9 +72,9 @@ export class AdminSpecializationsComponent implements OnInit {
  private specializationsService: SpecializationsService,
  private cd: ChangeDetectorRef,
  private confirmationService: ConfirmationService,
- private messageService: MessageService,
- private translate: TranslateService
- ) {}
+ private translate: TranslateService,
+    private appMsg: AppMessageService
+  ) {}
 
  private safeDetect(): void { try { this.cd.detectChanges(); } catch (e) { } }
 
@@ -84,7 +86,7 @@ export class AdminSpecializationsComponent implements OnInit {
 
  openNew(): void { this.editModel = { name: '', code: '', description: '' }; this.isCreating = true; this.displayDialog = true; }
 
- deleteSelectedPermissions(): void { if (!this.selectedPermissions || !this.selectedPermissions.length) return; try { this.messageService.add({ severity: 'info', summary: 'Not implemented', detail: 'Bulk delete is not implemented yet' }); } catch (e) {} }
+ deleteSelectedPermissions(): void { if (!this.selectedPermissions || !this.selectedPermissions.length) return; this.appMsg.info('Bulk delete is not implemented yet'); }
 
  openEdit(item: Specialization): void { if (!item) return; this.editModel = { ...item } as any; this.isCreating = false; this.displayDialog = true; }
 
@@ -95,9 +97,7 @@ export class AdminSpecializationsComponent implements OnInit {
  const payload: Partial<Specialization> = { name: this.editModel.name, code: (this.editModel as any).code, description: this.editModel.description };
 
  if (!this.validateForm()) {
- try {
- this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CONFIRM') || 'Error', detail: 'Please fix form errors' }); // TODO: make reactive (refresh on translate.onLangChange)
- } catch (e) {}
+ this.appMsg.error('Please fix form errors');
  return;
  }
 
@@ -109,14 +109,14 @@ export class AdminSpecializationsComponent implements OnInit {
  this.editModel = {} as any;
  this.loading = false;
  this.isCreating = false;
- try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.CREATE') || 'Success', detail: 'Created' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+ this.appMsg.success('Created'); // TODO: make reactive (refresh on translate.onLangChange)
  this.loadPermissions();
  this.safeDetect();
  },
  error: (err: any) => {
  this.error = (err && err.message) ? err.message : 'Failed to create item';
  this.loading = false;
- try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CREATE') || 'Create', detail: (err && err.message) ? err.message : 'Failed to create permission' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+ this.appMsg.error((err && err.message) ? err.message : 'Failed to create permission'); // TODO: make reactive (refresh on translate.onLangChange)
  this.safeDetect();
  }
  });
@@ -126,14 +126,14 @@ export class AdminSpecializationsComponent implements OnInit {
  this.displayDialog = false;
  this.editModel = {} as any;
  this.loading = false;
- try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Success', detail: 'Updated' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+ this.appMsg.success('Updated'); // TODO: make reactive (refresh on translate.onLangChange)
  this.loadPermissions();
  this.safeDetect();
  },
  error: (err: any) => {
  this.error = (err && err.message) ? err.message : 'Failed to update item';
  this.loading = false;
- try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.SAVE') || 'Save', detail: (err && err.message) ? err.message : 'Failed to update permission' }); } catch (e) {} // TODO: make reactive (refresh on translate.onLangChange)
+ this.appMsg.error((err && err.message) ? err.message : 'Failed to update permission'); // TODO: make reactive (refresh on translate.onLangChange)
  this.safeDetect();
  }
  });
@@ -142,19 +142,13 @@ export class AdminSpecializationsComponent implements OnInit {
 
  confirmDelete(item: Specialization): void { if (!item) return; this.confirmationService.confirm({ message: `${this.translate.instant('components.permissions.confirm.DELETE_QUESTION') || 'Delete item'} "${item.name || item.id}"?`, icon: 'pi pi-exclamation-triangle', accept: () => this.deletePermission(item) }); } // TODO: make reactive (refresh on translate.onLangChange)
 
- deletePermission(item: Specialization): void { if (!item) return; this.loading = true; this.specializationsService.deletePermission(item.id).subscribe({ next: () => { this.permissions = this.permissions.filter(u => u.id !== item.id); this.selectedPermissions = this.selectedPermissions.filter(s => s.id !== item.id); this.loading = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Delete', detail: 'Deleted' }); } catch (e) {} this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to delete item'; this.loading = false; this.safeDetect(); } }); } // TODO: make reactive (refresh on translate.onLangChange)
+ deletePermission(item: Specialization): void { if (!item) return; this.loading = true; this.specializationsService.deletePermission(item.id).subscribe({ next: () => { this.permissions = this.permissions.filter(u => u.id !== item.id); this.selectedPermissions = this.selectedPermissions.filter(s => s.id !== item.id); this.loading = false; this.appMsg.success('Deleted'); this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to delete item'; this.loading = false; this.safeDetect(); } }); } // TODO: make reactive (refresh on translate.onLangChange)
 
  exportCSV(): void {
  try {
  const rows = this.permissions || [];
  if (!rows.length) {
- try {
- this.messageService.add({
- severity: 'info',
- summary: this.translate.instant('MENU.EXPORT') || 'Export', // TODO: make reactive (refresh on translate.onLangChange)
- detail: this.translate.instant('MENU.ANY') || 'No users to export' // TODO: make reactive (refresh on translate.onLangChange)
- });
- } catch (e) {}
+ this.appMsg.info(this.translate.instant('MENU.ANY') || 'No users to export');
  return;
  }
 
@@ -192,17 +186,9 @@ export class AdminSpecializationsComponent implements OnInit {
  document.body.removeChild(link);
  URL.revokeObjectURL(url);
 
- try {
- this.messageService.add({
- severity: 'success',
- summary: this.translate.instant('MENU.EXPORT') || 'Export', // TODO: make reactive (refresh on translate.onLangChange)
- detail: this.translate.instant('components.permissions.messages.EXPORTED') || 'Export completed' // TODO: make reactive (refresh on translate.onLangChange)
- });
- } catch (e) {}
+ this.appMsg.success(this.translate.instant('components.permissions.messages.EXPORTED') || 'Export completed');
  } catch (err) {
- try {
- this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: 'Export failed' }); // TODO: make reactive (refresh on translate.onLangChange)
- } catch (e) {}
+ this.appMsg.error('Export failed');
  }
  }
 

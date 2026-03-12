@@ -1,0 +1,18 @@
+/* Shared small utility classes used by project forms to match issues.html styling */
+.font-bold { font-weight: 700; }
+.flex { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.flex-1 { flex: 1 1 0%; }
+.items-center { align-items: center; }
+.justify-end { justify-content: flex-end; }
+.gap-2 { gap: 0.5rem; }
+.gap-4 { gap: 1rem; }
+.mr-2 { margin-right: 0.5rem; }
+.mt-4 { margin-top: 1rem; }
+.w-60 { width: 15rem; }
+.block { display: block; }
+.text-red-600 { color: #dc2626; }
+
+/* Ensure select avatar helpers exist for all project components */
+.select-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; display: inline-block; }
+.select-avatar-initials { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; }

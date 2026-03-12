@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { Component, OnInit, inject, signal, ViewChild, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, signal, ViewChild, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { DatePipe, NgFor, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { TreeModule } from 'primeng/tree';
@@ -33,12 +33,14 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { Select } from 'primeng/select';
 import { TranslateService } from '@ngx-translate/core';
 import { AvatarService } from '../../services/avatar.service';
+import { AppMessageService } from '../../services/message.service';
 
 @Component({
+	changeDetection: ChangeDetectionStrategy.OnPush,
 	selector: 'app-documents',
 	standalone: true,
 	imports: [
-		CommonModule,
+		DatePipe, NgFor, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault,
 		TreeModule,
 		TreeSelectModule,
 		MenuModule,
@@ -63,7 +65,7 @@ import { AvatarService } from '../../services/avatar.service';
 	],
 	templateUrl: './documents.html',
 	styleUrls: ['../../_quill-snow.scss', './documents.scss'],
-	providers: [NodeService, ConfirmationService, MessageService]
+	providers: [NodeService, ConfirmationService]
 	})
 	export class DocumentsComponent implements OnInit {
 
@@ -265,7 +267,7 @@ import { AvatarService } from '../../services/avatar.service';
 			}
 			return n;
 		};
-		const result = (nodes || []).map(n => apply(JSON.parse(JSON.stringify(n))));
+		const result = (nodes || []).map(n => apply(structuredClone(n)));
 		// ensure returned tree is sorted according to order_index
 		try { this.sortTreeInPlace(result as any); } catch (e) { /* ignore */ }
 		return result;
@@ -328,7 +330,7 @@ import { AvatarService } from '../../services/avatar.service';
 		return max;
 	}
 
-	constructor() {}
+	constructor(private appMsg: AppMessageService) {}
 
 	openCreateDirectoryDialog(fromContext: boolean = false): void {
 			 	// reset edit state — opening the create dialog must never leave edit mode enabled
@@ -426,7 +428,7 @@ import { AvatarService } from '../../services/avatar.service';
 					// try to update node locally
 					try {
 						const current = this.files() || [];
-						const copy = JSON.parse(JSON.stringify(current || [])) as TreeNode[];
+						const copy = structuredClone(current || []) as TreeNode[];
 						const node = this.findNodeById(copy, (updated.id ?? this.editingDirId) as number);
 						if (node) {
 							// capture previous parent before overwriting node.data
@@ -476,7 +478,7 @@ import { AvatarService } from '../../services/avatar.service';
 									}
 								}
 								this.files.set(copy);
-								try { this.messageService.add({ severity: 'success', summary: 'Save', detail: 'Directory updated' }); } catch (e) { }
+								this.appMsg.success('Directory updated');
 							} catch (e) {
 								const data = await this.nodeService.getFiles();
 								this.files.set(this.applyExpansionFromCurrent(data));
@@ -516,7 +518,7 @@ import { AvatarService } from '../../services/avatar.service';
 						};
 						const parentId = (created.parent_id ?? this.normalizeId(this.newDir.parent_id)) as number | null;
 						if (parentId == null) {
-							const copyRoots = JSON.parse(JSON.stringify(current || [])) as TreeNode[];
+							const copyRoots = structuredClone(current || []) as TreeNode[];
 							copyRoots.push(newNode);
 							this.sortTreeInPlace(copyRoots as any);
 							this.files.set(copyRoots);
@@ -533,7 +535,7 @@ import { AvatarService } from '../../services/avatar.service';
 								}
 								return false;
 							};
-							const copy = JSON.parse(JSON.stringify(current || [])) as TreeNode[];
+							const copy = structuredClone(current || []) as TreeNode[];
 							if (!attach(copy)) {
 								const data = await this.nodeService.getFiles();
 								this.files.set(this.applyExpansionFromCurrent(data));
@@ -542,7 +544,7 @@ import { AvatarService } from '../../services/avatar.service';
 								this.sortTreeInPlace(copy as any);
 								this.files.set(copy);
 							}
-							try { this.messageService.add({ severity: 'success', summary: 'Create', detail: 'Directory created' }); } catch (e) { }
+							this.appMsg.success('Directory created');
 						}
 					} catch (e) {
 						const data = await this.nodeService.getFiles();
@@ -666,7 +668,7 @@ import { AvatarService } from '../../services/avatar.service';
 	// Bulk edit dialog handlers
 	openBulkEditDialog(): void {
 		if (!this.selectedDocuments || !this.selectedDocuments.length) {
-			try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.documents.bulk.NO_SELECTION') || 'No documents selected' }); } catch (e) {}
+			this.appMsg.info(this.translate.instant('components.documents.bulk.NO_SELECTION') || 'No documents selected');
 			return;
 		}
 		// attempt to prefill project if all selected documents share same project
@@ -694,12 +696,12 @@ import { AvatarService } from '../../services/avatar.service';
 
 	async applyBulkEdit(): Promise<void> {
 		if (!this.selectedDocuments || !this.selectedDocuments.length) {
-			try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.documents.bulk.NO_SELECTION') || 'No documents selected' }); } catch (e) {}
+			this.appMsg.info(this.translate.instant('components.documents.bulk.NO_SELECTION') || 'No documents selected');
 			return;
 		}
 		const ids = (this.selectedDocuments || []).map((s: any) => s.id).filter(Boolean);
 		if (!ids.length) {
-			try { this.messageService.add({ severity: 'warn', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.documents.bulk.NO_IDS') || 'No valid document ids selected' }); } catch (e) {}
+			this.appMsg.warn(this.translate.instant('components.documents.bulk.NO_IDS') || 'No valid document ids selected');
 			return;
 		}
 
@@ -711,7 +713,7 @@ import { AvatarService } from '../../services/avatar.service';
 		if (this.bulkEditModel.stage_id !== null && this.bulkEditModel.stage_id !== undefined) fields.stage_id = this.bulkEditModel.stage_id;
 
 		if (!Object.keys(fields).length) {
-			try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.documents.bulk.NOTHING_TO_APPLY') || 'Nothing to apply' }); } catch (e) {}
+			this.appMsg.info(this.translate.instant('components.documents.bulk.NOTHING_TO_APPLY') || 'Nothing to apply');
 			return;
 		}
 
@@ -722,9 +724,9 @@ import { AvatarService } from '../../services/avatar.service';
 
 		const failed = results.filter(r => r.status === 'rejected');
 		if (failed.length) {
-			try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.documents.bulk.PARTIAL_ERROR')?.replace('{n}', String(failed.length)) || (String(failed.length) + ' updates failed') }); } catch (e) {}
+			this.appMsg.error(this.translate.instant('components.documents.bulk.PARTIAL_ERROR')?.replace('{n}', String(failed.length)) || (String(failed.length) + ' updates failed'));
 		} else {
-			try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.documents.bulk.SUCCESS') || 'Bulk update applied' }); } catch (e) {}
+			this.appMsg.success(this.translate.instant('components.documents.bulk.SUCCESS') || 'Bulk update applied');
 		}
 
 		this.bulkEditDialogVisible = false;
@@ -854,11 +856,11 @@ import { AvatarService } from '../../services/avatar.service';
 		if (!id) return;
 		this.savingDir = true;
 		firstValueFrom(this.http.delete(`/api/documents/directories/${id}`)).then(() => {
-			try { this.messageService.add({ severity: 'success', summary: 'Delete', detail: 'Directory deleted' }); } catch (e) {}
+			this.appMsg.success('Directory deleted');
 			// remove node locally if present
 			try {
 				const current = this.files() || [];
-				const copy = JSON.parse(JSON.stringify(current || [])) as any[];
+				const copy = structuredClone(current || []) as any[];
 				const remove = (nodes: any[]): boolean => {
 					for (let i = 0; i < nodes.length; i++) {
 						const n = nodes[i];
@@ -881,7 +883,7 @@ import { AvatarService } from '../../services/avatar.service';
 				this.nodeService.getFiles().then((data) => this.files.set(this.applyExpansionFromCurrent(data)));
 			}
 		}).catch((err) => {
-			try { this.messageService.add({ severity: 'error', summary: 'Delete', detail: (err && err.message) ? err.message : 'Failed to delete directory' }); } catch (e) {}
+			this.appMsg.error((err && err.message) ? err.message : 'Failed to delete directory');
 		}).finally(() => {
 			this.savingDir = false;
 			this.createDirFromContext = false;
@@ -1048,18 +1050,18 @@ import { AvatarService } from '../../services/avatar.service';
 					pruned[k] = v;
 				}
 				await firstValueFrom(this.http.post('/api/documents', pruned));
-				try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Saved', detail: this.translate.instant('components.documents.form.UPDATED') || 'Created' }); } catch (e) {}
+				this.appMsg.success(this.translate.instant('components.documents.form.UPDATED') || 'Created');
 			} else {
 				const id = this.editModel.id;
 				if (id != null) await firstValueFrom(this.http.put(`/api/documents/${id}`, payload));
-				try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Saved', detail: this.translate.instant('components.documents.form.UPDATED') || 'Updated' }); } catch (e) {}
+				this.appMsg.success(this.translate.instant('components.documents.form.UPDATED') || 'Updated');
 			}
 			this.displayDialog = false;
 			// refresh current directory
 			if (this.selectedFile) this.onDirectorySelect(this.selectedFile);
 		} catch (e) {
 			const errMsg = (e && typeof e === 'object' && 'message' in e) ? (e as any).message : String(e);
-			try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.SAVE') || 'Save failed', detail: errMsg || (this.translate.instant('components.documents.messages.ERROR') || 'Failed to save') }); } catch (er) {}
+			this.appMsg.error(errMsg || (this.translate.instant('components.documents.messages.ERROR') || 'Failed to save'));
 		} finally {
 			this.loading = false;
 			try { this.cdr.detectChanges(); } catch (e) { /* ignore */ }
@@ -1354,4 +1356,6 @@ import { AvatarService } from '../../services/avatar.service';
 		};
 		return tree.map(n => filterNode(n)).filter(Boolean);
 	}
+
+	trackByField(index: number, col: any): string { return col.field; }
 }

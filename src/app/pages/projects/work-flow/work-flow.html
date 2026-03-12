@@ -20,7 +20,7 @@
       scrollHeight="flex"
       [rows]="10"
       size="small"
-      [globalFilterFields]="['name','description','from_status_id','to_status_id']"
+    [globalFilterFields]="['__source','description','from_status_id','to_status_id','project.code','project_code','document_type.name','issue_type.name','customer_question_type.name']"
       [(selection)]="selectedProjects"
       [rowHover]="true"
       dataKey="id"
@@ -39,11 +39,52 @@
 
       <ng-template pTemplate="header">
         <tr>
-          <th>{{ 'components.projects.table.HEADERS.ID' | translate }}</th>
-          <th pSortableColumn="name">{{ 'components.projects.table.HEADERS.NAME' | translate }}<p-sortIcon field="name" /></th>
-          <th pSortableColumn="from_status_id">From status<p-sortIcon field="from_status_id" /></th>
-          <th pSortableColumn="to_status_id">To status<p-sortIcon field="to_status_id" /></th>
-          <th pSortableColumn="created_at">{{ 'components.projects.table.HEADERS.CREATED_AT' | translate }}<p-sortIcon field="created_at" /></th>
+          <th pSortableColumn="id">
+            <div class="flex items-center gap-2">
+              <span>{{ 'components.projects.table.HEADERS.ID' | translate }}</span>
+              <p-sortIcon field="id" />
+            </div>
+          </th>
+          <th pSortableColumn="__source">
+            <div class="flex items-center gap-2">
+              <span>{{ 'components.projects.table.HEADERS.ENTITY' | translate }}</span>
+              <p-sortIcon field="__source" />
+            </div>
+          </th>
+          <th pSortableColumn="project_code">
+            <div class="flex items-center gap-2">
+              <span>{{ 'components.projects.table.HEADERS.PROJECT' | translate }}</span>
+              <p-sortIcon field="project_code" />
+            </div>
+            <div class="mt-1"><input pInputText type="text" (input)="dt.filter($event.target.value, 'project.code', 'contains')" placeholder="{{ 'components.projects.table.FILTER' | translate }}" /></div>
+          </th>
+          <th pSortableColumn="type">
+            <div class="flex items-center gap-2">
+              <span>{{ 'components.projects.table.HEADERS.TYPE' | translate }}</span>
+              <p-sortIcon field="type" />
+            </div>
+            <div class="mt-1">
+              <input pInputText type="text" (input)="dt.filter($event.target.value, 'document_type.name', 'contains'); dt.filter($event.target.value, 'issue_type.name', 'contains'); dt.filter($event.target.value, 'customer_question_type.name', 'contains'); dt.filter($event.target.value, 'type', 'contains')" placeholder="{{ 'components.projects.table.FILTER' | translate }}" />
+            </div>
+          </th>
+          <th pSortableColumn="from_status_id">
+            <div class="flex items-center gap-2">
+              <span>From status</span>
+              <p-sortIcon field="from_status_id" />
+            </div>
+          </th>
+          <th pSortableColumn="to_status_id">
+            <div class="flex items-center gap-2">
+              <span>To status</span>
+              <p-sortIcon field="to_status_id" />
+            </div>
+          </th>
+          <th pSortableColumn="created_at">
+            <div class="flex items-center gap-2">
+              <span>{{ 'components.projects.table.HEADERS.CREATED_AT' | translate }}</span>
+              <p-sortIcon field="created_at" />
+            </div>
+          </th>
           <th></th>
         </tr>
       </ng-template>
@@ -51,9 +92,17 @@
       <ng-template pTemplate="body" let-p>
         <tr>
           <td>{{ p?.id || '—' }}</td>
-          <td>{{ p?.name || '—' }}</td>
-          <td>{{ p?.from_status_id || '—' }}</td>
-          <td>{{ p?.to_status_id || '—' }}</td>
+          <td>
+            <p-tag
+              [value]="p?.__source === 'issue' ? ('MENU.ISSUE' | translate) : (p?.__source === 'document' ? ('MENU.DOCUMENT' | translate) : (p?.__source === 'customer_question' ? ('MENU.CUSTOMER_QUESTION' | translate) : (p?.__source || '—')))
+              "
+              [severity]="p?.__source === 'issue' ? 'info' : (p?.__source === 'document' ? 'success' : 'secondary')"
+            ></p-tag>
+          </td>
+          <td>{{ p?.project?.code || p?.project_code || p?.project_id || '—' }}</td>
+          <td>{{ typeName(p) }}</td>
+          <td>{{ statusName(p?.from_status_id, p?.__source) }}</td>
+          <td>{{ statusName(p?.to_status_id, p?.__source) }}</td>
           <td>{{ p?.created_at ? (p.created_at | date:'short') : '—' }}</td>
           <td>
             <p-button icon="pi pi-pencil" class="mr-2" [outlined]="true" (click)="openEdit(p)" />
@@ -62,29 +111,20 @@
         </tr>
       </ng-template>
     </p-table>
-  </div>
-</section>
-
 <p-dialog [header]="isCreating ? ('MENU.CREATE' | translate) : ('MENU.EDIT' | translate)" [(visible)]="displayDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{width: '25%'}">
   <div class=" flex flex-col gap-4">
     <div class="flex flex-col gap-2">
-      <label for="wfName">Name</label>
-      <input pInputText id="wfName" type="text" [(ngModel)]="editModel.name" name="name" />
-    </div>
-
-    <div class="flex flex-col gap-2">
-      <label for="wfFrom">From status id</label>
+      <label for="wfFrom" class="font-bold">From status id</label>
       <input pInputText id="wfFrom" type="number" [(ngModel)]="editModel.from_status_id" name="from_status_id" />
     </div>
 
     <div class="flex flex-col gap-2">
-      <label for="wfTo">To status id</label>
+      <label for="wfTo" class="font-bold">To status id</label>
       <input pInputText id="wfTo" type="number" [(ngModel)]="editModel.to_status_id" name="to_status_id" />
     </div>
 
     <div class="flex flex-col gap-2">
-      <label for="wfDescription">{{ 'components.projects.form.DESCRIPTION' | translate }}</label>
-      <input pInputText id="wfDescription" type="text" [(ngModel)]="editModel.description" name="description" />
+      
     </div>
 
     <div *ngIf="error" class="text-red-600 block">{{ error }}</div>

@@ -1,5 +1,5 @@
-import { Component, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, AfterViewInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { DatePipe, NgIf } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { ToolbarModule } from 'primeng/toolbar';
@@ -8,6 +8,8 @@ import { TableModule } from 'primeng/table';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputIconModule } from 'primeng/inputicon';
 import { ProjectsWorkFlowService } from '../../../services/projects-work-flow.service';
+import { ProjectsStatusesService } from '../../../services/projects-statuses.service';
+import { CustomerQuestionStatusesService } from '../../../services/customer-question-statuses.service';
 import { UsersService } from '../../../services/users.service';
 import { forkJoin } from 'rxjs';
 import { AuthService } from '../../../auth/auth.service';
@@ -18,14 +20,15 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { TagModule } from 'primeng/tag';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { Select } from 'primeng/select';
 import { AvatarModule } from 'primeng/avatar';
+import { AppMessageService } from '../../../services/message.service';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-projects-work-flow',
   standalone: true,
-  imports: [CommonModule, TranslateModule, FormsModule, ToolbarModule, ButtonModule, TableModule, InputTextModule, InputIconModule, IconFieldModule, DialogModule, ToastModule, TagModule, ConfirmDialogModule, Select, AvatarModule],
-  providers: [MessageService, ConfirmationService],
+  imports: [DatePipe, NgIf, TranslateModule, FormsModule, ToolbarModule, ButtonModule, TableModule, InputTextModule, InputIconModule, IconFieldModule, DialogModule, ToastModule, TagModule, ConfirmDialogModule, AvatarModule],
+  providers: [ConfirmationService],
   templateUrl: './work-flow.html',
   styleUrls: ['./work-flow.scss']
 })
@@ -42,7 +45,13 @@ export class ProjectsWorkFlowComponent implements OnInit, AfterViewInit {
   usersOptions: { label: string; value: any; avatar?: string | null }[] = [];
   statuses: { label: string; value: any }[] = [];
 
-  constructor(private svc: ProjectsWorkFlowService, private cd: ChangeDetectorRef, private messageService: MessageService, private translate: TranslateService, private usersService: UsersService, private confirmationService: ConfirmationService, private auth: AuthService, private avatarService: AvatarService) {}
+  issueStatusMap: Record<string, string> = {};
+  documentStatusMap: Record<string, string> = {};
+  customerQuestionStatusMap: Record<string, string> = {};
+
+  constructor(private svc: ProjectsWorkFlowService, private statusesSvc: ProjectsStatusesService, private cqStatusesSvc: CustomerQuestionStatusesService, private cd: ChangeDetectorRef, private translate: TranslateService, private usersService: UsersService, private confirmationService: ConfirmationService, private auth: AuthService, private avatarService: AvatarService,
+    private appMsg: AppMessageService
+  ) {}
 
   initialsFromName(name?: string | null): string { try { return this.avatarService.initialsFromName(name); } catch (e) { return ''; } }
   selectAvatarBg(label?: string | null): string { try { return this.avatarService.selectAvatarBg(label); } catch (e) { return ''; } }
@@ -53,7 +62,25 @@ export class ProjectsWorkFlowComponent implements OnInit, AfterViewInit {
     try { this.auth.me().subscribe({ next: (res: any) => { const user = (res && (res as any).data) ? (res as any).data : res; if (user && (user.id !== undefined && user.id !== null)) { this.currentUserId = user.id; this.ownerNames[String(this.currentUserId)] = this.formatUserName(user) || String(this.currentUserId); } }, error: () => {} }); } catch (e) {}
     try { this.statuses = [ { label: this.translate.instant('MENU.ACTIVE_YES') || 'Active', value: 'active' }, { label: this.translate.instant('MENU.ACTIVE_NO') || 'Inactive', value: 'inactive' }, { label: this.translate.instant('components.projects.STATUS_COMPLETED') || 'Completed', value: 'completed' } ]; } catch (e) { this.statuses = [{ label: 'Active', value: 'active' }, { label: 'Inactive', value: 'inactive' }, { label: 'Completed', value: 'completed' }]; }
     this.loadUsersForSelect();
+    this.loadStatusMaps();
     this.loadWorkFlows();
+  }
+
+  private loadStatusMaps(): void {
+    try {
+      const a$ = this.statusesSvc.getStatuses();
+      const b$ = this.statusesSvc.getDocumentStatuses();
+      const c$ = this.cqStatusesSvc.getStatuses();
+      forkJoin([a$, b$, c$]).subscribe({ next: (res: any[]) => {
+        const a = (res[0] && res[0].data) ? res[0].data : (Array.isArray(res[0]) ? res[0] : []);
+        const b = (res[1] && res[1].data) ? res[1].data : (Array.isArray(res[1]) ? res[1] : []);
+        const c = (res[2] && res[2].data) ? res[2].data : (Array.isArray(res[2]) ? res[2] : []);
+        (a || []).forEach((it: any) => { try { this.issueStatusMap[String(it.id)] = it.name || it.code || String(it.id); } catch (e) {} });
+        (b || []).forEach((it: any) => { try { this.documentStatusMap[String(it.id)] = it.name || it.code || String(it.id); } catch (e) {} });
+        (c || []).forEach((it: any) => { try { this.customerQuestionStatusMap[String(it.id)] = it.name || it.code || String(it.id); } catch (e) {} });
+        this.safeDetect();
+      }, error: () => { /* noop */ } });
+    } catch (e) { /* noop */ }
   }
 
   ngAfterViewInit(): void { setTimeout(() => { this.safeDetect(); }, 0); }
@@ -65,12 +92,15 @@ export class ProjectsWorkFlowComponent implements OnInit, AfterViewInit {
     try {
       const a$ = this.svc.getDocumentWorkFlows();
       const b$ = this.svc.getIssueWorkFlows();
-      forkJoin([a$, b$]).subscribe({ next: (res: any[]) => {
+      const c$ = this.svc.getCustomerQuestionWorkFlows();
+      forkJoin([a$, b$, c$]).subscribe({ next: (res: any[]) => {
         const a = (res[0] && res[0].data) ? res[0].data : (Array.isArray(res[0]) ? res[0] : []);
         const b = (res[1] && res[1].data) ? res[1].data : (Array.isArray(res[1]) ? res[1] : []);
+        const c = (res[2] && res[2].data) ? res[2].data : (Array.isArray(res[2]) ? res[2] : []);
         const ma = (a || []).map((it: any) => ({ ...it, __source: 'document' }));
         const mb = (b || []).map((it: any) => ({ ...it, __source: 'issue' }));
-        this.projects = [...ma, ...mb];
+        const mc = (c || []).map((it: any) => ({ ...it, __source: 'customer_question' }));
+        this.projects = [...ma, ...mb, ...mc];
         this.loadOwnerNames();
         this.loading = false;
         this.safeDetect();
@@ -84,13 +114,43 @@ export class ProjectsWorkFlowComponent implements OnInit, AfterViewInit {
 
   getOwnerName(id: any): string { if (!id && id !== 0) return '—'; return this.ownerNames[String(id)] || String(id); }
 
+  statusName(id: any, source?: string): string {
+    if (id === null || id === undefined || id === '') return '—';
+    const key = String(id);
+    if (source === 'issue') return this.issueStatusMap[key] || key;
+    if (source === 'document') return this.documentStatusMap[key] || key;
+    if (source === 'customer_question') return this.customerQuestionStatusMap[key] || key;
+    return key;
+  }
+
+  typeName(item: any): string {
+    if (!item) return '—';
+    try {
+      if (item.__source === 'document') return item.document_type?.name || item.document_type?.code || '—';
+      if (item.__source === 'issue') return item.issue_type?.name || item.issue_type?.code || '—';
+      if (item.__source === 'customer_question') return item.customer_question_type?.name || item.customer_question_type?.code || '—';
+    } catch (e) { /* noop */ }
+    return '—';
+  }
+
   openEdit(item: any): void { if (!item) return; this.editModel = { ...item }; this.isCreating = false; this.displayDialog = true; this.error = null; }
 
   confirmDelete(item: any): void { if (!item) return; try { this.confirmationService.confirm({ message: `${this.translate.instant('components.projects.confirm.DELETE_QUESTION') || 'Attention! Do you really want to delete project'} ${item.name || item.id}?`, icon: 'pi pi-exclamation-triangle', accept: () => this.deleteItem(item) }); } catch (e) { this.deleteItem(item); } }
 
-  deleteItem(item: any): void { if (!item || !item.id) return; this.loading = true; const isIssue = (item.__source === 'issue'); const fn = isIssue ? this.svc.deleteIssueWorkFlow(item.id) : this.svc.deleteDocumentWorkFlow(item.id); fn.subscribe({ next: () => { try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.projects.messages.SUMMARY_DELETE') || 'Delete', detail: this.translate.instant('components.projects.messages.DELETED') || 'Deleted' }); } catch (e) {} this.loadWorkFlows(); this.safeDetect(); this.loading = false; }, error: (err: any) => { try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.messages.SUMMARY_DELETE') || 'Delete', detail: (err && err.message) ? err.message : 'Failed to delete' }); } catch (e) {} this.loading = false; this.safeDetect(); } }); }
+  deleteItem(item: any): void {
+    if (!item || !item.id) return;
+    this.loading = true;
+    const isIssue = (item.__source === 'issue');
+    const isCustomer = (item.__source === 'customer_question');
+    if (isCustomer) {
+      this.svc.deleteCustomerQuestionWorkFlow(item.id).subscribe({ next: () => { this.appMsg.success(this.translate.instant('components.projects.messages.DELETED') || 'Deleted'); this.loadWorkFlows(); this.safeDetect(); this.loading = false; }, error: (err: any) => { this.appMsg.error((err && err.message) ? err.message : 'Failed to delete'); this.loading = false; this.safeDetect(); } });
+    } else {
+      const fn = isIssue ? this.svc.deleteIssueWorkFlow(item.id) : this.svc.deleteDocumentWorkFlow(item.id);
+      fn.subscribe({ next: () => { this.appMsg.success(this.translate.instant('components.projects.messages.DELETED') || 'Deleted'); this.loadWorkFlows(); this.safeDetect(); this.loading = false; }, error: (err: any) => { this.appMsg.error((err && err.message) ? err.message : 'Failed to delete'); this.loading = false; this.safeDetect(); } });
+    }
+  }
 
-  openNew(): void { this.editModel = { name: '', description: '', from_status_id: null, to_status_id: null, issue_type_id: null, __source: 'document' }; this.isCreating = true; this.displayDialog = true; this.error = null; }
+  openNew(): void { this.editModel = { name: '', from_status_id: null, to_status_id: null, issue_type_id: null, __source: 'document' }; this.isCreating = true; this.displayDialog = true; this.error = null; }
 
   validateForm(): boolean { if (!this.editModel || !this.editModel.from_status_id || !this.editModel.to_status_id) { this.error = 'From and To statuses are required'; return false; } this.error = null; return true; }
 
@@ -100,24 +160,32 @@ export class ProjectsWorkFlowComponent implements OnInit, AfterViewInit {
     if (!this.validateForm()) return;
     this.loading = true;
     const payload: any = { from_status_id: this.editModel.from_status_id, to_status_id: this.editModel.to_status_id };
-    if (this.editModel.name !== undefined) payload.name = this.editModel.name;
-    if (this.editModel.description !== undefined) payload.description = this.editModel.description;
+    
     const isIssue = (this.editModel.__source === 'issue');
+    const isCustomer = (this.editModel.__source === 'customer_question');
     if (isIssue) {
       if (this.isCreating) {
-        this.svc.createIssueWorkFlow(payload).subscribe({ next: () => { this.displayDialog = false; this.editModel = {}; this.loading = false; this.isCreating = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.projects.messages.SUMMARY_CREATE') || 'Create', detail: this.translate.instant('components.projects.messages.CREATED') || 'Created' }); } catch (e) {} this.loadWorkFlows(); this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to create'; this.loading = false; try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.messages.SUMMARY_CREATE') || 'Create', detail: this.error || '' }); } catch (e) {} this.safeDetect(); } });
+        this.svc.createIssueWorkFlow(payload).subscribe({ next: () => { this.displayDialog = false; this.editModel = {}; this.loading = false; this.isCreating = false; this.appMsg.success(this.translate.instant('components.projects.messages.CREATED') || 'Created'); this.loadWorkFlows(); this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to create'; this.loading = false; this.appMsg.error(this.error || ''); this.safeDetect(); } });
       } else {
         const id = this.editModel && (this.editModel.id || this.editModel._id || this.editModel.ID);
         if (!id) { this.error = 'id is missing'; this.loading = false; this.safeDetect(); return; }
-        this.svc.updateIssueWorkFlow(id, payload).subscribe({ next: () => { this.displayDialog = false; this.editModel = {}; this.loading = false; this.isCreating = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.projects.messages.SUMMARY_EDIT') || 'Edit', detail: this.translate.instant('components.projects.messages.UPDATED') || 'Updated' }); } catch (e) {} this.loadWorkFlows(); this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to update'; this.loading = false; try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.messages.SUMMARY_EDIT') || 'Edit', detail: this.error || '' }); } catch (e) {} this.safeDetect(); } });
+        this.svc.updateIssueWorkFlow(id, payload).subscribe({ next: () => { this.displayDialog = false; this.editModel = {}; this.loading = false; this.isCreating = false; this.appMsg.success(this.translate.instant('components.projects.messages.UPDATED') || 'Updated'); this.loadWorkFlows(); this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to update'; this.loading = false; this.appMsg.error(this.error || ''); this.safeDetect(); } });
+      }
+    } else if (isCustomer) {
+      if (this.isCreating) {
+        this.svc.createCustomerQuestionWorkFlow(payload).subscribe({ next: () => { this.displayDialog = false; this.editModel = {}; this.loading = false; this.isCreating = false; this.appMsg.success(this.translate.instant('components.projects.messages.CREATED') || 'Created'); this.loadWorkFlows(); this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to create'; this.loading = false; this.appMsg.error(this.error || ''); this.safeDetect(); } });
+      } else {
+        const id = this.editModel && (this.editModel.id || this.editModel._id || this.editModel.ID);
+        if (!id) { this.error = 'id is missing'; this.loading = false; this.safeDetect(); return; }
+        this.svc.updateCustomerQuestionWorkFlow(id, payload).subscribe({ next: () => { this.displayDialog = false; this.editModel = {}; this.loading = false; this.isCreating = false; this.appMsg.success(this.translate.instant('components.projects.messages.UPDATED') || 'Updated'); this.loadWorkFlows(); this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to update'; this.loading = false; this.appMsg.error(this.error || ''); this.safeDetect(); } });
       }
     } else {
       if (this.isCreating) {
-        this.svc.createDocumentWorkFlow(payload).subscribe({ next: () => { this.displayDialog = false; this.editModel = {}; this.loading = false; this.isCreating = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.projects.messages.SUMMARY_CREATE') || 'Create', detail: this.translate.instant('components.projects.messages.CREATED') || 'Created' }); } catch (e) {} this.loadWorkFlows(); this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to create'; this.loading = false; try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.messages.SUMMARY_CREATE') || 'Create', detail: this.error || '' }); } catch (e) {} this.safeDetect(); } });
+        this.svc.createDocumentWorkFlow(payload).subscribe({ next: () => { this.displayDialog = false; this.editModel = {}; this.loading = false; this.isCreating = false; this.appMsg.success(this.translate.instant('components.projects.messages.CREATED') || 'Created'); this.loadWorkFlows(); this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to create'; this.loading = false; this.appMsg.error(this.error || ''); this.safeDetect(); } });
       } else {
         const id = this.editModel && (this.editModel.id || this.editModel._id || this.editModel.ID);
         if (!id) { this.error = 'id is missing'; this.loading = false; this.safeDetect(); return; }
-        this.svc.updateDocumentWorkFlow(id, payload).subscribe({ next: () => { this.displayDialog = false; this.editModel = {}; this.loading = false; this.isCreating = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.projects.messages.SUMMARY_EDIT') || 'Edit', detail: this.translate.instant('components.projects.messages.UPDATED') || 'Updated' }); } catch (e) {} this.loadWorkFlows(); this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to update'; this.loading = false; try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.messages.SUMMARY_EDIT') || 'Edit', detail: this.error || '' }); } catch (e) {} this.safeDetect(); } });
+        this.svc.updateDocumentWorkFlow(id, payload).subscribe({ next: () => { this.displayDialog = false; this.editModel = {}; this.loading = false; this.isCreating = false; this.appMsg.success(this.translate.instant('components.projects.messages.UPDATED') || 'Updated'); this.loadWorkFlows(); this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to update'; this.loading = false; this.appMsg.error(this.error || ''); this.safeDetect(); } });
       }
     }
   }

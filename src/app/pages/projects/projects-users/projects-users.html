@@ -46,10 +46,30 @@
             <th style="width:3rem">
               <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
             </th>
-            <th pSortableColumn="id">{{ 'components.projects.table.HEADERS.ID' | translate }} <p-sortIcon field="id"></p-sortIcon></th>
-            <th pSortableColumn="user_id">{{ 'components.projects.table.HEADERS.USER' | translate }} <p-sortIcon field="user_id"></p-sortIcon></th>
-            <th pSortableColumn="role_name">{{ 'components.projects.table.HEADERS.ROLE' | translate }} <p-sortIcon field="role_name"></p-sortIcon></th>
-            <th pSortableColumn="created_at">{{ 'components.projects.table.HEADERS.CREATED_AT' | translate }} <p-sortIcon field="created_at"></p-sortIcon></th>
+            <th pSortableColumn="id">
+              <div class="flex items-center gap-2">
+                <span>{{ 'components.projects.table.HEADERS.ID' | translate }}</span>
+                <p-sortIcon field="id"></p-sortIcon>
+              </div>
+            </th>
+            <th pSortableColumn="user_id">
+              <div class="flex items-center gap-2">
+                <span>{{ 'components.projects.table.HEADERS.USER' | translate }}</span>
+                <p-sortIcon field="user_id"></p-sortIcon>
+              </div>
+            </th>
+            <th pSortableColumn="role_name">
+              <div class="flex items-center gap-2">
+                <span>{{ 'components.projects.table.HEADERS.ROLE' | translate }}</span>
+                <p-sortIcon field="role_name"></p-sortIcon>
+              </div>
+            </th>
+            <th pSortableColumn="created_at">
+              <div class="flex items-center gap-2">
+                <span>{{ 'components.projects.table.HEADERS.CREATED_AT' | translate }}</span>
+                <p-sortIcon field="created_at"></p-sortIcon>
+              </div>
+            </th>
             <th></th>
           </tr>
         </ng-template>
@@ -95,28 +115,28 @@
 <p-dialog [header]="isCreating ? ('MENU.CREATE' | translate) : ('MENU.EDIT' | translate)" [(visible)]="displayDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{width: '25%'}">
     <div class=" flex flex-col gap-4">
     <div class="flex flex-col gap-2">
-      <label for="projectName">{{ 'components.projects.form.NAME' | translate }}</label>
+      <label for="projectName" class="font-bold">{{ 'components.projects.form.NAME' | translate }}</label>
       <input pInputText id="projectName" type="text" [(ngModel)]="editModel.name" name="name" />
     </div>
 
     <div class="flex flex-col gap-2">
-      <label for="projectCode">{{ 'components.projects.form.CODE' | translate }}</label>
+      <label for="projectCode" class="font-bold">{{ 'components.projects.form.CODE' | translate }}</label>
       <input pInputText id="projectCode" type="text" [(ngModel)]="editModel.code" name="code" />
     </div>
 
     <div class="flex flex-col gap-2">
-      <label for="projectDescription">{{ 'components.projects.form.DESCRIPTION' | translate }}</label>
+      <label for="projectDescription" class="font-bold">{{ 'components.projects.form.DESCRIPTION' | translate }}</label>
       <input pInputText id="projectDescription" type="text" [(ngModel)]="editModel.description" name="description" />
     </div>
 
     <!-- Status and Owner are editable only in edit mode -->
     <div *ngIf="!isCreating" class="flex flex-col gap-2">
-      <label for="projectStatus">{{ 'components.projects.form.STATUS' | translate }}</label>
+      <label for="projectStatus" class="font-bold">{{ 'components.projects.form.STATUS' | translate }}</label>
       <p-select filter="true" filterBy="label" id="projectStatus" [options]="statuses" optionLabel="label" optionValue="value" [(ngModel)]="editModel.status" name="status" appendTo="body"></p-select>
     </div>
 
     <div *ngIf="!isCreating" class="flex flex-col gap-2">
-      <label for="projectOwner">{{ 'components.projects.form.OWNER' | translate }}</label>
+      <label for="projectOwner" class="font-bold">{{ 'components.projects.form.OWNER' | translate }}</label>
       <p-select filter="true" filterBy="label" [options]="usersOptions" optionLabel="label" optionValue="value" [(ngModel)]="editModel.owner_id" name="owner_id" appendTo="body">
         <ng-template let-opt pTemplate="item">
           <div class="flex items-center gap-2">
@@ -161,7 +181,7 @@
 <p-dialog header="{{ 'components.projects.users.ASSIGN' | translate }}" [(visible)]="assignDialog" [modal]="true" [closable]="true" [resizable]="false" appendTo="body" [style]="{width: '40%'}">
   <div class="flex flex-col gap-4">
     <div class="flex flex-col gap-2">
-  <label for="assignUsers">{{ 'components.projects.users.ASSIGNMENTS_USERS' | translate }}</label>
+  <label for="assignUsers" class="font-bold">{{ 'components.projects.users.ASSIGNMENTS_USERS' | translate }}</label>
   <p-multiSelect filter="true" filterBy="label" id="assignUsers" [options]="usersOptions" optionLabel="label" optionValue="value" [(ngModel)]="assignModel.user_id" placeholder="{{ 'components.projects.users.ASSIGNMENTS_SELECT_USERS' | translate }}" appendTo="body" [panelStyle]="{ 'max-height': '300px' }">
     <ng-template let-opt pTemplate="item">
       <div class="flex items-center gap-2">
@@ -178,7 +198,7 @@
     </div>
 
     <div class="flex flex-col gap-2">
-  <label for="assignRoles">{{ 'components.projects.users.ASSIGNMENTS_ROLES' | translate }}</label>
+  <label for="assignRoles" class="font-bold">{{ 'components.projects.users.ASSIGNMENTS_ROLES' | translate }}</label>
   <p-multiSelect filter="true" filterBy="label" id="assignRoles" [options]="rolesOptions" optionLabel="label" optionValue="value" [(ngModel)]="assignModel.roles" placeholder="{{ 'components.projects.users.ASSIGNMENTS_SELECT_ROLES' | translate }}" appendTo="body" [panelStyle]="{ 'max-height': '300px' }"></p-multiSelect>
     </div>
 

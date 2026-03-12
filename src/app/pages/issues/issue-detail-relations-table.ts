@@ -1,8 +1,8 @@
-import { Component, Input, OnChanges, SimpleChanges, ChangeDetectorRef, Output, EventEmitter } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, ChangeDetectorRef, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { CommonModule } from '@angular/common';
+import { NgIf } from '@angular/common';
 import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -13,12 +13,14 @@ import { BadgeModule } from 'primeng/badge';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { LinksService } from '../../services/links.service';
+import { AppMessageService } from '../../services/message.service';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-issue-detail-relations-table',
   standalone: true,
-  imports: [CommonModule, TranslateModule, TagModule, BadgeModule, ButtonModule, TableModule, ConfirmDialogModule, ToastModule],
-  providers: [ConfirmationService, MessageService],
+  imports: [NgIf, TranslateModule, TagModule, BadgeModule, ButtonModule, TableModule, ConfirmDialogModule, ToastModule],
+  providers: [ConfirmationService],
   template: `
     <section class="admin-subpage-relations card">
       <p-toast></p-toast>
@@ -82,7 +84,9 @@ export class IssueDetailRelationsTableComponent implements OnChanges {
   @Output() addRelation = new EventEmitter<void>();
   relations: Array<any> = [];
 
-  constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router, private confirmationService: ConfirmationService, private messageService: MessageService, private translate: TranslateService, private linksService: LinksService) {}
+  constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router, private confirmationService: ConfirmationService, private translate: TranslateService, private linksService: LinksService,
+    private appMsg: AppMessageService
+  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['issue']) {
@@ -279,11 +283,11 @@ export class IssueDetailRelationsTableComponent implements OnChanges {
             next: () => {
               this.relations = (this.relations || []).filter(r => r.raw?.id !== linkId && r.raw?.link_id !== linkId && r.raw?._id !== linkId);
               this.cdr.markForCheck();
-              try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Deleted', detail: this.translate.instant('components.issues.relations.DELETED') || 'Relation removed' }); } catch (e) {}
+              this.appMsg.success(this.translate.instant('components.issues.relations.DELETED') || 'Relation removed');
             },
             error: (err) => {
               console.warn('Failed to delete link', linkId, err);
-              try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: (err && err.message) ? err.message : this.translate.instant('components.documents.messages.ERROR') || 'Failed to delete relation' }); } catch (e) {}
+              this.appMsg.error((err && err.message) ? err.message : this.translate.instant('components.documents.messages.ERROR') || 'Failed to delete relation');
             }
           });
         },

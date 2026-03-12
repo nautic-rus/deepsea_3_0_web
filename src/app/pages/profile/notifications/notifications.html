@@ -17,7 +17,7 @@
         <tr>
           <th>Event</th>
           <th>Description</th>
-          <th *ngFor="let m of methods">{{ m.name }}</th>
+          <th *ngFor="let m of methods; trackBy: trackByMethodId">{{ m.name }}</th>
         </tr>
       </ng-template>
 
@@ -25,7 +25,7 @@
         <tr>
           <td>{{ row.event?.name || row.event?.code }}</td>
           <td>{{ row.event?.description || '-' }}</td>
-          <td *ngFor="let methodEntry of row.methods; let j = index">
+          <td *ngFor="let methodEntry of row.methods; let j = index; trackBy: trackByIndex">
             <p-checkbox [(ngModel)]="row.methods[j].enabled" (ngModelChange)="onToggleMethod(row.event, methodEntry, $event, row, j)" binary="true"></p-checkbox>
           </td>
         </tr>

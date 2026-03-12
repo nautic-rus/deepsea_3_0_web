@@ -70,7 +70,7 @@
       </td>
       <td>
         <ng-container *ngIf="page.permissions && page.permissions.length; else noPerms">
-          <span *ngFor="let perm of page.permissions; let i = index">
+          <span *ngFor="let perm of page.permissions; let i = index; trackBy: trackByPermId">
             {{ perm.name || perm.code || perm }}<span *ngIf="i < page.permissions.length - 1">, </span>
           </span>
         </ng-container>

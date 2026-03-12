@@ -1,16 +1,18 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy, DestroyRef, inject } from '@angular/core';
+;
 import { RouterOutlet, RouterModule, Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { filter, map, mergeMap } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { of } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 import { HeaderComponent } from './header/header';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterModule, HeaderComponent],
+  imports: [RouterOutlet, RouterModule, HeaderComponent],
   template: `
     <div class="layout-wrapper">
       <app-header />
@@ -43,6 +45,8 @@ import { HeaderComponent } from './header/header';
   `]
 })
 export class LayoutComponent {
+  private destroyRef = inject(DestroyRef);
+
   constructor(
     private router: Router,
     private activatedRoute: ActivatedRoute,
@@ -51,6 +55,7 @@ export class LayoutComponent {
   ) {
     // Update document title on navigation end using route data.titleKey (translation key)
     this.router.events.pipe(
+      takeUntilDestroyed(this.destroyRef),
       filter(e => e instanceof NavigationEnd),
       map(() => {
         // Walk the route tree and prefer the deepest route that defines a titleKey or title.

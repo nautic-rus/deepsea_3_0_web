@@ -1,6 +1,6 @@
-import { Component, Input, OnChanges, ChangeDetectorRef, ViewChild, ElementRef, AfterViewInit, inject } from '@angular/core';
+import { Component, Input, OnChanges, ChangeDetectorRef, ViewChild, ElementRef, AfterViewInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { forkJoin } from 'rxjs';
-import { CommonModule } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
@@ -10,12 +10,14 @@ import { IssuesService } from '../../../services/issues.service';
 import { AvatarService } from '../../../services/avatar.service';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { AppMessageService } from '../../../services/message.service';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-issue-detail-chat',
   standalone: true,
-  providers: [MessageService],
-  imports: [CommonModule, FormsModule, ButtonModule, AvatarModule, TranslateModule, ToastModule, ProgressSpinnerModule],
+  providers: [],
+  imports: [NgFor, NgIf, FormsModule, ButtonModule, AvatarModule, TranslateModule, ToastModule, ProgressSpinnerModule],
   templateUrl: './issue-detail-chat.component.html',
   styleUrls: ['./issue-detail-chat.component.scss']
 })
@@ -23,6 +25,7 @@ export class IssueDetailChatComponent implements OnChanges, AfterViewInit {
   private issuesService = inject(IssuesService);
   public avatarService = inject(AvatarService);
   private messageService = inject(MessageService);
+  private appMsg = inject(AppMessageService);
   private translate = inject(TranslateService);
   private cdr = inject(ChangeDetectorRef);
 
@@ -72,13 +75,13 @@ export class IssueDetailChatComponent implements OnChanges, AfterViewInit {
             try { if (this._issue) this._issue.messages = list; } catch {}
             finish();
           },
-          error: () => { try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR'), detail: this.translate.instant('components.issues.messages.ERROR') }); } catch (e) {} finish(); }
+          error: () => { this.appMsg.error(this.translate.instant('components.issues.messages.ERROR')); finish(); }
         });
       } else { finish(); }
 
       this.issuesService.getHistory(this._issue.id).subscribe({
         next: (res: any) => { const list = res?.data ?? res ?? []; this.historyEntries = this.normalizeHistory(list); try { if (this._issue) this._issue.history = list; } catch {} finish(); },
-        error: () => { try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR'), detail: this.translate.instant('components.issues.messages.ERROR') }); } catch (e) {} finish(); }
+        error: () => { this.appMsg.error(this.translate.instant('components.issues.messages.ERROR')); finish(); }
       });
     }
   }
@@ -223,7 +226,7 @@ export class IssueDetailChatComponent implements OnChanges, AfterViewInit {
       const input = ev.target as HTMLInputElement;
       const files = input.files;
       if (files && files.length) {
-        try { this.messageService.add({ severity: 'info', summary: 'Attachment', detail: `${files.length} file(s) selected` }); } catch (e) {}
+        this.appMsg.info(`${files.length} file(s) selected`);
       }
     } catch (e) { }
   }
@@ -301,13 +304,13 @@ export class IssueDetailChatComponent implements OnChanges, AfterViewInit {
                 this.historyEntries = this.normalizeHistory(hist);
                 try { this._issue.messages = msgs; this._issue.history = hist; } catch (e) {}
               } catch (e) {}
-              this.sending = false; this.cdr.markForCheck(); this.scrollToBottom(); try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.issues.messages.SAVED'), detail: this.translate.instant('components.issues.messages.SAVED') }); } catch (e) {}
+              this.sending = false; this.cdr.markForCheck(); this.scrollToBottom(); this.appMsg.success(this.translate.instant('components.issues.messages.SAVED'));
             },
-            error: () => { this.sending = false; this.cdr.markForCheck(); this.scrollToBottom(); try { this.messageService.add({ severity: 'warn', summary: this.translate.instant('components.issues.messages.SAVED'), detail: this.translate.instant('components.issues.messages.SAVED') }); } catch (e) {} }
+            error: () => { this.sending = false; this.cdr.markForCheck(); this.scrollToBottom(); this.appMsg.warn(this.translate.instant('components.issues.messages.SAVED')); }
           });
-  } else { this.sending = false; this.cdr.markForCheck(); this.scrollToBottom(); try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.issues.messages.SAVED'), detail: this.translate.instant('components.issues.messages.SAVED') }); } catch (e) {} }
+  } else { this.sending = false; this.cdr.markForCheck(); this.scrollToBottom(); this.appMsg.success(this.translate.instant('components.issues.messages.SAVED')); }
       },
-  error: () => { this.sending = false; try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR'), detail: this.translate.instant('components.issues.messages.ERROR') }); } catch (e) {} }
+  error: () => { this.sending = false; this.appMsg.error(this.translate.instant('components.issues.messages.ERROR')); }
     });
   }
 
@@ -343,4 +346,7 @@ export class IssueDetailChatComponent implements OnChanges, AfterViewInit {
   }
 
   private scrollToBottom(): void { setTimeout(() => { const el = this.messagesContainer?.nativeElement; if (el) el.scrollTop = el.scrollHeight; }, 0); }
+
+  trackByLabel(index: number, group: any): string { return group.label; }
+  trackByEvId(index: number, ev: any): string { return ev.type + '_' + (ev.id ?? index); }
 }

@@ -1,5 +1,5 @@
-import { Component, OnInit, Input, inject, OnChanges, SimpleChanges, ViewChild, ElementRef, NgZone, ChangeDetectorRef, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, Input, inject, OnChanges, SimpleChanges, ViewChild, ElementRef, NgZone, ChangeDetectorRef, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { DatePipe, NgFor, NgIf } from '@angular/common';
 import { TreeTableModule } from 'primeng/treetable';
 import { DialogModule } from 'primeng/dialog';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -21,12 +21,14 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
 import { AvatarService } from '../../../services/avatar.service';
+import { AppMessageService } from '../../../services/message.service';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-documents-detail-attach',
   standalone: true,
-  imports: [CommonModule, TreeTableModule, TranslateModule, DialogModule, ConfirmDialogModule, ButtonModule, AvatarModule, SelectModule, FormsModule, ProgressBarModule, ProgressSpinnerModule, TagModule, ToastModule],
-  providers: [NodeService, ConfirmationService, MessageService],
+  imports: [DatePipe, NgFor, NgIf, TreeTableModule, TranslateModule, DialogModule, ConfirmDialogModule, ButtonModule, AvatarModule, SelectModule, FormsModule, ProgressBarModule, ProgressSpinnerModule, TagModule, ToastModule],
+  providers: [NodeService, ConfirmationService],
   templateUrl: './documents-detail-attach.html',
   styleUrls: ['./documents-detail-attach.scss']
 })
@@ -34,6 +36,7 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
   @Input() document: any | null = null;
   private nodeService = inject(NodeService);
   private messageService = inject(MessageService);
+  private appMsg = inject(AppMessageService);
   private translate = inject(TranslateService);
   private confirmationService = inject(ConfirmationService);
   private avatarService = inject(AvatarService);
@@ -474,7 +477,7 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
       a.remove();
   URL.revokeObjectURL(url);
     } catch (err: any) {
-      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: err?.message || this.translate.instant('components.documents.messages.ERROR') || 'Failed to download file' }); } catch(e) { this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.message || 'Failed to download file' }); }
+      this.appMsg.error(err?.message || this.translate.instant('components.documents.messages.ERROR') || 'Failed to download file');
     }
   }
 
@@ -502,16 +505,16 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
           if (storageId) {
             const target = `${base}/dxf-viewer?storageId=${encodeURIComponent(String(storageId))}`;
             const w = window.open(target, '_blank');
-            if (w) { try { w.focus(); } catch(_) {} try { this.messageService.add({ severity: 'info', summary: this.translate.instant('components.documents.attach.PREVIEW_OPENED') || 'Preview opened', detail: this.getDisplayFileName(data) || '' }); } catch(e) {} }
-            else { try { this.messageService.add({ severity: 'warn', summary: this.translate.instant('components.documents.messages.WARNING') || 'Warning', detail: this.translate.instant('components.documents.attach.POPUP_BLOCKED') || 'Popup blocked. Opening preview in current tab.' }); } catch(e) {} window.location.href = target; }
+            if (w) { try { w.focus(); } catch(_) {} this.appMsg.info(this.getDisplayFileName(data) || ''); }
+            else { this.appMsg.warn(this.translate.instant('components.documents.attach.POPUP_BLOCKED') || 'Popup blocked. Opening preview in current tab.'); window.location.href = target; }
             return;
           }
 
           if (fileId) {
             const target = `${base}/dxf-viewer?fileId=${encodeURIComponent(String(fileId))}`;
             const w = window.open(target, '_blank');
-            if (w) { try { w.focus(); } catch(_) {} try { this.messageService.add({ severity: 'info', summary: this.translate.instant('components.documents.attach.PREVIEW_OPENED') || 'Preview opened', detail: this.getDisplayFileName(data) || '' }); } catch(e) {} }
-            else { try { this.messageService.add({ severity: 'warn', summary: this.translate.instant('components.documents.messages.WARNING') || 'Warning', detail: this.translate.instant('components.documents.attach.POPUP_BLOCKED') || 'Popup blocked. Opening preview in current tab.' }); } catch(e) {} window.location.href = target; }
+            if (w) { try { w.focus(); } catch(_) {} this.appMsg.info(this.getDisplayFileName(data) || ''); }
+            else { this.appMsg.warn(this.translate.instant('components.documents.attach.POPUP_BLOCKED') || 'Popup blocked. Opening preview in current tab.'); window.location.href = target; }
             return;
           }
 
@@ -520,8 +523,8 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
             const direct = String(data.storage);
             const target = `${base}/dxf-viewer?src=${encodeURIComponent(direct)}`;
             const w = window.open(target, '_blank');
-            if (w) { try { w.focus(); } catch(_) {} try { this.messageService.add({ severity: 'info', summary: this.translate.instant('components.documents.attach.PREVIEW_OPENED') || 'Preview opened', detail: this.getDisplayFileName(data) || '' }); } catch(e) {} }
-            else { try { this.messageService.add({ severity: 'warn', summary: this.translate.instant('components.documents.messages.WARNING') || 'Warning', detail: this.translate.instant('components.documents.attach.POPUP_BLOCKED') || 'Popup blocked. Opening preview in current tab.' }); } catch(e) {} window.location.href = target; }
+            if (w) { try { w.focus(); } catch(_) {} this.appMsg.info(this.getDisplayFileName(data) || ''); }
+            else { this.appMsg.warn(this.translate.instant('components.documents.attach.POPUP_BLOCKED') || 'Popup blocked. Opening preview in current tab.'); window.location.href = target; }
             return;
           }
         } catch (e) {
@@ -572,7 +575,7 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
       // Revoke after some time to allow browser to load the resource
       setTimeout(() => { try { URL.revokeObjectURL(url); } catch (_) {} }, 30000);
     } catch (err: any) {
-      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: err?.message || 'Failed to preview file' }); } catch(e) { this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.message || 'Failed to preview file' }); }
+      this.appMsg.error(err?.message || 'Failed to preview file');
     }
   }
 
@@ -641,16 +644,16 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
       };
       const docId = this.document?.id ?? data.document_id ?? data._original?.document_id ?? data.documentId ?? data._original?.documentId ?? null;
       if (!docId) {
-        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: this.translate.instant('components.documents.attach.MISSING_DOCUMENT_ID') || 'Missing document id' }); } catch(e) { this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Missing document id' }); }
+        this.appMsg.error(this.translate.instant('components.documents.attach.MISSING_DOCUMENT_ID') || 'Missing document id');
         return;
       }
       await firstValueFrom((this.http as any).put(`/api/documents/${docId}/files`, payload));
-      try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.documents.messages.SAVED') || 'Archived', detail: this.translate.instant('components.documents.messages.SAVED') || 'File archived' }); } catch(e) { this.messageService.add({ severity: 'success', summary: 'Archived', detail: 'File archived' }); }
+      this.appMsg.success(this.translate.instant('components.documents.messages.SAVED') || 'File archived');
       if (this.document && this.document.id) {
         this.loadFilesForDocument(this.document.id);
       }
     } catch (err: any) {
-      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: err?.message || this.translate.instant('components.documents.messages.ERROR') || 'Failed to archive file' }); } catch(e) { this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.message || 'Failed to archive file' }); }
+      this.appMsg.error(err?.message || this.translate.instant('components.documents.messages.ERROR') || 'Failed to archive file');
     }
   }
 
@@ -671,16 +674,16 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
       };
       const docId = this.document?.id ?? data.document_id ?? data._original?.document_id ?? data.documentId ?? data._original?.documentId ?? null;
       if (!docId) {
-        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: this.translate.instant('components.documents.attach.MISSING_DOCUMENT_ID') || 'Missing document id' }); } catch(e) { this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Missing document id' }); }
+        this.appMsg.error(this.translate.instant('components.documents.attach.MISSING_DOCUMENT_ID') || 'Missing document id');
         return;
       }
       await firstValueFrom((this.http as any).put(`/api/documents/${docId}/files`, payload));
-      try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.documents.messages.SAVED') || 'Restored', detail: this.translate.instant('components.documents.messages.SAVED') || 'File restored' }); } catch(e) { this.messageService.add({ severity: 'success', summary: 'Restored', detail: 'File restored' }); }
+      this.appMsg.success(this.translate.instant('components.documents.messages.SAVED') || 'File restored');
       if (this.document && this.document.id) {
         this.loadFilesForDocument(this.document.id);
       }
     } catch (err: any) {
-      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: err?.message || this.translate.instant('components.documents.messages.ERROR') || 'Failed to restore file' }); } catch(e) { this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.message || 'Failed to restore file' }); }
+      this.appMsg.error(err?.message || this.translate.instant('components.documents.messages.ERROR') || 'Failed to restore file');
     }
   }
 
@@ -699,7 +702,7 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
   async downloadAll(): Promise<void> {
     this.downloadingAll = true;
       if (!this.files || !Array.isArray(this.files)) {
-      try { this.messageService.add({ severity: 'warn', summary: this.translate.instant('components.documents.messages.WARNING') || 'Warning', detail: this.translate.instant('components.documents.attach.NO_ATTACHMENTS') || 'No files to download' }); } catch(e) { this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'No files to download' }); }
+      this.appMsg.warn(this.translate.instant('components.documents.attach.NO_ATTACHMENTS') || 'No files to download');
       this.downloadingAll = false;
       return;
       }
@@ -724,7 +727,7 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
       // deduplicate
       const uniq = Array.from(new Set(ids)).filter((x) => x !== null && x !== undefined);
       if (!uniq.length) {
-        try { this.messageService.add({ severity: 'warn', summary: this.translate.instant('components.documents.messages.WARNING') || 'Warning', detail: this.translate.instant('components.documents.attach.NO_ATTACHMENTS') || 'No files to download' }); } catch(e) { this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'No files to download' }); }
+        this.appMsg.warn(this.translate.instant('components.documents.attach.NO_ATTACHMENTS') || 'No files to download');
         this.downloadingAll = false;
         return;
       }
@@ -746,7 +749,7 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
               a.remove();
               setTimeout(() => { try { URL.revokeObjectURL(url); } catch (_) {} }, 30000);
             } catch (err: any) {
-              try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: err?.message || 'Failed to process downloaded file' }); } catch(e) { this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.message || 'Failed to process downloaded file' }); }
+              this.appMsg.error(err?.message || 'Failed to process downloaded file');
             } finally {
               // ensure spinner is removed after processing the blob
               this.downloadingAll = false;
@@ -756,7 +759,7 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
             }
           },
           error: (err: any) => {
-            try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: err?.message || 'Failed to download files' }); } catch(e) { this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.message || 'Failed to download files' }); }
+            this.appMsg.error(err?.message || 'Failed to download files');
             this.downloadingAll = false;
             try { this.cdr.markForCheck(); } catch(_) {}
             this._downloadAllSub = null;
@@ -769,7 +772,7 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
           }
         });
       } catch (err: any) {
-        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: err?.message || 'Failed to download files' }); } catch(e) { this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.message || 'Failed to download files' }); }
+        this.appMsg.error(err?.message || 'Failed to download files');
         this.downloadingAll = false;
         this._downloadAllSub = null;
       }
@@ -783,7 +786,7 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
       }
     } finally {
       this.downloadingAll = false;
-      try { this.messageService.add({ severity: 'info', summary: this.translate.instant('components.documents.messages.WARNING') || 'Cancelled', detail: this.translate.instant('components.documents.attach.DOWNLOAD_CANCELLED') || 'Download cancelled' }); } catch(e) { this.messageService.add({ severity: 'info', summary: 'Cancelled', detail: 'Download cancelled' }); }
+      this.appMsg.info(this.translate.instant('components.documents.attach.DOWNLOAD_CANCELLED') || 'Download cancelled');
     }
   }
 
@@ -892,7 +895,7 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
     this.addUploadedFiles = [];
     try { if (this.addFileInput && this.addFileInput.nativeElement) this.addFileInput.nativeElement.value = ''; } catch(_) {}
     this.cdr.markForCheck();
-    try { this.messageService.add({ severity: 'info', summary: this.translate.instant('components.issues.messages.WARNING') || 'Cancelled', detail: this.translate.instant('components.issues.messages.UPLOAD_CANCELLED') || 'Upload cancelled' }); } catch(e) { this.messageService.add({ severity: 'info', summary: 'Cancelled', detail: 'Upload cancelled' }); }
+    this.appMsg.info(this.translate.instant('components.issues.messages.UPLOAD_CANCELLED') || 'Upload cancelled');
   }
 
   private _revokeAllAddObjectUrls(): void {
@@ -909,7 +912,7 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
     if (!this.addUploadedFiles || !this.addUploadedFiles.length || !this.document || !this.document.id) return;
     // Validate required fields
     if (!this.addModel.type_id || !this.addModel.rev) {
-      try { this.messageService.add({ severity: 'warn', summary: this.translate.instant('components.documents.messages.WARNING') || 'Validation', detail: this.translate.instant('components.documents.attach.VALIDATION_REQUIRED') || 'TYPE and REV are required' }); } catch(e) { this.messageService.add({ severity: 'warn', summary: 'Validation', detail: 'TYPE and REV are required' }); }
+      this.appMsg.warn(this.translate.instant('components.documents.attach.VALIDATION_REQUIRED') || 'TYPE and REV are required');
       return;
     }
     const toUpload = this.addUploadedFiles.filter(p => !p.uploaded);
@@ -955,11 +958,11 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
 
   // after all uploads, show summary, clear previews and refresh list
     if (successCount > 0 && failCount === 0) {
-      try { this.messageService.add({ severity: 'success', summary: `${successCount} file(s) uploaded`, detail: 'All files were attached successfully' }); } catch(e) { this.messageService.add({ severity: 'success', summary: `${successCount} file(s) uploaded`, detail: 'All files were attached successfully' }); }
+      this.appMsg.success(`${successCount} file(s) uploaded`);
     } else if (successCount > 0 && failCount > 0) {
-      try { this.messageService.add({ severity: 'warn', summary: `${successCount} uploaded, ${failCount} failed`, detail: 'Some files failed to attach' }); } catch(e) { this.messageService.add({ severity: 'warn', summary: `${successCount} uploaded, ${failCount} failed`, detail: 'Some files failed to attach' }); }
+      this.appMsg.warn(`${successCount} uploaded, ${failCount} failed`);
     } else if (failCount > 0) {
-      try { this.messageService.add({ severity: 'error', summary: `${failCount} file(s) failed`, detail: 'No files were attached' }); } catch(e) { this.messageService.add({ severity: 'error', summary: `${failCount} file(s) failed`, detail: 'No files were attached' }); }
+      this.appMsg.error(`${failCount} file(s) failed`);
     }
 
     try {
@@ -1069,4 +1072,6 @@ export class DocumentsDetailAttachComponent implements OnInit, OnChanges, OnDest
     try { if (this._downloadAllSub) { try { this._downloadAllSub.unsubscribe(); } catch(_) {} this._downloadAllSub = null; } } catch(_) {}
     // no persistent preview object URL to revoke here (DXF opens in new window)
   }
+
+  trackByUploadId(index: number, p: any): number { return p.id; }
 }

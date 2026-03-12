@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DatePipe, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
@@ -31,13 +31,14 @@ import { DocumentsDetailAttachComponent } from './documents-detail-attach/docume
 import { DocumentsDetailRelationsTableComponent } from './documents-detail-relations-table';
 import { DocumentsDetailChatComponent } from './documents-detail-chat/documents-detail-chat.component';
 import { DocumentsActivityComponent } from './documents-activity/documents-activity';
+import { AppMessageService } from '../../services/message.service';
 // Description and chat-history components are not used in this template; removed to avoid NG8113 warnings
  
 @Component({
   selector: 'app-documents-detail',
   standalone: true,
-  providers: [MessageService],
-  imports: [CommonModule, TranslateModule, RouterModule, FormsModule, ButtonModule, DialogModule, InputTextModule, EditorModule, Select, MultiSelectModule, DatePickerModule, CheckboxModule, AvatarModule, TagModule, ProgressSpinnerModule, ChipModule, ToolbarModule, DocumentsDetailChatComponent, DocumentsDetailAttachComponent, DocumentsDetailRelationsTableComponent, SplitButtonModule, ToastModule, TreeSelectModule, DocumentsActivityComponent],
+  providers: [],
+  imports: [DatePipe, NgIf, TranslateModule, RouterModule, FormsModule, ButtonModule, DialogModule, InputTextModule, EditorModule, Select, MultiSelectModule, DatePickerModule, CheckboxModule, AvatarModule, TagModule, ProgressSpinnerModule, ChipModule, ToolbarModule, DocumentsDetailChatComponent, DocumentsDetailAttachComponent, DocumentsDetailRelationsTableComponent, SplitButtonModule, ToastModule, TreeSelectModule, DocumentsActivityComponent],
   templateUrl: './documents-detail.html',
   styleUrls: ['../../_quill-snow.scss', './documents-detail.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -94,7 +95,7 @@ export class DocumentsDetailComponent implements OnInit {
   private avatarService = inject(AvatarService);
   private linksService = inject(LinksService);
 
-  constructor() {
+  constructor(private appMsg: AppMessageService) {
     const idStr = this.route.snapshot.paramMap.get('id');
     if (idStr !== null) {
       const n = Number(idStr);
@@ -655,7 +656,7 @@ export class DocumentsDetailComponent implements OnInit {
                 const num = Number(newVal);
                 if (Number.isFinite(num)) newVal = num;
                 else {
-                  try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.SAVE') || 'Invalid', detail: `Invalid value for ${key}` }); } catch (e) {}
+                  this.appMsg.error(`Invalid value for ${key}`);
                   this.loading = false; this.cdr.markForCheck(); return;
                 }
               }
@@ -666,7 +667,7 @@ export class DocumentsDetailComponent implements OnInit {
                 const num = Number(newVal);
                 if (Number.isFinite(num)) newVal = num;
                 else {
-                  try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.SAVE') || 'Invalid', detail: `Invalid value for ${key}` }); } catch (e) {}
+                  this.appMsg.error(`Invalid value for ${key}`);
                   this.loading = false; this.cdr.markForCheck(); return;
                 }
               }
@@ -684,7 +685,7 @@ export class DocumentsDetailComponent implements OnInit {
         this.loading = false;
         this.displayDialog = false;
         this.cdr.markForCheck();
-        try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.SAVE') || 'No changes', detail: this.translate.instant('components.documents.messages.SAVED') || '' }); } catch (e) {}
+        this.appMsg.info(this.translate.instant('components.documents.messages.SAVED') || '');
         return;
       }
 
@@ -701,16 +702,12 @@ export class DocumentsDetailComponent implements OnInit {
         this.displayDialog = false;
         this.loading = false;
         this.cdr.markForCheck();
-        try {
-          this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Saved', detail: this.translate.instant('components.documents.form.UPDATED') || 'Updated' });
-        } catch (e) {}
+        this.appMsg.success(this.translate.instant('components.documents.form.UPDATED') || 'Updated');
       },
       error: (err: any) => {
         this.loading = false;
         this.cdr.markForCheck();
-        try {
-          this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.SAVE') || 'Save failed', detail: (err && err.message) ? err.message : this.translate.instant('components.documents.messages.ERROR') || 'Failed to save' });
-        } catch (e) {}
+        this.appMsg.error((err && err.message) ? err.message : this.translate.instant('components.documents.messages.ERROR') || 'Failed to save');
       }
     });
   }
@@ -888,19 +885,19 @@ export class DocumentsDetailComponent implements OnInit {
 
             this.statusSaving = false;
             this.cdr.markForCheck();
-            try { this.messageService.add({ severity: 'success', summary: this.trOr('components.documents.messages.SUCCESS', 'Success'), detail: this.trOr('components.documents.messages.STATUS_UPDATED', 'Status updated') }); } catch (e) {}
+            this.appMsg.success(this.trOr('components.documents.messages.STATUS_UPDATED', 'Status updated'));
           },
           error: () => {
             this.statusSaving = false;
             this.cdr.markForCheck();
-            try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: this.translate.instant('components.documents.messages.STATUS_UPDATE_FAILED') || 'Failed to update status' }); } catch (e) {}
+            this.appMsg.error(this.translate.instant('components.documents.messages.STATUS_UPDATE_FAILED') || 'Failed to update status');
           }
         });
       },
       error: (err: any) => {
         this.statusSaving = false;
         this.cdr.markForCheck();
-        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: (err && err.message) ? err.message : this.translate.instant('components.documents.messages.STATUS_UPDATE_FAILED') || 'Failed to update status' }); } catch (e) {}
+        this.appMsg.error((err && err.message) ? err.message : this.translate.instant('components.documents.messages.STATUS_UPDATE_FAILED') || 'Failed to update status');
       }
     });
   }
@@ -917,7 +914,7 @@ export class DocumentsDetailComponent implements OnInit {
 
   confirmDelete(): void {
     if (!this.document || !this.document.id) {
-      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: this.translate.instant('components.documents.errors.DOCUMENT_ID_MISSING') || 'Document id missing' }); } catch (e) {}
+      this.appMsg.error(this.translate.instant('components.documents.errors.DOCUMENT_ID_MISSING') || 'Document id missing');
       return;
     }
     this.deleting = true;
@@ -927,7 +924,7 @@ export class DocumentsDetailComponent implements OnInit {
         this.deleting = false;
         this.displayDeleteDialog = false;
         this.cdr.markForCheck();
-        try { this.messageService.add({ severity: 'success', summary: this.trOr('components.documents.messages.SUCCESS', 'Success'), detail: this.trOr('components.documents.messages.DELETED', 'Document deleted') }); } catch (e) {}
+        this.appMsg.success(this.trOr('components.documents.messages.DELETED', 'Document deleted'));
         // Navigate back to documents list
         try { this.router.navigate(['/documents']); } catch (e) {}
       },
@@ -935,7 +932,7 @@ export class DocumentsDetailComponent implements OnInit {
         this.deleting = false;
         this.displayDeleteDialog = false;
         this.cdr.markForCheck();
-        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: (err && err.message) ? err.message : this.translate.instant('components.documents.messages.DELETE_FAILED') || 'Failed to delete document' }); } catch (e) {}
+        this.appMsg.error((err && err.message) ? err.message : this.translate.instant('components.documents.messages.DELETE_FAILED') || 'Failed to delete document');
       }
     });
   }
@@ -953,14 +950,14 @@ export class DocumentsDetailComponent implements OnInit {
       if (event && typeof (event.stopPropagation) === 'function') event.stopPropagation();
       const id = this.document?.id ?? this.documentId;
       if (!id) {
-        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: this.translate.instant('components.documents.errors.DOCUMENT_ID_MISSING') || 'Document id missing' }); } catch (e) {}
+        this.appMsg.error(this.translate.instant('components.documents.errors.DOCUMENT_ID_MISSING') || 'Document id missing');
         return;
       }
       const url = `${window.location.origin}/documents/${id}`;
       // Use Clipboard API when available
       if (navigator && (navigator as any).clipboard && typeof (navigator as any).clipboard.writeText === 'function') {
         (navigator as any).clipboard.writeText(url).then(() => {
-          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.documents.messages.COPY_LINK') || 'Copied', detail: this.translate.instant('components.documents.messages.LINK_COPIED') || 'Link copied to clipboard' }); } catch (e) {}
+          this.appMsg.success(this.translate.instant('components.documents.messages.LINK_COPIED') || 'Link copied to clipboard');
         }).catch(() => {
           // fallback to prompt
           try { window.prompt(this.translate.instant('components.documents.messages.COPY_PROMPT') || 'Copy link', url); } catch (e) {}
@@ -969,7 +966,7 @@ export class DocumentsDetailComponent implements OnInit {
         try { window.prompt(this.translate.instant('components.documents.messages.COPY_PROMPT') || 'Copy link', url); } catch (e) {}
       }
     } catch (e) {
-      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR') || 'Error', detail: String(e) }); } catch (er) {}
+      this.appMsg.error(String(e));
     } finally {
       try { this.cdr.markForCheck(); } catch (e) {}
     }
@@ -1096,12 +1093,12 @@ export class DocumentsDetailComponent implements OnInit {
         // refresh the document to pick up new relations
         this.loadDocument(this.document.id);
         this.cdr.markForCheck();
-        try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Saved', detail: this.translate.instant('components.documents.relations.FORM.SAVED') || 'Relations created' }); } catch (e) {}
+        this.appMsg.success(this.translate.instant('components.documents.relations.FORM.SAVED') || 'Relations created');
       },
       error: (err) => {
         this.savingRelations = false;
         this.cdr.markForCheck();
-        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.documents.messages.ERROR'), detail: (err && err.message) ? err.message : this.translate.instant('components.documents.messages.ERROR') }); } catch (e) {}
+        this.appMsg.error((err && err.message) ? err.message : this.translate.instant('components.documents.messages.ERROR'));
       }
     });
   }

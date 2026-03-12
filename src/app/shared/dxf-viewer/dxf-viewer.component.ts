@@ -1,10 +1,10 @@
 import { Component, Input, ViewChild, ElementRef, AfterViewInit, OnDestroy, NgZone, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-dxf-viewer',
   standalone: true,
-  imports: [CommonModule],
+  imports: [NgIf],
   template: `
     <div class="dxf-viewer-root">
       <div #container style="width:100%;height:100%;min-height:360px;border:1px solid #e6e6e6;background:#fff;overflow:auto"></div>

@@ -181,7 +181,7 @@
         <ng-container *ngIf="!permissionsLoading">
           <ng-container *ngIf="rolePermissions && rolePermissions.length; else noPermissions">
             <ul class="list-none p-0 m-0">
-              <li *ngFor="let perm of rolePermissions; let i = index" class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+              <li *ngFor="let perm of rolePermissions; let i = index; trackBy: trackByPermId" class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
                 <div>
                   <span>{{ perm.name }}</span>
                   <div class="text-muted-color text">{{ perm.description || (perm.code || '-') }}</div>

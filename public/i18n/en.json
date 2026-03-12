@@ -37,6 +37,7 @@
     "DOCUMENTS": "Documents",
     "DOCUMENT": "Document",
     "ISSUE": "Issue",
+    "CUSTOMER_QUESTION": "Question",
     "EDIT": "EDIT",
     "EDIT_USER": "Edit user",
     "EMAIL": "Email",
@@ -102,6 +103,14 @@
     "SELECT": "Select"
   },
   "TODAY": "Today",
+  "MESSAGES": {
+    "SUCCESS": "Success",
+    "INFO": "Info",
+    "WARNING": "Warning",
+    "ERROR": "Error",
+    "SECONDARY": "Secondary",
+    "CONTRAST": "Contrast"
+  },
   "YESTERDAY": "Yesterday",
   "LAST_WEEK": "Last week",
   "PERMISSIONS": {
@@ -377,13 +386,17 @@
         "NAME": "Name",
         "OWNER": "Owner",
         "SAVE": "Save",
-        "STATUS": "Status"
+        "STATUS": "Status",
+        "PROJECT": "Project",
+        "TYPE": "Type",
+        "FROM_STATUS": "From status",
+        "TO_STATUS": "To status"
       },
       "menu": {
-        "LIST": "Projects List",
-        "USERS": "Project Users",
+        "LIST": "Projects",
+        "USERS": "Assignments",
         "TEMPLATES": "Templates",
-        "TITLE": "PROJECT MANAGEMENT",
+        "TITLE": "MANAGEMENT",
         "SETTINGS": "Settings",
         "STATUSES": "Statuses",
         "TYPES": "Types",
@@ -402,6 +415,8 @@
         "HEADERS": {
           "ENTITY": "Entity",
           "CODE": "Code",
+          "PROJECT": "Project",
+          "TYPE": "Type",
           "COLOR": "Color",
           "PROJECT_ID": "Project ID",
           "PROJECT_CODE": "Project Code",
@@ -416,7 +431,8 @@
           "OWNER": "Owner",
           "STATUS": "Status"
         },
-        "SEARCH": "Search"
+        "SEARCH": "Search",
+        "FILTER": "Filter"
       },
       "users": {
         "ASSIGN": "Assign",

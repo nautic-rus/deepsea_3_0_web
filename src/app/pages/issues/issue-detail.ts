@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DatePipe, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
@@ -29,12 +29,13 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
 import { AvatarService } from '../../services/avatar.service';
 import { LinksService } from '../../services/links.service';
+import { AppMessageService } from '../../services/message.service';
 
 @Component({
   selector: 'app-issue-detail',
   standalone: true,
-  providers: [MessageService],
-  imports: [CommonModule, TranslateModule, RouterModule, FormsModule, ButtonModule, DialogModule, InputTextModule, EditorModule, Select, MultiSelectModule, DatePickerModule, CheckboxModule, AvatarModule, TagModule, ProgressSpinnerModule, ChipModule, ToolbarModule, IssueDetailChatComponent, IssueDetailDescriptionComponent, IssueDetailAttachComponent, IssueDetailRelationsTableComponent, SplitButtonModule, ToastModule],
+  providers: [],
+  imports: [DatePipe, NgIf, TranslateModule, RouterModule, FormsModule, ButtonModule, DialogModule, InputTextModule, EditorModule, Select, MultiSelectModule, DatePickerModule, CheckboxModule, AvatarModule, TagModule, ProgressSpinnerModule, ChipModule, ToolbarModule, IssueDetailChatComponent, IssueDetailDescriptionComponent, IssueDetailAttachComponent, IssueDetailRelationsTableComponent, SplitButtonModule, ToastModule],
   templateUrl: './issue-detail.html',
   styleUrls: ['../../_quill-snow.scss', './issue-detail.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -76,7 +77,9 @@ export class IssueDetailComponent implements OnInit {
   displayDeleteDialog = false;
   deleting = false;
 
-  constructor(private route: ActivatedRoute, private router: Router, private issuesService: IssuesService, private http: HttpClient, private messageService: MessageService, private cdr: ChangeDetectorRef, private translate: TranslateService, private avatarService: AvatarService, private linksService: LinksService) {
+  constructor(private route: ActivatedRoute, private router: Router, private issuesService: IssuesService, private http: HttpClient, private cdr: ChangeDetectorRef, private translate: TranslateService, private avatarService: AvatarService, private linksService: LinksService,
+    private appMsg: AppMessageService
+  ) {
     // read route param synchronously in constructor to avoid ExpressionChangedAfterItHasBeenCheckedError
     // normalize numeric ids so initial template value type matches the server-provided issue.id
     const idStr = this.route.snapshot.paramMap.get('id');
@@ -252,9 +255,9 @@ export class IssueDetailComponent implements OnInit {
         this.displayDialog = false;
         this.loading = false;
         this.cdr.markForCheck();
-        try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Saved', detail: this.translate.instant('components.issues.form.UPDATED') || 'Updated' }); } catch (e) {}
+        this.appMsg.success(this.translate.instant('components.issues.form.UPDATED') || 'Updated');
       },
-      error: (err: any) => { console.error('Failed to update issue', err); this.loading = false; this.cdr.markForCheck(); try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.SAVE') || 'Save failed', detail: (err && err.message) ? err.message : 'Failed to update' }); } catch (e) {} }
+      error: (err: any) => { console.error('Failed to update issue', err); this.loading = false; this.cdr.markForCheck(); this.appMsg.error((err && err.message) ? err.message : 'Failed to update'); }
     });
   }
 
@@ -314,19 +317,19 @@ export class IssueDetailComponent implements OnInit {
 
             this.statusSaving = false;
             this.cdr.markForCheck();
-            try { this.messageService.add({ severity: 'success', summary: this.trOr('components.issues.messages.SUCCESS', 'Success'), detail: this.trOr('components.issues.messages.STATUS_UPDATED', 'Status updated') }); } catch (e) {}
+            this.appMsg.success(this.trOr('components.issues.messages.STATUS_UPDATED', 'Status updated'));
           },
           error: () => {
             this.statusSaving = false;
             this.cdr.markForCheck();
-            try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR'), detail: this.translate.instant('components.issues.messages.STATUS_UPDATE_FAILED') }); } catch (e) {}
+            this.appMsg.error(this.translate.instant('components.issues.messages.STATUS_UPDATE_FAILED'));
           }
         });
       },
       error: (err: any) => {
         this.statusSaving = false;
         this.cdr.markForCheck();
-        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR'), detail: (err && err.message) ? err.message : this.translate.instant('components.issues.messages.STATUS_UPDATE_FAILED') }); } catch (e) {}
+        this.appMsg.error((err && err.message) ? err.message : this.translate.instant('components.issues.messages.STATUS_UPDATE_FAILED'));
       }
     });
   }
@@ -344,13 +347,13 @@ export class IssueDetailComponent implements OnInit {
       if (event && typeof (event.stopPropagation) === 'function') event.stopPropagation();
       const id = this.issue?.id ?? this.issueId;
       if (!id) {
-        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR') || 'Error', detail: this.translate.instant('components.issues.errors.ISSUE_ID_MISSING') || 'Issue id missing' }); } catch (e) {}
+        this.appMsg.error(this.translate.instant('components.issues.errors.ISSUE_ID_MISSING') || 'Issue id missing');
         return;
       }
       const url = `${window.location.origin}/issues/${id}`;
       if (navigator && (navigator as any).clipboard && typeof (navigator as any).clipboard.writeText === 'function') {
         (navigator as any).clipboard.writeText(url).then(() => {
-          try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.issues.messages.COPY_LINK') || 'Copied', detail: this.translate.instant('components.issues.messages.LINK_COPIED') || 'Link copied to clipboard' }); } catch (e) {}
+          this.appMsg.success(this.translate.instant('components.issues.messages.LINK_COPIED') || 'Link copied to clipboard');
         }).catch(() => {
           try { window.prompt(this.translate.instant('components.issues.messages.COPY_PROMPT') || 'Copy link', url); } catch (e) {}
         });
@@ -358,7 +361,7 @@ export class IssueDetailComponent implements OnInit {
         try { window.prompt(this.translate.instant('components.issues.messages.COPY_PROMPT') || 'Copy link', url); } catch (e) {}
       }
     } catch (e) {
-      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR') || 'Error', detail: String(e) }); } catch (er) {}
+      this.appMsg.error(String(e));
     } finally {
       try { this.cdr.markForCheck(); } catch (e) {}
     }
@@ -376,7 +379,7 @@ export class IssueDetailComponent implements OnInit {
 
   confirmDelete(): void {
     if (!this.issue || !this.issue.id) {
-      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR') || 'Error', detail: this.translate.instant('components.issues.errors.ISSUE_ID_MISSING') || 'Issue id missing' }); } catch (e) {}
+      this.appMsg.error(this.translate.instant('components.issues.errors.ISSUE_ID_MISSING') || 'Issue id missing');
       return;
     }
     this.deleting = true;
@@ -386,14 +389,14 @@ export class IssueDetailComponent implements OnInit {
         this.deleting = false;
         this.displayDeleteDialog = false;
         this.cdr.markForCheck();
-        try { this.messageService.add({ severity: 'success', summary: this.trOr('components.issues.messages.SUCCESS', 'Success'), detail: this.trOr('components.issues.messages.DELETED', 'Issue deleted') }); } catch (e) {}
+        this.appMsg.success(this.trOr('components.issues.messages.DELETED', 'Issue deleted'));
         try { this.router.navigate(['/issues']); } catch (e) {}
       },
       error: (err: any) => {
         this.deleting = false;
         this.displayDeleteDialog = false;
         this.cdr.markForCheck();
-        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR') || 'Error', detail: (err && err.message) ? err.message : this.translate.instant('components.issues.messages.DELETE_FAILED') || 'Failed to delete issue' }); } catch (e) {}
+        this.appMsg.error((err && err.message) ? err.message : this.translate.instant('components.issues.messages.DELETE_FAILED') || 'Failed to delete issue');
       }
     });
   }
@@ -520,12 +523,12 @@ export class IssueDetailComponent implements OnInit {
         // refresh the issue to pick up new relations
         this.loadIssue(this.issue.id);
         this.cdr.markForCheck();
-        try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Saved', detail: this.translate.instant('components.issues.relations.FORM.SAVED') || 'Relations created' }); } catch (e) {}
+        this.appMsg.success(this.translate.instant('components.issues.relations.FORM.SAVED') || 'Relations created');
       },
       error: (err) => {
         this.savingRelations = false;
         this.cdr.markForCheck();
-        try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.issues.messages.ERROR'), detail: (err && err.message) ? err.message : this.translate.instant('components.issues.messages.ERROR') }); } catch (e) {}
+        this.appMsg.error((err && err.message) ? err.message : this.translate.instant('components.issues.messages.ERROR'));
       }
     });
   }

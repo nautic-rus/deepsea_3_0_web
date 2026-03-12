@@ -11,6 +11,11 @@ export class ProjectsWorkFlowService {
     return this.http.get(`/api/document_work_flows${q}`);
   }
 
+  getCustomerQuestionWorkFlows(projectId?: number): Observable<any> {
+    const q = projectId ? `?project_id=${encodeURIComponent(String(projectId))}` : '';
+    return this.http.get(`/api/customer_question_work_flows${q}`);
+  }
+
   getIssueWorkFlows(projectId?: number, issueTypeId?: number): Observable<any> {
     const params: string[] = [];
     if (projectId !== undefined) params.push(`project_id=${encodeURIComponent(String(projectId))}`);
@@ -23,6 +28,10 @@ export class ProjectsWorkFlowService {
     return this.http.post('/api/document_work_flows', payload);
   }
 
+  createCustomerQuestionWorkFlow(payload: any): Observable<any> {
+    return this.http.post('/api/customer_question_work_flows', payload);
+  }
+
   createIssueWorkFlow(payload: any): Observable<any> {
     return this.http.post('/api/issue_work_flows', payload);
   }
@@ -31,12 +40,20 @@ export class ProjectsWorkFlowService {
     return this.http.put(`/api/document_work_flows/${encodeURIComponent(String(id))}`, payload);
   }
 
+  updateCustomerQuestionWorkFlow(id: string | number, payload: any): Observable<any> {
+    return this.http.put(`/api/customer_question_work_flows/${encodeURIComponent(String(id))}`, payload);
+  }
+
   updateIssueWorkFlow(id: string | number, payload: any): Observable<any> {
     return this.http.put(`/api/issue_work_flows/${encodeURIComponent(String(id))}`, payload);
   }
 
   deleteDocumentWorkFlow(id: string | number): Observable<any> {
     return this.http.delete(`/api/document_work_flows/${encodeURIComponent(String(id))}`);
+  }
+
+  deleteCustomerQuestionWorkFlow(id: string | number): Observable<any> {
+    return this.http.delete(`/api/customer_question_work_flows/${encodeURIComponent(String(id))}`);
   }
 
   deleteIssueWorkFlow(id: string | number): Observable<any> {

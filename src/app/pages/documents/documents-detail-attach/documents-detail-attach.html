@@ -144,7 +144,7 @@
           </div>
 
           <div class="uploaded-previews mt-4" *ngIf="addUploadedFiles && addUploadedFiles.length">
-            <div *ngFor="let p of addUploadedFiles" class="preview-item flex items-center justify-between mb-3">
+            <div *ngFor="let p of addUploadedFiles; trackBy: trackByUploadId" class="preview-item flex items-center justify-between mb-3">
               <div class="flex items-center gap-3">
                 <img *ngIf="p.url" [src]="p.url" [alt]="p.file.name" style="width:48px;height:48px;object-fit:cover;border-radius:4px;" />
                 <div>

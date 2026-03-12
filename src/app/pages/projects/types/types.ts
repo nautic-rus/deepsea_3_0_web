@@ -1,5 +1,5 @@
-import { Component, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, AfterViewInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { DatePipe, NgIf } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { ToolbarModule } from 'primeng/toolbar';
@@ -24,12 +24,14 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { ColorPickerModule } from 'primeng/colorpicker';
 import { CheckboxModule } from 'primeng/checkbox';
 import { AvatarModule } from 'primeng/avatar';
+import { AppMessageService } from '../../../services/message.service';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-projects-types',
   standalone: true,
-  imports: [CommonModule, TranslateModule, FormsModule, ToolbarModule, ButtonModule, TableModule, InputTextModule, InputIconModule, IconFieldModule, DialogModule, ToastModule, TagModule, ConfirmDialogModule, Select, ColorPickerModule, CheckboxModule, AvatarModule, MultiSelectModule],
-  providers: [MessageService, ConfirmationService],
+  imports: [DatePipe, NgIf, TranslateModule, FormsModule, ToolbarModule, ButtonModule, TableModule, InputTextModule, InputIconModule, IconFieldModule, DialogModule, ToastModule, TagModule, ConfirmDialogModule, Select, ColorPickerModule, CheckboxModule, AvatarModule, MultiSelectModule],
+  providers: [ConfirmationService],
   templateUrl: './types.html',
   styleUrls: ['./types.scss']
 })
@@ -49,7 +51,9 @@ export class ProjectsTypesComponent implements OnInit, AfterViewInit {
   usersOptions: { label: string; value: any; avatar?: string | null }[] = [];
   statuses: { label: string; value: any }[] = [];
 
-  constructor(private svc: ProjectsTypesService, private projectsSvc: ProjectsService, private cd: ChangeDetectorRef, private messageService: MessageService, private translate: TranslateService, private usersService: UsersService, private confirmationService: ConfirmationService, private auth: AuthService, private avatarService: AvatarService) {}
+  constructor(private svc: ProjectsTypesService, private projectsSvc: ProjectsService, private cd: ChangeDetectorRef, private translate: TranslateService, private usersService: UsersService, private confirmationService: ConfirmationService, private auth: AuthService, private avatarService: AvatarService,
+    private appMsg: AppMessageService
+  ) {}
 
   initialsFromName(name?: string | null): string { try { return this.avatarService.initialsFromName(name); } catch (e) { return ''; } }
   selectAvatarBg(label?: string | null): string { try { return this.avatarService.selectAvatarBg(label); } catch (e) { return ''; } }
@@ -113,7 +117,7 @@ export class ProjectsTypesComponent implements OnInit, AfterViewInit {
 
   confirmDelete(item: any): void { if (!item) return; try { this.confirmationService.confirm({ message: `${this.translate.instant('components.projects.confirm.DELETE_QUESTION') || 'Attention! Do you really want to delete project'} ${item.name || item.id}?`, icon: 'pi pi-exclamation-triangle', accept: () => this.deleteItem(item) }); } catch (e) { this.deleteItem(item); } }
 
-  deleteItem(item: any): void { if (!item || !item.id) return; this.loading = true; const isIssue = (item.__source === 'issue'); this.svc.deleteType(item.id, isIssue).subscribe({ next: () => { try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.projects.messages.SUMMARY_DELETE') || 'Delete', detail: this.translate.instant('components.projects.messages.DELETED') || 'Deleted' }); } catch (e) {} this.loadTypes(); this.safeDetect(); this.loading = false; }, error: (err: any) => { try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.messages.SUMMARY_DELETE') || 'Delete', detail: (err && err.message) ? err.message : 'Failed to delete' }); } catch (e) {} this.loading = false; this.safeDetect(); } }); }
+  deleteItem(item: any): void { if (!item || !item.id) return; this.loading = true; const isIssue = (item.__source === 'issue'); this.svc.deleteType(item.id, isIssue).subscribe({ next: () => { this.appMsg.success(this.translate.instant('components.projects.messages.DELETED') || 'Deleted'); this.loadTypes(); this.safeDetect(); this.loading = false; }, error: (err: any) => { this.appMsg.error((err && err.message) ? err.message : 'Failed to delete'); this.loading = false; this.safeDetect(); } }); }
 
   openNew(): void { this.editModel = { name: '', code: '', description: '', __source: 'issue' }; this.isCreating = true; this.displayDialog = true; this.error = null; }
 
@@ -129,7 +133,6 @@ export class ProjectsTypesComponent implements OnInit, AfterViewInit {
       name: this.editModel.name,
       code: this.editModel.code,
       description: this.editModel.description,
-      color: this.editModel.color,
       order_index: this.editModel.order_index,
       project_id: this.editModel.project_id,
       created_at: this.editModel.created_at,
@@ -137,13 +140,13 @@ export class ProjectsTypesComponent implements OnInit, AfterViewInit {
     };
     const isIssue = (this.editModel.__source === 'issue');
     if (this.isCreating) {
-      this.svc.createType(payload, isIssue).subscribe({ next: () => { this.displayDialog = false; this.editModel = {}; this.loading = false; this.isCreating = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.projects.messages.SUMMARY_CREATE') || 'Create', detail: this.translate.instant('components.projects.messages.CREATED') || 'Created' }); } catch (e) {} this.loadTypes(); this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to create'; this.loading = false; try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.messages.SUMMARY_CREATE') || 'Create', detail: this.error || '' }); } catch (e) {} this.safeDetect(); } });
+      this.svc.createType(payload, isIssue).subscribe({ next: () => { this.displayDialog = false; this.editModel = {}; this.loading = false; this.isCreating = false; this.appMsg.success(this.translate.instant('components.projects.messages.CREATED') || 'Created'); this.loadTypes(); this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to create'; this.loading = false; this.appMsg.error(this.error || ''); this.safeDetect(); } });
     } else {
       const id = this.editModel && (this.editModel.id || this.editModel._id || this.editModel.ID);
       if (!id) { this.error = 'id is missing'; this.loading = false; this.safeDetect(); return; }
       if (this.editModel.status !== undefined) payload.status = this.editModel.status;
       if (this.editModel.owner_id !== undefined) payload.owner_id = this.editModel.owner_id;
-      this.svc.updateType(id, payload, isIssue).subscribe({ next: () => { this.displayDialog = false; this.editModel = {}; this.loading = false; this.isCreating = false; try { this.messageService.add({ severity: 'success', summary: this.translate.instant('components.projects.messages.SUMMARY_EDIT') || 'Edit', detail: this.translate.instant('components.projects.messages.UPDATED') || 'Updated' }); } catch (e) {} this.loadTypes(); this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to update'; this.loading = false; try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.projects.messages.SUMMARY_EDIT') || 'Edit', detail: this.error || '' }); } catch (e) {} this.safeDetect(); } });
+      this.svc.updateType(id, payload, isIssue).subscribe({ next: () => { this.displayDialog = false; this.editModel = {}; this.loading = false; this.isCreating = false; this.appMsg.success(this.translate.instant('components.projects.messages.UPDATED') || 'Updated'); this.loadTypes(); this.safeDetect(); }, error: (err: any) => { this.error = (err && err.message) ? err.message : 'Failed to update'; this.loading = false; this.appMsg.error(this.error || ''); this.safeDetect(); } });
     }
   }
 

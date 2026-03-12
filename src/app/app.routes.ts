@@ -135,11 +135,23 @@ export const routes: Routes = [
           { path: '', pathMatch: 'full', redirectTo: 'projects-list' },
           { path: 'projects-list', loadComponent: () => import('./pages/projects/projects-list/projects-list').then(m => m.ProjectsListComponent), canActivate: [AuthGuard] },
           { path: 'projects-users', loadComponent: () => import('./pages/projects/projects-users/projects-users').then(m => m.ProjectsUsersComponent), canActivate: [AuthGuard] },
-          { path: 'projects-templates', loadComponent: () => import('./pages/projects/projects-templates/projects-templates').then(m => m.ProjectsTemplatesComponent), canActivate: [AuthGuard] }
-          ,{ path: 'statuses', loadComponent: () => import('./pages/projects/statuses/statuses').then(m => m.ProjectsStatusesComponent), canActivate: [AuthGuard] },
-          { path: 'types', loadComponent: () => import('./pages/projects/types/types').then(m => m.ProjectsTypesComponent), canActivate: [AuthGuard] },
-          { path: 'storage-types', loadComponent: () => import('./pages/projects/storage-types/storage-types').then(m => m.ProjectsStorageTypesComponent), canActivate: [AuthGuard] },
-          { path: 'work-flow', loadComponent: () => import('./pages/projects/work-flow/work-flow').then(m => m.ProjectsWorkFlowComponent), canActivate: [AuthGuard] }
+          { path: 'projects-templates', loadComponent: () => import('./pages/projects/projects-templates/projects-templates').then(m => m.ProjectsTemplatesComponent), canActivate: [AuthGuard] },
+
+          // Issues
+          { path: 'issues/statuses', loadComponent: () => import('./pages/projects/issues/statuses/statuses').then(m => m.IssueStatusesComponent), canActivate: [AuthGuard] },
+          { path: 'issues/types', loadComponent: () => import('./pages/projects/issues/types/types').then(m => m.IssueTypesComponent), canActivate: [AuthGuard] },
+          { path: 'issues/work-flow', loadComponent: () => import('./pages/projects/issues/work-flow/work-flow').then(m => m.IssueWorkFlowComponent), canActivate: [AuthGuard] },
+
+          // Documents
+          { path: 'documents/statuses', loadComponent: () => import('./pages/projects/documents/statuses/statuses').then(m => m.DocumentStatusesComponent), canActivate: [AuthGuard] },
+          { path: 'documents/types', loadComponent: () => import('./pages/projects/documents/types/types').then(m => m.DocumentTypesComponent), canActivate: [AuthGuard] },
+          { path: 'documents/work-flow', loadComponent: () => import('./pages/projects/documents/work-flow/work-flow').then(m => m.DocumentWorkFlowComponent), canActivate: [AuthGuard] },
+          { path: 'documents/storage-types', loadComponent: () => import('./pages/projects/storage-types/storage-types').then(m => m.ProjectsStorageTypesComponent), canActivate: [AuthGuard] },
+
+          // Questions
+          { path: 'questions/statuses', loadComponent: () => import('./pages/projects/questions/statuses/statuses').then(m => m.QuestionStatusesComponent), canActivate: [AuthGuard] },
+          { path: 'questions/types', loadComponent: () => import('./pages/projects/questions/types/types').then(m => m.QuestionTypesComponent), canActivate: [AuthGuard] },
+          { path: 'questions/work-flow', loadComponent: () => import('./pages/projects/questions/work-flow/work-flow').then(m => m.QuestionWorkFlowComponent), canActivate: [AuthGuard] }
         ]
       }
     ]

@@ -58,7 +58,7 @@
                 </th>
 
                 <!-- render headers from columns array so order is consistent -->
-                <ng-container *ngFor="let col of columns">
+                <ng-container *ngFor="let col of columns; trackBy: trackByField">
                     <th *ngIf="isColumnVisible(col.field)" [attr.data-field]="col.field" pReorderableColumn [pSortableColumn]="col.field" pResizableColumn>
                         <div class="flex justify-between items-center">
                             <div class="flex items-center gap-2">
@@ -175,7 +175,7 @@
                 </td>
 
                 <!-- render body cells in same order as columns array -->
-                <ng-container *ngFor="let col of columns">
+                <ng-container *ngFor="let col of columns; trackBy: trackByField">
                     <td *ngIf="isColumnVisible(col.field)" [attr.data-field]="col.field">
                         <ng-container [ngSwitch]="col.field">
                             <ng-container *ngSwitchCase="'id'">{{ issue.id }}</ng-container>

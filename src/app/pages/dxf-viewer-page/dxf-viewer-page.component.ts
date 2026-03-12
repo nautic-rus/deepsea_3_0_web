@@ -1,10 +1,9 @@
 import { Component, OnInit, inject, OnDestroy, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
 import { DxfViewerComponent } from '../../shared/dxf-viewer/dxf-viewer.component';
 import { HttpClient } from '@angular/common/http';
-import { Location } from '@angular/common';
+import { Location, NgFor, NgIf } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { firstValueFrom } from 'rxjs';
@@ -12,7 +11,7 @@ import { firstValueFrom } from 'rxjs';
 @Component({
   selector: 'app-dxf-viewer-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, DxfViewerComponent, ButtonModule, ProgressSpinnerModule],
+  imports: [NgFor, NgIf, RouterModule, DxfViewerComponent, ButtonModule, ProgressSpinnerModule],
   template: `
     <div class="dxf-page-root">
       <div class="dxf-topbar">

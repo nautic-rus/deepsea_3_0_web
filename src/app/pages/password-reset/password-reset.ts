@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { NgClass, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -14,7 +14,7 @@ import { RouterModule } from '@angular/router';
 @Component({
   selector: 'app-password-reset',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, TranslateModule, ButtonModule, InputTextModule, PasswordModule, RippleModule],
+  imports: [NgClass, NgIf, FormsModule, RouterModule, TranslateModule, ButtonModule, InputTextModule, PasswordModule, RippleModule],
   templateUrl: './password-reset.html',
   styleUrls: ['./password-reset.scss']
 })

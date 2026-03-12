@@ -20,7 +20,7 @@
       scrollHeight="flex"
       [rows]="10"
       size="small"
-      [globalFilterFields]="['__source','code','name','description','color','project_id','project_code','order_index','created_at','updated_at']"
+      [globalFilterFields]="['__source','code','name','description','order_index','created_at','updated_at']"
       [(selection)]="selectedProjects"
       [rowHover]="true"
       dataKey="id"
@@ -39,7 +39,12 @@
 
       <ng-template pTemplate="header">
         <tr>
-          <th>#</th>
+          <th pSortableColumn="id">
+            <div class="flex items-center gap-2">
+              <span>{{ 'components.projects.table.HEADERS.ID' | translate }}</span>
+              <p-sortIcon field="id" />
+            </div>
+          </th>
           <th pSortableColumn="__source">
             <div class="flex justify-between items-center">
               <div class="flex items-center gap-2">
@@ -61,54 +66,58 @@
               </p-columnFilter>
             </div>
           </th>
-          <th pSortableColumn="code">{{ 'components.projects.table.HEADERS.CODE' | translate }}<p-sortIcon field="code" /></th>
-          <th pSortableColumn="name">{{ 'components.projects.table.HEADERS.NAME' | translate }}<p-sortIcon field="name" /></th>
-          <th pSortableColumn="description">{{ 'components.projects.table.HEADERS.DESCRIPTION' | translate }}<p-sortIcon field="description" /></th>
-          <th pSortableColumn="color">{{ 'components.projects.table.HEADERS.COLOR' | translate }}<p-sortIcon field="color" /></th>
-          <th pSortableColumn="project_id">{{ 'components.projects.table.HEADERS.PROJECT_ID' | translate }}<p-sortIcon field="project_id" /></th>
-          <th pSortableColumn="project_code">
-            <div class="flex justify-between items-center">
-              <div class="flex items-center gap-2">
-                <span>{{ 'components.projects.table.HEADERS.PROJECT_CODE' | translate }}</span>
-                <p-sortIcon field="project_code" />
-              </div>
-              <p-columnFilter field="project_code" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
-                <ng-template #filter let-value let-filter="filterCallback">
-                  <p-multiselect filter="true" filterBy="label" [ngModel]="value"
-                                 [options]="projectCodeOptions"
-                                 optionValue="value"
-                                 placeholder="{{ 'MENU.ANY' | translate }}"
-                                 (onChange)="filter($event.value)"
-                                 optionLabel="label"
-                                 styleClass="w-full"
-                                 appendTo="body">
-                  </p-multiselect>
-                </ng-template>
-              </p-columnFilter>
+          <th pSortableColumn="code">
+            <div class="flex items-center gap-2">
+              <span>{{ 'components.projects.table.HEADERS.CODE' | translate }}</span>
+              <p-sortIcon field="code" />
             </div>
           </th>
-          <th pSortableColumn="order_index">{{ 'components.projects.table.HEADERS.ORDER_INDEX' | translate }}<p-sortIcon field="order_index" /></th>
-          <th pSortableColumn="created_at">{{ 'components.projects.table.HEADERS.CREATED_AT' | translate }}<p-sortIcon field="created_at" /></th>
-          <th pSortableColumn="updated_at">{{ 'components.projects.table.HEADERS.UPDATED_AT' | translate }}<p-sortIcon field="updated_at" /></th>
+          <th pSortableColumn="name">
+            <div class="flex items-center gap-2">
+              <span>{{ 'components.projects.table.HEADERS.NAME' | translate }}</span>
+              <p-sortIcon field="name" />
+            </div>
+          </th>
+          <th pSortableColumn="description">
+            <div class="flex items-center gap-2">
+              <span>{{ 'components.projects.table.HEADERS.DESCRIPTION' | translate }}</span>
+              <p-sortIcon field="description" />
+            </div>
+          </th>
+          
+          
+          <th pSortableColumn="order_index">
+            <div class="flex items-center gap-2">
+              <span>{{ 'components.projects.table.HEADERS.ORDER_INDEX' | translate }}</span>
+              <p-sortIcon field="order_index" />
+            </div>
+          </th>
+          <th pSortableColumn="created_at">
+            <div class="flex items-center gap-2">
+              <span>{{ 'components.projects.table.HEADERS.CREATED_AT' | translate }}</span>
+              <p-sortIcon field="created_at" />
+            </div>
+          </th>
+          <th pSortableColumn="updated_at">
+            <div class="flex items-center gap-2">
+              <span>{{ 'components.projects.table.HEADERS.UPDATED_AT' | translate }}</span>
+              <p-sortIcon field="updated_at" />
+            </div>
+          </th>
           <th></th>
         </tr>
       </ng-template>
 
       <ng-template pTemplate="body" let-p let-i="rowIndex">
         <tr>
-          <td>{{ (dt && dt.first) ? (dt.first + i + 1) : (i + 1) }}</td>
+          <td>{{ p?.id || '—' }}</td>
           <td>
             <p-tag [value]="p?.__source === 'issue' ? ('MENU.ISSUE' | translate) : (p?.__source === 'document' ? ('MENU.DOCUMENT' | translate) : (p?.__source || '—'))" [severity]="p?.__source === 'issue' ? 'info' : (p?.__source === 'document' ? 'success' : 'secondary')"></p-tag>
           </td>
           <td>{{ p?.code || '—' }}</td>
           <td>{{ p?.name || '—' }}</td>
           <td>{{ p?.description || '—' }}</td>
-          <td>
-            <span [style.background]="p?.color" style="display:inline-block;width:18px;height:18px;border-radius:3px;margin-right:8px;border:1px solid rgba(0,0,0,0.08);vertical-align:middle"></span>
-            <span>{{ p?.color || '—' }}</span>
-          </td>
-          <td>{{ p?.project_id !== undefined && p?.project_id !== null ? p.project_id : '—' }}</td>
-          <td>{{ p?.project_code || '—' }}</td>
+          
           <td>{{ p?.order_index !== undefined && p?.order_index !== null ? p.order_index : '—' }}</td>
           <td>{{ p?.created_at ? (p.created_at | date:'short') : '—' }}</td>
           <td>{{ p?.updated_at ? (p.updated_at | date:'short') : '—' }}</td>
@@ -125,68 +134,31 @@
 <p-dialog [header]="isCreating ? ('MENU.CREATE' | translate) : ('MENU.EDIT' | translate)" [(visible)]="displayDialog" [modal]="true" [closable]="true" [resizable]="false" [style]="{width: '25%'}">
   <div class=" flex flex-col gap-4">
     <div class="flex flex-col gap-2">
-      <label for="projectName">{{ 'components.projects.form.NAME' | translate }}</label>
+      <label for="projectName" class="font-bold">{{ 'components.projects.form.NAME' | translate }}</label>
       <input pInputText id="projectName" type="text" [(ngModel)]="editModel.name" name="name" />
     </div>
 
     <div class="flex flex-col gap-2">
-      <label for="projectCode">{{ 'components.projects.form.CODE' | translate }}</label>
+      <label for="projectCode" class="font-bold">{{ 'components.projects.form.CODE' | translate }}</label>
       <input pInputText id="projectCode" type="text" [(ngModel)]="editModel.code" name="code" />
     </div>
 
     <div class="flex flex-col gap-2">
-      <label for="projectDescription">{{ 'components.projects.form.DESCRIPTION' | translate }}</label>
+      <label for="projectDescription" class="font-bold">{{ 'components.projects.form.DESCRIPTION' | translate }}</label>
       <input pInputText id="projectDescription" type="text" [(ngModel)]="editModel.description" name="description" />
     </div>
 
     <div class="flex flex-col gap-2">
-      <label for="entitySelect">Entity</label>
+      <label for="entitySelect" class="font-bold">Entity</label>
       <p-select filter="true" filterBy="label" id="entitySelect" [options]="entityOptions" optionLabel="label" optionValue="value" [(ngModel)]="editModel.__source" name="entity"></p-select>
     </div>
 
-    <div *ngIf="!isCreating" class="flex flex-col gap-2">
-      <label for="projectStatus">{{ 'components.projects.form.STATUS' | translate }}</label>
-      <p-select filter="true" filterBy="label" id="projectStatus" [options]="statuses" optionLabel="label" optionValue="value" [(ngModel)]="editModel.status" name="status" appendTo="body"></p-select>
-    </div>
 
-    <div *ngIf="!isCreating" class="flex flex-col gap-2">
-      <label for="projectOwner">{{ 'components.projects.form.OWNER' | translate }}</label>
-      <p-select filter="true" filterBy="label" id="projectOwner" [options]="usersOptions" optionLabel="label" optionValue="value" [(ngModel)]="editModel.owner_id" name="owner_id" appendTo="body">
-        <ng-template let-opt pTemplate="item">
-          <div class="flex items-center gap-2">
-            <ng-container *ngIf="opt.avatar; else initialsItem">
-              <img [src]="opt.avatar" alt="avatar" class="select-avatar mr-2" />
-            </ng-container>
-            <ng-template #initialsItem>
-              <p-avatar [label]="initialsFromName(opt.label)" class="mr-2" shape="circle" [style]="{ 'background-color': selectAvatarBg(opt.value || opt.label), color: selectAvatarTextColor(opt.value || opt.label) }"></p-avatar>
-            </ng-template>
-            <div>{{ opt.label }}</div>
-          </div>
-        </ng-template>
-        <ng-template let-opt pTemplate="selectedItem">
-          <div>{{ opt.label }}</div>
-        </ng-template>
-      </p-select>
-    </div>
-
-    <div class="flex flex-col gap-2">
-      <label for="projectSelect">Project</label>
-      <p-select filter="true" filterBy="label" id="projectSelect" [options]="projectOptions" optionLabel="label" optionValue="value" [(ngModel)]="editModel.project_id" name="project_id" appendTo="body"></p-select>
-    </div>
+    
 
     <div class="flex items-center gap-4">
       <div class="flex flex-col gap-2">
-        <label for="isFinal">Is Final</label>
-        <p-checkbox id="isFinal" [(ngModel)]="editModel.is_final" binary="true"></p-checkbox>
-      </div>
-
-      <div class="flex flex-col gap-2">
-        <label for="colorPicker">Color</label>
-        <p-colorPicker id="colorPicker" [(ngModel)]="editModel.color" appendTo="body"></p-colorPicker>
-      </div>
-
-      <div class="flex flex-col gap-2">
-        <label for="orderIndex">Order Index</label>
+        <label for="orderIndex" class="font-bold">Order Index</label>
         <input pInputText id="orderIndex" type="number" [(ngModel)]="editModel.order_index" name="order_index" />
       </div>
     </div>

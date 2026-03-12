@@ -1,6 +1,6 @@
-import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { CommonModule } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
@@ -19,12 +19,14 @@ import { PagesService } from '../../../services/pages.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
+import { AppMessageService } from '../../../services/message.service';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-admin-pages',
   standalone: true,
   imports: [
-    CommonModule,
+    NgFor, NgIf,
     TranslateModule,
     RouterModule,
     ButtonModule,
@@ -41,7 +43,7 @@ import { InputIconModule } from 'primeng/inputicon';
     IconFieldModule,
     InputIconModule
   ],
-  providers: [ConfirmationService, MessageService],
+  providers: [ConfirmationService],
   templateUrl: './pages.html',
   styleUrls: ['./pages.scss']
 })
@@ -59,10 +61,10 @@ export class AdminPagesComponent implements OnInit {
   constructor(
     private http: HttpClient,
     private confirmation: ConfirmationService,
-    private messageService: MessageService,
     private pagesService: PagesService,
     private cd: ChangeDetectorRef,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private appMsg: AppMessageService
   ) {}
 
   // Safe change-detection helper (mirrors pattern used in users component)
@@ -100,8 +102,7 @@ export class AdminPagesComponent implements OnInit {
       },
       error: () => {
         this.loading = false;
-        this.messageService.add({severity: 'error', summary: this.translate.instant('MENU.CONFIRM') || 'Error', detail: 'Failed to load pages'});
-        this.safeDetect();
+        this.appMsg.error('Failed to load pages');this.safeDetect();
       }
     });
   }
@@ -158,8 +159,7 @@ export class AdminPagesComponent implements OnInit {
           Promise.allSettled([...adds, ...removes]).then(() => {
             this.loading = false;
             this.displayDialog = false;
-            this.messageService.add({severity: 'success', summary: 'Saved', detail: 'Page saved'});
-            this.loadPages();
+            this.appMsg.success('Page saved');this.loadPages();
             this.safeDetect();
           });
         },
@@ -167,8 +167,7 @@ export class AdminPagesComponent implements OnInit {
           // even if sync failed, finish
           this.loading = false;
           this.displayDialog = false;
-          this.messageService.add({severity: 'warning', summary: 'Saved', detail: 'Page saved, but failed to sync permissions'});
-          this.loadPages();
+          this.appMsg.warn('Page saved, but failed to sync permissions');this.loadPages();
           this.safeDetect();
         }
       });
@@ -183,8 +182,7 @@ export class AdminPagesComponent implements OnInit {
             // fallback: reload and return
             this.loading = false;
             this.displayDialog = false;
-            this.messageService.add({severity: 'success', summary: 'Saved', detail: 'Page created'});
-            this.loadPages();
+            this.appMsg.success('Page created');this.loadPages();
             this.safeDetect();
             return;
           }
@@ -192,8 +190,7 @@ export class AdminPagesComponent implements OnInit {
         },
         error: () => {
           this.loading = false;
-          this.messageService.add({severity: 'error', summary: 'Error', detail: 'Failed to create page'});
-          this.safeDetect();
+          this.appMsg.error('Failed to create page');this.safeDetect();
         }
       });
     } else {
@@ -205,8 +202,7 @@ export class AdminPagesComponent implements OnInit {
         },
         error: () => {
           this.loading = false;
-          this.messageService.add({severity: 'error', summary: 'Error', detail: 'Failed to update page'});
-          this.safeDetect();
+          this.appMsg.error('Failed to update page');this.safeDetect();
         }
       });
     }
@@ -225,19 +221,16 @@ export class AdminPagesComponent implements OnInit {
       next: () => {
         this.pagesService.deletePage(page.id).subscribe({
           next: () => {
-            this.messageService.add({severity: 'success', summary: 'Deleted', detail: 'Page deleted'});
-            this.loadPages();
+            this.appMsg.success('Page deleted');this.loadPages();
             this.cd.detectChanges();
           },
           error: () => {
-            this.messageService.add({severity: 'error', summary: 'Error', detail: 'Failed to delete page'});
-            this.cd.detectChanges();
+            this.appMsg.error('Failed to delete page');this.cd.detectChanges();
           }
         });
       },
       error: () => {
-        this.messageService.add({severity: 'error', summary: 'Error', detail: 'Failed to delete page permissions'});
-        this.cd.detectChanges();
+        this.appMsg.error('Failed to delete page permissions');this.cd.detectChanges();
       }
     });
   }
@@ -252,8 +245,7 @@ export class AdminPagesComponent implements OnInit {
         );
         Promise.allSettled(deletes).then(() => {
           this.selectedPages = [];
-          this.messageService.add({severity: 'success', summary: 'Deleted', detail: 'Selected pages deleted'});
-          this.loadPages();
+          this.appMsg.success('Selected pages deleted');this.loadPages();
           this.cd.detectChanges();
         });
       }
@@ -268,4 +260,6 @@ export class AdminPagesComponent implements OnInit {
     const value = (event.target as HTMLInputElement).value;
     dt.filterGlobal(value, 'contains');
   }
+
+  trackByPermId(index: number, perm: any): any { return perm?.id ?? perm?.code ?? index; }
 }

@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, Output, inject, ChangeDetectionStrategy, ChangeDetectorRef, DestroyRef } from '@angular/core';
+import { NgClass, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { SplitButtonModule } from 'primeng/splitbutton';
@@ -12,20 +12,22 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { ToastModule } from 'primeng/toast';
 import { EditorModule } from 'primeng/editor';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { Subscription } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MessageService } from 'primeng/api';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { AvatarModule } from 'primeng/avatar';
 import { AvatarService } from '../../../services/avatar.service';
 import { LinksService } from '../../../services/links.service';
+import { AppMessageService } from '../../../services/message.service';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-documents-activity',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonModule, SplitButtonModule, DialogModule, Select, DatePickerModule, InputTextModule, CheckboxModule, ToastModule, AvatarModule, TranslateModule, EditorModule, MultiSelectModule],
+  imports: [NgClass, NgIf, FormsModule, ButtonModule, SplitButtonModule, DialogModule, Select, DatePickerModule, InputTextModule, CheckboxModule, ToastModule, AvatarModule, TranslateModule, EditorModule, MultiSelectModule],
   templateUrl: './documents-activity.html',
   styleUrls: ['../../../_quill-snow.scss', './documents-activity.scss'],
-  providers: [MessageService]
+  providers: []
 })
 export class DocumentsActivityComponent {
   @Input() documentId: any = null;
@@ -50,12 +52,14 @@ export class DocumentsActivityComponent {
 
   private http = inject(HttpClient);
   private messageService = inject(MessageService);
+  private appMsg = inject(AppMessageService);
   private avatarService = inject(AvatarService);
   private translate = inject(TranslateService);
   private linksService = inject(LinksService);
+  private cdr = inject(ChangeDetectorRef);
+  private destroyRef = inject(DestroyRef);
 
   menuItems: any[] = [];
-  private langSub: Subscription | null = null;
 
   openAssign(): void {
     this.assignModel = { user_id: null, comment: '', due_date: null, priority: null, change_status: false, title: '', description: '', project_id: null };
@@ -76,6 +80,7 @@ export class DocumentsActivityComponent {
         } catch (e) {
           // ignore
         }
+        this.cdr.markForCheck();
       }).catch(() => {
         // ignore
       });
@@ -86,15 +91,10 @@ export class DocumentsActivityComponent {
   ngOnInit(): void {
     this.setMenuItems();
     // update labels when language changes
-    this.langSub = this.translate.onLangChange.subscribe(() => this.setMenuItems());
+    this.translate.onLangChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => { this.setMenuItems(); this.cdr.markForCheck(); });
   }
 
-  ngOnDestroy(): void {
-    if (this.langSub) {
-      this.langSub.unsubscribe();
-      this.langSub = null;
-    }
-  }
+  ngOnDestroy(): void { /* subscriptions auto-cleaned via takeUntilDestroyed */ }
 
   private setMenuItems(): void {
     this.menuItems = [
@@ -131,6 +131,7 @@ export class DocumentsActivityComponent {
       }
     }
     this.showLinkDialog = true;
+    this.cdr.markForCheck();
   }
   openCorrection(): void {
     this.correctionModel = { code: '', title: '' };
@@ -196,8 +197,7 @@ export class DocumentsActivityComponent {
         }
       }
 
-      this.messageService.add({ severity: 'success', summary: 'Assign', detail: 'Issue created and linked' });
-      this.assigned.emit({ documentId: this.documentId, issue: issueRes, payload: issuePayload });
+      this.appMsg.success('Issue created and linked');this.assigned.emit({ documentId: this.documentId, issue: issueRes, payload: issuePayload });
 
       // Dispatch a DOM event so any ancestor/listener (for example documents-detail) can refresh
       try {
@@ -219,8 +219,7 @@ export class DocumentsActivityComponent {
       this.showAssignDialog = false;
     } catch (e: any) {
       // Fallback: emit and show warning
-      this.messageService.add({ severity: 'warn', summary: 'Assign', detail: 'Failed to create issue or link; emitted event' });
-      this.assigned.emit({ documentId: this.documentId, payload: issuePayload });
+      this.appMsg.warn('Failed to create issue or link; emitted event');this.assigned.emit({ documentId: this.documentId, payload: issuePayload });
       this.showAssignDialog = false;
     }
   }
@@ -229,8 +228,7 @@ export class DocumentsActivityComponent {
     const selected = Array.isArray(this.linkModel.selected_ids) ? this.linkModel.selected_ids : [];
     if (!selected.length) {
       // nothing selected
-      this.messageService.add({ severity: 'warn', summary: 'Link', detail: 'No documents selected' });
-      return;
+      this.appMsg.warn('No documents selected');return;
     }
     try {
       const createLinkPromises: Promise<any>[] = [];
@@ -251,15 +249,12 @@ export class DocumentsActivityComponent {
         await this.http.put(`/api/documents/${this.documentId}`, { status_id: 5, comment: (this.linkModel.reason || null) }).toPromise();
       } catch (updateErr: any) {
         // non-fatal: show warning but continue
-        this.messageService.add({ severity: 'warn', summary: 'Link', detail: 'Linked but failed to update document status/comment' });
-      }
+        this.appMsg.warn('Linked but failed to update document status/comment');}
 
-      this.messageService.add({ severity: 'success', summary: 'Link', detail: 'Relations created and document updated' });
-      this.linked.emit({ documentId: this.documentId, results: linkResults, reason: this.linkModel.reason });
+      this.appMsg.success('Relations created and document updated');this.linked.emit({ documentId: this.documentId, results: linkResults, reason: this.linkModel.reason });
       this.showLinkDialog = false;
     } catch (e: any) {
-      this.messageService.add({ severity: 'warn', summary: 'Link', detail: 'API call failed, emitted event' });
-      this.linked.emit({ documentId: this.documentId, reason: this.linkModel.reason });
+      this.appMsg.warn('API call failed, emitted event');this.linked.emit({ documentId: this.documentId, reason: this.linkModel.reason });
       this.showLinkDialog = false;
     }
   }
@@ -271,12 +266,10 @@ export class DocumentsActivityComponent {
       if (this.documentId != null) {
         await this.http.post('/api/documents', payload).toPromise();
       }
-      this.messageService.add({ severity: 'success', summary: 'Create', detail: 'Correction document created' });
-      this.correctionCreated.emit({ documentId: this.documentId, ...payload });
+      this.appMsg.success('Correction document created');this.correctionCreated.emit({ documentId: this.documentId, ...payload });
       this.showCorrectionDialog = false;
   } catch (e: any) {
-      this.messageService.add({ severity: 'warn', summary: 'Create', detail: 'API call failed, emitted event' });
-      this.correctionCreated.emit({ documentId: this.documentId, ...payload });
+      this.appMsg.warn('API call failed, emitted event');this.correctionCreated.emit({ documentId: this.documentId, ...payload });
       this.showCorrectionDialog = false;
     }
   }

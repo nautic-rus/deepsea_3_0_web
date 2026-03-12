@@ -1,7 +1,7 @@
 import { Component, ChangeDetectorRef } from '@angular/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { NgClass, NgIf } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -16,7 +16,7 @@ import { RippleModule } from 'primeng/ripple';
   selector: 'app-login',
   standalone: true,
   imports: [
-    CommonModule,
+    NgClass, NgIf,
     FormsModule,
   RouterModule,
   TranslateModule,

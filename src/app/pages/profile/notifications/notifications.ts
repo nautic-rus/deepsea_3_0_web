@@ -1,5 +1,5 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { ToastModule } from 'primeng/toast';
@@ -15,12 +15,14 @@ import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { UsersService } from '../../../services/users.service';
 import { AuthService } from '../../../auth/auth.service';
+import { AppMessageService } from '../../../services/message.service';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-profile-notifications',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule, TableModule, CheckboxModule, Select, ButtonModule, ToolbarModule, InputTextModule, InputIconModule, IconFieldModule, ToastModule],
-  providers: [MessageService],
+  imports: [NgFor, FormsModule, TranslateModule, TableModule, CheckboxModule, Select, ButtonModule, ToolbarModule, InputTextModule, InputIconModule, IconFieldModule, ToastModule],
+  providers: [],
   templateUrl: './notifications.html',
   styleUrls: ['./notifications.scss']
 })
@@ -34,7 +36,9 @@ export class ProfileNotificationsComponent {
   selectedProject: any = null;
   loading = false;
 
-  constructor(private usersService: UsersService, private auth: AuthService, private http: HttpClient, private cd: ChangeDetectorRef, private messageService: MessageService) {}
+  constructor(private usersService: UsersService, private auth: AuthService, private http: HttpClient, private cd: ChangeDetectorRef,
+    private appMsg: AppMessageService
+  ) {}
 
   private safeDetect(): void {
     try {
@@ -124,18 +128,14 @@ export class ProfileNotificationsComponent {
     // optimistic UI already applied via ngModel; send update
     this.usersService.createNotificationSetting(payload).subscribe({
       next: () => {
-        try {
-          this.messageService.add({ severity: 'success', summary: '', detail: 'Настройки уведомлений обновлены' });
-        } catch (e) {}
+        this.appMsg.success('Настройки уведомлений обновлены');
       },
       error: (err: any) => {
         // revert change on error
         try {
           row.methods[index].enabled = !enabled;
         } catch (e) {}
-        try {
-          this.messageService.add({ severity: 'error', summary: '', detail: (err && err.message) ? err.message : 'Failed to update' });
-        } catch (e) {}
+        this.appMsg.error((err && err.message) ? err.message : 'Failed to update');
         this.safeDetect();
       }
     });
@@ -145,4 +145,7 @@ export class ProfileNotificationsComponent {
     this.selectedProject = projectId;
     this.loadNotificationSettings(projectId);
   }
+
+  trackByMethodId(index: number, m: any): any { return m.id ?? index; }
+  trackByIndex(index: number): number { return index; }
 }

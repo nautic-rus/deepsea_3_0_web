@@ -1,6 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { registerLocaleData } from '@angular/common';
+import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { DatePipe, NgIf, registerLocaleData } from '@angular/common';
 import ruLocale from '@angular/common/locales/ru';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
@@ -28,6 +27,7 @@ import { UsersService } from '../../../services/users.service';
 import { Select } from "primeng/select";
 import { Avatar } from "primeng/avatar";
 import { AvatarService } from '../../../services/avatar.service';
+import { AppMessageService } from '../../../services/message.service';
 
 interface User {
   id: number | string;
@@ -47,10 +47,11 @@ interface User {
 }
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-admin-users',
   standalone: true,
   imports: [
-    CommonModule,
+    DatePipe, NgIf,
     TranslateModule,
     FormsModule,
     ToolbarModule,
@@ -73,7 +74,7 @@ interface User {
     ToastModule,
     Avatar
 ],
-  providers: [ConfirmationService, MessageService],
+  providers: [ConfirmationService],
   templateUrl: './users.html',
   styleUrls: ['./users.scss']
 })
@@ -112,9 +113,9 @@ export class AdminUsersComponent implements OnInit {
     private usersService: UsersService,
     private cd: ChangeDetectorRef,
     private confirmationService: ConfirmationService,
-    private messageService: MessageService,
     private translate: TranslateService
-    , private avatarService: AvatarService
+    , private avatarService: AvatarService,
+    private appMsg: AppMessageService
   ) {
     // register Russian locale data so DatePipe supports 'ru' formatting
     try { registerLocaleData(ruLocale, 'ru'); } catch (e) { }
@@ -313,7 +314,7 @@ export class AdminUsersComponent implements OnInit {
   // Bulk edit dialog handlers
   openBulkEditDialog(): void {
     if (!this.selectedProducts || !this.selectedProducts.length) {
-      try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.users.bulk.NO_SELECTION') || 'No users selected' }); } catch (e) {}
+      this.appMsg.info(this.translate.instant('components.users.bulk.NO_SELECTION') || 'No users selected');
       return;
     }
     this.bulkEditModel = { department_id: null, job_title_id: null, activeSelected: false, inactiveSelected: false };
@@ -327,7 +328,7 @@ export class AdminUsersComponent implements OnInit {
   // Send invitations dialog handlers
   openSendInvitationsDialog(): void {
     if (!this.selectedProducts || !this.selectedProducts.length) {
-      try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.SEND_INVITATIONS') || 'Send invitations', detail: this.translate.instant('components.users.bulk.NO_SELECTION') || 'No users selected' }); } catch (e) {}
+      this.appMsg.info(this.translate.instant('components.users.bulk.NO_SELECTION') || 'No users selected');
       return;
     }
     this.sendInvitationsDialogVisible = true;
@@ -339,18 +340,18 @@ export class AdminUsersComponent implements OnInit {
 
   confirmSendInvitations(): void {
     // placeholder — actual sending not implemented yet
-    try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.SEND_INVITATIONS') || 'Send invitations', detail: this.translate.instant('components.users.bulk.SEND_CONFIRMED') || 'Invitation sending not implemented yet' }); } catch (e) {}
+    this.appMsg.info(this.translate.instant('components.users.bulk.SEND_CONFIRMED') || 'Invitation sending not implemented yet');
     this.sendInvitationsDialogVisible = false;
   }
 
   async applyBulkEdit(): Promise<void> {
     if (!this.selectedProducts || !this.selectedProducts.length) {
-      try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.users.bulk.NO_SELECTION') || 'No users selected' }); } catch (e) {}
+      this.appMsg.info(this.translate.instant('components.users.bulk.NO_SELECTION') || 'No users selected');
       return;
     }
     const ids = (this.selectedProducts || []).map((s: any) => s.id).filter(Boolean);
     if (!ids.length) {
-      try { this.messageService.add({ severity: 'warn', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.users.bulk.NO_IDS') || 'No valid user ids selected' }); } catch (e) {}
+      this.appMsg.warn(this.translate.instant('components.users.bulk.NO_IDS') || 'No valid user ids selected');
       return;
     }
 
@@ -365,7 +366,7 @@ export class AdminUsersComponent implements OnInit {
     }
 
     if (!Object.keys(fields).length) {
-      try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.users.bulk.NOTHING_TO_APPLY') || 'Nothing to apply' }); } catch (e) {}
+      this.appMsg.info(this.translate.instant('components.users.bulk.NOTHING_TO_APPLY') || 'Nothing to apply');
       return;
     }
 
@@ -376,9 +377,9 @@ export class AdminUsersComponent implements OnInit {
 
     const failed = results.filter(r => r.status === 'rejected');
     if (failed.length) {
-      try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.users.bulk.PARTIAL_ERROR')?.replace('{n}', String(failed.length)) || (String(failed.length) + ' updates failed') }); } catch (e) {}
+      this.appMsg.error(this.translate.instant('components.users.bulk.PARTIAL_ERROR')?.replace('{n}', String(failed.length)) || (String(failed.length) + ' updates failed'));
     } else {
-      try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.BULK_EDIT') || 'Bulk edit', detail: this.translate.instant('components.users.bulk.SUCCESS') || 'Bulk update applied' }); } catch (e) {}
+      this.appMsg.success(this.translate.instant('components.users.bulk.SUCCESS') || 'Bulk update applied');
     }
 
     this.bulkEditDialogVisible = false;
@@ -389,10 +390,7 @@ export class AdminUsersComponent implements OnInit {
   // Delete selected products/users (stub)
   deleteSelectedProducts(): void {
     // TODO: implement deletion logic with confirmation
-    try {
-      this.messageService.add({ severity: 'info', summary: 'Not implemented', detail: 'Bulk delete is not implemented yet' });
-    } catch (e) {
-    }
+    this.appMsg.info('Bulk delete is not implemented yet');
   }
 
   // Export CSV (stub)
@@ -400,7 +398,7 @@ export class AdminUsersComponent implements OnInit {
     try {
       const rows = this.users || [];
       if (!rows.length) {
-    try { this.messageService.add({ severity: 'info', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('MENU.ANY') || 'No users to export' }); } catch (e) { }
+    this.appMsg.info(this.translate.instant('MENU.ANY') || 'No users to export');
         return;
       }
 
@@ -444,9 +442,9 @@ export class AdminUsersComponent implements OnInit {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-  try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: this.translate.instant('MENU.USER_CREATED') || 'Export completed' }); } catch (e) { }
+  this.appMsg.success(this.translate.instant('MENU.USER_CREATED') || 'Export completed');
     } catch (err) {
-  try { this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.EXPORT') || 'Export', detail: 'Export failed' }); } catch (e) { }
+  this.appMsg.error('Export failed');
     }
   }
 
@@ -534,9 +532,7 @@ export class AdminUsersComponent implements OnInit {
     // validate form before sending
     if (!this.validateForm()) {
       // validation errors were populated and safeDetect called
-      try {
-        this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CONFIRM') || 'Error', detail: 'Please fix form errors' });
-      } catch (e) {}
+      this.appMsg.error('Please fix form errors');
       return;
     }
 
@@ -550,18 +546,14 @@ export class AdminUsersComponent implements OnInit {
           this.editModel = {};
           this.loading = false;
           this.isCreating = false;
-          try {
-            this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.CREATE_USER') || 'Success', detail: this.translate.instant('MENU.USER_CREATED') || 'User created' });
-          } catch (e) {}
+          this.appMsg.success(this.translate.instant('MENU.USER_CREATED') || 'User created');
           this.loadUsers();
           this.safeDetect();
         },
         error: (err) => {
           this.error = this.extractErrorMessage(err) || 'Failed to create user';
           this.loading = false;
-          try {
-            this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.CREATE_USER') || 'Error', detail: this.error ?? '' });
-          } catch (e) {}
+          this.appMsg.error(this.error ?? '');
           this.safeDetect();
         }
       });
@@ -574,20 +566,14 @@ export class AdminUsersComponent implements OnInit {
           this.editModel = {};
           this.loading = false;
           // show success message
-          try {
-            this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Success', detail: this.translate.instant('MENU.USER_UPDATED') || 'User updated' });
-          } catch (e) {
-            // ignore messaging errors
-          }
+          this.appMsg.success(this.translate.instant('MENU.USER_UPDATED') || 'User updated');
           this.loadUsers();
           this.safeDetect();
         },
         error: (err) => {
           this.error = this.extractErrorMessage(err) || 'Failed to update user';
           this.loading = false;
-          try {
-            this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.SAVE') || 'Error', detail: this.error ?? '' });
-          } catch (e) {}
+          this.appMsg.error(this.error ?? '');
           this.safeDetect();
         }
       });
@@ -641,19 +627,13 @@ export class AdminUsersComponent implements OnInit {
         this.selectedProducts = this.selectedProducts.filter(s => s.id !== user.id);
         this.loading = false;
         // show success message
-        try {
-          this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.DELETE') || 'Success', detail: this.translate.instant('MENU.USER_DELETED') || 'User deleted' });
-        } catch (e) {
-          // ignore
-        }
+        this.appMsg.success(this.translate.instant('MENU.USER_DELETED') || 'User deleted');
         this.safeDetect();
       },
       error: (err) => {
         this.error = this.extractErrorMessage(err) || 'Failed to delete user';
         this.loading = false;
-        try {
-          this.messageService.add({ severity: 'error', summary: this.translate.instant('MENU.DELETE') || 'Error', detail: this.error ?? '' });
-        } catch (e) {}
+        this.appMsg.error(this.error ?? '');
         this.safeDetect();
       }
     });
