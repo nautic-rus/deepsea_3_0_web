@@ -224,7 +224,7 @@
                                 </div>
                             </ng-container>
                             <ng-container *ngSwitchCase="'status_name'">
-                                {{question.status_name ? question.status_name : '-'}}
+                                <p-tag [value]="question?.status_name || '-'" [severity]="statusSeverity(question?.status_code || question?.status_name)"></p-tag>
                             </ng-container>
                             <ng-container *ngSwitchCase="'priority'">
                                 <p-tag [value]="question.priority || '-'" [severity]="prioritySeverity(question.priority)"></p-tag>

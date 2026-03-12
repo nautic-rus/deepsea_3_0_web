@@ -912,6 +912,14 @@ export class CustomerQuestionsComponent implements OnInit {
               if (copy.type.name) copy.type_name = copy.type.name;
             } catch (e) {}
           }
+          // Normalize status object if provided (backend may return nested status)
+          if (copy.status && typeof copy.status === 'object') {
+            try {
+              if (copy.status.id !== undefined && copy.status.id !== null) copy.status_id = copy.status.id;
+              if (copy.status.name) copy.status_name = copy.status.name;
+              if (copy.status.code) copy.status_code = copy.status.code;
+            } catch (e) {}
+          }
         } catch (e) {}
         const askedById = copy.asked_by_avatar_id ?? copy.asked_by_avatarId;
         if (!copy.asked_by_avatar && !copy.asked_by_avatar_url && (askedById !== null && askedById !== undefined && String(askedById).trim() !== '')) {

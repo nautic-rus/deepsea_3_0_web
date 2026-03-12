@@ -538,9 +538,10 @@ export class CustomerQuestionDetailComponent implements OnInit {
         const data = (res && res.data) ? res.data : res;
         this.question = this.normalizeQuestion(data);
         this.loading = false;
-        const allowed = (this.question && this.question.allowed_statuses) ? this.question.allowed_statuses : null;
-        if (Array.isArray(allowed) && allowed.length) {
-          this.statusOptions = allowed.map((s: any) => ({ label: s.name || s.label || String(s.code), value: (s.id !== undefined && s.id !== null) ? s.id : s.code }));
+        // prefer API field `available_statuses`, fallback to legacy `allowed_statuses`
+        const avail = (this.question && (this.question.available_statuses || this.question.allowed_statuses || this.question.allowedStatuses)) ? (this.question.available_statuses || this.question.allowed_statuses || this.question.allowedStatuses) : null;
+        if (Array.isArray(avail) && avail.length) {
+          this.statusOptions = avail.map((s: any) => ({ label: s.name || s.label || String(s.code || s.id), value: (s.id !== undefined && s.id !== null) ? s.id : s.code }));
           this.statusMenuItems = this.statusOptions.map(o => ({ label: o.label, command: () => this.changeStatus(o.value) }));
         } else {
           this.statusOptions = [];
@@ -560,32 +561,31 @@ export class CustomerQuestionDetailComponent implements OnInit {
     if (!this.question || !this.question.id) return;
     this.statusSaving = true;
     this.cdr.markForCheck();
+    // Optimistic update: update local question.status_name immediately and update server.
+    const prevStatus = { id: this.question.status_id, name: this.question.status_name };
+    try {
+      const found = (this.statusOptions || []).find(o => String(o.value) === String(statusId));
+      if (found) {
+        this.question.status_id = found.value;
+        this.question.status_name = found.label;
+      } else {
+        this.question.status_id = statusId;
+      }
+    } catch (e) {}
+    this.cdr.markForCheck();
+
     this.qsService.updateQuestion(this.question.id, { status_id: statusId }).subscribe({
       next: () => {
-        this.qsService.getQuestion(this.question.id).subscribe({
-          next: (fetchRes: any) => {
-            const data = (fetchRes && fetchRes.data) ? fetchRes.data : fetchRes;
-            this.question = data;
-            const allowed = (this.question && this.question.allowed_statuses) ? this.question.allowed_statuses : null;
-            if (Array.isArray(allowed) && allowed.length) {
-              this.statusOptions = allowed.map((s: any) => ({ label: s.name || s.label || String(s.code), value: (s.id !== undefined && s.id !== null) ? s.id : s.code }));
-              this.statusMenuItems = this.statusOptions.map(o => ({ label: o.label, command: () => this.changeStatus(o.value) }));
-            } else {
-              this.statusOptions = [];
-              this.statusMenuItems = [];
-            }
-            this.statusSaving = false;
-            this.cdr.markForCheck();
-            try { this.messageService.add({ severity: 'success', summary: this.trOr('components.customer_questions.messages.SUCCESS', 'Success'), detail: this.trOr('components.customer_questions.messages.STATUS_UPDATED', 'Status updated') }); } catch (e) {}
-          },
-          error: () => {
-            this.statusSaving = false;
-            this.cdr.markForCheck();
-            try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.customer_questions.messages.ERROR'), detail: this.translate.instant('components.customer_questions.messages.STATUS_UPDATE_FAILED') }); } catch (e) {}
-          }
-        });
+        this.statusSaving = false;
+        this.cdr.markForCheck();
+        try { this.messageService.add({ severity: 'success', summary: this.trOr('components.customer_questions.messages.SUCCESS', 'Success'), detail: this.trOr('components.customer_questions.messages.STATUS_UPDATED', 'Status updated') }); } catch (e) {}
       },
       error: (err: any) => {
+        // rollback to previous status on error
+        try {
+          this.question.status_id = prevStatus.id;
+          this.question.status_name = prevStatus.name;
+        } catch (e) {}
         this.statusSaving = false;
         this.cdr.markForCheck();
         try { this.messageService.add({ severity: 'error', summary: this.translate.instant('components.customer_questions.messages.ERROR'), detail: (err && err.message) ? err.message : this.translate.instant('components.customer_questions.messages.STATUS_UPDATE_FAILED') }); } catch (e) {}
