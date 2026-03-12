@@ -308,7 +308,7 @@ export class AdminRolesComponent implements OnInit, OnDestroy {
   confirmDeleteRole(role: Role): void {
     if (!role) return;
     this.confirmationService.confirm({
-      message: `Delete role "${role.name}"?`,
+      message: `${this.translate.instant('components.roles.confirm.DELETE_QUESTION') || 'Attention! Do you really want to delete role'} "${role.name}"?`,
       icon: 'pi pi-exclamation-triangle',
       accept: () => this.deleteRole(role)
     });
@@ -317,7 +317,7 @@ export class AdminRolesComponent implements OnInit, OnDestroy {
   confirmRemovePermission(perm: any): void {
     if (!perm || !this.selectedRole) return;
     this.confirmationService.confirm({
-      message: `Remove permission "${perm.name || perm.id}" from role "${this.selectedRole.name}"?`,
+      message: `${this.translate.instant('components.roles.confirm.REMOVE_PERMISSION_QUESTION') || 'Attention! Do you really want to remove permission from role'} "${perm.name || perm.id}" — "${this.selectedRole.name}"?`,
       icon: 'pi pi-exclamation-triangle',
       accept: () => this.removePermissionFromRole(perm)
     });

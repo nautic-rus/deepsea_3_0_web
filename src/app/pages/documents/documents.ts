@@ -826,7 +826,7 @@ import { AppMessageService } from '../../services/message.service';
 		if (!id) return;
 		try {
 			this.confirmationService.confirm({
-				message: `Delete directory "${target.label || (target.data && target.data.name) || id}"?`,
+				message: `${this.translate.instant('components.documents.confirm.DELETE_DIRECTORY_QUESTION') || 'Attention! Do you really want to delete directory'} "${target.label || (target.data && target.data.name) || id}"?`,
 				icon: 'pi pi-exclamation-triangle',
 				accept: () => this.deleteDirectory(id)
 			});

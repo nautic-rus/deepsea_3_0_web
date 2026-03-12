@@ -334,6 +334,10 @@
         },
         "EMPTY": "No pages to display",
         "SEARCH": "Search"
+      },
+      "confirm": {
+        "DELETE_QUESTION": "Attention! Do you really want to delete page",
+        "DELETE_SELECTED_QUESTION": "Attention! Do you really want to delete selected pages?"
       }
     },
     "menu": {
@@ -487,6 +491,12 @@
       "confirm": {
         "DELETE_QUESTION": "Attention! Do you really want to delete project"
       },
+      "settings": {
+        "confirm": {
+          "DELETE_QUESTION": "Attention! Do you really want to delete",
+          "DELETE_WORKFLOW_QUESTION": "Attention! Do you really want to delete workflow"
+        }
+      },
       "form": {
         "CANCEL": "Cancel",
         "CODE": "Code",
@@ -575,6 +585,9 @@
     "documents": {
       "TREE_TITLE": "Documents tree",
       "BACK": "Back",
+      "confirm": {
+        "DELETE_DIRECTORY_QUESTION": "Attention! Do you really want to delete directory"
+      },
       "bulk": {
         "SELECTED": "selected",
         "NO_SELECTION": "No documents selected",
@@ -812,7 +825,8 @@
       },
       "PERMISSIONS_TITLE": "Roles permissions",
       "confirm": {
-        "DELETE_QUESTION": "Attention! Do you really want to delete role"
+        "DELETE_QUESTION": "Attention! Do you really want to delete role",
+        "REMOVE_PERMISSION_QUESTION": "Attention! Do you really want to remove permission from role"
       },
       "form": {
         "CANCEL": "Cancel",

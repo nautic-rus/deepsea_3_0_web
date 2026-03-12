@@ -131,7 +131,7 @@
     <div class="flex justify-end gap-2 mt-4">
       <p-button label="{{ 'components.projects.form.CANCEL' | translate }}" (onClick)="displayDialog=false" severity="secondary" icon="pi pi-times" iconPos="left" [disabled]="loading"></p-button>
       <p-button label="{{ 'components.projects.form.SAVE' | translate }}" (onClick)="save()" severity="primary" icon="pi pi-check" iconPos="left" [disabled]="loading"></p-button>
-      <p-confirmDialog [style]="{ width: '25%' }" header="{{ 'MENU.CONFIRM' | translate }}" acceptLabel="{{ 'MENU.DELETE' | translate }}" rejectLabel="{{ 'MENU.CANCEL' | translate }}" acceptIcon="pi pi-check" acceptButtonStyleClass="p-button-danger" rejectButtonStyleClass="secondary p-button-text" rejectIcon="pi pi-times"></p-confirmDialog>
+      <p-confirmDialog [style]="{ width: '25%' }" styleClass="project-confirm-dialog" header="{{ 'MENU.CONFIRM' | translate }}" acceptLabel="{{ 'MENU.DELETE' | translate }}" rejectLabel="{{ 'MENU.CANCEL' | translate }}" acceptIcon="pi pi-check" acceptButtonStyleClass="p-button-danger" rejectButtonStyleClass="secondary p-button-text" rejectIcon="pi pi-times"></p-confirmDialog>
     </div>
   </div>
 </p-dialog>

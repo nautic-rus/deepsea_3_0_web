@@ -51,7 +51,6 @@ import { CustomerQuestionAttachComponent } from './customer-question-attach';
     TagModule,
     ProgressSpinnerModule,
     ChipModule,
-    CustomerQuestionRelationsComponent,
     CustomerQuestionRelationsTableComponent,
     CustomerQuestionAttachComponent,
     ToolbarModule,

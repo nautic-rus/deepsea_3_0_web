@@ -523,6 +523,7 @@ export class CustomerQuestionAttachComponent implements OnChanges, OnDestroy {
 
     this.confirmationService.confirm({
       message: confirmMessage,
+      icon: 'pi pi-exclamation-triangle',
       accept: () => {
         if (!storageId || !qId) {
           const filtered = (this.attachments || []).filter(a => a !== file && a.id !== storageId);

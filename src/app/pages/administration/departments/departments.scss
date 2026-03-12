@@ -16,19 +16,6 @@
 	gap: var(--p-toolbar-gap);
 }
 
-/* Keep confirm/dialog/toast styles consistent with users page if needed */
-.user-confirm-dialog {
-	box-shadow: 0 4px 14px rgba(16,24,40,0.08);
-}
-.user-confirm-dialog .p-dialog-header {
-	background: var(--surface-0);
-	border-bottom: 1px solid var(--surface-border);
-	border-top-left-radius: 12px;
-	border-top-right-radius: 12px;
-}
-.user-confirm-dialog .p-dialog-content {
-	padding: 1rem;
-}
 .user-toast .p-toast-message {
 	border-radius: 8px;
 }

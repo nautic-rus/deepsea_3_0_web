@@ -24,7 +24,7 @@ import { AppMessageService } from '../../services/message.service';
   template: `
     <section class="admin-subpage-relations card">
       <p-toast></p-toast>
-      <p-confirmDialog header="{{ 'MENU.CONFIRM' | translate }}" [style]="{ width: '30%' }"></p-confirmDialog>
+      <p-confirmDialog [style]="{ width: '25%' }" styleClass="project-confirm-dialog" header="{{ 'MENU.CONFIRM' | translate }}" acceptLabel="{{ 'MENU.DELETE' | translate }}" rejectLabel="{{ 'MENU.CANCEL' | translate }}" acceptIcon="pi pi-check" acceptButtonStyleClass="p-button-danger" rejectButtonStyleClass="secondary p-button-text" rejectIcon="pi pi-times"></p-confirmDialog>
       <div class="flex items-center justify-between mt-0 mb-2">
          <h4 class="mb-0">{{ 'components.issues.relations.TITLE' | translate }}</h4>
           <p-button severity="secondary" icon="pi pi-plus" class="mt-0" [outlined]="true" (click)="onAddRelation($event)"></p-button>

@@ -10,7 +10,8 @@ import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { DialogModule } from 'primeng/dialog';
 import { ToastModule } from 'primeng/toast';
-import { MessageService, ConfirmationService } from 'primeng/api';
+import { ConfirmationService } from 'primeng/api';
+import { AppMessageService } from '../../../../services/message.service';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { Select } from 'primeng/select';
 import { MultiSelectModule } from 'primeng/multiselect';
@@ -48,7 +49,7 @@ export class DocumentWorkFlowComponent implements OnInit {
     private projectsSvc: ProjectsService,
     private typesSvc: ProjectsTypesService,
     private cd: ChangeDetectorRef,
-    private msg: MessageService,
+    private appMsg: AppMessageService,
     private translate: TranslateService,
     private confirm: ConfirmationService
   ) {}
@@ -119,16 +120,16 @@ export class DocumentWorkFlowComponent implements OnInit {
     this.loading = true;
     const payload: any = { project_id: this.editModel.project_id, document_type_id: this.editModel.document_type_id, from_status_id: this.editModel.from_status_id, to_status_id: this.editModel.to_status_id };
     if (this.isCreating) {
-      this.svc.createDocumentWorkFlow(payload).subscribe({ next: () => { this.displayDialog = false; this.load(); this.msg.add({ severity: 'success', summary: 'Created' }); this.loading = false; }, error: (e: any) => { this.error = e?.message || 'Error'; this.loading = false; } });
+      this.svc.createDocumentWorkFlow(payload).subscribe({ next: () => { this.displayDialog = false; this.load(); this.appMsg.success('Created'); this.loading = false; }, error: (e: any) => { this.error = e?.message || 'Error'; this.loading = false; } });
     } else {
       const id = this.editModel.id || this.editModel._id;
-      this.svc.updateDocumentWorkFlow(id, payload).subscribe({ next: () => { this.displayDialog = false; this.load(); this.msg.add({ severity: 'success', summary: 'Updated' }); this.loading = false; }, error: (e: any) => { this.error = e?.message || 'Error'; this.loading = false; } });
+      this.svc.updateDocumentWorkFlow(id, payload).subscribe({ next: () => { this.displayDialog = false; this.load(); this.appMsg.success('Updated'); this.loading = false; }, error: (e: any) => { this.error = e?.message || 'Error'; this.loading = false; } });
     }
   }
 
   confirmDelete(item: any): void {
-    this.confirm.confirm({ message: `Delete workflow #${item.id}?`, accept: () => {
-      this.svc.deleteDocumentWorkFlow(item.id).subscribe({ next: () => { this.load(); this.msg.add({ severity: 'success', summary: 'Deleted' }); }, error: () => {} });
+    this.confirm.confirm({ message: `${this.translate.instant('components.projects.settings.confirm.DELETE_WORKFLOW_QUESTION') || 'Attention! Do you really want to delete workflow'} #${item.id}?`, icon: 'pi pi-exclamation-triangle', accept: () => {
+      this.svc.deleteDocumentWorkFlow(item.id).subscribe({ next: () => { this.load(); this.appMsg.success('Deleted'); }, error: () => {} });
     } });
   }
 

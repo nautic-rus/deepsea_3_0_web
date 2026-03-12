@@ -502,6 +502,7 @@ export class IssueDetailAttachComponent implements OnChanges, OnDestroy {
 
     this.confirmationService.confirm({
       message: confirmMessage,
+      icon: 'pi pi-exclamation-triangle',
       accept: () => {
         if (!storageId || !issueId) {
           const filtered = (this.attachments || []).filter(a => a !== file && a.id !== storageId);

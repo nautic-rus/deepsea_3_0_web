@@ -34,20 +34,6 @@
     gap: var(--p-toolbar-gap);
 }
 
-/* Style the confirm dialog to match the edit dialog appearance */
-.user-confirm-dialog {
-  /* card-like surface and subtle shadow to match edit dialog */
-  box-shadow: 0 4px 14px rgba(16,24,40,0.08);
-}
-.user-confirm-dialog .p-dialog-header {
-  background: var(--surface-0);
-  border-bottom: 1px solid var(--surface-border);
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
-}
-.user-confirm-dialog .p-dialog-content {
-  padding: 1rem;
-}
 
 /* Toast customization for user actions */
 .user-toast .p-toast-message {

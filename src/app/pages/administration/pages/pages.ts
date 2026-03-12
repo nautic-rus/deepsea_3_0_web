@@ -210,7 +210,8 @@ export class AdminPagesComponent implements OnInit {
 
   confirmDelete(page: any): void {
     this.confirmation.confirm({
-      message: 'Are you sure you want to delete this page?',
+      message: `${this.translate.instant('components.pages.confirm.DELETE_QUESTION') || 'Attention! Do you really want to delete page'}?`,
+      icon: 'pi pi-exclamation-triangle',
       accept: () => this.deletePage(page)
     });
   }
@@ -238,7 +239,8 @@ export class AdminPagesComponent implements OnInit {
   deleteSelectedPages(): void {
     if (!this.selectedPages || !this.selectedPages.length) return;
     this.confirmation.confirm({
-      message: `Are you sure you want to delete ${this.selectedPages.length} selected pages?`,
+      message: `${this.translate.instant('components.pages.confirm.DELETE_SELECTED_QUESTION') || 'Attention! Do you really want to delete selected pages?'}`,
+      icon: 'pi pi-exclamation-triangle',
       accept: () => {
         const deletes = this.selectedPages.map(p =>
           this.pagesService.deletePagePermissionsByPage(p.id).toPromise().then(() => this.pagesService.deletePage(p.id).toPromise())
