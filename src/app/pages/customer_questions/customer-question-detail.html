@@ -86,7 +86,7 @@
                     <div class="flex flex-col md:flex-row gap-4">
                             <div class="flex items-center gap-4 flex-1">
                                     <div class="w-[140px] text-surface-500 dark:text-surface-0 font-bold text-base leading-tight">{{ 'components.customer_questions.detail.PROJECT' | translate }}</div>
-                                    <div class="flex-1 text-surface-500 dark:text-surface-0 text-base leading-tight">{{ question?.project_name || (question?.project && question.project.name) || '-' }}</div>
+                                    <div class="flex-1 text-surface-500 dark:text-surface-0 text-base leading-tight">{{ question?.project.code || (question?.project && question.project.code) || '-' }}</div>
                                 </div>
                     </div>
 
@@ -188,9 +188,14 @@
               </div>
               <!-- Inline editor like IssueDetailDescription -->
               <div>
-                  <div *ngIf="!editingQuestionInline" class="ql-view">
-                      <div class="ql-editor" [innerHTML]="question?.question_text || ('components.customer_questions.detail.NO_ANSWER' | translate)"></div>
-                  </div>
+                      <div *ngIf="!editingQuestionInline" class="ql-view">
+                          <ng-container *ngIf="hasTextContent(question?.question_text); else noQuestionTpl">
+                              <div class="ql-editor" [innerHTML]="question.question_text"></div>
+                          </ng-container>
+                          <ng-template #noQuestionTpl>
+                              <div class="ql-editor ql-empty text-surface-500 italic">{{ 'components.customer_questions.detail.NO_QUESTION' | translate }}</div>
+                          </ng-template>
+                      </div>
                   <form *ngIf="editingQuestionInline" #questionForm="ngForm" (ngSubmit)="saveQuestionText()" class="flex flex-col ng-untouched ng-pristine ng-valid ng-star-inserted" [style]="{ height: 'flex' }">
                       <p-editor styleClass="small-editor" [(ngModel)]="editingQuestionText" name="questionContent" [style]="{ height: '50px' }"></p-editor>
                       <div class="flex gap-2 mt-4">
@@ -209,7 +214,12 @@
                   </div>
               </div>
               <div *ngIf="!editingAnswerInline" class="ql-view">
-                  <div class="ql-editor" [innerHTML]="question?.answer_text || ('components.customer_questions.detail.NO_ANSWER' | translate)"></div>
+                  <ng-container *ngIf="hasTextContent(question?.answer_text); else noAnswerTpl">
+                      <div class="ql-editor" [innerHTML]="question.answer_text"></div>
+                  </ng-container>
+                  <ng-template #noAnswerTpl>
+                      <div class="ql-editor ql-empty text-surface-500 italic">{{ 'components.customer_questions.detail.NO_ANSWER' | translate }}</div>
+                  </ng-template>
               </div>
               <form *ngIf="editingAnswerInline" #answerForm="ngForm" (ngSubmit)="saveAnswerText()" class="flex flex-col">
                   <p-editor styleClass="small-editor" [(ngModel)]="editingAnswerText" name="answerContent" [style]="{ height: '180px' }"></p-editor>

@@ -167,10 +167,20 @@ export class CustomerQuestionDetailComponent implements OnInit {
     this.loading = true;
     this.qsService.updateQuestion(id, payload).subscribe({
       next: () => {
+        // Update local model immediately to avoid visible reload delay
         this.editingQuestionInline = false;
         this.editingQuestionText = null;
         this.loading = false;
-        this.loadQuestion(id);
+        try {
+          if (this.question) {
+            this.question.question_text = payload.question_text;
+            // keep short title if empty: fallback to trimmed plain text
+            if (!this.question.question_title) {
+              const plain = (payload.question_text || '').replace(/<[^>]*>/g, '').replace(/&nbsp;|&#160;/g, ' ').trim();
+              this.question.question_title = plain ? (plain.length > 120 ? plain.substring(0, 120) + '...' : plain) : '';
+            }
+          }
+        } catch (e) { }
         try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Saved', detail: this.translate.instant('components.customer_questions.form.UPDATED') || 'Updated' }); } catch (e) {}
         this.cdr.markForCheck();
       },
@@ -203,10 +213,22 @@ export class CustomerQuestionDetailComponent implements OnInit {
     this.loading = true;
     this.qsService.updateQuestion(id, payload).subscribe({
       next: () => {
+        // Update local model immediately to avoid visible reload delay
         this.editingAnswerInline = false;
         this.editingAnswerText = null;
         this.loading = false;
-        this.loadQuestion(id);
+        try {
+          if (this.question) {
+            this.question.answer_text = payload.answer_text;
+            if (payload.answered_by) {
+              this.question.answered_by = payload.answered_by;
+              // set answered_by_full_name from currentUser when available
+              if (this.currentUser) {
+                this.question.answered_by_full_name = this.currentUser.full_name ?? this.currentUser.name ?? (this.currentUser.first_name ? (this.currentUser.first_name + (this.currentUser.last_name ? ' ' + this.currentUser.last_name : '')) : this.question.answered_by_full_name);
+              }
+            }
+          }
+        } catch (e) { }
         try { this.messageService.add({ severity: 'success', summary: this.translate.instant('MENU.SAVE') || 'Saved', detail: this.translate.instant('components.customer_questions.form.UPDATED') || 'Updated' }); } catch (e) {}
         this.cdr.markForCheck();
       },
@@ -216,6 +238,24 @@ export class CustomerQuestionDetailComponent implements OnInit {
         this.cdr.markForCheck();
       }
     });
+  }
+
+  // Helper used from template: check whether a HTML string contains visible text
+  // Returns true when there is at least one non-whitespace character after stripping tags/entities
+  public hasTextContent(html: any): boolean {
+    try {
+      if (html === null || html === undefined) return false;
+      const s = String(html);
+      // Remove HTML tags
+      const withoutTags = s.replace(/<[^>]*>/g, '');
+      // Replace common HTML entities that act like spaces
+      const decoded = withoutTags.replace(/&nbsp;|&#160;/g, ' ').replace(/\u00A0/g, '');
+      // Remove zero-width and control characters and collapse whitespace
+      const cleaned = decoded.replace(/[\u200B-\u200D\uFEFF]/g, '').replace(/\s+/g, ' ').trim();
+      return cleaned.length > 0;
+    } catch (e) {
+      return false;
+    }
   }
 
   // Open add-relation dialog (triggered from child relations component)

@@ -14,7 +14,7 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  height: 80vh;
+  height: 84vh;
 }
 
 .table-responsive {
@@ -110,3 +110,58 @@
 
 /* Note: hover/cursor rules above already cover both generic and clickable-row selectors;
    keep only one set to avoid duplication. */
+
+
+/* Make table cells wrap long text for the questions table and add minimum widths
+   so layout stays readable (mirror of issues table styles). */
+.questions-table th,
+.questions-table td {
+  white-space: normal !important;
+}
+
+/* Minimum column widths for questions table */
+.questions-table th[data-field="id"],
+.questions-table td[data-field="id"] {
+  min-width: 60px;
+}
+.questions-table th[data-field="project_code"],
+.questions-table td[data-field="project_code"] {
+  min-width: 140px;
+}
+.questions-table th[data-field="project_name"],
+.questions-table td[data-field="project_name"],
+.questions-table th[data-field="type_name"],
+.questions-table td[data-field="type_name"] {
+  min-width: 140px;
+}
+.questions-table th[data-field="question_title"],
+.questions-table td[data-field="question_title"] {
+  min-width: 320px;
+}
+.questions-table th[data-field="asked_by_full_name"],
+.questions-table td[data-field="asked_by_full_name"],
+.questions-table th[data-field="answered_by_full_name"],
+.questions-table td[data-field="answered_by_full_name"] {
+  min-width: 190px;
+}
+.questions-table th[data-field="status_name"],
+.questions-table td[data-field="status_name"] {
+  min-width: 140px;
+}
+.questions-table th[data-field="priority"],
+.questions-table td[data-field="priority"] {
+  min-width: 150px;
+}
+.questions-table th[data-field="due_date"],
+.questions-table td[data-field="due_date"],
+.questions-table th[data-field="created_at"],
+.questions-table td[data-field="created_at"] {
+  min-width: 160px;
+}
+
+/* Keep pointer cursor on rows (reinforce) */
+:host ::ng-deep .questions-table .p-datatable-tbody > tr,
+:host ::ng-deep .questions-table .p-datatable-tbody tr {
+  cursor: pointer !important;
+}
+

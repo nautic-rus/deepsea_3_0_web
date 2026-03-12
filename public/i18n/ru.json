@@ -145,6 +145,7 @@
       "table": {
         "PROJECT": "Проект",
         "QUESTION": "Вопрос",
+        "QUESTION_TITLE": "Тема",
         "ASKED_BY": "Автор",
         "ANSWERED_BY": "Ответил",
         "STATUS": "Статус",
@@ -153,12 +154,13 @@
         "DUE_DATE": "Срок",
         "CREATED_AT": "Дата создания",
         "SEARCH": "Поиск",
-        "Type": "Тип"
+        "Type": "Тип",
+        "PROJECT_CODE": "Проект"
       },
       "form": {
         "PROJECT": "Проект",
         "QUESTION_TEXT": "Вопрос",
-        "QUESTION_TITLE": "Тема вопроса",
+        "QUESTION_TITLE": "Тема",
         "QUESTION_TEXT_REQUIRED": "Требуется вопрос",
         "ANSWER_TEXT": "Ответ",
         "PRIORITY": "Приоритет",
@@ -214,12 +216,24 @@
         "DUE_DATE": "Срок",
         "ANSWER": "Ответ",
         "NO_ANSWER": "Ответа пока нет",
+        "NO_QUESTION": "Вопрос отсутствует",
         "TYPE": "Тип",
         "ATTACHE": "Вложения",
         "CHOOSE": "Выбрать",
         "UPLOAD": "Загрузить",
         "CANCEL": "Отменить",
         "DRAG_DROP": "Перетащите файлы сюда для загрузки"
+      },
+      "attach": {
+        "CHOOSE": "Выбрать",
+        "UPLOAD": "Загрузить",
+        "CANCEL": "Отменить",
+        "DRAG_DROP": "Перетащите файлы сюда для загрузки",
+        "NO_ATTACHMENTS": "Нет вложений",
+        "COLUMN_NAME": "Имя файла",
+        "COLUMN_SIZE": "Размер",
+        "COLUMN_UPLOADED": "Загружено",
+        "DELETE_CONFIRM": "Удалить файл \"{{name}}\"?"
       },
       "messages": {
         "CREATED": "Вопрос создан",
@@ -233,7 +247,19 @@
         "LINK_COPIED": "Ссылка скопирована в буфер обмена",
         "COPY_PROMPT": "Скопировать ссылку",
         "DELETE_FAILED": "Не удалось удалить вопрос",
-        "DELETE_CONFIRM": "Вы уверены, что хотите удалить этот вопрос?"
+        "DELETE_CONFIRM": "Вы уверены, что хотите удалить этот вопрос?",
+        "COLUMN_SIZE": "Размер",
+        "COLUMN_UPLOADED": "Загружено",
+        "UPLOADED": "Загружено",
+        "UPLOADED_COUNT": "{{count}} файл(ов) загружено",
+        "UPLOAD_FAILED": "Не удалось загрузить",
+        "UPLOAD_CANCELLED": "Загрузка отменена",
+        "WARNING": "Внимание",
+        "FILE_TOO_LARGE": "Файл слишком большой (макс {{size}})",
+        "FAILED_LOAD": "Не удалось загрузить",
+        "SAVED": "Сохранено",
+        "SAVED_LOCAL": "Сохранено локально (нет id)",
+        "DESCRIPTION_SAVE_FAILED": "Не удалось сохранить описание"
       },
       "errors": {
         "QUESTION_ID_MISSING": "Отсутствует ID вопроса",
