@@ -109,7 +109,8 @@ export class CustomerQuestionsComponent implements OnInit {
   // Prefer backend-provided full name fields; UI will display formatted surname+initials.
   columns: { field: string; headerKey: string; visible: boolean }[] = [
     { field: 'id', headerKey: 'MENU.ID', visible: true },
-    { field: 'question_title', headerKey: 'components.customer_questions.table.QUESTION', visible: true },
+    { field: 'project_code', headerKey: 'components.customer_questions.table.PROJECT_CODE', visible: true },
+    { field: 'question_title', headerKey: 'components.customer_questions.table.QUESTION_TITLE', visible: true },
     { field: 'type_name', headerKey: 'components.customer_questions.table.TYPE', visible: true },
     { field: 'asked_by_full_name', headerKey: 'components.customer_questions.table.ASKED_BY', visible: true },
     { field: 'answered_by_full_name', headerKey: 'components.customer_questions.table.ANSWERED_BY', visible: true },
@@ -911,6 +912,14 @@ export class CustomerQuestionsComponent implements OnInit {
               if (copy.type.name) copy.type_name = copy.type.name;
             } catch (e) {}
           }
+          // Normalize status object if provided (backend may return nested status)
+          if (copy.status && typeof copy.status === 'object') {
+            try {
+              if (copy.status.id !== undefined && copy.status.id !== null) copy.status_id = copy.status.id;
+              if (copy.status.name) copy.status_name = copy.status.name;
+              if (copy.status.code) copy.status_code = copy.status.code;
+            } catch (e) {}
+          }
         } catch (e) {}
         const askedById = copy.asked_by_avatar_id ?? copy.asked_by_avatarId;
         if (!copy.asked_by_avatar && !copy.asked_by_avatar_url && (askedById !== null && askedById !== undefined && String(askedById).trim() !== '')) {
@@ -936,11 +945,68 @@ export class CustomerQuestionsComponent implements OnInit {
         if (copy.question_title == null || copy.question_title === '') {
           copy.question_title = (copy.question_text != null) ? copy.question_text : '';
         }
+        // Add date object fields for p-columnFilter type="date" to work reliably
+        try {
+          copy.due_date_obj = this.toLocalDateObject(copy.due_date ?? copy.dueDate ?? null);
+        } catch (e) { copy.due_date_obj = null; }
+        try {
+          copy.created_at_obj = this.toLocalDateObject(copy.created_at ?? copy.createdAt ?? copy.created ?? null);
+        } catch (e) { copy.created_at_obj = null; }
         return copy;
       } catch (e) {
         return it;
       }
     });
+  }
+
+  private dateToDayString(v: any): string | null {
+    try {
+      if (!v && v !== 0) return null;
+      // If value is a string in ISO-like format, prefer taking the date prefix to avoid timezone shifts
+      if (typeof v === 'string') {
+        const m = v.match(/^(\d{4}-\d{2}-\d{2})/);
+        if (m && m[1]) return m[1];
+      }
+      const d = (v instanceof Date) ? v : new Date(v);
+      if (!d || isNaN(d.getTime())) return null;
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    } catch (e) { return null; }
+  }
+
+  private toLocalDateObject(v: any): Date | null {
+    try {
+      if (v === null || v === undefined) return null;
+      // If already a Date
+      if (v instanceof Date) {
+        return new Date(v.getFullYear(), v.getMonth(), v.getDate());
+      }
+      // If number (timestamp ms)
+      if (typeof v === 'number') {
+        const d = new Date(v);
+        if (isNaN(d.getTime())) return null;
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      }
+      // If string like YYYY-MM-DD (date-only), construct local date
+      if (typeof v === 'string') {
+        const mDateOnly = v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (mDateOnly) {
+          const y = Number(mDateOnly[1]);
+          const mo = Number(mDateOnly[2]) - 1;
+          const dd = Number(mDateOnly[3]);
+          return new Date(y, mo, dd);
+        }
+        // Try full ISO parse then convert to local date parts
+        const parsed = new Date(v);
+        if (!isNaN(parsed.getTime())) {
+          return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+        }
+        return null;
+      }
+      return null;
+    } catch (e) { return null; }
   }
 
   confirmDeleteQuestion(question: any): void {

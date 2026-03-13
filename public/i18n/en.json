@@ -151,6 +151,7 @@
       "table": {
         "PROJECT": "Project",
         "QUESTION": "Question",
+        "QUESTION_TITLE": "Title",
         "ASKED_BY": "Author",
         "ANSWERED_BY": "Answered By",
         "STATUS": "Status",
@@ -159,7 +160,8 @@
         "DUE_DATE": "Due Date",
         "CREATED_AT": "Created At",
         "SEARCH": "Search",
-        "TYPE": "Type"
+        "TYPE": "Type",
+        "PROJECT_CODE": "Project"
       },
       "form": {
         "PROJECT": "Project",
@@ -222,6 +224,7 @@
         "DUE_DATE": "Due Date",
         "ANSWER": "Answer",
         "NO_ANSWER": "No answer yet",
+        "NO_QUESTION": "Question is missing",
         "TYPE": "Type",
         "ATTACHE": "Attachments"
       },
@@ -229,16 +232,35 @@
         "CHOOSE" : "Choose",
         "UPLOAD": "Upload",
         "CANCEL": "Cancel",
-        "DRAG_DROP": "Drag and drop files here to upload"
+        "DRAG_DROP": "Drag and drop files here to upload",
+        "NO_ATTACHMENTS": "No attachments",
+        "COLUMN_NAME": "File name",
+        "COLUMN_SIZE": "Size",
+        "COLUMN_UPLOADED": "Uploaded",
+        "DELETE_CONFIRM": "Delete file \"{{name}}\"?"
       },
       "messages": {
         "CREATED": "Question created",
         "UPDATED": "Question updated",
         "DELETED": "Question deleted",
         "SUCCESS": "Success",
+        "COLUMN_SIZE": "Size",
+        "COLUMN_UPLOADED": "Uploaded",
+        "DELETE_CONFIRM": "Delete file \"{{name}}\"?",
+        "UPLOADED": "Uploaded",
+        "UPLOADED_COUNT": "{{count}} file(s) uploaded",
+        "UPLOAD_FAILED": "Upload failed",
+        "UPLOAD_CANCELLED": "Upload cancelled",
         "ERROR": "Error",
+        "WARNING": "Warning",
+        "FILE_TOO_LARGE": "File is too large (max {{size}})",
         "STATUS_UPDATED": "Status updated",
         "STATUS_UPDATE_FAILED": "Failed to update status",
+        "DELETED": "Deleted",
+        "FAILED_LOAD": "Failed to load",
+        "SAVED": "Saved",
+        "SAVED_LOCAL": "Saved locally (no id)",
+        "DESCRIPTION_SAVE_FAILED": "Failed to save description",
         "COPY_LINK": "Copy link",
         "LINK_COPIED": "Link copied to clipboard",
         "COPY_PROMPT": "Copy link",

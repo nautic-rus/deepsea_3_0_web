@@ -80,6 +80,14 @@
                                         </ng-template>
                                     </p-columnFilter>
                                 </ng-container>
+                                <ng-container *ngSwitchCase="'project_code'">
+                                    <p-columnFilter field="project_code" matchMode="contains" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
+                                        <ng-template #filter let-value let-filter="filterCallback">
+                                            <input pInputText type="text" class="w-full" [ngModel]="value" (ngModelChange)="filter($event)" placeholder="{{ 'components.customer_questions.table.PROJECT_CODE' | translate }}" />
+                                        </ng-template>
+                                    </p-columnFilter>
+                                </ng-container>
+
                                 <ng-container *ngSwitchCase="'asked_by_full_name'">
                                     <p-columnFilter field="asked_by_full_name" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
                                         <ng-template #filter let-value let-filter="filterCallback">
@@ -125,6 +133,21 @@
                                         </ng-template>
                                     </p-columnFilter>
                                 </ng-container>
+                                  <ng-container *ngSwitchCase="'type_name'">
+                                      <p-columnFilter field="type_name" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
+                                          <ng-template #filter let-value let-filter="filterCallback">
+                                              <p-multiselect [ngModel]="value"
+                                                             [options]="typeOptions"
+                                                             optionLabel="label"
+                                                             optionValue="label"
+                                                             placeholder="{{ 'MENU.ANY' | translate }}"
+                                                             (onChange)="filter($event.value)"
+                                                             styleClass="w-full"
+                                                             appendTo="body">
+                                              </p-multiselect>
+                                          </ng-template>
+                                      </p-columnFilter>
+                                  </ng-container>
                                 <ng-container *ngSwitchCase="'priority'">
                                     <p-columnFilter field="priority" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
                                         <ng-template #filter let-value let-filter="filterCallback">
@@ -140,6 +163,12 @@
                                         </ng-template>
                                     </p-columnFilter>
                                 </ng-container>
+                                  <ng-container *ngSwitchCase="'due_date'">
+                                      <p-columnFilter type="date" field="due_date_obj" display="menu"></p-columnFilter>
+                                  </ng-container>
+                                  <ng-container *ngSwitchCase="'created_at'">
+                                      <p-columnFilter type="date" field="created_at_obj" display="menu"></p-columnFilter>
+                                  </ng-container>
                                 <ng-container *ngSwitchDefault></ng-container>
                             </ng-container>
                         </div>
@@ -161,6 +190,7 @@
                         <ng-container [ngSwitch]="col.field">
                             <ng-container *ngSwitchCase="'id'">{{ question.id }}</ng-container>
 
+                            <ng-container *ngSwitchCase="'project_code'">{{ question.project_code || (projectCode(question) || '-') }}</ng-container>
                             <ng-container *ngSwitchCase="'question_title'">{{ question.question_title || question.question_text || '-' }}</ng-container>
                             <ng-container *ngSwitchCase="'type_name'">{{ question.type_name || (question.type && question.type.name) || '-' }}</ng-container>
                             <ng-container *ngSwitchCase="'asked_by_full_name'">
@@ -194,7 +224,7 @@
                                 </div>
                             </ng-container>
                             <ng-container *ngSwitchCase="'status_name'">
-                                {{question.status_name ? question.status_name : '-'}}
+                                <p-tag [value]="question?.status_name || '-'" [severity]="statusSeverity(question?.status_code || question?.status_name)"></p-tag>
                             </ng-container>
                             <ng-container *ngSwitchCase="'priority'">
                                 <p-tag [value]="question.priority || '-'" [severity]="prioritySeverity(question.priority)"></p-tag>
